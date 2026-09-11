@@ -14,7 +14,7 @@
 
 ### Source resolution
 
-The requested filename `HamBazi_Software_Architecture_v1.1_Reviewed.md` is not present at the repository root. The existing staged file `docs/ARCHITECTURE.md` identifies itself as **Software Architecture Specification — Reviewed Edition**, version **1.1**, and contains the referenced architecture and five linked diagrams. It is therefore used as the authoritative architecture source without moving or rewriting the user's staged files. The path mismatch must be normalized in Phase 1B so repository references have one canonical target.
+The requested filename `HamBazi_Software_Architecture_v1.1_Reviewed.md` was not present at the repository root. The committed file `docs/ARCHITECTURE.md` identifies itself as **Software Architecture Specification — Reviewed Edition**, version **1.1**, and contains the referenced architecture and five linked diagrams. It is therefore the canonical authoritative architecture source. Phase 1B normalized the repository reference in `AGENTS.md` to this path without moving or duplicating the architecture or breaking its relative image links.
 
 No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`. `AGENTS.md` is a more concise operational restatement and keeps the architecture's open decisions unresolved.
 
@@ -22,14 +22,14 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 
 | Area | Observed state |
 |---|---|
-| Git | Initial repository on `master`; no commits and no configured remote reported. |
-| Existing user work | `docs/ARCHITECTURE.md` plus five architecture PNGs are staged; `AGENTS.md` is untracked. These files are preserved. |
+| Git | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported. |
+| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved. |
 | Product code | No application or package source exists. |
-| Monorepo | No root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile exists. |
-| Tooling | Node.js `v24.20.0` and Corepack `0.35.0` are available; `pnpm` is not currently available on `PATH`. |
-| Tests/build | No test, lint, typecheck, build, integration, or E2E configuration or scripts exist. |
+| Monorepo | Phase 1A found no root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile; Phase 1B introduces the minimal root configuration. |
+| Tooling | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`. |
+| Tests/build | No product test, lint, typecheck, build, integration, or E2E scripts exist yet; Phase 1B provides only validated package-manager and task-runner foundations. |
 | Infrastructure | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist. |
-| Documentation | The reviewed architecture, its five images, and `AGENTS.md` exist; no implementation plan or ADR files existed before Phase 1A. |
+| Documentation | The reviewed architecture, its five images, `AGENTS.md`, and this implementation plan exist; no ADR files exist yet. |
 
 ### Gap summary
 
@@ -55,7 +55,7 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 1A; current stable compatible package versions must be verified before pinning.
 - **Acceptance criteria:** Corepack can provision the pinned pnpm version; frozen install succeeds; workspace discovery succeeds; no product packages or speculative scripts are introduced.
 - **Required tests and validations:** declared install/workspace commands, configuration/schema validation, `git diff --check`, and user-change preservation review.
-- **Status:** Pending
+- **Status:** Completed
 
 ### Phase 2A — Shared TypeScript configuration
 
@@ -389,4 +389,4 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 1A is completed. Phase 1B must not begin until the user explicitly approves proceeding.
+Phase 1B is completed. Phase 2A must not begin until the user explicitly approves proceeding.
