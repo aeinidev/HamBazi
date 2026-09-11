@@ -1,0 +1,21 @@
+{
+  "name": "@hambazi/typescript",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./node.json": "./node.json",
+    "./web.json": "./web.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}

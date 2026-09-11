@@ -27,9 +27,9 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 | Product code | No application or package source exists. |
 | Monorepo | Phase 1A found no root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile; Phase 1B introduces the minimal root configuration. |
 | Tooling | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`. |
-| Tests/build | No product test, lint, typecheck, build, integration, or E2E scripts exist yet; Phase 1B provides only validated package-manager and task-runner foundations. |
+| Tests/build | Phase 2A adds declared tooling typecheck and compiler-test scripts through Turbo; product tests, lint, application build, integration, and E2E scripts remain pending. |
 | Infrastructure | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist. |
-| Documentation | The reviewed architecture, its five images, `AGENTS.md`, and this implementation plan exist; no ADR files exist yet. |
+| Documentation | The reviewed architecture, its five images, `AGENTS.md`, and this plan are supplemented by ADR-008 and TypeScript consumer conventions in Phase 2A. |
 
 ### Gap summary
 
@@ -65,7 +65,9 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 1B.
 - **Acceptance criteria:** a fixture package can extend each relevant config; strict type checking succeeds; configs do not couple the game engine to framework types.
 - **Required tests and validations:** declared typecheck and config-resolution checks.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** `@hambazi/typescript` exports base, library, Node, and web presets; root `typecheck`/`test` run real workspace commands. ADR-008 records compiler/runtime boundaries and `docs/architecture/typescript-tooling.md` records consumer/reference conventions.
+- **Validation evidence (2026-09-12):** scoped and root typechecks pass; 15 compiler tests pass (0 failures), including preset resolution, strict negative cases, environment globals, declaration/map emit, no-emit checks, and composite references. Frozen install and dependency audit pass. Lint, application integration/E2E, and production builds are not yet available. A test-local `DOMHighResTimeStamp` alias accommodates tinybench declarations without adding DOM to consumer presets.
 
 ### Phase 2B — Shared ESLint, formatting, and Turborepo orchestration
 
@@ -389,4 +391,4 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 1B is completed. Phase 2A must not begin until the user explicitly approves proceeding.
+Phase 2A is completed. Phase 2B must not begin until the user explicitly approves proceeding.
