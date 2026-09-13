@@ -179,6 +179,114 @@ importers:
         specifier: 2.10.12
         version: 2.10.12
 
+  apps/api:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  apps/bot:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  apps/web:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  apps/worker:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/config:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/contracts:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/database:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/game-core:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/games/coup-engine:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/shared:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/validation:
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   tooling/eslint:
     dependencies:
       '@eslint/js':

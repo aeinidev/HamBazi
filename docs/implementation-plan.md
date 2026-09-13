@@ -20,16 +20,16 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 
 ### Current inventory
 
-| Area               | Observed state                                                                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Git                | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported.                                                                     |
-| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved.                                                                         |
-| Product code       | No application or package source exists.                                                                                                                             |
-| Monorepo           | Phase 1A found no root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile; Phase 1B introduces the minimal root configuration.       |
-| Tooling            | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`.                            |
-| Tests/build        | Phase 2B provides root lint/format/check commands, tooling typecheck, and 28 tests through declared scripts. Application build, integration, and E2E remain pending. |
-| Infrastructure     | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist.                                                                        |
-| Documentation      | The architecture, its five images, AGENTS guide, and this plan are supplemented by ADR-008/009 and TypeScript/quality-tooling conventions.                           |
+| Area               | Observed state                                                                                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Git                | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported.                                                                                                                           |
+| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved.                                                                                                                               |
+| Product code       | Four app and seven package workspaces have empty public source surfaces and working module builds; no product behavior is implemented yet.                                                                                 |
+| Monorepo           | pnpm discovers 13 workspaces plus root. All 11 app/package workspaces build and typecheck; the two tooling packages retain their declared checks.                                                                          |
+| Tooling            | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`.                                                                                  |
+| Tests/build        | Root format/lint/typecheck/test/build commands pass. Existing tooling suites contain 28 tests; public-import smoke checks cover 11 new workspaces. Service startup, browser bundling, integration, and E2E remain pending. |
+| Infrastructure     | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist.                                                                                                                              |
+| Documentation      | Architecture and assets, AGENTS guide, implementation plan, ADR-008/009, TypeScript/quality/workspace conventions, and infrastructure ownership READMEs are present.                                                       |
 
 ### Gap summary
 
@@ -90,7 +90,10 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 2B.
 - **Acceptance criteria:** all required workspaces are discovered and build/typecheck without cross-boundary internal imports; placeholders are explicit scaffolding rather than mocks or incomplete product behavior.
 - **Required tests and validations:** lint, typecheck, unit test command, build, workspace listing, and import-surface review.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** four app and seven package workspaces, 12 API module surfaces, six frontend feature surfaces, Coup UI ownership folders, and infra ownership READMEs. Every new workspace has explicit empty public entry points, private ESM exports, no-emit checking, and a module/declaration build. Root `check` now includes `build`; Turbo caches `dist/**` and builds dependencies before consumer checks. See `docs/architecture/workspaces.md`.
+- **Validation evidence (2026-09-13):** strict frozen install passes after recording the new workspace importers; root formatting/lint and 12 real typechecks pass. Eleven real builds pass. Existing 28 tooling tests are reused from valid Turbo cache entries. Node smoke checks pass for all 11 public imports and reject all 11 internal package subpaths; emitted JS/declaration/maps are present. Workspace discovery finds 13 workspaces plus root, and audit reports no known vulnerabilities.
+- **Limits:** these are compiled skeleton modules, not running services or a browser bundle. No behavior tests are invented for empty modules. Framework startup, integration/E2E, actual cross-module ports, and full import-boundary fitness checks remain assigned to their owning phases. Compiler presets and existing architectural decisions are unchanged; no new ADR is required.
 
 ### Phase 4A — Configuration management and local services
 
@@ -394,4 +397,4 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 2B is completed. Phase 3 must not begin until the user explicitly approves proceeding.
+Phase 3 is completed. Phase 4A must not begin until the user explicitly approves proceeding.

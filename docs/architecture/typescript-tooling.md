@@ -40,7 +40,8 @@ Declare project references locally and only for real buildable library
 dependencies. Referenceable projects use the composite library preset and emit
 their declarations before consumers are checked. Keep references aligned with
 workspace dependencies; import via documented package exports, not cross-package
-source paths. No root solution graph is needed while only tooling exists.
+source paths. The current scaffold uses Turbo's workspace dependency graph;
+introduce explicit project references only when real library dependencies need them.
 
 For libraries, use a distinct check config when a completely artifact-free check
 is required: extend the library config and override `composite: false`,

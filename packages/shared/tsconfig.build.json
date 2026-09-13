@@ -1,0 +1,10 @@
+{
+  "extends": "@hambazi/typescript/library.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/build.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"]
+}
