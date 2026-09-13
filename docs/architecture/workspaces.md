@@ -1,9 +1,9 @@
 # Workspace structure and ownership
 
-Phase 3 establishes compilable workspace boundaries. All new source entry points
-currently export an empty module. They are scaffolding, not implemented product
-APIs or runnable services. No credentials, mock services, game rules, schemas, or
-startup side effects are introduced.
+Phase 3 establishes compilable workspace boundaries. Phase 4A implements the
+Node-only config package and local data-service infrastructure. Other source
+entry points remain empty modules, not implemented product APIs or runnable app
+services. No game rules or application startup side effects are introduced.
 
 ## Workspace ownership
 
@@ -82,8 +82,8 @@ smoke checks. Application integration and E2E remain future gates.
 ## Infrastructure and documentation
 
 `infra/docker` owns local/container definitions; `infra/scripts` owns operational
-scripts. Their READMEs describe the pending owners without inventing commands.
-PostgreSQL/Redis services and configuration begin in Phase 4A, Prisma in Phase 4B,
+scripts. Phase 4A's [local runbook](local-development.md) documents implemented
+PostgreSQL/Redis service definitions and configuration. Prisma begins in Phase 4B,
 and production packaging in Phase 18B. `docs/architecture` owns supplementary
 architecture conventions; `docs/adr` owns recorded implementation decisions.
 The canonical product architecture remains `docs/ARCHITECTURE.md`.

@@ -20,16 +20,16 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 
 ### Current inventory
 
-| Area               | Observed state                                                                                                                                                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Git                | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported.                                                                                                                           |
-| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved.                                                                                                                               |
-| Product code       | Four app and seven package workspaces have empty public source surfaces and working module builds; no product behavior is implemented yet.                                                                                 |
-| Monorepo           | pnpm discovers 13 workspaces plus root. All 11 app/package workspaces build and typecheck; the two tooling packages retain their declared checks.                                                                          |
-| Tooling            | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`.                                                                                  |
-| Tests/build        | Root format/lint/typecheck/test/build commands pass. Existing tooling suites contain 28 tests; public-import smoke checks cover 11 new workspaces. Service startup, browser bundling, integration, and E2E remain pending. |
-| Infrastructure     | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist.                                                                                                                              |
-| Documentation      | Architecture and assets, AGENTS guide, implementation plan, ADR-008/009, TypeScript/quality/workspace conventions, and infrastructure ownership READMEs are present.                                                       |
+| Area               | Observed state                                                                                                                                                                                                          |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Git                | Phase 4A began on `main` at `3b499e1` (Phase 3) with a clean worktree. No commit, push, or deployment was performed by this phase.                                                                                      |
+| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved.                                                                                                                            |
+| Product code       | Config now provides validated API/Worker settings and redacted secret wrappers. Other app/package surfaces remain scaffolds; no gameplay or account behavior is implemented.                                            |
+| Monorepo           | pnpm discovers 13 workspaces plus root. All 11 app/package workspaces build and typecheck; the two tooling packages retain their declared checks.                                                                       |
+| Tooling            | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`.                                                                               |
+| Tests/build        | Root checks pass: 64 tests (28 tooling, 29 config, 7 infrastructure), 12 typechecks, and 11 builds. Live service integration, browser bundling, and E2E remain pending.                                                 |
+| Infrastructure     | Local Compose, role/ACL bootstrap, safe environment generation, and a development runbook exist. Docker/psql/redis-cli are unavailable here; live service checks have not run. Prisma and deployment/CI remain pending. |
+| Documentation      | Architecture/assets, AGENTS, implementation plan, ADR-008/009/010, TypeScript/quality/workspace conventions, local runbook, and infrastructure ownership READMEs are present.                                           |
 
 ### Gap summary
 
@@ -103,7 +103,11 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 3; validation library selection based on existing code or an explicit recorded decision.
 - **Acceptance criteria:** invalid/missing config fails safely without logging secrets; services are private-by-default and become healthy locally.
 - **Required tests and validations:** config unit tests, Docker Compose config validation, service startup and health checks when Docker is available, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** public Node-only configuration parser with role-specific fields, safe error codes/field names, URL/origin validation, immutable output, and explicit secret reveal/redacted serialization. Added Zod 4.6.2, pinned PostgreSQL/Redis images, loopback ports, private network, PostgreSQL volume and separate roles, scoped Redis ACLs, exclusive mode-0600 environment generation, declared `infra:*`/`test:infra` scripts, ADR-010, and local runbook.
+- **Validation evidence (2026-09-13):** frozen strict-peer install, root formatting/lint, 12 typechecks, 64 tests, 11 builds, audit (no known vulnerabilities), and diff checks pass. The official standalone Compose 5.5.1 binary was downloaded into a temporary directory, SHA-256 verified, and successfully ran `config --quiet` with temporary generated credentials; it was not installed system-wide. Built config public-import smoke accepts generated API/Worker configuration and rejects internal package imports. Shell syntax, non-overwrite/symlink protection, file permissions, credential distinctness/redaction, and static topology/privilege checks pass.
+- **Resolved issue:** pnpm initially generated a release-age exception for Zod 4.6.4. Removed the exception and its stale lock entry, selected 4.6.2, and regenerated/verified the lockfile without relaxing policy.
+- **Validation limit / next-phase prerequisite:** Docker, PostgreSQL client, and Redis client executables are unavailable. Live startup/health, authenticated permissions/ACLs, PostgreSQL volume recovery, and Redis restart-loss checks are not claimed; run them on a Docker-enabled host before Phase 4B database integration. The phase's conditional live checks remain a tracked environment gap, not production-readiness evidence. No service startup, migration, E2E, or deployment occurred.
 
 ### Phase 4B — Prisma database foundation
 
@@ -397,4 +401,7 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 3 is completed. Phase 4A must not begin until the user explicitly approves proceeding.
+Phase 4A is completed with the live-service validation gap recorded above. Phase 4B
+(Prisma database foundation) must not begin until the user explicitly approves
+proceeding. Docker-enabled service verification is required before database
+integration and migration acceptance in Phase 4B.

@@ -1,7 +1,7 @@
 {
-  "extends": "@hambazi/typescript/base.json",
+  "extends": "@hambazi/typescript/node.json",
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

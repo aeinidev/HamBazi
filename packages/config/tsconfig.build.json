@@ -1,6 +1,7 @@
 {
   "extends": "@hambazi/typescript/library.json",
   "compilerOptions": {
+    "types": ["node"],
     "noEmit": false,
     "rootDir": "src",
     "outDir": "dist",

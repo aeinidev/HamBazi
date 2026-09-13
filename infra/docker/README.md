@@ -1,9 +1,10 @@
 # Docker infrastructure
 
-This directory owns local PostgreSQL/Redis Compose definitions beginning in
-Phase 4A and production container packaging in Phase 18B. No services or Docker
-commands are available yet. Keep database/Redis access private and use validated
-environment configuration when these definitions are implemented.
+This directory owns the local PostgreSQL/Redis Compose definition and its role/ACL
+bootstrap scripts. Use the declared root `infra:*` commands and follow the
+[local development runbook](../../docs/architecture/local-development.md).
+Ports bind only to loopback; normal shutdown preserves PostgreSQL data. Live
+validation requires Docker. Production packaging remains Phase 18B.
 
 See [workspace ownership](../../docs/architecture/workspaces.md) and the
 [implementation plan](../../docs/implementation-plan.md).
