@@ -10,10 +10,17 @@
   },
   "packageManager": "pnpm@12.4.1",
   "scripts": {
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@hambazi/eslint": "workspace:*",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
     "turbo": "2.10.12"
   }
 }

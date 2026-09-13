@@ -1,5 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -23,7 +31,11 @@ function fixture(preset: string, source: string, options: Record<string, unknown
   mkdirSync(join(root, "node_modules/@hambazi"), { recursive: true });
   symlinkSync(packageRoot, join(root, "node_modules/@hambazi/typescript"), "junction");
   mkdirSync(join(root, "node_modules/@types"), { recursive: true });
-  symlinkSync(dirname(require.resolve("@types/node/package.json")), join(root, "node_modules/@types/node"), "junction");
+  symlinkSync(
+    dirname(require.resolve("@types/node/package.json")),
+    join(root, "node_modules/@types/node"),
+    "junction",
+  );
   write(root, "package.json", { private: true, type: "module" });
   write(root, "tsconfig.json", {
     extends: `@hambazi/typescript/${preset}.json`,
@@ -34,7 +46,10 @@ function fixture(preset: string, source: string, options: Record<string, unknown
   return root;
 }
 
-function tsc(root: string, args = ["--project", "tsconfig.json"]): { status: number | null; output: string } {
+function tsc(
+  root: string,
+  args = ["--project", "tsconfig.json"],
+): { status: number | null; output: string } {
   const result = spawnSync(process.execPath, [compiler, ...args, "--pretty", "false"], {
     cwd: root,
     encoding: "utf8",
@@ -56,21 +71,31 @@ afterEach(() => {
 });
 
 describe("public TypeScript presets", () => {
-  it.each(["base", "library", "node", "web"])("resolves %s through the package public surface", (preset) => {
-    const root = fixture(preset, "export const value: number = 1;");
-    const result = tsc(root, ["--project", "tsconfig.json", "--showConfig"]);
-    expect(result.status).toBe(0);
-    const config = JSON.parse(result.output) as { compilerOptions: { strict: boolean }; files: string[] };
-    expect(config.compilerOptions.strict).toBe(true);
-    expect(config.files).toContain("./src/index.ts");
-    expectSuccess(tsc(root));
-  });
+  it.each(["base", "library", "node", "web"])(
+    "resolves %s through the package public surface",
+    (preset) => {
+      const root = fixture(preset, "export const value: number = 1;");
+      const result = tsc(root, ["--project", "tsconfig.json", "--showConfig"]);
+      expect(result.status).toBe(0);
+      const config = JSON.parse(result.output) as {
+        compilerOptions: { strict: boolean };
+        files: string[];
+      };
+      expect(config.compilerOptions.strict).toBe(true);
+      expect(config.files).toContain("./src/index.ts");
+      expectSuccess(tsc(root));
+    },
+  );
 
   it.each([
     ["implicit any", "export function identity(value) { return value; }", 7006],
     ["null", "export const name: string = null;", 2322],
     ["unchecked indexing", "export const first: number = [1][0];", 2322],
-    ["explicit undefined optional properties", "export const optional: { count?: number } = { count: undefined };", 2375],
+    [
+      "explicit undefined optional properties",
+      "export const optional: { count?: number } = { count: undefined };",
+      2375,
+    ],
   ])("rejects %s and suppresses emit on error", (_name, source, code) => {
     const root = fixture("base", source);
     const result = tsc(root);
@@ -80,7 +105,10 @@ describe("public TypeScript presets", () => {
   });
 
   it("excludes Node and browser globals from a pure library even when Node types are installed", () => {
-    const root = fixture("library", "export const pid = process.pid; export const title = document.title;");
+    const root = fixture(
+      "library",
+      "export const pid = process.pid; export const title = document.title;",
+    );
     const result = tsc(root);
     expect(result.status).not.toBe(0);
     expect(result.output).toContain("'process'");
@@ -90,9 +118,9 @@ describe("public TypeScript presets", () => {
   it("emits JavaScript, declarations, and maps from a pure library", () => {
     const root = fixture("library", "export const value: number = 1;");
     expectSuccess(tsc(root));
-    expect(readdirSync(join(root, "dist"))).toEqual(expect.arrayContaining([
-      "index.js", "index.js.map", "index.d.ts", "index.d.ts.map",
-    ]));
+    expect(readdirSync(join(root, "dist"))).toEqual(
+      expect.arrayContaining(["index.js", "index.js.map", "index.d.ts", "index.d.ts.map"]),
+    );
     expect(readFileSync(join(root, "dist/index.d.ts"), "utf8")).toContain("value: number");
   });
 
@@ -108,7 +136,9 @@ describe("public TypeScript presets", () => {
 
   it("supports an artifact-free library check without making it a reference target", () => {
     const root = fixture("library", "export const value: number = 1;", {
-      composite: false, incremental: false, noEmit: true,
+      composite: false,
+      incremental: false,
+      noEmit: true,
     });
     expectSuccess(tsc(root));
     expect(readdirSync(root)).not.toContain("dist");
@@ -116,7 +146,10 @@ describe("public TypeScript presets", () => {
   });
 
   it("typechecks Node APIs without emitting and rejects DOM globals", () => {
-    const root = fixture("node", 'import { readFile } from "node:fs/promises"; export const content = readFile(process.argv[0] ?? "");');
+    const root = fixture(
+      "node",
+      'import { readFile } from "node:fs/promises"; export const content = readFile(process.argv[0] ?? "");',
+    );
     expectSuccess(tsc(root));
     expect(readdirSync(root)).not.toContain("dist");
     write(root, "src/index.ts", "export const title = document.title;");
@@ -137,16 +170,30 @@ describe("public TypeScript presets", () => {
     for (const project of ["producer", "consumer"]) {
       write(root, `${project}/tsconfig.json`, {
         extends: "@hambazi/typescript/library.json",
-        compilerOptions: { rootDir: "src", outDir: "dist", tsBuildInfoFile: "dist/project.tsbuildinfo" },
+        compilerOptions: {
+          rootDir: "src",
+          outDir: "dist",
+          tsBuildInfoFile: "dist/project.tsbuildinfo",
+        },
         include: ["src/**/*.ts"],
         ...(project === "consumer" ? { references: [{ path: "../producer" }] } : {}),
       });
     }
     write(root, "producer/src/index.ts", "export const value: number = 1;");
-    write(root, "consumer/src/index.ts", 'import { value } from "../../producer/dist/index.js"; export const result: number = value;');
+    write(
+      root,
+      "consumer/src/index.ts",
+      'import { value } from "../../producer/dist/index.js"; export const result: number = value;',
+    );
     expectSuccess(tsc(root, ["--build", "consumer/tsconfig.json"]));
-    expect(readFileSync(resolve(root, "consumer/dist/index.d.ts"), "utf8")).toContain("result: number");
-    write(root, "consumer/src/index.ts", 'import { value } from "../../producer/dist/index.js"; export const result: string = value;');
+    expect(readFileSync(resolve(root, "consumer/dist/index.d.ts"), "utf8")).toContain(
+      "result: number",
+    );
+    write(
+      root,
+      "consumer/src/index.ts",
+      'import { value } from "../../producer/dist/index.js"; export const result: string = value;',
+    );
     const result = tsc(root, ["--build", "consumer/tsconfig.json"]);
     expect(result.status).not.toBe(0);
     expect(result.output).toContain("TS2322");

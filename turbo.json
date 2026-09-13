@@ -3,10 +3,12 @@
   "tasks": {
     "typecheck": {
       "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     },
     "test": {
       "dependsOn": ["typecheck"],
+      "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     }
   }

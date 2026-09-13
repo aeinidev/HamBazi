@@ -20,16 +20,16 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 
 ### Current inventory
 
-| Area | Observed state |
-|---|---|
-| Git | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported. |
-| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved. |
-| Product code | No application or package source exists. |
-| Monorepo | Phase 1A found no root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile; Phase 1B introduces the minimal root configuration. |
-| Tooling | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`. |
-| Tests/build | Phase 2A adds declared tooling typecheck and compiler-test scripts through Turbo; product tests, lint, application build, integration, and E2E scripts remain pending. |
-| Infrastructure | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist. |
-| Documentation | The reviewed architecture, its five images, `AGENTS.md`, and this plan are supplemented by ADR-008 and TypeScript consumer conventions in Phase 2A. |
+| Area               | Observed state                                                                                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Git                | Phase 1A was subsequently committed on `master` as `b00aeef`; no configured remote was reported.                                                                     |
+| Existing user work | `docs/ARCHITECTURE.md`, five architecture PNGs, and `AGENTS.md` are committed and preserved.                                                                         |
+| Product code       | No application or package source exists.                                                                                                                             |
+| Monorepo           | Phase 1A found no root `package.json`, `pnpm-workspace.yaml`, `turbo.json`, package manifest, or lockfile; Phase 1B introduces the minimal root configuration.       |
+| Tooling            | Phase 1B activated pnpm `12.4.1` through Corepack `0.35.0` on the available Node.js `v24.20.0` LTS runtime and installed Turbo `2.10.12`.                            |
+| Tests/build        | Phase 2B provides root lint/format/check commands, tooling typecheck, and 28 tests through declared scripts. Application build, integration, and E2E remain pending. |
+| Infrastructure     | No Docker, PostgreSQL, Redis, Prisma, CI/CD, environment, deployment, or runbook files exist.                                                                        |
+| Documentation      | The architecture, its five images, AGENTS guide, and this plan are supplemented by ADR-008/009 and TypeScript/quality-tooling conventions.                           |
 
 ### Gap summary
 
@@ -77,7 +77,10 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 2A.
 - **Acceptance criteria:** lint catches representative invalid code; task dependencies and cache outputs are explicit; scripts invoke only existing workspace tasks.
 - **Required tests and validations:** frozen install, lint, typecheck, Turbo dry-run/task graph inspection, and config tests.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** `@hambazi/eslint` shared flat configuration, root lint/format/check commands, Prettier policy, explicit Turbo inputs/outputs, 13 lint fixtures, and ADR-009. TypeScript is aligned to 6.0.3 because the stable parser excludes 7.x; the 15 compiler fixtures still pass. Existing source and maintained documentation were formatted; supplied architecture and AGENTS files were preserved.
+- **Validation evidence (2026-09-13):** frozen install with strict peer dependencies passes; `pnpm check` passes formatting, lint (zero warnings), typecheck, and 28 tests across two suites. Root ESLint stdin probes return 0 for valid code and 1 with the expected rule for invalid code. Turbo dry-run confirms task commands, inputs, empty outputs, and local cache hits. Audit reports no known vulnerabilities.
+- **Deferred scope:** root lint/format run uncached to cover root configuration directly. The JavaScript lint package has no TypeScript compile script. Application build scripts/outputs and React-specific rules will be added with actual applications; full module-boundary enforcement remains Phase 5B.
 
 ### Phase 3 — Required workspace and module skeleton
 
@@ -391,4 +394,4 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 2A is completed. Phase 2B must not begin until the user explicitly approves proceeding.
+Phase 2B is completed. Phase 3 must not begin until the user explicitly approves proceeding.

@@ -4,6 +4,7 @@
 - **Owner:** HamBazi engineering
 - **Date:** 2026-09-12
 - **Supersedes:** None
+- **Partially superseded by:** [ADR-009](009-eslint-formatting.md), which selects TypeScript 6.0.3 for compatibility with the stable lint toolchain. All preset decisions below remain applicable.
 
 ## Context
 
@@ -16,12 +17,12 @@ section 27.1 already reserves ADR-001 through ADR-007 for foundational decisions
 
 Use the private `@hambazi/typescript` workspace to export four JSON presets:
 
-| Preset | Use | Resolution | Ambient types | Output |
-|---|---|---|---|---|
-| `base.json` | Common strict policy | NodeNext | ES2022 only | Consumer decides |
-| `library.json` | Pure/shared libraries, including game-core and engines | NodeNext | ES2022 only | JS, declarations, maps; composite |
-| `node.json` | Node applications and tooling | NodeNext | Node, explicitly enabled | No emit by default |
-| `web.json` | Vite browser applications | Bundler / ESNext | DOM and DOM.Iterable | No emit; React JSX transform |
+| Preset         | Use                                                    | Resolution       | Ambient types            | Output                            |
+| -------------- | ------------------------------------------------------ | ---------------- | ------------------------ | --------------------------------- |
+| `base.json`    | Common strict policy                                   | NodeNext         | ES2022 only              | Consumer decides                  |
+| `library.json` | Pure/shared libraries, including game-core and engines | NodeNext         | ES2022 only              | JS, declarations, maps; composite |
+| `node.json`    | Node applications and tooling                          | NodeNext         | Node, explicitly enabled | No emit by default                |
+| `web.json`     | Vite browser applications                              | Bundler / ESNext | DOM and DOM.Iterable     | No emit; React JSX transform      |
 
 Use ES2022 as the emitted language baseline. This is not a claim of compatibility
 with every Telegram WebView; actual device/browser support must be validated in

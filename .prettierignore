@@ -1,0 +1,18 @@
+# Preserve the supplied architecture and operational instructions verbatim.
+AGENTS.md
+docs/ARCHITECTURE.md
+docs/assets/
+
+# Generated dependency metadata and output
+pnpm-lock.yaml
+**/node_modules/
+**/.turbo/
+**/.pnpm-store/
+**/dist/
+**/build/
+**/coverage/
+**/playwright-report/
+**/test-results/
+.git/
+.env
+.env.*
