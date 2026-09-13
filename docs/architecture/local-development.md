@@ -2,8 +2,8 @@
 
 This is a development-only PostgreSQL/Redis topology, not a deployment manifest.
 See [ADR-010](../adr/010-configuration-and-local-services.md). Application startup,
-Prisma schemas/migrations, and database integration tests are not included in
-Phase 4A.
+Prisma schemas/migrations and database integration tests are documented in
+the [Phase 4B database foundation](database-foundation.md).
 
 ## Prerequisites and commands
 
@@ -83,7 +83,10 @@ secret delivery remains a later deployment responsibility.
 - Before adopting this setup for Phase 4B, verify both healthy containers,
   authenticated role access, negative privilege/ACL checks, Redis restart loss,
   and PostgreSQL persistence across `infra:down`/`infra:up`. These checks have not
-  been run in the current environment because Docker is unavailable.
+  been run against Docker because Docker is unavailable. Phase 4B additionally
+  verifies the actual PostgreSQL role bootstrap, permissions, and restart data
+  persistence in an isolated native PostgreSQL cluster; that does not verify
+  Compose networking, named-volume mounts, or Redis behavior.
 
 Production restore/PITR, RPO/retention, hosting/region, capacity, and final SLOs
 remain unresolved architectural decisions. This local runbook does not settle

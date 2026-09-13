@@ -16,9 +16,19 @@
 
 The requested filename `HamBazi_Software_Architecture_v1.1_Reviewed.md` was not present at the repository root. The committed file `docs/ARCHITECTURE.md` identifies itself as **Software Architecture Specification — Reviewed Edition**, version **1.1**, and contains the referenced architecture and five linked diagrams. It is therefore the canonical authoritative architecture source. Phase 1B normalized the repository reference in `AGENTS.md` to this path without moving or duplicating the architecture or breaking its relative image links.
 
-No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`. `AGENTS.md` is a more concise operational restatement and keeps the architecture's open decisions unresolved.
+The initial assessment reported no substantive conflict. Phase 4B's database
+review corrected that assessment: `AGENTS.md` section 9 (line 155) prohibits
+persisting deck/card, RNG material, chat text, and hidden state, while architecture
+sections 11.8, 13.1, and 14.5–14.6 require durable match snapshots/events and
+PostgreSQL chat history with restricted access and no telemetry exposure.
+`AGENTS.md` section 6 itself also requires durable match snapshots/events. The
+distinction between authorized application persistence and prohibited logging
+was explicitly clarified by the user: “Proceed with the correction and continue
+Phase 4B.” The approved correction in `AGENTS.md` distinguishes architecture-required
+restricted application persistence from prohibited telemetry, without authorizing
+raw authentication-secret storage or unnecessary RNG-material retention.
 
-### Current inventory
+### Foundation inventory through Phase 4A
 
 | Area               | Observed state                                                                                                                                                                                                          |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,6 +40,13 @@ No substantive conflict was found between `docs/ARCHITECTURE.md` and `AGENTS.md`
 | Tests/build        | Root checks pass: 64 tests (28 tooling, 29 config, 7 infrastructure), 12 typechecks, and 11 builds. Live service integration, browser bundling, and E2E remain pending.                                                 |
 | Infrastructure     | Local Compose, role/ACL bootstrap, safe environment generation, and a development runbook exist. Docker/psql/redis-cli are unavailable here; live service checks have not run. Prisma and deployment/CI remain pending. |
 | Documentation      | Architecture/assets, AGENTS, implementation plan, ADR-008/009/010, TypeScript/quality/workspace conventions, local runbook, and infrastructure ownership READMEs are present.                                           |
+
+### Current inventory — Phase 4B update (2026-09-14)
+
+- Work continues on `main` at `2802d49` (Phase 4A). The earlier blocked-phase plan edit was preserved; no commit, push, or deployment was performed.
+- The database package now provides Prisma schema/client generation, 14 MVP/consumer-deduplication tables, an additive transactional migration, explicit API/Worker grants, safe lifecycle/owner callbacks, and native PostgreSQL integration tooling. Other product entry points remain scaffolds.
+- Root checks pass with 77 tests (28 tooling, 29 config, 13 database unit, 7 infrastructure), 12 typechecks, and 11 builds. Ten additional real PostgreSQL integration tests, migration redeploy, zero Prisma-visible schema drift, and persisted-data restart verification pass. Audit reports no known vulnerabilities.
+- PostgreSQL 18.6 distribution packages were downloaded/extracted into a temporary directory, not installed system-wide. Isolated test clusters were stopped and their synthetic data removed. Docker/Redis live verification remains unavailable. ADR-011 and the database runbook document the foundation and its limitations; the approved AGENTS.md clarification is the only reference-guide change.
 
 ### Gap summary
 
@@ -117,7 +134,13 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 4A.
 - **Acceptance criteria:** PostgreSQL is the durable source; key uniqueness/version/idempotency/outbox constraints exist; Prisma models are not exported as cross-module contracts.
 - **Required tests and validations:** Prisma format/validate/generate, migration apply on an empty test database, constraint integration tests, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Assessment:** both reference documents, repository state, manifests, task graph, and available service tooling were reviewed. The pre-implementation conflict pause was respected, then implementation resumed after explicit owner approval.
+- **Resolved source conflict:** the user explicitly approved correcting `AGENTS.md` section 9 and continuing. Restricted durable match state/events and chat history are allowed as required by the architecture; sensitive payloads remain prohibited in telemetry, raw authentication secrets remain non-persistent, and unnecessary RNG-material retention is not authorized. Chat retention and session policy remain open.
+- **Delivered:** pinned stable Prisma CLI/client/adapter-pg 7.10.0 and pg 8.23.0; isolated generated ESM client; public database lifecycle and owned top-level delegate/transaction callbacks; sanitized errors; initial 14-table schema, foreign keys and uniqueness, version guards and append-only history triggers; dedicated migration/grants workflow; unit/integration tests and isolated native PostgreSQL harness; ADR-011 and database runbook. Session/refresh persistence and product policies remain deferred.
+- **Validation evidence (2026-09-14):** strict frozen install, Prisma format/validate/generate, lint/format, 12 typechecks, 77 root tests, 11 builds, audit, public-import/subpath-denial smoke, and diff checks pass. PostgreSQL 18.6 was run from extracted Ubuntu packages without installing a system service. The actual role bootstrap, initial migration and repeat deploy, zero Prisma-visible schema drift, 10 integration tests, and schema plus committed-data restart verification pass. Integration covers BigInt-safe identity, unique action/sequence/seat keys, foreign keys, version pinning, atomic four-record commit/rollback, concurrent duplicate commands, append-only enforcement, role restrictions, outbox delivery-column grants, and consumer deduplication.
+- **Resolved implementation issues:** pnpm's default-denied Prisma install scripts were reviewed and narrowly allowlisted. Audit findings in CLI transitive dependencies were removed with targeted patched deepmerge-ts/mysql2 overrides, then compatibility checks rerun. Generated `CREATE SCHEMA IF NOT EXISTS public` requested unnecessary database-level CREATE permission; it was removed in favor of the pre-provisioned schema, preserving least privilege. Temporary diagnostic instrumentation was removed.
+- **Remaining limits:** Docker networking/named-volume and Redis startup/ACL/restart tests from Phase 4A remain unverified; native PostgreSQL checks do not replace them. Domain repositories, row-lock command processing, outbox publishing, all-module dependency fitness, application contracts, E2E, production TLS/backup/deployment, and product open decisions remain future phase gates. The schema is not a playable backend and local restart is not backup restore evidence.
 
 ### Phase 5A — Shared contracts, validation, and stable errors
 
@@ -401,7 +424,8 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 4A is completed with the live-service validation gap recorded above. Phase 4B
-(Prisma database foundation) must not begin until the user explicitly approves
-proceeding. Docker-enabled service verification is required before database
-integration and migration acceptance in Phase 4B.
+Phase 4B is completed, including the explicitly approved persistence correction
+and native PostgreSQL migration/integration acceptance. Phase 5A — shared
+contracts, validation, and stable errors — must not begin until the user explicitly
+approves proceeding. The outstanding Docker/Redis verification gap remains tracked
+and is not a claim of deployment readiness.

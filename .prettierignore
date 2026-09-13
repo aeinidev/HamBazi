@@ -14,5 +14,6 @@ pnpm-lock.yaml
 **/playwright-report/
 **/test-results/
 .git/
+packages/database/src/generated/
 .env
 .env.*

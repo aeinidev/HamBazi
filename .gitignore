@@ -10,6 +10,7 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+packages/database/src/generated/
 
 # Runtime configuration and secrets
 .env

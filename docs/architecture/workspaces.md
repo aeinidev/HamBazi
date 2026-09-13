@@ -1,7 +1,9 @@
 # Workspace structure and ownership
 
 Phase 3 establishes compilable workspace boundaries. Phase 4A implements the
-Node-only config package and local data-service infrastructure. Other source
+Node-only config package and local data-service infrastructure. Phase 4B adds the
+[database foundation](database-foundation.md), private generated Prisma client,
+migrations, and database verification. Other source
 entry points remain empty modules, not implemented product APIs or runnable app
 services. No game rules or application startup side effects are introduced.
 

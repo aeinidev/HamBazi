@@ -10,11 +10,28 @@
     }
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "build": "pnpm db:generate && tsc --project tsconfig.build.json",
+    "typecheck": "pnpm db:generate && tsc --project tsconfig.json --noEmit",
+    "test": "vitest run tests/unit",
+    "test:integration": "pnpm db:generate && vitest run tests/integration",
+    "test:local": "pnpm db:generate && node scripts/test-local.mjs",
+    "db:format": "prisma format",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:diff": "prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script"
+  },
+  "dependencies": {
+    "@prisma/client": "7.10.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "pg": "8.23.0"
   },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@types/node": "24.13.4",
+    "@types/pg": "8.23.1",
+    "prisma": "7.10.0",
+    "vitest": "5.0.0"
   }
 }

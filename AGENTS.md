@@ -152,7 +152,9 @@ Phaser فقط برای بازی‌های canvas-heavy در نظر گرفته ش�
 - Telegram `initData` خام را server-side از نظر signature و freshness/`auth_date` اعتبارسنجی و مقایسهٔ signature را constant-time کنید. به `initDataUnsafe` یا Telegram ID ارسالی client اعتماد نکنید.
 - access token کوتاه‌عمر و فقط memory-only است؛ آن را در `localStorage` قرار ندهید.
 - راهبرد refresh token هنوز تصمیم باز است. در صورت تصویب، باید rotating و در cookie با `HttpOnly` و `Secure` باشد؛ در غیر این صورت re-auth از `initData` معتبر انجام می‌شود.
-- `initData`، token/hash، deck/card، RNG material، chat text و hidden state را persist یا log نکنید. logging فقط با allowlist field انجام شود.
+- `initData` خام، token و hash احراز هویت و bot token را persist یا log نکنید. تصمیم session/refresh همچنان باز است.
+- snapshot و eventهای لازم برای state/replay بازی، شامل اطلاعات مخفی ضروری، فقط در storage مجاز معماری و با دسترسی محدود Match service ماندگار شوند. تاریخچهٔ chat در PostgreSQL با کنترل عضویت مجاز است؛ سیاست نهایی retention همچنان تصمیم باز است. این مجوز شامل نگه‌داری مستقل seed یا RNG material غیرضروری نیست.
+- deck/card، RNG material، chat text و hidden state هرگز وارد log، trace یا error report نشوند؛ logging فقط با allowlist field انجام شود. persistence مجاز application را با telemetry اشتباه نگیرید.
 - webhook بات باید HTTPS، `secret_token` header، rate limit و dedupe بر اساس `update_id` داشته باشد.
 - auth/session، membership، role، state، capacity، turn و تمام قوانین بازی server-side enforce شوند.
 - DTO/schema همهٔ ورودی‌های REST و Socket validate شود و rate limit توزیع‌شده بر Redis اعمال شود.

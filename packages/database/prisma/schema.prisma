@@ -1,0 +1,253 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String             @id @db.Uuid
+  telegramUserId   BigInt             @unique @map("telegram_user_id")
+  displayName      String             @map("display_name")
+  publicHandle     String             @unique @map("public_handle")
+  telegramUsername String?            @map("telegram_username")
+  status           String
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  settings         UserSettings?
+  hostedRooms      Room[]
+  roomMembers      RoomMember[]
+  matchPlayers     MatchPlayer[]
+  events           GameEvent[]
+  results          GameResult[]
+  stats            UserGameStats[]
+  messages         ChatMessage[]
+  commands         ProcessedCommand[]
+
+  @@map("users")
+}
+
+model UserSettings {
+  userId        String   @id @map("user_id") @db.Uuid
+  schemaVersion Int      @map("schema_version")
+  settingsJsonb Json     @map("settings_jsonb") @db.JsonB
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("user_settings")
+}
+
+model Game {
+  id                  String          @id
+  slug                String          @unique
+  title               String
+  minPlayers          Int             @map("min_players")
+  maxPlayers          Int             @map("max_players")
+  matchmakingEnabled  Boolean         @map("matchmaking_enabled")
+  privateRoomsEnabled Boolean         @map("private_rooms_enabled")
+  chatEnabled         Boolean         @map("chat_enabled")
+  voiceEnabled        Boolean         @default(false) @map("voice_enabled")
+  status              String
+  configSchemaVersion Int             @map("config_schema_version")
+  configJsonb         Json            @map("config_jsonb") @db.JsonB
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  rooms               Room[]
+  matches             Match[]
+  results             GameResult[]
+  stats               UserGameStats[]
+
+  @@map("games")
+}
+
+model Room {
+  id         String       @id @db.Uuid
+  gameId     String       @map("game_id")
+  hostUserId String       @map("host_user_id") @db.Uuid
+  capacity   Int
+  inviteCode String       @unique @map("invite_code")
+  status     String
+  expiresAt  DateTime     @map("expires_at") @db.Timestamptz(3)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  game       Game         @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  host       User         @relation(fields: [hostUserId], references: [id], onDelete: Restrict)
+  members    RoomMember[]
+  match      Match?
+
+  @@index([status, expiresAt])
+  @@map("rooms")
+}
+
+model RoomMember {
+  roomId   String   @map("room_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  seat     Int
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(3)
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([roomId, userId])
+  @@unique([roomId, seat])
+  @@index([userId])
+  @@map("room_members")
+}
+
+model Match {
+  id                 String             @id @db.Uuid
+  gameId             String             @map("game_id")
+  roomId             String?            @unique @map("room_id") @db.Uuid
+  matchType          String             @map("match_type")
+  status             String
+  engineVersion      String             @map("engine_version")
+  stateSchemaVersion Int                @map("state_schema_version")
+  rulesetVersion     String             @map("ruleset_version")
+  stateJsonb         Json?              @map("state_jsonb") @db.JsonB
+  stateVersion       Int                @default(0) @map("state_version")
+  lastEventSeq       Int                @default(0) @map("last_event_seq")
+  startedAt          DateTime?          @map("started_at") @db.Timestamptz(3)
+  finishedAt         DateTime?          @map("finished_at") @db.Timestamptz(3)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  game               Game               @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  room               Room?              @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  players            MatchPlayer[]
+  events             GameEvent[]
+  commands           ProcessedCommand[]
+  results            GameResult[]
+  messages           ChatMessage[]
+
+  @@unique([id, gameId])
+  @@index([gameId, status, createdAt])
+  @@map("matches")
+}
+
+model MatchPlayer {
+  matchId          String    @map("match_id") @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  seat             Int
+  agentType        String    @map("agent_type")
+  connectionStatus String    @map("connection_status")
+  connectionEpoch  Int       @default(0) @map("connection_epoch")
+  disconnectedAt   DateTime? @map("disconnected_at") @db.Timestamptz(3)
+  replacedAt       DateTime? @map("replaced_at") @db.Timestamptz(3)
+  joinedAt         DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
+  match            Match     @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([matchId, userId])
+  @@unique([matchId, seat])
+  @@index([userId, matchId])
+  @@map("match_players")
+}
+
+model GameEvent {
+  id            String   @id @db.Uuid
+  matchId       String   @map("match_id") @db.Uuid
+  seq           Int
+  schemaVersion Int      @map("schema_version")
+  type          String
+  actorUserId   String?  @map("actor_user_id") @db.Uuid
+  payloadJsonb  Json     @map("payload_jsonb") @db.JsonB
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  match         Match    @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  actor         User?    @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@unique([matchId, seq])
+  @@map("game_events")
+}
+
+model ProcessedCommand {
+  matchId          String   @map("match_id") @db.Uuid
+  actionId         String   @map("action_id") @db.Uuid
+  actorUserId      String   @map("actor_user_id") @db.Uuid
+  schemaVersion    Int      @map("schema_version")
+  expectedVersion  Int      @map("expected_version")
+  resultingVersion Int      @map("resulting_version")
+  resultJsonb      Json     @map("result_jsonb") @db.JsonB
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  match            Match    @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  actor            User     @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@id([matchId, actionId])
+  @@map("processed_commands")
+}
+
+model OutboxEvent {
+  id            String    @id @db.Uuid
+  aggregateId   String    @map("aggregate_id") @db.Uuid
+  type          String
+  schemaVersion Int       @map("schema_version")
+  payloadJsonb  Json      @map("payload_jsonb") @db.JsonB
+  status        String
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @map("next_attempt_at") @db.Timestamptz(3)
+  publishedAt   DateTime? @map("published_at") @db.Timestamptz(3)
+  requestId     String?   @map("request_id")
+  traceparent   String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([status, nextAttemptAt, createdAt])
+  @@map("outbox_events")
+}
+
+model ConsumerReceipt {
+  consumer    String
+  eventId     String   @map("event_id") @db.Uuid
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@id([consumer, eventId])
+  @@map("consumer_receipts")
+}
+
+model GameResult {
+  matchId       String   @map("match_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  gameId        String   @map("game_id")
+  placement     Int
+  winner        Boolean
+  schemaVersion Int      @map("schema_version")
+  metricsJsonb  Json     @map("metrics_jsonb") @db.JsonB
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  match         Match    @relation(fields: [matchId, gameId], references: [id, gameId], onDelete: Restrict)
+  game          Game     @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([matchId, userId])
+  @@index([userId, gameId, createdAt])
+  @@map("game_results")
+}
+
+model UserGameStats {
+  userId    String   @map("user_id") @db.Uuid
+  gameId    String   @map("game_id")
+  metric    String
+  period    String
+  value     BigInt   @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Restrict)
+
+  @@id([userId, gameId, metric, period])
+  @@index([gameId, metric, period, value])
+  @@map("user_game_stats")
+}
+
+model ChatMessage {
+  id            String   @id @db.Uuid
+  matchId       String   @map("match_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  schemaVersion Int      @map("schema_version")
+  text          String
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  match         Match    @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([matchId, createdAt, id])
+  @@map("chat_messages")
+}
