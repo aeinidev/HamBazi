@@ -16,6 +16,16 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     },
+    "@hambazi/database#typecheck": {
+      "dependsOn": ["build", "^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": []
+    },
+    "@hambazi/api#test": {
+      "dependsOn": ["typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/contracts/auth.v1.baseline.json"],
+      "outputs": []
+    },
     "@hambazi/eslint#test": {
       "inputs": [
         "$TURBO_DEFAULT$",

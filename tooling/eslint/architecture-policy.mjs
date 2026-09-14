@@ -21,7 +21,7 @@ export const apiDependencies = {
   admin: ["users", "games", "rooms", "matches"],
   health: [],
 };
-export const databaseOwners = ["users", "games", "rooms", "matches", "chat", "leaderboard"];
+export const databaseOwners = ["auth", "users", "games", "rooms", "matches", "chat", "leaderboard"];
 const common = ["shared", "contracts", "validation"];
 const workspaceDependencies = {
   shared: [],

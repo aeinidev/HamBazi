@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { mkdtemp, writeFile, rm, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { createServer } from "node:net";
@@ -101,6 +101,41 @@ if (!bin) {
     childEnv.TEST_DATABASE_CONFIRM = "isolated-hambazi-test";
     childEnv.TEST_DATABASE_RUN_ID = randomBytes(8).toString("hex");
     const cwd = new URL("..", import.meta.url);
+    const require = createRequire(import.meta.url);
+    let legacyId;
+    if (process.argv.includes("--api-auth")) {
+      stage = "populated foundation upgrade setup";
+      // Isolated-cluster rehearsal only: establish the previous schema and a
+      // synthetic old-release row, then let normal deploy apply the expansion.
+      legacyId = randomUUID();
+      const legacy = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
+      await legacy.connect();
+      try {
+        await legacy.query(
+          await readFile(
+            new URL("../prisma/migrations/202609130001_foundation/migration.sql", import.meta.url),
+            "utf8",
+          ),
+        );
+        await legacy.query(
+          "INSERT INTO users (id,telegram_user_id,display_name,public_handle,status,updated_at) VALUES ($1,17,'Legacy Synthetic','legacy_synthetic','ACTIVE',now())",
+          [legacyId],
+        );
+      } finally {
+        await legacy.end();
+      }
+      await run(
+        process.execPath,
+        [
+          require.resolve("prisma/build/index.js"),
+          "migrate",
+          "resolve",
+          "--applied",
+          "202609130001_foundation",
+        ],
+        { cwd, env: childEnv, timeout: 30_000 },
+      );
+    }
     stage = "migration deploy";
     await run(process.execPath, [new URL("migrate.mjs", import.meta.url).pathname], {
       cwd,
@@ -112,7 +147,33 @@ if (!bin) {
       env: childEnv,
     });
     stage = "integration";
-    const require = createRequire(import.meta.url);
+    if (legacyId) {
+      stage = "populated foundation upgrade verification";
+      const legacy = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
+      await legacy.connect();
+      try {
+        const result = await legacy.query(
+          "SELECT display_name, public_handle, status FROM users WHERE id=$1",
+          [legacyId],
+        );
+        if (
+          JSON.stringify(result.rows) !==
+          JSON.stringify([
+            {
+              display_name: "Legacy Synthetic",
+              public_handle: "legacy_synthetic",
+              status: "ACTIVE",
+            },
+          ])
+        )
+          throw new Error();
+        // Remove only our known synthetic upgrade probe before the empty-fixture suite.
+        await legacy.query("DELETE FROM users WHERE id=$1", [legacyId]);
+      } finally {
+        await legacy.end();
+      }
+      console.info("Populated previous-schema expansion preserved the synthetic old-release row.");
+    }
     stage = "schema drift";
     await run(
       process.execPath,
@@ -156,7 +217,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 1) throw new Error();
+      if (result.rows[0].count !== 2) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -167,6 +228,52 @@ if (!bin) {
       await restored.end();
     }
     console.info("Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.");
+    if (process.argv.includes("--api-auth")) {
+      stage = "API session integration";
+      const result = await run(
+        process.execPath,
+        [
+          join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"),
+          "run",
+          "tests/integration",
+        ],
+        {
+          cwd: new URL("../../../apps/api/", import.meta.url),
+          env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
+          timeout: 120_000,
+          maxBuffer: 4 * 1024 * 1024,
+        },
+      );
+      console.info(result.stdout);
+      stage = "session restart persistence";
+      const snapshot = async () => {
+        const client = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
+        await client.connect();
+        try {
+          const result = await client.query(
+            "SELECT id, user_id, command_id, schema_version, key_id, issuer, audience, issued_at, expires_at, revoked_at FROM sessions ORDER BY id",
+          );
+          if (result.rows.length < 2 || !result.rows.some((row) => row.revoked_at))
+            throw new Error();
+          return JSON.stringify(result.rows);
+        } finally {
+          await client.end();
+        }
+      };
+      const before = await snapshot();
+      await run(join(bin, "pg_ctl"), [
+        "-D",
+        join(path, "data"),
+        "-m",
+        "fast",
+        "-w",
+        "restart",
+        "-l",
+        join(path, "server.log"),
+      ]);
+      if (before !== (await snapshot())) throw new Error();
+      console.info("API session integration and session/revocation restart persistence passed.");
+    }
   } catch (error) {
     // Only sanitized test output is reportable; never emit child command/env/error.
     let output =
@@ -174,6 +281,20 @@ if (!bin) {
     for (const [key, value] of Object.entries(env))
       if (key.endsWith("PASSWORD")) output = output.replaceAll(value, "[REDACTED]");
     if (output) console.error(output);
+    if (
+      stage === "API session integration" &&
+      error &&
+      typeof error === "object" &&
+      "stderr" in error
+    ) {
+      // Test names and source locations only: never print assertion values, SQL or credentials.
+      const lines = String(error.stderr).split("\n");
+      for (const line of lines) {
+        if (/^ FAIL {2}tests\/integration\/[A-Za-z0-9_.-]+/.test(line)) console.error(line);
+        const frame = line.match(/tests\/integration\/[A-Za-z0-9_.-]+:\d+:\d+/);
+        if (frame) console.error(`Integration failure location: ${frame[0]}`);
+      }
+    }
     if (stage === "migration deploy" && error && typeof error === "object" && "stderr" in error) {
       const safe = String(error.stderr)
         .split("\n")

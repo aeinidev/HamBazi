@@ -13,6 +13,25 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
+  it("exposes only session metadata to the Auth owner", async () => {
+    const database = createDatabase(options);
+    await database.forModule("auth").execute(async (db) => {
+      expect(Object.keys(db)).toEqual(["session"]);
+      expect("user" in db).toBe(false);
+    });
+    await database.disconnect();
+  });
+  it("adds sessions without altering the foundation migration", async () => {
+    const sql = await readFile(
+      new URL("../../prisma/migrations/202609140001_auth_sessions/migration.sql", import.meta.url),
+      "utf8",
+    );
+    expect(sql.startsWith("BEGIN;")).toBe(true);
+    expect(sql.trim().endsWith("COMMIT;")).toBe(true);
+    expect(sql).toContain("sessions_guard_metadata");
+    expect(sql).toContain("sessions_user_id_command_id_key");
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE TABLE/);
+  });
   it.each(["toString", "__proto__", "SYNTHETIC_UNKNOWN_CODE"])(
     "does not expose unrecognized error code %s",
     async (code) => {

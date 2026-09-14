@@ -10,12 +10,33 @@
     }
   },
   "scripts": {
+    "start": "node dist/composition/main.js",
+    "contract:generate": "node scripts/auth-contract.mjs --write",
+    "contract:check": "node scripts/auth-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
+    "test": "vitest run tests/auth tests/users tests/http",
+    "test:integration": "vitest run tests/integration"
+  },
+  "dependencies": {
+    "@hambazi/config": "workspace:*",
+    "@hambazi/contracts": "workspace:*",
+    "@hambazi/database": "workspace:*",
+    "@nestjs/common": "12.0.1",
+    "@nestjs/core": "12.0.1",
+    "@nestjs/platform-fastify": "12.0.1",
+    "fastify": "5.12.4",
+    "jose": "6.2.12",
+    "pino": "10.3.1",
+    "redis": "6.2.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.2"
   },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
     "@types/node": "24.13.4",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
   }
 }

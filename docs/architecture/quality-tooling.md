@@ -53,6 +53,15 @@ produces no deliverable artifacts. Logs may be replayed from the local cache.
 Package manifests and dependency graph/lockfile data contribute to task hashes.
 Consumers must declare shared configuration dependencies with `workspace:*`.
 
+Database typecheck additionally waits for its own build in Turbo. Both standalone
+scripts generate Prisma source, and allowing a consumer to schedule database
+build/typecheck concurrently caused a real generated-directory race in Phase
+6A2. This task dependency serializes generation without dropping standalone
+generation or weakening typechecks. Do not launch separate Prisma-generating
+root commands concurrently against the same worktree. Root `test:auth:local`
+is an explicit environment-dependent integration gate, not part of cached unit
+tests; it builds the API dependency chain before the isolated database harness.
+
 Root formatting/lint always run, so changes to root config or formatting policy
 cannot be hidden by a package task cache. Use `pnpm exec turbo run typecheck test
 --dry=json` to inspect the resolved graph and hashes. After changing the runtime
@@ -60,6 +69,14 @@ or investigating stale local results, `pnpm exec turbo run typecheck test --forc
 executes the real declared tasks again. Phase 3 build tasks depend on dependency
 builds and cache `dist/**`, including library incremental metadata. See
 [workspace conventions](workspaces.md) for the current scaffold build limits.
+
+Phase 6A3 adds the uncached API `contract:check` after root build. The generator
+uses feature-owned Zod schemas and a conservative initial-v1 compatibility
+baseline; descriptions/new paths may change, existing wire/security shapes may
+not silently drift. API test cache inputs explicitly include that external
+baseline. `test:auth-http:local` is an uncached Docker Redis + native PostgreSQL
+integration harness, separate from root unit tests. API now also has a real
+`start` command; browser/staging E2E and CI workflow installation remain pending.
 
 The independent architecture gate is also uncached and disallows inline
 suppression. The ESLint test task explicitly includes the repository manifests,

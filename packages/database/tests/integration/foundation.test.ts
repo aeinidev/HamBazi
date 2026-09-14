@@ -18,6 +18,8 @@ const worker = new pg.Client({ connectionString: process.env.WORKER_DATABASE_URL
 const userId = randomUUID();
 const matchId = randomUUID();
 const gameId = `test-${process.env.TEST_DATABASE_RUN_ID ?? randomUUID()}`;
+const sessionId = randomUUID();
+const sessionCommandId = randomUUID();
 const options = {
   databaseUrl: { reveal: () => process.env.API_DATABASE_URL! },
   poolMax: 2,
@@ -70,6 +72,87 @@ afterAll(async () => {
 });
 
 describe("PostgreSQL foundation", () => {
+  it("inserts valid Auth metadata with only the API role", async () => {
+    expect(
+      await sqlState(
+        api,
+        "INSERT INTO sessions (id,user_id,command_id,schema_version,key_id,issuer,audience,issued_at,expires_at) VALUES ($1,$2,$3,1,'synthetic','test-api','test-app','2026-01-01T00:00:00Z','2026-01-01T00:01:00Z')",
+        [sessionId, userId, sessionCommandId],
+      ),
+    ).toBeUndefined();
+    expect(await sqlState(worker, "SELECT id FROM sessions")).toBe("42501");
+    expect(await sqlState(worker, "UPDATE sessions SET revoked_at=now()")).toBe("42501");
+    expect(await sqlState(api, "DELETE FROM sessions WHERE id=$1", [sessionId])).toBe("42501");
+  });
+  it("enforces session command uniqueness, foreign keys, and lifetime constraints", async () => {
+    const insert =
+      "INSERT INTO sessions (id,user_id,command_id,schema_version,key_id,issuer,audience,issued_at,expires_at) VALUES ($1,$2,$3,1,'test','api','app',$4,$5)";
+    const start = "2026-01-01T00:00:00Z",
+      end = "2026-01-01T00:01:00Z";
+    expect(await sqlState(api, insert, [randomUUID(), userId, sessionCommandId, start, end])).toBe(
+      "23505",
+    );
+    expect(
+      await sqlState(api, insert, [randomUUID(), randomUUID(), randomUUID(), start, end]),
+    ).toBe("23503");
+    expect(await sqlState(api, insert, [randomUUID(), userId, randomUUID(), end, start])).toBe(
+      "23514",
+    );
+    expect(
+      await sqlState(api, insert, [randomUUID(), userId, randomUUID(), start, "infinity"]),
+    ).toBe("23514");
+  });
+  it("permits one-way revocation but prevents expiry extension and resurrection", async () => {
+    expect(
+      await sqlState(
+        api,
+        "UPDATE sessions SET expires_at=expires_at+interval '1 day' WHERE id=$1",
+        [sessionId],
+      ),
+    ).toBe("42501");
+    expect(
+      await sqlState(
+        admin,
+        "UPDATE sessions SET expires_at=expires_at+interval '1 day' WHERE id=$1",
+        [sessionId],
+      ),
+    ).toBe("23514");
+    expect(
+      await sqlState(api, "UPDATE sessions SET revoked_at='2026-01-01T00:00:30Z' WHERE id=$1", [
+        sessionId,
+      ]),
+    ).toBeUndefined();
+    expect(
+      await sqlState(api, "UPDATE sessions SET revoked_at=NULL WHERE id=$1", [sessionId]),
+    ).toBe("23514");
+    expect(
+      await sqlState(api, "UPDATE sessions SET revoked_at='2026-01-01T00:00:31Z' WHERE id=$1", [
+        sessionId,
+      ]),
+    ).toBe("23514");
+  });
+  it("rolls back a failed session metadata transaction", async () => {
+    const before = await database.forModule("auth").execute((db) => db.session.count());
+    await expect(
+      database.forModule("auth").transaction(async (db) => {
+        await db.session.create({
+          data: {
+            id: randomUUID(),
+            userId,
+            commandId: randomUUID(),
+            schemaVersion: 1,
+            keyId: "test",
+            issuer: "api",
+            audience: "app",
+            issuedAt: new Date("2026-01-01T00:00:00Z"),
+            expiresAt: new Date("2026-01-01T00:01:00Z"),
+          },
+        });
+        throw new Error("Synthetic rollback");
+      }),
+    ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+    expect(await database.forModule("auth").execute((db) => db.session.count())).toBe(before);
+  });
   it("preserves Telegram identifiers beyond JavaScript's safe integer range", async () => {
     const user = await database
       .forModule("users")

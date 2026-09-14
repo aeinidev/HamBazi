@@ -10,7 +10,7 @@
   },
   "packageManager": "pnpm@12.4.1",
   "scripts": {
-    "check": "pnpm format:check && pnpm lint && pnpm check:architecture && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm format:check && pnpm lint && pnpm check:architecture && pnpm typecheck && pnpm test && pnpm build && pnpm --filter @hambazi/api contract:check",
     "check:architecture": "node tooling/eslint/check-architecture.mjs",
     "build": "turbo run build",
     "lint": "eslint . --max-warnings 0",
@@ -19,6 +19,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && pnpm test:infra",
     "test:infra": "vitest run infra",
+    "test:auth:local": "turbo run build --filter=@hambazi/api && pnpm --filter @hambazi/database test:local --api-auth",
+    "test:auth-http:local": "node infra/scripts/test-auth-http-local.mjs",
     "infra:env": "node infra/scripts/create-local-env.mjs",
     "infra:config": "docker compose --env-file .env --file infra/docker/compose.yaml config --quiet",
     "infra:up": "docker compose --env-file .env --file infra/docker/compose.yaml up --detach --wait --wait-timeout 90",

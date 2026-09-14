@@ -22,6 +22,7 @@ remain Phase 11A, not claims made by this generic foundation.
 
 | Owner       | Tables/delegates                                                                     |
 | ----------- | ------------------------------------------------------------------------------------ |
+| auth        | sessions                                                                             |
 | users       | users, user_settings                                                                 |
 | games       | games                                                                                |
 | rooms       | rooms, room_members                                                                  |
@@ -105,6 +106,31 @@ Root `pnpm check` includes database unit tests, not environment-dependent
 integration tests. Run the database integration gate separately for schema,
 transaction, client, or permission changes. Integration evidence covers real
 PostgreSQL, not Docker networking or Redis. Those Phase 4A checks remain tracked.
+
+### Phase 6A2 expansion
+
+ADR-014 adds Auth-owned session metadata as a second additive migration. The
+original foundation migration is unchanged. No credential/hash is persisted;
+API gets read/insert and revocation-column update only, and Worker gets no session
+access. Immutable metadata and one-way revocation are enforced by a trigger;
+unique user/command IDs preserve issuance idempotency. Session policy is now
+governed by ADR-014 rather than the historical open-decision note above.
+
+Root `pnpm test:auth:local` runs the isolated database harness with `--api-auth`
+after API/dependency builds. In that mode, it establishes the previous schema,
+baselines its migration in the isolated database only, inserts a synthetic
+old-release row, then runs the normal expansion deploy and verifies the row is
+unchanged. It removes only that probe before ordinary fixtures. It runs foundation
+and Auth integration suites, then compares session metadata/revocation across a
+PostgreSQL restart without printing their values. This is a test-only migration
+rehearsal, not permission to baseline or reset a deployed database.
+
+The API integration suite requires the harness's additional
+`TEST_AUTH_DATABASE_READY=foundation-completed` marker and expected fixture count;
+do not run it against a normal developer database. The standalone database
+`test:local` still exercises clean initial deploy of both migrations.
+Neither command installs services, reads the project's `.env`, or deploys to
+staging/production. See [authentication boundary](telegram-authentication.md).
 
 ## Security and operations
 

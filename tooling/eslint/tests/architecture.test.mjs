@@ -59,6 +59,31 @@ const engine = "packages/games/coup-engine/src/engine.ts";
 const repository = (owner) => api(owner, "infrastructure/repositories/postgres.ts");
 
 describe("source ownership boundaries", () => {
+  it("allows only Auth repositories to select session storage", async () => {
+    expect(
+      await messages(
+        'import { createDatabase } from "@hambazi/database"; db.forModule("auth").execute(db => db.session.findUnique({where:{id}}));',
+        repository("auth"),
+      ),
+    ).toEqual([]);
+    expect((await messages('db.forModule("users");', repository("auth"))).length).toBeGreaterThan(
+      0,
+    );
+    expect(
+      (await messages("db.session.findUnique({where:{id}});", repository("users"))).length,
+    ).toBeGreaterThan(0);
+    expect(
+      (
+        await messages(
+          "db.session.findUnique({where:{id},include:{user:true}});",
+          repository("auth"),
+        )
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      (await messages('import { createDatabase } from "@hambazi/database";', api("auth"))).length,
+    ).toBeGreaterThan(0);
+  });
   it.each([
     [api("auth"), 'import type { UserPort } from "../../users/index.js";'],
     [api("rooms"), 'export { UsersPort } from "../../users/index.js";'],

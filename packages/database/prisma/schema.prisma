@@ -28,8 +28,27 @@ model User {
   stats            UserGameStats[]
   messages         ChatMessage[]
   commands         ProcessedCommand[]
+  sessions         Session[]
 
   @@map("users")
+}
+
+model Session {
+  id            String    @id @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  commandId     String    @map("command_id") @db.Uuid
+  schemaVersion Int       @map("schema_version")
+  keyId         String    @map("key_id")
+  issuer        String
+  audience      String
+  issuedAt      DateTime  @map("issued_at") @db.Timestamptz(3)
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt     DateTime? @map("revoked_at") @db.Timestamptz(3)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, commandId])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 model UserSettings {

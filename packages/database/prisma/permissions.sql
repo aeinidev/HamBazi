@@ -1,5 +1,7 @@
 -- Run as the migration owner after deploy. No PUBLIC or blanket future-table grants.
 BEGIN;
+GRANT SELECT, INSERT ON sessions TO hambazi_api;
+GRANT UPDATE (revoked_at) ON sessions TO hambazi_api;
 GRANT SELECT, INSERT, UPDATE ON users, user_settings TO hambazi_api;
 GRANT SELECT ON games TO hambazi_api, hambazi_worker;
 GRANT SELECT, INSERT, UPDATE ON rooms TO hambazi_api;

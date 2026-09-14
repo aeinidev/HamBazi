@@ -9,6 +9,7 @@ import {
 } from "./architecture-policy.mjs";
 
 const delegates = {
+  auth: ["session"],
   users: ["user", "userSettings"],
   games: ["game"],
   rooms: ["room", "roomMember"],

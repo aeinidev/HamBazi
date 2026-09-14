@@ -98,7 +98,7 @@ and hidden-information tests remain mandatory when the engine is implemented.
 Permitted owning locations are:
 
 ```text
-apps/api/src/<users|games|rooms|matches|chat|leaderboard>/infrastructure/repositories/
+apps/api/src/<auth|users|games|rooms|matches|chat|leaderboard>/infrastructure/repositories/
 ```
 
 Only these adapters select the corresponding literal `forModule` owner. Matches
@@ -106,6 +106,11 @@ may select `outbox` for its narrower dispatcher persistence scope. API/Worker
 process composition may construct the database dependency but cannot select an
 owner or query tables. Worker jobs, realtime adapters, Bot, and application/domain
 services invoke public owning use cases instead.
+
+Phase 6A2 adds the reviewed Auth `session` delegate and matching positive/negative
+fixtures. Auth still resolves account eligibility exclusively through Users'
+public identity port; the sessions-to-users foreign key does not permit relation
+traversal. Other modules cannot select the Auth owner or session delegate.
 
 Supported query shape:
 

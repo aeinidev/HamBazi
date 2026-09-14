@@ -3,6 +3,7 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import type { Prisma } from "./generated/prisma/client.js";
 
 const ownership = {
+  auth: ["session"],
   users: ["user", "userSettings"],
   games: ["game"],
   rooms: ["room", "roomMember"],
