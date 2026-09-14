@@ -15,6 +15,23 @@
       "dependsOn": ["typecheck"],
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
+    },
+    "@hambazi/eslint#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/eslint.config.mjs",
+        "$TURBO_ROOT$/apps/*/package.json",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/games/*/package.json",
+        "$TURBO_ROOT$/tooling/*/package.json",
+        "$TURBO_ROOT$/packages/database/prisma/schema.prisma",
+        "$TURBO_ROOT$/tsconfig*.json",
+        "$TURBO_ROOT$/apps/*/tsconfig*.json",
+        "$TURBO_ROOT$/packages/*/tsconfig*.json",
+        "$TURBO_ROOT$/packages/games/*/tsconfig*.json",
+        "$TURBO_ROOT$/tooling/typescript/*.json"
+      ],
+      "outputs": []
     }
   }
 }

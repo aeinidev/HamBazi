@@ -1,9 +1,11 @@
 import { defineConfig } from "eslint/config";
-import { base, node, browser } from "@hambazi/eslint";
+import { fileURLToPath } from "node:url";
+import { base, node, browser, architecture } from "@hambazi/eslint";
 
 export default defineConfig([
   { ignores: ["packages/database/src/generated/**"] },
   base,
+  architecture(fileURLToPath(new URL(".", import.meta.url))),
   {
     files: [
       "*.mjs",

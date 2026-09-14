@@ -4,6 +4,8 @@ import prettier from "eslint-config-prettier/flat";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+export { architecture } from "./architecture.mjs";
+
 export const base = defineConfig([
   globalIgnores([
     "**/node_modules/**",

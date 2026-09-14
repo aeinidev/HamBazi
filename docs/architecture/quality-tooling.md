@@ -8,15 +8,16 @@ described in [TypeScript tooling](typescript-tooling.md).
 
 Run `pnpm install --frozen-lockfile` first. Root commands are:
 
-| Command             | Scope                                                                      |
-| ------------------- | -------------------------------------------------------------------------- |
-| `pnpm lint`         | All current JavaScript/TypeScript files; warnings fail the command         |
-| `pnpm format:check` | Supported source/config/document formats, read-only                        |
-| `pnpm format`       | Apply the shared formatter to the same scope                               |
-| `pnpm typecheck`    | Declared workspace TypeScript checks through Turbo                         |
-| `pnpm test`         | Declared workspace tests through Turbo                                     |
-| `pnpm build`        | Declared app/package module builds through Turbo                           |
-| `pnpm check`        | Formatting, lint, typecheck, tests, then build; stops at the first failure |
+| Command                   | Scope                                                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `pnpm lint`               | All current JavaScript/TypeScript files; warnings fail the command                            |
+| `pnpm check:architecture` | Uncached source ownership, runtime manifest, and resolver-policy audit                        |
+| `pnpm format:check`       | Supported source/config/document formats, read-only                                           |
+| `pnpm format`             | Apply the shared formatter to the same scope                                                  |
+| `pnpm typecheck`          | Declared workspace TypeScript checks through Turbo                                            |
+| `pnpm test`               | Declared workspace tests through Turbo                                                        |
+| `pnpm build`              | Declared app/package module builds through Turbo                                              |
+| `pnpm check`              | Formatting, lint, architecture gate, typecheck, tests, then build; stops at the first failure |
 
 Scoped suites are `pnpm --filter @hambazi/eslint test` and the TypeScript
 package commands documented separately. The ESLint configuration package uses
@@ -27,14 +28,15 @@ integration tests, and E2E scripts remain pending.
 ## Shared configuration
 
 The root `eslint.config.mjs` imports only `@hambazi/eslint`'s public surface:
-`base`, `node`, and `browser`. Base enables recommended JS and TS rules and does
+`base`, `node`, `browser`, and `architecture`. Base enables recommended JS and TS rules and does
 not assume a runtime. Consumers scope the Node/browser additions using `files`.
 Root config enables Node for tooling, root `.mjs` files, and API/Bot/Worker
 source. Browser globals are scoped to `apps/web/src`.
 Unused TypeScript parameters/variables prefixed `_` are an explicit convention.
 TypeScript files rely on compiler checks for undefined identifiers; JS uses ESLint
-`no-undef`. Full module-boundary checks and type-aware linting are not implied by
-these rules. React-specific rules will be selected when React source is added.
+`no-undef`. Phase 5B adds [module-boundary rules](boundaries.md) through the
+architecture configuration factory. These are syntax/scope-aware checks, not full
+TypeScript type/dataflow analysis. React-specific rules will be selected when React source is added.
 
 `.prettierrc.json` defines the formatting policy; `eslint-config-prettier` prevents
 conflicting lint rules. `.prettierignore` preserves the supplied architecture and
@@ -58,3 +60,8 @@ or investigating stale local results, `pnpm exec turbo run typecheck test --forc
 executes the real declared tasks again. Phase 3 build tasks depend on dependency
 builds and cache `dist/**`, including library incremental metadata. See
 [workspace conventions](workspaces.md) for the current scaffold build limits.
+
+The independent architecture gate is also uncached and disallows inline
+suppression. The ESLint test task explicitly includes the repository manifests,
+resolver configurations, and Prisma schema that its boundary fixtures read, so
+those external inputs invalidate its cached result.

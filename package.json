@@ -10,7 +10,8 @@
   },
   "packageManager": "pnpm@12.4.1",
   "scripts": {
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm format:check && pnpm lint && pnpm check:architecture && pnpm typecheck && pnpm test && pnpm build",
+    "check:architecture": "node tooling/eslint/check-architecture.mjs",
     "build": "turbo run build",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",

@@ -48,12 +48,19 @@ raw authentication-secret storage or unnecessary RNG-material retention.
 - Root checks pass with 77 tests (28 tooling, 29 config, 13 database unit, 7 infrastructure), 12 typechecks, and 11 builds. Ten additional real PostgreSQL integration tests, migration redeploy, zero Prisma-visible schema drift, and persisted-data restart verification pass. Audit reports no known vulnerabilities.
 - PostgreSQL 18.6 distribution packages were downloaded/extracted into a temporary directory, not installed system-wide. Isolated test clusters were stopped and their synthetic data removed. Docker/Redis live verification remains unavailable. ADR-011 and the database runbook document the foundation and its limitations; the approved AGENTS.md clarification is the only reference-guide change.
 
-### Current inventory — Phase 5A update (2026-09-14)
+### Foundation inventory — Phase 5A update (2026-09-14)
 
 - Phase 5A began on `main` at `93d677a` (Phase 4B), with a clean worktree. No commit, push, or deployment was performed.
 - Shared now exposes eight stable public error codes. Contracts provides version-1 command/event/snapshot envelopes, UUID aliases, pagination types, safe error construction, and storage-compatible counters. Validation provides composable Zod schemas and sanitized parse results; feature payload schemas remain owned by feature modules.
 - Root checks pass with 184 tests (28 tooling, 29 config, 13 database unit, 107 shared-contract/validation, 7 infrastructure), 12 workspace/tooling typecheck scripts, and 11 builds. Existing unchanged Turbo tasks may be reused from cache. The validation typecheck separately checks source and tests. Frozen install, audit, three built public imports, three denied internal subpaths, and diff checks pass.
 - ADR-012 and the contract conventions document strict intents, additive receiver compatibility, unknown-code fallback, JSON payload checks, and safe errors. No database integration/migration or E2E was run in this library-only phase. Phase 4B's integration evidence is historical, not a new run; Docker/Redis verification and application/staging E2E remain outstanding.
+
+### Current inventory — Phase 5B update (2026-09-14)
+
+- Phase 5B began on `main` at `252e103` (Phase 5A), with a clean worktree. No commit, push, deployment, database migration, or product source change was performed.
+- The ESLint package now owns import/module policies, engine determinism checks, database-owner/query-shape rules, runtime manifest/export/cycle auditing, resolver-remapping checks, and an independent uncached `check:architecture` command included in `pnpm check`.
+- Root checks pass with 325 tests (154 ESLint/architecture, 15 TypeScript, 29 config, 13 database unit, 107 contract/validation, 7 infrastructure), 12 typecheck scripts, and 11 builds. The dedicated audit covers 13 workspaces and 42 handwritten product source files. Frozen install, audit, formatting/lint, and diff checks pass. Existing unchanged tasks may reuse Turbo cache; a dry run confirms the architecture test includes 13 manifests and the Prisma schema as explicit external cache inputs.
+- ADR-013 and the boundary conventions record the enforced matrix, wiring surfaces, strict scalar repository syntax, alias/export rules, and static-analysis limitations. Runtime database behavior, shared wire contracts, and architectural product decisions remain unchanged. Integration/E2E and Docker/Redis gaps remain tracked, not newly verified.
 
 ### Gap summary
 
@@ -170,7 +177,10 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 5A and the Phase 3 skeleton.
 - **Acceptance criteria:** prohibited internal/framework/Prisma imports fail CI-style checks while documented application ports pass.
 - **Required tests and validations:** positive and negative architecture fixtures, lint, typecheck, unit tests, build.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** three local ESLint architecture rules, shared source/manifest policy, standalone uncached architecture command wired into root checks, 141 new positive/negative fitness tests, explicit Turbo metadata inputs, ADR-013, and boundary/quality/workspace/database documentation.
+- **Validation evidence (2026-09-14):** frozen install, targeted ESLint tests, complete root checks (325 tests, 12 typecheck scripts, 11 builds), 13-workspace/42-source architecture audit, dependency audit, Turbo dry-run input inspection, and diff review pass. Early fixtures exposed resolved-global handling and numeric property access in the checker; both were corrected with regression coverage. A redundant regex escape caught by lint was removed.
+- **Limits:** checks cover the documented import/manifest/query syntax, not arbitrary JavaScript reflection, runtime authorization, safe inferred public return types, hidden-state projection, event compatibility, or deterministic replay. Opaque repository query builders and relation traversal require reviewed policy extensions; database runtime/integration behavior is unchanged. No E2E or live-service integration was run for this tooling-only phase. CI workflow installation remains Phase 18.
 
 ### Phase 6A — Telegram Mini App authentication
 
@@ -434,8 +444,10 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 5A — shared contracts, validation, and stable errors — is completed.
-Phase 5B — enforced architecture boundaries — must not begin until the user
-explicitly approves proceeding after the Phase 5A report. The outstanding
-Docker/Redis verification gap remains tracked and is not a claim of deployment
-readiness. No application transport, gameplay, or staging E2E is implemented yet.
+Phase 5B — enforced architecture boundaries — is completed.
+Phase 6A — Telegram Mini App authentication — must not begin until the user
+explicitly approves proceeding after the Phase 5B report. OD-003 (session strategy)
+must be resolved before the authentication phase freezes its public session
+behavior; this phase does not choose it. The outstanding Docker/Redis verification
+gap remains tracked and is not a claim of deployment readiness. No application
+transport, gameplay, or staging E2E is implemented yet.

@@ -6,7 +6,8 @@ Node-only config package and local data-service infrastructure. Phase 4B adds th
 migrations, and database verification. Phase 5A adds the
 [shared contract foundation](contracts.md), runtime schemas, and stable errors.
 Application entry points remain empty modules, not implemented product APIs or
-runnable app services. No game rules or application startup side effects are introduced.
+runnable app services. Phase 5B adds executable [architecture boundaries](boundaries.md).
+No game rules or application startup side effects are introduced.
 
 ## Workspace ownership
 
@@ -46,8 +47,8 @@ API root does not re-export all module internals. Internal domain/repository
 folders should be created as the relevant implementation arrives. Follow the
 architecture's dependency matrix when wiring modules; do not expose Prisma models
 as shared contracts or import another module's repository. Package export maps
-do not enforce same-repository relative imports: the planned Phase 5B fitness
-rules must enforce those boundaries.
+do not enforce same-repository relative imports on their own: Phase 5B's lint and
+uncached architecture gate now enforce those source boundaries and manifest directions.
 
 Frontend feature surfaces live under `apps/web/src/features` for `auth`, `profile`,
 `game-catalog`, `room`, `matchmaking`, and `leaderboard`. Coup-specific `components`,

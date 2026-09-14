@@ -33,8 +33,9 @@ remain Phase 11A, not claims made by this generic foundation.
 Foreign keys do not grant permission to traverse another module's relations.
 Request data through its application port instead. Repository adapters map all
 Prisma records into module-owned domain/DTO types; never share generated models
-through public application ports. Full import/query-boundary fitness checks are
-scheduled for Phase 5B. Bot, Gateway, frontend, shared contracts, and game engines
+through public application ports. Phase 5B's [boundary checks](boundaries.md)
+enforce repository locations, literal owner selection, and explicit scalar query
+shapes; they do not replace mapping review or integration tests. Bot, Gateway, frontend, shared contracts, and game engines
 must not import this package.
 
 ## Schema and migration workflow
