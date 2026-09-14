@@ -41,12 +41,19 @@ raw authentication-secret storage or unnecessary RNG-material retention.
 | Infrastructure     | Local Compose, role/ACL bootstrap, safe environment generation, and a development runbook exist. Docker/psql/redis-cli are unavailable here; live service checks have not run. Prisma and deployment/CI remain pending. |
 | Documentation      | Architecture/assets, AGENTS, implementation plan, ADR-008/009/010, TypeScript/quality/workspace conventions, local runbook, and infrastructure ownership READMEs are present.                                           |
 
-### Current inventory — Phase 4B update (2026-09-14)
+### Foundation inventory — Phase 4B update (2026-09-14)
 
 - Work continues on `main` at `2802d49` (Phase 4A). The earlier blocked-phase plan edit was preserved; no commit, push, or deployment was performed.
 - The database package now provides Prisma schema/client generation, 14 MVP/consumer-deduplication tables, an additive transactional migration, explicit API/Worker grants, safe lifecycle/owner callbacks, and native PostgreSQL integration tooling. Other product entry points remain scaffolds.
 - Root checks pass with 77 tests (28 tooling, 29 config, 13 database unit, 7 infrastructure), 12 typechecks, and 11 builds. Ten additional real PostgreSQL integration tests, migration redeploy, zero Prisma-visible schema drift, and persisted-data restart verification pass. Audit reports no known vulnerabilities.
 - PostgreSQL 18.6 distribution packages were downloaded/extracted into a temporary directory, not installed system-wide. Isolated test clusters were stopped and their synthetic data removed. Docker/Redis live verification remains unavailable. ADR-011 and the database runbook document the foundation and its limitations; the approved AGENTS.md clarification is the only reference-guide change.
+
+### Current inventory — Phase 5A update (2026-09-14)
+
+- Phase 5A began on `main` at `93d677a` (Phase 4B), with a clean worktree. No commit, push, or deployment was performed.
+- Shared now exposes eight stable public error codes. Contracts provides version-1 command/event/snapshot envelopes, UUID aliases, pagination types, safe error construction, and storage-compatible counters. Validation provides composable Zod schemas and sanitized parse results; feature payload schemas remain owned by feature modules.
+- Root checks pass with 184 tests (28 tooling, 29 config, 13 database unit, 107 shared-contract/validation, 7 infrastructure), 12 workspace/tooling typecheck scripts, and 11 builds. Existing unchanged Turbo tasks may be reused from cache. The validation typecheck separately checks source and tests. Frozen install, audit, three built public imports, three denied internal subpaths, and diff checks pass.
+- ADR-012 and the contract conventions document strict intents, additive receiver compatibility, unknown-code fallback, JSON payload checks, and safe errors. No database integration/migration or E2E was run in this library-only phase. Phase 4B's integration evidence is historical, not a new run; Docker/Redis verification and application/staging E2E remain outstanding.
 
 ### Gap summary
 
@@ -150,7 +157,10 @@ The repository contains the architectural input but none of the executable MVP. 
 - **Dependencies:** Phase 4B.
 - **Acceptance criteria:** untrusted input is runtime-validated; `schemaVersion`, `actionId`, `matchId`, and `expectedVersion` are represented; clients can branch on stable error codes, not messages.
 - **Required tests and validations:** schema positive/negative tests, serialization tests, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Delivered:** framework-free shared codes/contracts, Zod 4.6.2 schema factories, version-1 match command/event/snapshot metadata, endpoint-bounded pagination, known-code error construction and future-code reception, sanitized synchronous parsing, 107 contract tests/type assertions, ADR-012, and contract/workspace documentation.
+- **Validation evidence (2026-09-14):** frozen install, format/lint, typecheck, 184 root tests, 11 builds, dependency audit, public-import/subpath-denial smoke, and diff review pass. An initial pure-library typecheck exposed Zod's URL declaration dependency and a generic pipeline input mismatch; package-local DOM declarations and type-preserving JSON refinement composition resolved them without enabling skipLibCheck or changing shared/engine presets.
+- **Deferred:** concrete feature DTOs/rules/authorization, durable idempotency, player/spectator projection, event delivery/resync, adapter byte/depth/rate limits, version negotiation, generated OpenAPI/event-catalog CI checks, and Phase 5B boundary enforcement. No open architectural product decision was finalized.
 
 ### Phase 5B — Enforced architecture boundaries
 
@@ -424,8 +434,8 @@ The repository contains the architectural input but none of the executable MVP. 
 
 ## Current gate
 
-Phase 4B is completed, including the explicitly approved persistence correction
-and native PostgreSQL migration/integration acceptance. Phase 5A — shared
-contracts, validation, and stable errors — must not begin until the user explicitly
-approves proceeding. The outstanding Docker/Redis verification gap remains tracked
-and is not a claim of deployment readiness.
+Phase 5A — shared contracts, validation, and stable errors — is completed.
+Phase 5B — enforced architecture boundaries — must not begin until the user
+explicitly approves proceeding after the Phase 5A report. The outstanding
+Docker/Redis verification gap remains tracked and is not a claim of deployment
+readiness. No application transport, gameplay, or staging E2E is implemented yet.

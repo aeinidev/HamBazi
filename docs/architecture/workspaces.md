@@ -3,9 +3,10 @@
 Phase 3 establishes compilable workspace boundaries. Phase 4A implements the
 Node-only config package and local data-service infrastructure. Phase 4B adds the
 [database foundation](database-foundation.md), private generated Prisma client,
-migrations, and database verification. Other source
-entry points remain empty modules, not implemented product APIs or runnable app
-services. No game rules or application startup side effects are introduced.
+migrations, and database verification. Phase 5A adds the
+[shared contract foundation](contracts.md), runtime schemas, and stable errors.
+Application entry points remain empty modules, not implemented product APIs or
+runnable app services. No game rules or application startup side effects are introduced.
 
 ## Workspace ownership
 
@@ -30,8 +31,9 @@ services. No game rules or application startup side effects are introduced.
 Each new workspace owns `src/index.ts`. Its package exports only `.` through
 `dist/index.js` and `dist/index.d.ts`; imports of unexported package subpaths are
 rejected by Node package resolution. Consumers must declare a workspace dependency
-before importing a package. No product workspace currently needs a cross-package
-runtime dependency; add one when an implemented use case needs it.
+before importing a package. Validation depends on contracts/shared, and contracts
+depends on shared. Other product dependencies should be added when their owning
+use cases need them.
 
 API modules each have an application public surface at
 `apps/api/src/<module>/index.ts`:
@@ -56,7 +58,9 @@ indexes reserve ownership and carry no rule authority.
 
 Each new workspace declares `build` and `typecheck` and depends on the public
 `@hambazi/typescript` configuration package. Node applications explicitly enable
-Node typings; shared libraries retain the framework-free base environment.
+Node typings; shared/contracts retain the framework-free base environment.
+Validation opts into DOM declarations for Zod's cross-runtime URL declaration,
+without using DOM at runtime; its test configuration separately enables Node types.
 Database/config packages may opt into necessary infrastructure types in their
 own implementation phases, without changing game-core/engine presets.
 

@@ -13,6 +13,9 @@
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "@hambazi/shared": "workspace:*"
+  },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
     "typescript": "6.0.3"

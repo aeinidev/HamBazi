@@ -1,2 +1,13 @@
-// Public surface for shared; behavior is introduced in its implementation phase.
-export {};
+/** Stable public codes. Infrastructure errors must be mapped by the owning use case. */
+export const ERROR_CODES = Object.freeze([
+  "INVALID_INPUT",
+  "UNAUTHENTICATED",
+  "FORBIDDEN",
+  "NOT_FOUND",
+  "RATE_LIMITED",
+  "GAME_STATE_CONFLICT",
+  "CLIENT_UPGRADE_REQUIRED",
+  "INTERNAL_ERROR",
+] as const);
+
+export type ErrorCode = (typeof ERROR_CODES)[number];
