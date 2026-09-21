@@ -72,6 +72,87 @@ afterAll(async () => {
 });
 
 describe("PostgreSQL foundation", () => {
+  it("limits onboarding metadata to API-owned tables and excludes content columns", async () => {
+    for (const table of ["bot_update_receipts", "bot_onboarding_flows"]) {
+      expect(await sqlState(worker, `SELECT id, expires_at FROM ${table}`)).toBeUndefined();
+      expect(await sqlState(worker, `SELECT telegram_user_id FROM ${table}`)).toBe("42501");
+      expect(await sqlState(worker, `SELECT * FROM ${table}`)).toBe("42501");
+      expect(await sqlState(worker, `UPDATE ${table} SET expires_at=now()`)).toBe("42501");
+      expect(await sqlState(worker, `DELETE FROM ${table} WHERE false`)).toBeUndefined();
+      const columns = await admin.query(
+        "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=$1",
+        [table],
+      );
+      expect(columns.rows.map((row) => row.column_name).join(" ")).not.toMatch(
+        /text|payload|name|token|secret|hash|json/,
+      );
+    }
+    const receipt = randomUUID();
+    const at = "2026-09-01T00:00:00Z";
+    const insert =
+      "INSERT INTO bot_update_receipts (id,bot_id,update_id,telegram_user_id,message_id,schema_version,action,phase,version,received_at,expires_at,lease_until) VALUES ($1,123,999,111,1,1,'START','PROCESSING',1,$2,$3,$2::timestamptz+interval '5 seconds')";
+    expect(await sqlState(api, insert, [receipt, at, "2026-09-08T00:00:00Z"])).toBeUndefined();
+    expect(await sqlState(api, insert, [randomUUID(), at, "2026-09-08T00:00:00Z"])).toBe("23505");
+    expect(
+      await sqlState(
+        api,
+        "UPDATE bot_update_receipts SET expires_at=expires_at+interval '1 day' WHERE id=$1",
+        [receipt],
+      ),
+    ).toBe("42501");
+    expect(
+      await sqlState(
+        admin,
+        "UPDATE bot_update_receipts SET received_at=received_at+interval '1 day',expires_at=expires_at+interval '1 day' WHERE id=$1",
+        [receipt],
+      ),
+    ).toBe("23514");
+    expect(
+      await sqlState(api, "UPDATE bot_update_receipts SET phase='UNKNOWN' WHERE id=$1", [receipt]),
+    ).toBe("23514");
+    expect(
+      await sqlState(api, "UPDATE bot_update_receipts SET version=version+2 WHERE id=$1", [
+        receipt,
+      ]),
+    ).toBe("23514");
+    expect(
+      await sqlState(api, "DELETE FROM bot_update_receipts WHERE id=$1", [receipt]),
+    ).toBeUndefined();
+    // Retention is elapsed time, independent of the database session's DST calendar.
+    await api.query("SET TIME ZONE 'America/New_York'");
+    try {
+      expect(
+        await sqlState(api, insert, [receipt, "2026-03-07T12:00:00Z", "2026-03-14T12:00:00Z"]),
+      ).toBeUndefined();
+      await api.query("DELETE FROM bot_update_receipts WHERE id=$1", [receipt]);
+    } finally {
+      await api.query("RESET TIME ZONE");
+    }
+    const flow = randomUUID();
+    const createFlow =
+      "INSERT INTO bot_onboarding_flows (id,bot_id,telegram_user_id,schema_version,version,state,created_at,expires_at,prompt_version) VALUES ($1,123,111,1,1,'WAITING',$2,$3,1)";
+    expect(await sqlState(api, createFlow, [flow, at, "2026-09-01T00:15:00Z"])).toBeUndefined();
+    expect(
+      await sqlState(api, "UPDATE bot_onboarding_flows SET version=version+2 WHERE id=$1", [flow]),
+    ).toBe("23514");
+    expect(
+      await sqlState(
+        api,
+        "UPDATE bot_onboarding_flows SET state='SUBMITTING',version=version+1 WHERE id=$1",
+        [flow],
+      ),
+    ).toBe("23514");
+    expect(
+      await sqlState(
+        api,
+        "UPDATE bot_onboarding_flows SET expires_at=expires_at+interval '1 minute' WHERE id=$1",
+        [flow],
+      ),
+    ).toBe("42501");
+    expect(
+      await sqlState(api, "DELETE FROM bot_onboarding_flows WHERE id=$1", [flow]),
+    ).toBeUndefined();
+  });
   it("inserts valid Auth metadata with only the API role", async () => {
     expect(
       await sqlState(

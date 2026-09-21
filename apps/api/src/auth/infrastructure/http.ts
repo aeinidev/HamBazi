@@ -5,7 +5,15 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AuthSessions, SessionClock, SessionFailure } from "../application/session-ports.js";
 import type { TelegramVerifier } from "../application/telegram-verifier.js";
 import type { AuthRateLimiter, RateDecision } from "../application/rate-limit.js";
-import { inspectedSchema, issuanceSchema, issuedSchema, logoutSchema } from "./http-contract.js";
+import type { MiniAppOnboarding } from "../application/mini-app-onboarding.js";
+import {
+  accountCreationSchema,
+  accountCreatedSchema,
+  inspectedSchema,
+  issuanceSchema,
+  issuedSchema,
+  logoutSchema,
+} from "./http-contract.js";
 
 export function sendRateDecision(reply: FastifyReply, decision: RateDecision): boolean {
   if (decision.allowed) return false;
@@ -39,9 +47,38 @@ export function createAuthHttpModule(deps: {
   telegram: TelegramVerifier;
   clock: SessionClock;
   limiter: AuthRateLimiter;
+  onboarding: MiniAppOnboarding;
 }) {
   @Controller("v1/auth")
   class AuthController {
+    @Post("telegram-mini-app/account")
+    async createAccount(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+      const parsed = accountCreationSchema.safeParse(request.body);
+      if (!parsed.success || Buffer.byteLength(parsed.data.initData, "utf8") > 16384)
+        return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+      const verified = deps.telegram.verify(parsed.data.initData, deps.clock.nowMs());
+      if (!verified.ok) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (
+        sendRateDecision(
+          reply,
+          await deps.limiter.consumeIdentity(verified.identity.telegramUserId),
+        )
+      )
+        return;
+      const result = await deps.onboarding.create(
+        parsed.data.initData,
+        parsed.data.commandId,
+        parsed.data.displayName,
+      );
+      if (!result.ok) return failure(reply, result);
+      const response = accountCreatedSchema.safeParse({
+        schemaVersion: 1,
+        account: result.account,
+        ...(result.startParam !== undefined ? { startParam: result.startParam } : {}),
+      });
+      if (!response.success) return reply.code(500).send(createErrorEnvelope("INTERNAL_ERROR"));
+      return reply.code(200).send(response.data);
+    }
     @Post("telegram-mini-app")
     async issue(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       const parsed = issuanceSchema.safeParse(request.body);

@@ -22,7 +22,7 @@ remain Phase 11A, not claims made by this generic foundation.
 
 | Owner       | Tables/delegates                                                                     |
 | ----------- | ------------------------------------------------------------------------------------ |
-| auth        | sessions                                                                             |
+| auth        | sessions, bot_update_receipts, bot_onboarding_flows                                  |
 | users       | users, user_settings                                                                 |
 | games       | games                                                                                |
 | rooms       | rooms, room_members                                                                  |
@@ -121,8 +121,9 @@ after API/dependency builds. In that mode, it establishes the previous schema,
 baselines its migration in the isolated database only, inserts a synthetic
 old-release row, then runs the normal expansion deploy and verifies the row is
 unchanged. It removes only that probe before ordinary fixtures. It runs foundation
-and Auth integration suites, then compares session metadata/revocation across a
-PostgreSQL restart without printing their values. This is a test-only migration
+and Auth/Users integration suites, then compares session metadata/revocation and
+account identities, names, handles and statuses across a PostgreSQL restart
+without printing their values. This is a test-only migration
 rehearsal, not permission to baseline or reset a deployed database.
 
 The API integration suite requires the harness's additional
@@ -131,6 +132,17 @@ do not run it against a normal developer database. The standalone database
 `test:local` still exercises clean initial deploy of both migrations.
 Neither command installs services, reads the project's `.env`, or deploys to
 staging/production. See [authentication boundary](telegram-authentication.md).
+
+### Phase 6B1 account creation
+
+[ADR-015](../adr/015-account-identity-policy.md) uses the existing Users table and
+unique Telegram ID/public-handle/UUID constraints; no migration or grant change
+is needed. Users' owned repository inserts with conflicts ignored and selects
+the Telegram identity in the same short transaction. A missing identity after a
+skipped insert means a handle/UUID collision, with at most five application-layer
+attempts. Concurrent repeated creation never updates the winning row. The API
+integration gate covers two-client creation races, forced handle/UUID collisions,
+uniqueness, rollback, eligibility, handle stability and database unavailability.
 
 ## Security and operations
 
@@ -146,3 +158,30 @@ staging/production. See [authentication boundary](telegram-authentication.md).
   can still change schema, so operations need their own authorization and audit.
 - Production TLS trust, hosting, backups/PITR, retention, deployment rollback,
   and capacity remain later gates. Local database restart is not a backup restore.
+
+## Bot onboarding metadata expansion (6B2B2)
+
+Migration `202609210001_bot_onboarding` adds Auth-owned `bot_update_receipts` and
+`bot_onboarding_flows`; prior foundation/session migrations are unchanged.
+Receipts are unique per bot/update and flows per bot/Telegram sender. They store
+only IDs, schema/optimistic versions, processing/reply enums and timestamps.
+No name draft, raw update, content JSON, credential or authentication hash is
+stored. SQL checks fix retention to seven days and 15 minutes respectively;
+triggers prevent identity/expiry rewrites and version regression. Receipt expiry
+and flow expiry indexes support bounded maintenance selection.
+
+API receives SELECT/INSERT/DELETE and column-specific UPDATE for workflow state;
+it cannot rewrite receipt identities or expiry. B2 gave Worker no access; B3A
+adds only SELECT on `id, expires_at` and DELETE for bounded cleanup via Auth's
+public port. DELETE is table-wide; expiry/batch enforcement remains in Auth's
+repository. Bot continues to have no DB credentials. Repository delegates and ESLint
+ownership permit only Auth repositories to access the new models. No foreign key
+to Users or persisted name payload creates cross-module ownership coupling.
+
+Receipt locking and flow compare-and-swap changes commit together in short Auth
+transactions. Users account creation happens outside them after durable admission
+and is independently idempotent. Cleanup selects at most the requested limit
+(1–500) per table and rechecks expiry at deletion. B3A supplies opt-in internal
+HTTPS admission and configured Worker scheduling; neither runs merely by
+applying grants. See [internal transport operations](bot-internal-transport.md)
+and [ADR-016](../adr/016-onboarding-transports.md).

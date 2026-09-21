@@ -13,10 +13,23 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
-  it("exposes only session metadata to the Auth owner", async () => {
+  it("expands onboarding storage without modifying or dropping existing data", async () => {
+    const sql = await readFile(
+      new URL("../../prisma/migrations/202609210001_bot_onboarding/migration.sql", import.meta.url),
+      "utf8",
+    );
+    expect(sql.startsWith("BEGIN;")).toBe(true);
+    expect(sql.trim().endsWith("COMMIT;")).toBe(true);
+    expect(sql).toContain("bot_update_receipts_bot_id_update_id_key");
+    expect(sql).toContain("bot_onboarding_flows_bot_id_telegram_user_id_key");
+    expect(sql).not.toMatch(
+      /DROP TABLE|DROP COLUMN|TRUNCATE TABLE|ALTER TABLE users|ALTER TABLE sessions/,
+    );
+  });
+  it("exposes only session and onboarding metadata to the Auth owner", async () => {
     const database = createDatabase(options);
     await database.forModule("auth").execute(async (db) => {
-      expect(Object.keys(db)).toEqual(["session"]);
+      expect(Object.keys(db)).toEqual(["session", "botUpdateReceipt", "botOnboardingFlow"]);
       expect("user" in db).toBe(false);
     });
     await database.disconnect();

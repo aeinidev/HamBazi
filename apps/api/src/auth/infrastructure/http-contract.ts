@@ -6,6 +6,23 @@ export const issuanceSchema = z.strictObject({
   commandId: z.uuid(),
   initData: z.string().min(1).max(16384),
 });
+export const accountCreationSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  commandId: z.uuid(),
+  initData: z.string().min(1).max(16384),
+  // Domain normalization/length rules remain exclusively owned by Users.
+  displayName: z.string().min(1).max(256),
+});
+export const accountCreatedSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  account: z.strictObject({
+    schemaVersion: z.literal(1),
+    userId: z.uuid(),
+    displayName: z.string().min(1),
+    publicHandle: z.string().min(1),
+  }),
+  startParam: z.string().max(16384).optional(),
+});
 export const logoutSchema = z.strictObject({ schemaVersion: z.literal(1) });
 export const sessionSchema = z.strictObject({
   schemaVersion: z.literal(1),
@@ -44,6 +61,7 @@ export const authPaths = Object.freeze({
   issue: "/v1/auth/telegram-mini-app",
   inspect: "/v1/auth/session",
   logout: "/v1/auth/logout",
+  createAccount: "/v1/auth/telegram-mini-app/account",
 });
 
 /** Generated from the same feature-owned runtime schemas; no credential-bearing examples. */
@@ -100,6 +118,16 @@ export function authOpenApiDocument() {
           responses: responses(revokedSchema),
           description:
             "Idempotent revocation of the bearer session. Repeating before token expiry succeeds; no new command identifier is needed for this set-to-revoked operation.",
+        },
+      },
+      [authPaths.createAccount]: {
+        post: {
+          operationId: "createTelegramAccount",
+          security: [],
+          requestBody: body(accountCreationSchema),
+          responses: responses(accountCreatedSchema),
+          description:
+            "Explicit creation with fresh verified initData. Retry using the same commandId and fresh initData. First-create-wins account identity is idempotent even across different command IDs; current profile is returned, never renamed or reactivated. Shares issuance IP/identity rate budgets. startParam is signed opaque routing context, not membership or an arbitrary redirect URL. No session, cookie or credential is issued. Names are plain text requiring escaped rendering. A failed response after commit may leave the account created; retry recovers it.",
         },
       },
     },

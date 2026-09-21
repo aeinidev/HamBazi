@@ -19,7 +19,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && pnpm test:infra",
     "test:infra": "vitest run infra",
-    "test:auth:local": "turbo run build --filter=@hambazi/api && pnpm --filter @hambazi/database test:local --api-auth",
+    "test:auth:local": "turbo run build --filter=@hambazi/worker --filter=@hambazi/bot && pnpm --filter @hambazi/database test:local --api-auth",
     "test:auth-http:local": "node infra/scripts/test-auth-http-local.mjs",
     "infra:env": "node infra/scripts/create-local-env.mjs",
     "infra:config": "docker compose --env-file .env --file infra/docker/compose.yaml config --quiet",

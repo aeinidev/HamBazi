@@ -4,10 +4,13 @@ import {
   createAuthSessions,
   createTelegramVerifier,
   createRedisAuthRateLimiter,
+  createMiniAppOnboarding,
+  createBotOnboarding,
 } from "../auth/index.js";
-import { createUserIdentityPort } from "../users/index.js";
+import { createUserIdentityPort, createAccountCreationPort } from "../users/index.js";
 import { createHttpApplication } from "./http.js";
 import type { SafeLogger } from "./safe-logger.js";
+import { startBotInternalTransport } from "./bot-internal-runtime.js";
 
 export async function startApi(
   environment: Readonly<Record<string, string | undefined>>,
@@ -31,9 +34,16 @@ export async function startApi(
     identityLimit: auth.identityLimit,
   });
   let http: Awaited<ReturnType<typeof createHttpApplication>> | undefined;
+  let internal: Awaited<ReturnType<typeof startBotInternalTransport>>;
   try {
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
     const clock = { nowMs: () => Date.now() };
+    const onboarding = createMiniAppOnboarding({
+      accounts: createAccountCreationPort(database),
+      users: createUserIdentityPort(database),
+      telegram,
+      clock,
+    });
     const sessions = createAuthSessions({
       database,
       users: createUserIdentityPort(database),
@@ -46,18 +56,31 @@ export async function startApi(
     // Existing durable sessions/logout can work while Redis is unavailable; issuance fails closed.
     await rate.connect().catch(() => {});
     http = await createHttpApplication({
-      auth: { sessions, telegram, clock, limiter: rate.limiter },
+      auth: { sessions, telegram, clock, limiter: rate.limiter, onboarding },
       allowedOrigins: runtime.allowedOrigins,
       trustedProxies: auth.trustedProxies,
       production: runtime.environment === "production",
       logger,
+    });
+    internal = await startBotInternalTransport({
+      environment,
+      redisUrl: runtime.redisUrl,
+      logger,
+      onboarding: (leaseMs) =>
+        createBotOnboarding({
+          database,
+          accounts: createAccountCreationPort(database),
+          users: createUserIdentityPort(database),
+          clock,
+          leaseMs,
+        }),
     });
     await http.app.listen(runtime.port, auth.bindAddress);
     logger.lifecycle("api.started");
     return {
       async close() {
         try {
-          await http?.app.close();
+          await Promise.all([http?.app.close(), internal?.close()]);
         } finally {
           rate.close();
           await database.disconnect();
@@ -66,6 +89,7 @@ export async function startApi(
       },
     };
   } catch {
+    await internal?.close().catch(() => {});
     await http?.app.close().catch(() => {});
     rate.close();
     await database.disconnect().catch(() => {});

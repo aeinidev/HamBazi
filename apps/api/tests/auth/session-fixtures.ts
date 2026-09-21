@@ -20,11 +20,20 @@ export const now = 1700000000;
 export const userId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 export const otherUserId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 export const commandId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
-export function initData(id = 42, date = now): string {
-  const fields = { auth_date: String(date), user: JSON.stringify({ id, first_name: "Synthetic" }) };
+export function initData(id = 42, date = now, startParam?: string): string {
+  const fields: Record<string, string> = {
+    auth_date: String(date),
+    user: JSON.stringify({ id, first_name: "Synthetic" }),
+    ...(startParam !== undefined ? { start_param: startParam } : {}),
+  };
   const key = createHmac("sha256", "WebAppData").update(botToken).digest();
   const hash = createHmac("sha256", key)
-    .update(`auth_date=${fields.auth_date}\nuser=${fields.user}`)
+    .update(
+      Object.entries(fields)
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\n"),
+    )
     .digest("hex");
   return new URLSearchParams({ ...fields, hash }).toString();
 }

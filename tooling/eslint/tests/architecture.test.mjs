@@ -84,6 +84,16 @@ describe("source ownership boundaries", () => {
       (await messages('import { createDatabase } from "@hambazi/database";', api("auth"))).length,
     ).toBeGreaterThan(0);
   });
+  it("keeps Bot onboarding metadata inside Auth repositories", async () => {
+    for (const delegate of ["botUpdateReceipt", "botOnboardingFlow"]) {
+      expect(
+        await messages(`db.${delegate}.findMany({where:{botId:123n}});`, repository("auth")),
+      ).toEqual([]);
+      expect(
+        (await messages(`db.${delegate}.findMany({});`, repository("users"))).length,
+      ).toBeGreaterThan(0);
+    }
+  });
   it.each([
     [api("auth"), 'import type { UserPort } from "../../users/index.js";'],
     [api("rooms"), 'export { UsersPort } from "../../users/index.js";'],

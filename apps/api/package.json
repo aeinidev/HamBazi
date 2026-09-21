@@ -7,12 +7,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
     }
   },
   "scripts": {
     "start": "node dist/composition/main.js",
-    "contract:generate": "node scripts/auth-contract.mjs --write",
-    "contract:check": "node scripts/auth-contract.mjs",
+    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write",
+    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
     "test": "vitest run tests/auth tests/users tests/http",

@@ -2,14 +2,22 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { createServer } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createDatabase } from "@hambazi/database";
-import { createAuthSessions, createRedisAuthRateLimiter, authPaths } from "../../src/auth/index.js";
+import {
+  createAuthSessions,
+  createRedisAuthRateLimiter,
+  createMiniAppOnboarding,
+  authPaths,
+} from "../../src/auth/index.js";
 import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { startApi } from "../../src/composition/runtime.js";
 import { createClient } from "redis";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { createUserIdentityPort } from "../../src/users/index.js";
+import { createUserIdentityPort, createAccountCreationPort } from "../../src/users/index.js";
+import { accountIntegrationCases } from "./account-cases.js";
+import { botOnboardingIntegrationCases } from "./bot-onboarding-cases.js";
+import { botInternalIntegrationCases } from "./bot-internal-cases.js";
 import {
   commandId,
   initData,
@@ -62,7 +70,18 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       });
       const logs: string[] = [];
       const http = await createHttpApplication({
-        auth: { sessions, telegram, clock, limiter: rate.limiter },
+        auth: {
+          sessions,
+          telegram,
+          clock,
+          limiter: rate.limiter,
+          onboarding: createMiniAppOnboarding({
+            accounts: createAccountCreationPort(database),
+            users: createUserIdentityPort(database),
+            telegram,
+            clock,
+          }),
+        },
         allowedOrigins: ["https://mini.example"],
         trustedProxies: [],
         production: false,
@@ -78,6 +97,209 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       schemaVersion: 1,
       commandId: command,
       initData: initData(42, Math.floor(clock.value / 1000)),
+    });
+    const accountPayload = (id: number, command = randomUUID()) => ({
+      schemaVersion: 1,
+      commandId: command,
+      initData: initData(id, Math.floor(clock.value / 1000), "room_synthetic-onboarding"),
+      displayName: "  Mehdi  ",
+    });
+    it("creates one account across two HTTP instances and eight concurrent authenticated retries without a session", async () => {
+      const namespace = `integration:${randomUUID()}`;
+      const a = await transport(namespace);
+      const b = await transport(namespace);
+      try {
+        const body = accountPayload(7101);
+        const results = await Promise.all(
+          Array.from({ length: 8 }, (_, i) =>
+            (i % 2 ? a : b).server.inject({
+              method: "POST",
+              url: authPaths.createAccount,
+              payload: { ...body, displayName: i % 2 ? "Mehdi" : "مهدی" },
+            }),
+          ),
+        );
+        const passed = results.filter((response) => response.statusCode === 200);
+        expect(passed).toHaveLength(6);
+        expect(results.filter((response) => response.statusCode === 429)).toHaveLength(2);
+        for (const response of passed) expect(response.json()).toEqual(passed[0]!.json());
+        const account = passed[0]!.json().account;
+        expect(passed[0]!.json().startParam).toBe("room_synthetic-onboarding");
+        expect(Object.keys(passed[0]!.json()).sort()).toEqual([
+          "account",
+          "schemaVersion",
+          "startParam",
+        ]);
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7101n } })),
+        ).toBe(1);
+        expect(
+          await admin
+            .forModule("auth")
+            .execute((client) => client.session.count({ where: { userId: account.userId } })),
+        ).toBe(0);
+        expect(a.logs.join("") + b.logs.join("")).not.toContain(body.initData);
+        expect(a.logs.join("") + b.logs.join("")).not.toContain("room_synthetic-onboarding");
+      } finally {
+        a.rate.close();
+        b.rate.close();
+        await Promise.all([a.app.close(), b.app.close()]);
+      }
+    });
+    it("recovers a committed account through HTTP after post-commit Telegram freshness failure", async () => {
+      const a = await transport(`integration:${randomUUID()}`);
+      const originalTime = clock.value;
+      try {
+        const accounts = createAccountCreationPort(second);
+        const interrupted = createMiniAppOnboarding({
+          accounts: {
+            async createForVerifiedTelegramIdentity(id, name) {
+              const result = await accounts.createForVerifiedTelegramIdentity(id, name);
+              clock.value += 301000;
+              return result;
+            },
+          },
+          users: createUserIdentityPort(second),
+          telegram,
+          clock,
+        });
+        const body = accountPayload(7108);
+        expect(await interrupted.create(body.initData, body.commandId, "Original")).toMatchObject({
+          ok: false,
+          error: { code: "UNAUTHENTICATED" },
+        });
+        const committed = await admin
+          .forModule("users")
+          .execute((client) => client.user.findUniqueOrThrow({ where: { telegramUserId: 7108n } }));
+        const response = await a.server.inject({
+          method: "POST",
+          url: authPaths.createAccount,
+          payload: { ...accountPayload(7108, body.commandId), displayName: "Changed" },
+        });
+        expect(response.statusCode).toBe(200);
+        expect(response.json().account).toEqual({
+          schemaVersion: 1,
+          userId: committed.id,
+          displayName: "Original",
+          publicHandle: committed.publicHandle,
+        });
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7108n } })),
+        ).toBe(1);
+      } finally {
+        clock.value = originalTime;
+        a.rate.close();
+        await a.app.close();
+      }
+    });
+    it("shares Redis identity quotas across account creation and session issuance on two instances", async () => {
+      const namespace = `integration:${randomUUID()}`;
+      const a = await transport(namespace);
+      const b = await transport(namespace);
+      try {
+        const creation = accountPayload(7102);
+        for (let i = 0; i < 6; i++) {
+          const account = i % 2 === 0;
+          const response = await (account ? a : b).server.inject({
+            method: "POST",
+            url: account ? authPaths.createAccount : authPaths.issue,
+            payload: account
+              ? creation
+              : { schemaVersion: 1, commandId: randomUUID(), initData: creation.initData },
+          });
+          expect(response.statusCode).toBe(200);
+        }
+        for (const url of [authPaths.createAccount, authPaths.issue]) {
+          const response = await b.server.inject({
+            method: "POST",
+            url,
+            payload:
+              url === authPaths.createAccount
+                ? creation
+                : { schemaVersion: 1, commandId: randomUUID(), initData: creation.initData },
+          });
+          expect(response.statusCode).toBe(429);
+          expect(Number(response.headers["retry-after"])).toBeGreaterThan(0);
+        }
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7102n } })),
+        ).toBe(1);
+      } finally {
+        a.rate.close();
+        b.rate.close();
+        await Promise.all([a.app.close(), b.app.close()]);
+      }
+    });
+    it("shares the pre-parse IP quota across both routes for malformed unauthenticated bodies", async () => {
+      const a = await transport(`integration:${randomUUID()}`);
+      try {
+        const results = await Promise.all(
+          Array.from({ length: 32 }, (_, i) =>
+            a.server.inject({
+              method: "POST",
+              url: i % 2 ? authPaths.issue : authPaths.createAccount,
+              payload: {},
+            }),
+          ),
+        );
+        expect(results.filter((response) => response.statusCode === 400)).toHaveLength(30);
+        expect(results.filter((response) => response.statusCode === 429)).toHaveLength(2);
+      } finally {
+        a.rate.close();
+        await a.app.close();
+      }
+    });
+    it("rejects forged identity and blocked accounts at HTTP without renaming or reactivation", async () => {
+      const a = await transport(`integration:${randomUUID()}`);
+      try {
+        const body = accountPayload(7103);
+        expect(
+          (
+            await a.server.inject({
+              method: "POST",
+              url: authPaths.createAccount,
+              payload: { ...body, initData: body.initData.replace("7103", "7104") },
+            })
+          ).statusCode,
+        ).toBe(401);
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7104n } })),
+        ).toBe(0);
+        expect(
+          (await a.server.inject({ method: "POST", url: authPaths.createAccount, payload: body }))
+            .statusCode,
+        ).toBe(200);
+        await admin
+          .forModule("users")
+          .execute((client) =>
+            client.user.update({ where: { telegramUserId: 7103n }, data: { status: "BLOCKED" } }),
+          );
+        expect(
+          (
+            await a.server.inject({
+              method: "POST",
+              url: authPaths.createAccount,
+              payload: { ...body, displayName: "Changed" },
+            })
+          ).statusCode,
+        ).toBe(401);
+        const row = await admin
+          .forModule("users")
+          .execute((client) => client.user.findUniqueOrThrow({ where: { telegramUserId: 7103n } }));
+        expect(row.status).toBe("BLOCKED");
+        expect(row.displayName).toBe("Mehdi");
+      } finally {
+        a.rate.close();
+        await a.app.close();
+      }
     });
     it("atomically limits two HTTP instances and commits one session across concurrent retries", async () => {
       const namespace = `integration:${randomUUID()}`;
@@ -217,7 +439,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         await a.app.close();
       }
     });
-    it("denies HTTP issuance, inspection and logout when the database adapter is closed", async () => {
+    it("denies HTTP onboarding, issuance, inspection and logout when the database adapter is closed", async () => {
       const database = createDatabase({
         ...config,
         databaseUrl: { reveal: () => process.env.API_DATABASE_URL! },
@@ -232,6 +454,20 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         });
         expect(response.statusCode).toBe(200);
         await database.disconnect();
+        expect(
+          (
+            await a.server.inject({
+              method: "POST",
+              url: authPaths.createAccount,
+              payload: accountPayload(7105),
+            })
+          ).statusCode,
+        ).toBe(503);
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7105n } })),
+        ).toBe(0);
         expect(
           (await a.server.inject({ method: "POST", url: authPaths.issue, payload: payload() }))
             .statusCode,
@@ -302,6 +538,20 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           .update(`auth_date=${date}\nuser=${user}`)
           .digest("hex");
         const data = new URLSearchParams({ auth_date: String(date), user, hash }).toString();
+        const created = await fetch(`http://127.0.0.1:${port}${authPaths.createAccount}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            schemaVersion: 1,
+            commandId: randomUUID(),
+            initData: data,
+            displayName: "Ignored retry",
+          }),
+        });
+        expect(created.status).toBe(200);
+        const projection = (await created.json()) as { account: { userId: string } };
+        expect(projection.account.userId).toBe(userId);
+        expect(Object.keys(projection).sort()).toEqual(["account", "schemaVersion"]);
         const response = await fetch(`http://127.0.0.1:${port}${authPaths.issue}`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -329,12 +579,18 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       expect(logs.some((line) => JSON.parse(line).event === "api.started")).toBe(true);
       expect(logs.some((line) => JSON.parse(line).event === "api.stopped")).toBe(true);
     });
-    it("recovers from an actual Redis restart without losing durable sessions", async () => {
+    it("recovers from an actual Redis restart without losing durable sessions or onboarding accounts", async () => {
       const name = process.env.TEST_AUTH_REDIS_CONTAINER;
       if (!name || !/^hambazi-auth-http-[a-f0-9-]{36}$/.test(name))
         throw new Error("Expected harness-owned disposable Redis container");
       const a = await transport(`integration:${randomUUID()}`);
       try {
+        const account = await a.server.inject({
+          method: "POST",
+          url: authPaths.createAccount,
+          payload: accountPayload(7106),
+        });
+        expect(account.statusCode).toBe(200);
         const issued = await a.server.inject({
           method: "POST",
           url: authPaths.issue,
@@ -342,6 +598,20 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         });
         expect(issued.statusCode).toBe(200);
         await promisify(execFile)("docker", ["stop", "--time", "1", name]);
+        expect(
+          (
+            await a.server.inject({
+              method: "POST",
+              url: authPaths.createAccount,
+              payload: accountPayload(7107),
+            })
+          ).statusCode,
+        ).toBe(503);
+        expect(
+          await admin
+            .forModule("users")
+            .execute((client) => client.user.count({ where: { telegramUserId: 7107n } })),
+        ).toBe(0);
         expect(
           (await a.server.inject({ method: "POST", url: authPaths.issue, payload: payload() }))
             .statusCode,
@@ -362,6 +632,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           await new Promise((resolve) => setTimeout(resolve, 200));
         }
         expect(recovered).toBe(true);
+        const retry = await a.server.inject({
+          method: "POST",
+          url: authPaths.createAccount,
+          payload: { ...accountPayload(7106), displayName: "Ignored" },
+        });
+        expect(retry.statusCode).toBe(200);
+        expect(retry.json()).toEqual(account.json());
         expect((await a.server.inject({ url: authPaths.inspect, headers })).statusCode).toBe(200);
       } finally {
         a.rate.close();
@@ -566,3 +843,7 @@ describe("Auth and Users ports against PostgreSQL", () => {
     ).toMatchObject({ ok: false, error: { code: "INTERNAL_ERROR" } });
   });
 });
+
+accountIntegrationCases(admin);
+botOnboardingIntegrationCases(admin);
+botInternalIntegrationCases(admin);

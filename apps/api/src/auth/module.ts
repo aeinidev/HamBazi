@@ -7,6 +7,28 @@ import type { AuthSessions, SessionClock } from "./application/session-ports.js"
 import { sessionService } from "./application/sessions.js";
 import { createSessionRepository } from "./infrastructure/repositories/sessions.js";
 import { createSessionCodec, type SessionSigningOptions } from "./infrastructure/session-jwt.js";
+import { botOnboardingService } from "./application/bot-onboarding.js";
+import { createBotOnboardingRepository } from "./infrastructure/repositories/bot-onboarding.js";
+import { botCleanupService } from "./application/bot-cleanup.js";
+
+export function createBotOnboardingCleanup(
+  database: Parameters<typeof createBotOnboardingRepository>[0],
+  clock: SessionClock,
+) {
+  return botCleanupService(createBotOnboardingRepository(database), clock);
+}
+
+export function createBotOnboarding(
+  options: Omit<Parameters<typeof botOnboardingService>[0], "repository" | "newId"> & {
+    database: Parameters<typeof createBotOnboardingRepository>[0];
+  },
+) {
+  return botOnboardingService({
+    ...options,
+    repository: createBotOnboardingRepository(options.database),
+    newId: randomUUID,
+  });
+}
 
 /** Transport-free assembly. Database ownership is selected only in repository adapters. */
 export function createAuthSessions(options: {

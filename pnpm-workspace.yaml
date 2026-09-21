@@ -5,6 +5,7 @@ packages:
   - "tooling/*"
 allowBuilds:
   "@prisma/engines": true
+  msgpackr-extract: false
   prisma: true
 overrides:
   "@nestjs/platform-fastify>fastify": 5.12.4

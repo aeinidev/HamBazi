@@ -100,7 +100,12 @@ try {
   const url = `redis://api:${env.REDIS_API_PASSWORD}@127.0.0.1:${port}/0`;
   stage = "PostgreSQL and HTTP integration";
   const result = await run("pnpm", ["test:auth:local"], {
-    env: { ...process.env, TEST_AUTH_REDIS_URL: url, TEST_AUTH_REDIS_CONTAINER: name },
+    env: {
+      ...process.env,
+      TEST_AUTH_REDIS_URL: url,
+      TEST_AUTH_REDIS_CONTAINER: name,
+      TEST_WORKER_REDIS_URL: `redis://worker:${env.REDIS_WORKER_PASSWORD}@127.0.0.1:${port}/0`,
+    },
     timeout: 180000,
     maxBuffer: 4 * 1024 * 1024,
   });

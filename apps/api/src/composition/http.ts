@@ -76,7 +76,8 @@ export async function createHttpApplication(options: {
         .send();
     }
     if (
-      request.routeOptions.url === authPaths.issue &&
+      (request.routeOptions.url === authPaths.issue ||
+        request.routeOptions.url === authPaths.createAccount) &&
       sendRateDecision(reply, await options.auth.limiter.consumeIp(request.ip))
     )
       return reply;

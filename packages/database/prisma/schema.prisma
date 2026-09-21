@@ -51,6 +51,47 @@ model Session {
   @@map("sessions")
 }
 
+model BotUpdateReceipt {
+  id               String   @id @db.Uuid
+  botId            BigInt   @map("bot_id")
+  updateId         Int      @map("update_id")
+  telegramUserId   BigInt   @map("telegram_user_id")
+  messageId        Int      @map("message_id")
+  replyToMessageId Int?     @map("reply_to_message_id")
+  schemaVersion    Int      @map("schema_version")
+  action           String
+  phase            String
+  version          Int
+  receivedAt       DateTime @map("received_at") @db.Timestamptz(3)
+  expiresAt        DateTime @map("expires_at") @db.Timestamptz(3)
+  leaseUntil       DateTime @map("lease_until") @db.Timestamptz(3)
+  reply            String?
+  flowId           String?  @map("flow_id") @db.Uuid
+  promptVersion    Int?     @map("prompt_version")
+
+  @@unique([botId, updateId])
+  @@index([expiresAt])
+  @@map("bot_update_receipts")
+}
+
+model BotOnboardingFlow {
+  id                String   @id @db.Uuid
+  botId             BigInt   @map("bot_id")
+  telegramUserId    BigInt   @map("telegram_user_id")
+  schemaVersion     Int      @map("schema_version")
+  version           Int
+  state             String
+  createdAt         DateTime @map("created_at") @db.Timestamptz(3)
+  expiresAt         DateTime @map("expires_at") @db.Timestamptz(3)
+  promptVersion     Int      @map("prompt_version")
+  promptMessageId   Int?     @map("prompt_message_id")
+  admittedReceiptId String?  @map("admitted_receipt_id") @db.Uuid
+
+  @@unique([botId, telegramUserId])
+  @@index([expiresAt])
+  @@map("bot_onboarding_flows")
+}
+
 model UserSettings {
   userId        String   @id @map("user_id") @db.Uuid
   schemaVersion Int      @map("schema_version")

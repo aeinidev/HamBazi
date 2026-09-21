@@ -23,7 +23,11 @@
     },
     "@hambazi/api#test": {
       "dependsOn": ["typecheck"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/contracts/auth.v1.baseline.json"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/contracts/auth.v1.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/bot-internal.v1.baseline.json"
+      ],
       "outputs": []
     },
     "@hambazi/eslint#test": {

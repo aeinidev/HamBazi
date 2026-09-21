@@ -1,3 +1,4 @@
-// Public application surface for the users module; no use cases are implemented yet.
-export { createUserIdentityPort } from "./module.js";
+// Public Users application ports. Creation requires a server-verified Telegram identity.
+export { createUserIdentityPort, createAccountCreationPort } from "./module.js";
+export type { AccountCreationPort, Account } from "./application/accounts.js";
 export type { UserIdentityPort, UserIdentity } from "./application/identity.js";

@@ -10,8 +10,24 @@ const baseline = () =>
     ),
   );
 describe("version-1 compatibility gate", () => {
-  it("matches the reviewed initial wire contract", () =>
+  it("matches the reviewed v1 wire contract including additive onboarding", () =>
     expect(compatibleAuthContract(baseline(), authOpenApiDocument())).toBe(true));
+  it.each(["remove", "identity", "token", "routing"])(
+    "protects the approved onboarding contract against %s drift",
+    (kind) => {
+      const next = baseline();
+      const path = "/v1/auth/telegram-mini-app/account";
+      const operation = next.paths[path].post;
+      if (kind === "remove") delete next.paths[path];
+      if (kind === "identity")
+        operation.requestBody.content["application/json"].schema.required.push("telegramUserId");
+      if (kind === "token")
+        operation.responses["200"].content["application/json"].schema.required.push("accessToken");
+      if (kind === "routing")
+        delete operation.responses["200"].content["application/json"].schema.properties.startParam;
+      expect(compatibleAuthContract(baseline(), next)).toBe(false);
+    },
+  );
   it("permits a new path and description edits", () => {
     const next = baseline();
     next.paths["/v2/auth/example"] = {};

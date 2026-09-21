@@ -6,14 +6,15 @@ import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { authOpenApiDocument, authPaths } from "../../src/auth/index.js";
 import type { AuthRateLimiter, RateDecision } from "../../src/auth/index.js";
-import { fixture, initData, userId } from "../auth/session-fixtures.js";
+import { initData, userId } from "../auth/session-fixtures.js";
+import { onboardingFixture } from "../auth/onboarding-fixtures.js";
 
 const active: Awaited<ReturnType<typeof createHttpApplication>>[] = [];
 afterEach(async () => {
   await Promise.all(active.splice(0).map((h) => h.app.close()));
 });
 async function setup(options: { production?: boolean; trustedProxies?: string[] } = {}) {
-  const f = fixture();
+  const f = onboardingFixture();
   const output: string[] = [];
   const ip = vi.fn(async (_value: string): Promise<RateDecision> => ({ allowed: true }));
   const identity = vi.fn(async (_value: string): Promise<RateDecision> => ({ allowed: true }));
@@ -21,7 +22,13 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   const sessions = { ...f.service };
   const issue = vi.spyOn(sessions, "issue");
   const http = await createHttpApplication({
-    auth: { sessions, telegram: f.telegram, clock: f.clock, limiter },
+    auth: {
+      sessions,
+      telegram: f.telegram,
+      clock: f.clock,
+      limiter,
+      onboarding: f.onboarding,
+    },
     logger: createSafeLogger({
       write: (v: string) => {
         output.push(v);
@@ -38,6 +45,18 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   return { ...f, ...http, output, ip, identity, issue, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it("does not register privileged Bot operations on the public listener", async () => {
+    const f = await setup();
+    for (const name of ["admit", "updates", "acknowledgements"]) {
+      const result = await f.server.inject({
+        method: "POST",
+        url: `/v1/internal/bot/${name}`,
+        headers: { authorization: `Bearer current.${Buffer.alloc(32, 17).toString("base64url")}` },
+        payload: { schemaVersion: 1 },
+      });
+      expect(result.statusCode).toBe(404);
+    }
+  });
   it("issues, retries, inspects and idempotently revokes through HTTP", async () => {
     const f = await setup();
     const first = await f.post();

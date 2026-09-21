@@ -103,11 +103,13 @@ if (!bin) {
     const cwd = new URL("..", import.meta.url);
     const require = createRequire(import.meta.url);
     let legacyId;
+    let legacySessionId;
     if (process.argv.includes("--api-auth")) {
       stage = "populated foundation upgrade setup";
       // Isolated-cluster rehearsal only: establish the previous schema and a
       // synthetic old-release row, then let normal deploy apply the expansion.
       legacyId = randomUUID();
+      legacySessionId = randomUUID();
       const legacy = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
       await legacy.connect();
       try {
@@ -121,6 +123,19 @@ if (!bin) {
           "INSERT INTO users (id,telegram_user_id,display_name,public_handle,status,updated_at) VALUES ($1,17,'Legacy Synthetic','legacy_synthetic','ACTIVE',now())",
           [legacyId],
         );
+        await legacy.query(
+          await readFile(
+            new URL(
+              "../prisma/migrations/202609140001_auth_sessions/migration.sql",
+              import.meta.url,
+            ),
+            "utf8",
+          ),
+        );
+        await legacy.query(
+          "INSERT INTO sessions (id,user_id,command_id,schema_version,key_id,issuer,audience,issued_at,expires_at) VALUES ($1,$2,$3,1,'legacy','legacy-api','legacy-app','2026-09-20T00:00:00Z','2026-09-20T00:15:00Z')",
+          [legacySessionId, legacyId, randomUUID()],
+        );
       } finally {
         await legacy.end();
       }
@@ -132,6 +147,17 @@ if (!bin) {
           "resolve",
           "--applied",
           "202609130001_foundation",
+        ],
+        { cwd, env: childEnv, timeout: 30_000 },
+      );
+      await run(
+        process.execPath,
+        [
+          require.resolve("prisma/build/index.js"),
+          "migrate",
+          "resolve",
+          "--applied",
+          "202609140001_auth_sessions",
         ],
         { cwd, env: childEnv, timeout: 30_000 },
       );
@@ -167,12 +193,26 @@ if (!bin) {
           ])
         )
           throw new Error();
+        const priorSession = await legacy.query(
+          "SELECT key_id,issuer,audience,revoked_at FROM sessions WHERE id=$1 AND user_id=$2",
+          [legacySessionId, legacyId],
+        );
+        if (
+          JSON.stringify(priorSession.rows) !==
+          JSON.stringify([
+            { key_id: "legacy", issuer: "legacy-api", audience: "legacy-app", revoked_at: null },
+          ])
+        )
+          throw new Error();
         // Remove only our known synthetic upgrade probe before the empty-fixture suite.
+        await legacy.query("DELETE FROM sessions WHERE id=$1", [legacySessionId]);
         await legacy.query("DELETE FROM users WHERE id=$1", [legacyId]);
       } finally {
         await legacy.end();
       }
-      console.info("Populated previous-schema expansion preserved the synthetic old-release row.");
+      console.info(
+        "Populated previous-schema expansion preserved synthetic old-release account and session rows.",
+      );
     }
     stage = "schema drift";
     await run(
@@ -217,7 +257,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 2) throw new Error();
+      if (result.rows[0].count !== 3) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -245,7 +285,7 @@ if (!bin) {
         },
       );
       console.info(result.stdout);
-      stage = "session restart persistence";
+      stage = "session and account restart persistence";
       const snapshot = async () => {
         const client = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
         await client.connect();
@@ -255,7 +295,20 @@ if (!bin) {
           );
           if (result.rows.length < 2 || !result.rows.some((row) => row.revoked_at))
             throw new Error();
-          return JSON.stringify(result.rows);
+          const accounts = await client.query(
+            "SELECT id, telegram_user_id, display_name, public_handle, status FROM users ORDER BY id",
+          );
+          if (!accounts.rows.some((row) => row.telegram_user_id === "6001")) throw new Error();
+          const receipts = await client.query("SELECT * FROM bot_update_receipts ORDER BY id");
+          const flows = await client.query("SELECT * FROM bot_onboarding_flows ORDER BY id");
+          if (!receipts.rows.some((row) => row.phase === "REPLY") || !flows.rows.length)
+            throw new Error();
+          return JSON.stringify({
+            sessions: result.rows,
+            accounts: accounts.rows,
+            receipts: receipts.rows,
+            flows: flows.rows,
+          });
         } finally {
           await client.end();
         }
@@ -272,7 +325,19 @@ if (!bin) {
         join(path, "server.log"),
       ]);
       if (before !== (await snapshot())) throw new Error();
-      console.info("API session integration and session/revocation restart persistence passed.");
+      console.info(
+        "API session/account/onboarding integration and account/session/receipt/flow restart persistence passed.",
+      );
+      if (childEnv.TEST_WORKER_REDIS_URL) {
+        stage = "Worker cleanup integration";
+        const workerTests = await run("pnpm", ["test:integration"], {
+          cwd: new URL("../../../apps/worker/", import.meta.url),
+          env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
+          timeout: 60000,
+          maxBuffer: 4 * 1024 * 1024,
+        });
+        console.info(workerTests.stdout);
+      }
     }
   } catch (error) {
     // Only sanitized test output is reportable; never emit child command/env/error.
@@ -282,7 +347,7 @@ if (!bin) {
       if (key.endsWith("PASSWORD")) output = output.replaceAll(value, "[REDACTED]");
     if (output) console.error(output);
     if (
-      stage === "API session integration" &&
+      ["API session integration", "Worker cleanup integration"].includes(stage) &&
       error &&
       typeof error === "object" &&
       "stderr" in error

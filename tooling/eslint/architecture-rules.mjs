@@ -9,7 +9,7 @@ import {
 } from "./architecture-policy.mjs";
 
 const delegates = {
-  auth: ["session"],
+  auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
   users: ["user", "userSettings"],
   games: ["game"],
   rooms: ["room", "roomMember"],
