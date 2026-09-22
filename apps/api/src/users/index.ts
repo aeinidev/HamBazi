@@ -2,3 +2,9 @@
 export { createUserIdentityPort, createAccountCreationPort } from "./module.js";
 export type { AccountCreationPort, Account } from "./application/accounts.js";
 export type { UserIdentityPort, UserIdentity } from "./application/identity.js";
+export { createProfilePort, createProfileCleanup } from "./module.js";
+export type { ProfilePort } from "./application/profile.js";
+export { createProfileHttpModule } from "./infrastructure/profile-http.js";
+export type { ProfileHttpDependencies } from "./infrastructure/profile-http.js";
+export { createProfileRate } from "./infrastructure/profile-rate.js";
+export { profileOpenApiDocument } from "./infrastructure/profile-contract.js";

@@ -6,6 +6,7 @@ export const ERROR_CODES = Object.freeze([
   "NOT_FOUND",
   "RATE_LIMITED",
   "GAME_STATE_CONFLICT",
+  "PROFILE_CONFLICT",
   "CLIENT_UPGRADE_REQUIRED",
   "INTERNAL_ERROR",
 ] as const);

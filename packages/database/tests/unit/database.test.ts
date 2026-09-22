@@ -79,7 +79,7 @@ describe("database infrastructure boundary", () => {
   it("returns only owned top-level delegates, no raw SQL/client", async () => {
     const database = createDatabase(options);
     await database.forModule("users").execute(async (db) => {
-      expect(Object.keys(db).sort()).toEqual(["user", "userSettings"]);
+      expect(Object.keys(db).sort()).toEqual(["profileMutationReceipt", "user", "userSettings"]);
       expect("match" in db).toBe(false);
       expect("$queryRaw" in db).toBe(false);
     });

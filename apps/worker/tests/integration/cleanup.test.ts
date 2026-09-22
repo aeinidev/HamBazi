@@ -221,6 +221,30 @@ describe("cleanup with Worker PostgreSQL grants and Redis ACL", () => {
   });
   it("composes a real Worker without API/session/Bot credentials", async () => {
     const row = await seed();
+    const userId = randomUUID();
+    const receiptId = randomUUID();
+    await admin.forModule("users").execute(async (db) => {
+      await db.user.create({
+        data: {
+          id: userId,
+          telegramUserId: 995999n,
+          displayName: "Synthetic",
+          publicHandle: "worker_profile_fixture",
+          status: "ACTIVE",
+        },
+      });
+      await db.profileMutationReceipt.create({
+        data: {
+          id: receiptId,
+          userId,
+          commandId: randomUUID(),
+          requestDigest: "a".repeat(64),
+          appliedVersion: 1,
+          createdAt: new Date("2000-01-01T00:00:00Z"),
+          expiresAt: new Date("2000-01-08T00:00:00Z"),
+        },
+      });
+    });
     const events: string[] = [];
     const runtime = await startWorker(
       {
@@ -239,6 +263,12 @@ describe("cleanup with Worker PostgreSQL grants and Redis ACL", () => {
     try {
       await until(() => events.includes("worker.job_completed"));
       expect(await exists(row)).toEqual({ receipt: 0, flow: 0 });
+      await until(
+        async () =>
+          (await admin
+            .forModule("users")
+            .execute((db) => db.profileMutationReceipt.count({ where: { id: receiptId } }))) === 0,
+      );
     } finally {
       await runtime.close();
       await runtime.close();

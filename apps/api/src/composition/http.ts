@@ -2,15 +2,17 @@ import "reflect-metadata";
 import { randomUUID } from "node:crypto";
 import { NestFactory } from "@nestjs/core";
 import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
-import { HttpException } from "@nestjs/common";
+import { HttpException, Module } from "@nestjs/common";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import type { FastifyReply } from "fastify";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import { authPaths, createAuthHttpModule, sendRateDecision } from "../auth/index.js";
 import type { SafeLogger } from "./safe-logger.js";
+import { createProfileHttpModule, type ProfileHttpDependencies } from "../users/index.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
+  profile?: ProfileHttpDependencies;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
   production: boolean;
@@ -58,7 +60,11 @@ export async function createHttpApplication(options: {
     if (request.method === "OPTIONS") {
       if (
         !origin ||
-        !["GET", "POST"].includes(String(request.headers["access-control-request-method"]))
+        ![
+          "GET",
+          "POST",
+          ...(options.profile && request.url === "/v1/me" ? ["PATCH"] : []),
+        ].includes(String(request.headers["access-control-request-method"]))
       )
         return reply.code(403).send(createErrorEnvelope("FORBIDDEN"));
       const requested = String(request.headers["access-control-request-headers"] ?? "")
@@ -70,7 +76,10 @@ export async function createHttpApplication(options: {
         return reply.code(403).send(createErrorEnvelope("FORBIDDEN"));
       return reply
         .header("Vary", "Origin, Access-Control-Request-Method, Access-Control-Request-Headers")
-        .header("Access-Control-Allow-Methods", "GET, POST")
+        .header(
+          "Access-Control-Allow-Methods",
+          options.profile && request.url === "/v1/me" ? "GET, POST, PATCH" : "GET, POST",
+        )
         .header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         .code(204)
         .send();
@@ -87,11 +96,17 @@ export async function createHttpApplication(options: {
   server.addHook("onResponse", async (request, reply) => {
     options.logger.completed(request.id, reply.elapsedTime, reply.statusCode);
   });
-  const app = await NestFactory.create<NestFastifyApplication>(
-    createAuthHttpModule(options.auth),
-    adapter,
-    { logger: false, abortOnError: false },
-  );
+  @Module({
+    imports: [
+      createAuthHttpModule(options.auth),
+      ...(options.profile ? [createProfileHttpModule(options.profile)] : []),
+    ],
+  })
+  class HttpModule {}
+  const app = await NestFactory.create<NestFastifyApplication>(HttpModule, adapter, {
+    logger: false,
+    abortOnError: false,
+  });
   const filter: ExceptionFilter = {
     catch(exception: unknown, host: ArgumentsHost) {
       const candidate =

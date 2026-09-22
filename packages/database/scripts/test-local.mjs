@@ -179,7 +179,7 @@ if (!bin) {
       await legacy.connect();
       try {
         const result = await legacy.query(
-          "SELECT display_name, public_handle, status FROM users WHERE id=$1",
+          "SELECT display_name, public_handle, status, profile_version FROM users WHERE id=$1",
           [legacyId],
         );
         if (
@@ -189,6 +189,7 @@ if (!bin) {
               display_name: "Legacy Synthetic",
               public_handle: "legacy_synthetic",
               status: "ACTIVE",
+              profile_version: 0,
             },
           ])
         )
@@ -257,7 +258,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 3) throw new Error();
+      if (result.rows[0].count !== 4) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -270,21 +271,25 @@ if (!bin) {
     console.info("Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.");
     if (process.argv.includes("--api-auth")) {
       stage = "API session integration";
-      const result = await run(
-        process.execPath,
-        [
-          join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"),
-          "run",
-          "tests/integration",
-        ],
-        {
-          cwd: new URL("../../../apps/api/", import.meta.url),
-          env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
-          timeout: 120_000,
-          maxBuffer: 4 * 1024 * 1024,
-        },
-      );
-      console.info(result.stdout);
+      // The session suite asserts the pristine foundation fixture before seeding.
+      // Keep suite setup/restart drills isolated; each suite still tests concurrent clients.
+      for (const suite of ["sessions.test.ts", "bot-delivery.test.mjs", "profile.test.ts"]) {
+        const result = await run(
+          process.execPath,
+          [
+            join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"),
+            "run",
+            `tests/integration/${suite}`,
+          ],
+          {
+            cwd: new URL("../../../apps/api/", import.meta.url),
+            env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
+            timeout: 120_000,
+            maxBuffer: 4 * 1024 * 1024,
+          },
+        );
+        console.info(result.stdout);
+      }
       stage = "session and account restart persistence";
       const snapshot = async () => {
         const client = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
@@ -296,11 +301,16 @@ if (!bin) {
           if (result.rows.length < 2 || !result.rows.some((row) => row.revoked_at))
             throw new Error();
           const accounts = await client.query(
-            "SELECT id, telegram_user_id, display_name, public_handle, status FROM users ORDER BY id",
+            "SELECT id, telegram_user_id, display_name, public_handle, status, profile_version FROM users ORDER BY id",
           );
           if (!accounts.rows.some((row) => row.telegram_user_id === "6001")) throw new Error();
           const receipts = await client.query("SELECT * FROM bot_update_receipts ORDER BY id");
           const flows = await client.query("SELECT * FROM bot_onboarding_flows ORDER BY id");
+          const profiles = await client.query(
+            "SELECT * FROM profile_mutation_receipts ORDER BY id",
+          );
+          const settings = await client.query("SELECT * FROM user_settings ORDER BY user_id");
+          if (!profiles.rows.length || !settings.rows.length) throw new Error();
           if (!receipts.rows.some((row) => row.phase === "REPLY") || !flows.rows.length)
             throw new Error();
           return JSON.stringify({
@@ -308,6 +318,8 @@ if (!bin) {
             accounts: accounts.rows,
             receipts: receipts.rows,
             flows: flows.rows,
+            profiles: profiles.rows,
+            settings: settings.rows,
           });
         } finally {
           await client.end();

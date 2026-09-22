@@ -23,7 +23,7 @@ remain Phase 11A, not claims made by this generic foundation.
 | Owner       | Tables/delegates                                                                     |
 | ----------- | ------------------------------------------------------------------------------------ |
 | auth        | sessions, bot_update_receipts, bot_onboarding_flows                                  |
-| users       | users, user_settings                                                                 |
+| users       | users, user_settings, profile_mutation_receipts                                      |
 | games       | games                                                                                |
 | rooms       | rooms, room_members                                                                  |
 | matches     | matches, match_players, game_events, processed_commands, game_results, outbox_events |

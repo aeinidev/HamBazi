@@ -1,6 +1,7 @@
 import { parseRuntimeConfig, parseOnboardingWorkerConfig } from "@hambazi/config";
 import { createDatabase } from "@hambazi/database";
 import { createBotOnboardingCleanup } from "@hambazi/api/auth";
+import { createProfileCleanup } from "@hambazi/api/users";
 import { startCleanupQueue } from "../onboarding-cleanup.js";
 export async function startWorker(
   environment: Readonly<Record<string, string | undefined>>,
@@ -17,6 +18,7 @@ export async function startWorker(
     transactionTimeoutMs: 5000,
   });
   let queue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
+  let profileQueue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
   try {
     await database.connect();
     queue = await startCleanupQueue({
@@ -25,12 +27,19 @@ export async function startWorker(
       cleanup: createBotOnboardingCleanup(database, { nowMs: () => Date.now() }),
       event,
     });
+    profileQueue = await startCleanupQueue({
+      ...config,
+      name: "profile-receipt-cleanup-v1",
+      redisUrl: runtime.redisUrl,
+      cleanup: createProfileCleanup(database, { nowMs: () => Date.now() }),
+      event,
+    });
     let closing: Promise<void> | undefined;
     return {
       close() {
         return (closing ??= (async () => {
           try {
-            await queue!.close();
+            await Promise.all([queue!.close(), profileQueue!.close()]);
           } finally {
             await database.disconnect();
           }
@@ -39,6 +48,7 @@ export async function startWorker(
     };
   } catch {
     await queue?.close().catch(() => {});
+    await profileQueue?.close().catch(() => {});
     await database.disconnect().catch(() => {});
     throw new Error("Worker startup failed");
   }

@@ -11,14 +11,16 @@ datasource db {
 }
 
 model User {
-  id               String             @id @db.Uuid
-  telegramUserId   BigInt             @unique @map("telegram_user_id")
-  displayName      String             @map("display_name")
-  publicHandle     String             @unique @map("public_handle")
-  telegramUsername String?            @map("telegram_username")
+  id               String                   @id @db.Uuid
+  telegramUserId   BigInt                   @unique @map("telegram_user_id")
+  displayName      String                   @map("display_name")
+  publicHandle     String                   @unique @map("public_handle")
+  telegramUsername String?                  @map("telegram_username")
   status           String
-  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt        DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profileVersion   Int                      @default(0) @map("profile_version")
+  profileReceipts  ProfileMutationReceipt[]
   settings         UserSettings?
   hostedRooms      Room[]
   roomMembers      RoomMember[]
@@ -100,6 +102,21 @@ model UserSettings {
   user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@map("user_settings")
+}
+
+model ProfileMutationReceipt {
+  id             String   @id @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  commandId      String   @map("command_id") @db.Uuid
+  requestDigest  String   @map("request_digest")
+  appliedVersion Int      @map("applied_version")
+  createdAt      DateTime @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, commandId])
+  @@index([expiresAt])
+  @@map("profile_mutation_receipts")
 }
 
 model Game {

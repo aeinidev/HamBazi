@@ -8,6 +8,8 @@ GRANT UPDATE (version, state, prompt_version, prompt_message_id, admitted_receip
 -- Cleanup only: no sender, update, prompt, workflow or session metadata reads/writes.
 GRANT SELECT (id, expires_at), DELETE ON bot_update_receipts, bot_onboarding_flows TO hambazi_worker;
 GRANT SELECT, INSERT, UPDATE ON users, user_settings TO hambazi_api;
+GRANT SELECT, INSERT, DELETE ON profile_mutation_receipts TO hambazi_api;
+GRANT SELECT (id, expires_at), DELETE ON profile_mutation_receipts TO hambazi_worker;
 GRANT SELECT ON games TO hambazi_api, hambazi_worker;
 GRANT SELECT, INSERT, UPDATE ON rooms TO hambazi_api;
 GRANT SELECT, UPDATE ON rooms TO hambazi_worker;

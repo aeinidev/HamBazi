@@ -4,7 +4,7 @@ import type { Prisma } from "./generated/prisma/client.js";
 
 const ownership = {
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
-  users: ["user", "userSettings"],
+  users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
   rooms: ["room", "roomMember"],
   matches: ["match", "matchPlayer", "gameEvent", "processedCommand", "gameResult", "outboxEvent"],
@@ -112,8 +112,16 @@ export function createDatabase(options: DatabaseOptions) {
       return Object.freeze({
         execute: <T>(operation: (db: ScopedClient<O>) => Promise<T>) =>
           safe(() => operation(scoped)),
-        transaction: <T>(operation: (db: ScopedClient<O>) => Promise<T>) =>
-          safe(() => client.$transaction((tx) => operation(scope(tx, owner)))),
+        transaction: <T>(
+          operation: (db: ScopedClient<O>) => Promise<T>,
+          isolationLevel?: "Serializable",
+        ) =>
+          safe(() =>
+            client.$transaction(
+              (tx) => operation(scope(tx, owner)),
+              isolationLevel ? { isolationLevel } : {},
+            ),
+          ),
       });
     },
   });

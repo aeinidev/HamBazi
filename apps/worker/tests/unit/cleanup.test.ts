@@ -3,6 +3,16 @@ import { UnrecoverableError } from "bullmq";
 import { cleanupProcessor } from "../../src/onboarding-cleanup.js";
 const job = { name: "bot-onboarding-cleanup-v1", data: { schemaVersion: 1, limit: 10 } };
 describe("versioned cleanup jobs", () => {
+  it("isolates profile cleanup from onboarding job names", async () => {
+    const cleanup = vi.fn(async () => ({ ok: true, receipts: 1, flows: 0 }));
+    const run = cleanupProcessor(cleanup, "profile-receipt-cleanup-v1");
+    expect(await run({ ...job, name: "profile-receipt-cleanup-v1" })).toEqual({
+      schemaVersion: 1,
+      receipts: 1,
+      flows: 0,
+    });
+    await expect(run(job)).rejects.toBeInstanceOf(UnrecoverableError);
+  });
   it("invokes the public port with only a bounded versioned request", async () => {
     const cleanup = vi.fn(async () => ({
       ok: true,

@@ -10,7 +10,7 @@ import {
 
 const delegates = {
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
-  users: ["user", "userSettings"],
+  users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
   rooms: ["room", "roomMember"],
   matches: ["match", "matchPlayer", "gameEvent", "processedCommand", "gameResult", "outboxEvent"],

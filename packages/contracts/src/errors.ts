@@ -17,6 +17,7 @@ const definitions = {
   NOT_FOUND: { message: "Resource not found", retryable: false },
   RATE_LIMITED: { message: "Request rate exceeded", retryable: true },
   GAME_STATE_CONFLICT: { message: "Client state is stale", retryable: true },
+  PROFILE_CONFLICT: { message: "Profile edit conflicts with current state", retryable: false },
   CLIENT_UPGRADE_REQUIRED: { message: "Client upgrade required", retryable: false },
   INTERNAL_ERROR: { message: "Operation failed", retryable: false },
 } as const satisfies Record<ErrorCode, { message: string; retryable: boolean }>;

@@ -279,6 +279,11 @@ describe("engine determinism", () => {
 });
 
 describe("database ownership", () => {
+  it("keeps profile receipts out of Auth repositories", async () => {
+    expect(
+      (await messages("db.profileMutationReceipt.findMany();", repository("auth"))).length,
+    ).toBeGreaterThan(0);
+  });
   it.each(["users", "games", "rooms", "matches", "chat", "leaderboard"])(
     "accepts the literal database owner in its repository: %s",
     async (owner) => {
@@ -295,6 +300,7 @@ describe("database ownership", () => {
     'const repo = database.forModule("users");',
     "db.user.findMany({ where: { status: input }, select: { id: true, displayName: true }, take: limit });",
     "db.userSettings.update({ where: { userId }, data: { settingsJsonb: untrustedButValidatedJson } });",
+    "db.profileMutationReceipt.findMany({ where: { userId }, select: { commandId: true, appliedVersion: true } });",
     'db.user.findMany({ where: { OR: [{ id }, { status: "active" }] } });',
     "db.user.count();",
   ])("accepts owned scalar queries: %s", async (source) => {

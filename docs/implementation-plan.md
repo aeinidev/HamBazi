@@ -400,6 +400,34 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 6B.
 - **Acceptance criteria:** profile mutation rules and unique handle behavior are server-enforced; game availability is backend-configured; no game rules leak into catalog/Users.
 - **Required tests and validations:** domain/repository/REST contract tests, authorization tests, lint/typecheck/build.
+- **Status:** In Progress
+- **Assessment (2026-09-22):** owner approved continuation and explicitly deferred live Telegram webhook end-to-end verification until a public HTTPS environment exists. That remains a release/environment gate, not a dependency blocker for Phase 7. Worktree was clean at `c392892` (Phase 6B). Re-read the architecture/guide, ADR-011/015, manifests/task graph, Users ports, HTTP composition and schema. Users has identity/create-only ports; Games is an empty public surface. `user_settings` is versioned JSONB without approved keys/defaults, and there is no profile revision or profile-mutation receipt. Architecture sections 6.1 and 15 specify editable names/settings and idempotent mutations, but do not select settings or edit/retry policy. ADR-015 already fixes name validation and immutable handles; do not reopen those decisions.
+- **Split:** 7A authenticated profile/settings and mutation safety, then 7B Games catalog/registry/configuration. Keep the game descriptor, enablement and operator-control decisions for 7B; no premature Coup ruleset, timer or playable-engine claim. Complete one subphase per interaction.
+- **Decision gate resolved (2026-09-22):** owner approved the proposed 7A policy with GET rate-limit failure open and PATCH failure closed, with safe logging/metrics. [ADR-017](adr/017-profile-settings.md) records acceptance. The original assessment below remains decision history; its original fail-closed-for-both proposal is superseded by this explicit adjustment.
+
+### Phase 7A — Authenticated profile and settings
+
+- **Objective / scope:** `GET/PATCH /v1/me` through Users-owned application/repository ports, using Auth's public session authentication; reuse ADR-015 name policy and preserve handles. No account deletion, handle editing, Telegram identity editing, profile UI or game catalog.
+- **Expected deliverables:** accepted profile/settings ADR, strict versioned DTOs, Users use cases/repositories, additive revision/receipt persistence and least-privilege cleanup, authenticated REST composition, generated compatible OpenAPI and tests.
+- **Dependencies:** Phase 6B local gates; explicit approval of settings/defaults and mutation/retry/rate policy. Live webhook verification is deferred by the owner, not required for this implementation step.
+- **Acceptance criteria:** current session/ACTIVE-user identity only; strict field allowlist; no lost updates or replayed stale effects; atomic name/settings/revision/receipt write; stable handles; no raw name/settings payload in telemetry or receipt history; safe dependency failures; backward-compatible migration.
+- **Required tests and validations:** name/settings validation, authorization and identity injection, settings defaults/partial merge, concurrent edits, duplicate/conflicting command IDs, commit-before-response recovery, receipt expiry/cleanup, database grants/restart/migration compatibility, HTTP/CORS/rate/contract checks, lint/typecheck/build and isolated PostgreSQL/Redis integration.
+- **Status:** Completed
+- **Accepted settings (2026-09-22):** v1 preferences are `locale: auto | fa | en` (default `auto`) and `theme: system | light | dark` (default `system`). Missing settings rows read as defaults without writes; partial updates merge allowed keys. Preferences do not claim translations/themes are implemented yet. Audio, notifications, privacy and chat preferences remain deferred until their owning features exist.
+- **Accepted mutation semantics:** request carries `schemaVersion`, UUID `commandId`, `expectedVersion` and a nonempty name/settings patch. One shared profile revision guards both name and settings. Stale versions and command IDs reused with different normalized input return HTTP 409/PROFILE_CONFLICT; one competing edit wins. Matching committed retries return the same minimal command/revision acknowledgement, not historical profile text; clients read current profile with GET. Per-user command ID, normalized-input digest, applied revision and timestamps persist for seven days, with bounded idempotent cleanup; no raw patch/history snapshot. After receipt expiry an old applied command cannot reapply because its expected revision is stale, but the acknowledgement is unavailable. Every accepted new command, including same-value patches, advances revision.
+- **Accepted abuse controls with owner adjustment:** separate distributed per-user 60-second read/write windows; recommended explicit budgets 60/10 (maxima 600/60). Retries count. Exhaustion returns 429/Retry-After for both. Redis failure allows GET after normal session/ACTIVE-user/database checks, with allowlisted warning events and process-local counters; PATCH returns sanitized 503 without mutation. These are provisional endpoint budgets, not capacity assumptions or a rename cooldown. [ADR-017](adr/017-profile-settings.md) records the decision.
+- **Delivered:** Users profile ports/repositories and strict REST DTOs, composition-only Auth adapter, immutable handles, additive profile revision/receipt schema and restricted cleanup grants. Serializable transactions with at most five attempts atomically commit name/settings/revision/receipt. Worker adds a separate profile-receipt-cleanup-v1 queue/scheduler using existing explicit cleanup timing/batch/retry settings and leaves onboarding v1 supported. Added PROFILE_CONFLICT, generated/frozen profile OpenAPI and an uncached compatibility check; existing Auth/Bot contracts remain unchanged. [Profile operations](architecture/profile-settings.md) documents rollout, failure behavior, telemetry limits and rollback.
+- **Validation:** frozen install, Prisma format/generation, scoped API typecheck/tests, lint, root `pnpm check`, Bot `test:integration`, isolated `pnpm test:auth-http:local` and diff checks pass. Root gate: 1066 tests (510 API, 190 config, 48 Bot, 14 Worker, 158 architecture/tooling, 15 TypeScript, 16 database, 108 validation, 7 infra), with unchanged tasks eligible for cache; audit covers 13 workspaces/99 product source files and all three OpenAPI checks pass. Integration: 90 PostgreSQL/Redis tests (15 database, 69 API, 6 Worker), plus 38 Bot TLS/runtime regression cases. New coverage includes 31 root-gate cases and 10 database/rate cases, plus extended TCP/Redis restart/Worker tests.
+- **Evidence / corrections:** eight-request/two-client duplicate races, competing revisions, normalized retries, changed-command conflict, stable handles, rollback on receipt insertion failure, exact expiry and cleanup grants, no historical payload, unknown stored settings, default/partial settings, actual Redis stop/restart GET-open/PATCH-closed/recovery, safe warning/counter tests and real TCP session-to-profile flow pass. Migration deploy/redeploy/drift and populated legacy expansion (revision 0) pass; profile revisions/settings/receipts join the real PostgreSQL restart snapshot checks. Corrected strict optional-property/test literal typing, a static boundary false positive for crypto update syntax, and an integration suite setup-order collision; suites now start in explicit order without removing within-suite concurrency tests. Final checks have no failures.
+- **Limits / stop gate:** no UI, Games implementation, production migration/deployment, commit or live Bot change. Prior plan/runbook edits were preserved. Test clusters/Redis containers/temporary certificates were cleaned by their harnesses. Counters are process-local plus structured events; centralized metrics export/alert deployment remains the observability phase. Live Telegram E2E remains explicitly owner-deferred until public HTTPS is available. Stop here; 7B is next and parent Phase 7 remains In Progress.
+
+### Phase 7B — Game catalog and registry configuration
+
+- **Objective / scope:** backend-owned Coup metadata/descriptor baseline, authenticated catalog/config reads and server-controlled status/capabilities; no engine or gameplay implementation.
+- **Expected deliverables:** Games public ports/repository, registry/config policy ADR where required, read contracts, maintenance behavior/runbook and tests.
+- **Dependencies:** 7A; review player capacities, descriptor readiness, safe initial availability and operator configuration authority before freezing public behavior. Do not guess unresolved timer values or claim a not-yet-built engine is playable.
+- **Acceptance criteria:** catalog is backend-driven, invalid/unavailable configuration fails closed, no game rules in Users/Rooms, no public unauthenticated operator mutation route, compatibility checked.
+- **Required tests and validations:** manifest/config validation, authorization, status/capability projection, maintenance/failure behavior, repository integration, contract compatibility, lint/typecheck/build.
 - **Status:** Pending
 
 ### Phase 8A — Private room domain and persistence
@@ -634,19 +662,14 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 6A1, 6A2 and 6A3 are complete, including their available local integration
-gates. ADR-014 records the approved session lifecycle, HS256 profile and 15-minute
-runtime policy. The owner approved the adjusted 6B1 identity policy in ADR-015;
-shared account creation and its available local validation are complete.
-The owner approved ADR-016's service-auth, metadata-retention and delivery policy.
-Phase 6B2A Mini App transport and its available local checks are complete. Phase
-6B2B1 service-auth foundation, 6B2B2 durable onboarding and 6B2B3A internal HTTPS/
-Worker cleanup, including their available local checks, are complete. Phase 6B2,
-parent 6B2B and 6B2B3 remain In Progress until Telegram Bot runtime/delivery
-(6B2B3B) is delivered. Stop after the B3A report before implementing B3B; do not
-advance to Phase 7.
-No application deployment
-was performed. Live Telegram WebView, production ingress, authenticated-route/global
-abuse hardening, full Docker PostgreSQL-volume recovery, network-partition and
-staging E2E/load gates remain outstanding. Authentication transport is runnable;
-the account-to-gameplay MVP loop is not implemented yet.
+Phase 6A/6B implementation and available local gates are complete. The development
+Bot identity and commands were verified/configured as recorded in B3B; live
+webhook/chat E2E is explicitly deferred by the owner until public HTTPS exists.
+Phase 7A profile/settings is complete under ADR-017, including the approved
+GET-open/PATCH-closed Redis-failure distinction and available local verification.
+Stop after the 7A report; 7B Games catalog/registry is next and remains Pending.
+Parent Phase 7 remains In Progress. No application deployment was performed.
+Production ingress, centralized observability, global abuse hardening, full Docker
+PostgreSQL-volume recovery, network-partition and staging E2E/load gates remain
+outstanding. Authentication, onboarding and profile transports are runnable with
+documented configuration; the account-to-gameplay MVP loop is not implemented.

@@ -14,7 +14,12 @@ import { startApi } from "../../src/composition/runtime.js";
 import { createClient } from "redis";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { createUserIdentityPort, createAccountCreationPort } from "../../src/users/index.js";
+import {
+  createUserIdentityPort,
+  createAccountCreationPort,
+  createProfileRate,
+  createProfilePort,
+} from "../../src/users/index.js";
 import { accountIntegrationCases } from "./account-cases.js";
 import { botOnboardingIntegrationCases } from "./bot-onboarding-cases.js";
 import { botInternalIntegrationCases } from "./bot-internal-cases.js";
@@ -60,6 +65,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         identityLimit: 6,
       });
       await rate.connect();
+      const profileRate = createProfileRate({
+        url: { reveal: () => process.env.TEST_AUTH_REDIS_URL! },
+        namespace,
+        readLimit: 60,
+        writeLimit: 10,
+      });
+      await profileRate.connect();
       const sessions = createAuthSessions({
         database,
         users: createUserIdentityPort(database),
@@ -82,6 +94,17 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
             clock,
           }),
         },
+        profile: {
+          profile: createProfilePort(database, clock),
+          authenticate: async (token) => {
+            const result = await sessions.authenticate(token);
+            return result.ok ? { ok: true, userId: result.session.userId } : result;
+          },
+          rate: profileRate.consume,
+          degraded: (requestId, kind) => {
+            logs.push(JSON.stringify({ event: `profile.rate_${kind}_unavailable`, requestId }));
+          },
+        },
         allowedOrigins: ["https://mini.example"],
         trustedProxies: [],
         production: false,
@@ -91,7 +114,18 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           },
         }),
       });
-      return { ...http, rate, logs };
+      return {
+        ...http,
+        rate: {
+          ...rate,
+          close() {
+            rate.close();
+            profileRate.close();
+          },
+        },
+        profileRate,
+        logs,
+      };
     }
     const payload = (command = randomUUID()) => ({
       schemaVersion: 1,
@@ -424,6 +458,20 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         expect(count).toBe(0);
         const headers = { authorization: `Bearer ${issued.json().accessToken}` };
         expect((await a.server.inject({ url: authPaths.inspect, headers })).statusCode).toBe(200);
+        const profile = await a.server.inject({ url: "/v1/me", headers });
+        expect(profile.statusCode).toBe(200);
+        const command = {
+          schemaVersion: 1,
+          commandId: randomUUID(),
+          expectedVersion: profile.json().version,
+          patch: { settings: { theme: "light" } },
+        };
+        expect(
+          (await a.server.inject({ method: "PATCH", url: "/v1/me", headers, payload: command }))
+            .statusCode,
+        ).toBe(503);
+        expect((await a.server.inject({ url: "/v1/me", headers })).json()).toEqual(profile.json());
+        expect(a.logs.join("")).toContain("profile.rate_read_unavailable");
         expect(
           (
             await a.server.inject({
@@ -510,6 +558,8 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           ALLOWED_ORIGINS: "https://mini.example",
           API_BIND_ADDRESS: "127.0.0.1",
           API_DB_POOL_MAX: "5",
+          PROFILE_READ_LIMIT: "60",
+          PROFILE_WRITE_LIMIT: "10",
           API_TRUSTED_PROXIES: "",
           TELEGRAM_BOT_TOKEN: botToken,
           AUTH_SESSION_SECONDS: "900",
@@ -563,6 +613,33 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           session: { expiresAt: number };
         };
         expect(result.session.expiresAt).toBeGreaterThanOrEqual(date + 900);
+        const profileHeaders = {
+          authorization: `Bearer ${result.accessToken}`,
+          "content-type": "application/json",
+        };
+        const profileResponse = await fetch(`http://127.0.0.1:${port}/v1/me`, {
+          headers: profileHeaders,
+        });
+        expect(profileResponse.status).toBe(200);
+        const profile = (await profileResponse.json()) as { version: number; publicHandle: string };
+        const profileCommand = {
+          schemaVersion: 1,
+          commandId: randomUUID(),
+          expectedVersion: profile.version,
+          patch: { settings: { locale: "fa" } },
+        };
+        const edited = await fetch(`http://127.0.0.1:${port}/v1/me`, {
+          method: "PATCH",
+          headers: profileHeaders,
+          body: JSON.stringify(profileCommand),
+        });
+        expect(edited.status).toBe(200);
+        const latest = await fetch(`http://127.0.0.1:${port}/v1/me`, { headers: profileHeaders });
+        expect(await latest.json()).toMatchObject({
+          version: profile.version + 1,
+          publicHandle: profile.publicHandle,
+          settings: { locale: "fa" },
+        });
         expect(
           (
             await fetch(`http://127.0.0.1:${port}${authPaths.inspect}`, {
@@ -618,6 +695,20 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         ).toBe(503);
         const headers = { authorization: `Bearer ${issued.json().accessToken}` };
         expect((await a.server.inject({ url: authPaths.inspect, headers })).statusCode).toBe(200);
+        const profile = await a.server.inject({ url: "/v1/me", headers });
+        expect(profile.statusCode).toBe(200);
+        const command = {
+          schemaVersion: 1,
+          commandId: randomUUID(),
+          expectedVersion: profile.json().version,
+          patch: { settings: { theme: "light" } },
+        };
+        expect(
+          (await a.server.inject({ method: "PATCH", url: "/v1/me", headers, payload: command }))
+            .statusCode,
+        ).toBe(503);
+        expect((await a.server.inject({ url: "/v1/me", headers })).json()).toEqual(profile.json());
+        expect(a.logs.join("")).toContain("profile.rate_read_unavailable");
         await promisify(execFile)("docker", ["start", name]);
         const published = await promisify(execFile)("docker", ["port", name, "6379/tcp"]);
         expect(published.stdout.trim()).toBe(
@@ -632,6 +723,19 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           await new Promise((resolve) => setTimeout(resolve, 200));
         }
         expect(recovered).toBe(true);
+        let profileRecovered = false;
+        for (let i = 0; i < 40; i++) {
+          if ((await a.profileRate.consume("read", userId)).allowed) {
+            profileRecovered = true;
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        expect(profileRecovered).toBe(true);
+        expect(
+          (await a.server.inject({ method: "PATCH", url: "/v1/me", headers, payload: command }))
+            .statusCode,
+        ).toBe(200);
         const retry = await a.server.inject({
           method: "POST",
           url: authPaths.createAccount,

@@ -132,6 +132,12 @@ from the deployment environment. The token stayed in memory/private stdin,
 never command arguments or output, and was not rotated. No system DNS/proxy
 settings or deployment were changed.
 
+The owner subsequently deferred live webhook end-to-end verification until a
+public HTTPS environment is available and authorized proceeding to Phase 7.
+Keep this as an outstanding staging/release verification item; it does not block
+local implementation of profile/settings/catalog and must not be reported as a
+passed live onboarding test.
+
 ## Failure, shutdown and rollback
 
 Redis failure denies admission through API; DB failure cannot produce successful

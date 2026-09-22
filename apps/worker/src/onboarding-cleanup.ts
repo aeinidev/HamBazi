@@ -8,11 +8,10 @@ type Cleanup = (input: {
   schemaVersion: 1;
   limit: number;
 }) => Promise<{ ok: boolean; receipts?: number; flows?: number; status?: string }>;
-export function cleanupProcessor(cleanup: Cleanup) {
+export function cleanupProcessor(cleanup: Cleanup, name = "bot-onboarding-cleanup-v1") {
   return async (job: { name: string; data: unknown }) => {
     const data = cleanupJobSchema.safeParse(job.data);
-    if (job.name !== "bot-onboarding-cleanup-v1" || !data.success)
-      throw new UnrecoverableError("Invalid cleanup job");
+    if (job.name !== name || !data.success) throw new UnrecoverableError("Invalid cleanup job");
     try {
       const result = await cleanup(data.data);
       if (
@@ -50,6 +49,7 @@ function connection(secret: { reveal(): string }, worker: boolean): ConnectionOp
   };
 }
 export async function startCleanupQueue(options: {
+  name?: "bot-onboarding-cleanup-v1" | "profile-receipt-cleanup-v1";
   redisUrl: { reveal(): string };
   namespace: string;
   intervalMs: number;
@@ -60,11 +60,12 @@ export async function startCleanupQueue(options: {
   event(name: "worker.job_completed" | "worker.job_failed" | "worker.queue_unavailable"): void;
 }) {
   const prefix = `hambazi:jobs:${options.namespace}`;
-  const queue = new Queue("bot-onboarding-cleanup-v1", {
+  const name = options.name ?? "bot-onboarding-cleanup-v1";
+  const queue = new Queue(name, {
     connection: connection(options.redisUrl, false),
     prefix,
   });
-  const worker = new Worker("bot-onboarding-cleanup-v1", cleanupProcessor(options.cleanup), {
+  const worker = new Worker(name, cleanupProcessor(options.cleanup, name), {
     connection: connection(options.redisUrl, true),
     prefix,
     concurrency: 1,
@@ -86,10 +87,10 @@ export async function startCleanupQueue(options: {
     ]);
     clearTimeout(timer);
     await queue.upsertJobScheduler(
-      "bot-onboarding-cleanup-v1",
+      name,
       { every: options.intervalMs },
       {
-        name: "bot-onboarding-cleanup-v1",
+        name,
         data: { schemaVersion: 1, limit: options.batchSize },
         opts: {
           attempts: options.attempts,
