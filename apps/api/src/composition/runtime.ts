@@ -1,4 +1,10 @@
-import { parseRuntimeConfig, parseAuthRuntimeConfig, parseProfileConfig } from "@hambazi/config";
+import {
+  parseRuntimeConfig,
+  parseAuthRuntimeConfig,
+  parseProfileConfig,
+  parseCatalogConfig,
+} from "@hambazi/config";
+import { createCatalogPort, createCatalogRate } from "../games/index.js";
 import { createDatabase } from "@hambazi/database";
 import {
   createAuthSessions,
@@ -25,6 +31,7 @@ export async function startApi(
   if (runtime.role !== "api") throw new Error("Invalid runtime role");
   const auth = parseAuthRuntimeConfig(environment);
   const profileConfig = parseProfileConfig(environment);
+  const catalogConfig = parseCatalogConfig(environment);
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: auth.poolMax,
@@ -45,6 +52,11 @@ export async function startApi(
     ...profileConfig,
   });
   let http: Awaited<ReturnType<typeof createHttpApplication>> | undefined;
+  const catalogRate = createCatalogRate({
+    url: runtime.redisUrl,
+    namespace: auth.signing.issuer,
+    ...catalogConfig,
+  });
   let internal: Awaited<ReturnType<typeof startBotInternalTransport>>;
   try {
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
@@ -67,6 +79,7 @@ export async function startApi(
     // Existing durable sessions/logout can work while Redis is unavailable; issuance fails closed.
     await rate.connect().catch(() => {});
     await profileRate.connect().catch(() => {});
+    await catalogRate.connect().catch(() => {});
     http = await createHttpApplication({
       auth: { sessions, telegram, clock, limiter: rate.limiter, onboarding },
       profile: {
@@ -79,6 +92,15 @@ export async function startApi(
         degraded: logger.profileRateUnavailable,
       },
       allowedOrigins: runtime.allowedOrigins,
+      catalog: {
+        catalog: createCatalogPort(database),
+        authenticate: async (token) => {
+          const result = await sessions.authenticate(token);
+          return result.ok ? { ok: true, userId: result.session.userId } : result;
+        },
+        rate: catalogRate.consume,
+        degraded: logger.catalogRateUnavailable,
+      },
       trustedProxies: auth.trustedProxies,
       production: runtime.environment === "production",
       logger,
@@ -105,6 +127,7 @@ export async function startApi(
         } finally {
           rate.close();
           profileRate.close();
+          catalogRate.close();
           await database.disconnect();
         }
         logger.lifecycle("api.stopped");
@@ -115,6 +138,7 @@ export async function startApi(
     await http?.app.close().catch(() => {});
     rate.close();
     profileRate.close();
+    catalogRate.close();
     await database.disconnect().catch(() => {});
     throw new Error("API startup failed");
   }

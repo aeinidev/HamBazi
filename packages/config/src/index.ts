@@ -13,3 +13,4 @@ export {
   OnboardingWorkerConfigurationError,
 } from "./onboarding-worker.js";
 export { parseProfileConfig } from "./profile.js";
+export { parseCatalogConfig } from "./catalog.js";

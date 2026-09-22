@@ -12,6 +12,7 @@ import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { startApi } from "../../src/composition/runtime.js";
 import { createClient } from "redis";
+import { createCatalogPort, createCatalogRate } from "../../src/games/index.js";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
@@ -72,6 +73,12 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         writeLimit: 10,
       });
       await profileRate.connect();
+      const catalogRate = createCatalogRate({
+        url: { reveal: () => process.env.TEST_AUTH_REDIS_URL! },
+        namespace,
+        readLimit: 60,
+      });
+      await catalogRate.connect();
       const sessions = createAuthSessions({
         database,
         users: createUserIdentityPort(database),
@@ -106,6 +113,17 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           },
         },
         allowedOrigins: ["https://mini.example"],
+        catalog: {
+          catalog: createCatalogPort(database),
+          authenticate: async (token) => {
+            const result = await sessions.authenticate(token);
+            return result.ok ? { ok: true, userId: result.session.userId } : result;
+          },
+          rate: catalogRate.consume,
+          degraded: (requestId) => {
+            logs.push(JSON.stringify({ event: "catalog.rate_read_fail_open", requestId }));
+          },
+        },
         trustedProxies: [],
         production: false,
         logger: createSafeLogger({
@@ -121,9 +139,11 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           close() {
             rate.close();
             profileRate.close();
+            catalogRate.close();
           },
         },
         profileRate,
+        catalogRate,
         logs,
       };
     }
@@ -472,6 +492,9 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         ).toBe(503);
         expect((await a.server.inject({ url: "/v1/me", headers })).json()).toEqual(profile.json());
         expect(a.logs.join("")).toContain("profile.rate_read_unavailable");
+        for (const url of ["/v1/games", "/v1/games/coup"])
+          expect((await a.server.inject({ url, headers })).statusCode).toBe(200);
+        expect(a.logs.join("")).toContain("catalog.rate_read_fail_open");
         expect(
           (
             await a.server.inject({
@@ -559,6 +582,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           API_BIND_ADDRESS: "127.0.0.1",
           API_DB_POOL_MAX: "5",
           PROFILE_READ_LIMIT: "60",
+          CATALOG_READ_LIMIT: "60",
           PROFILE_WRITE_LIMIT: "10",
           API_TRUSTED_PROXIES: "",
           TELEGRAM_BOT_TOKEN: botToken,
@@ -621,6 +645,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           headers: profileHeaders,
         });
         expect(profileResponse.status).toBe(200);
+        for (const path of ["/v1/games", "/v1/games/coup"]) {
+          const catalogResponse = await fetch(`http://127.0.0.1:${port}${path}`, {
+            headers: profileHeaders,
+          });
+          expect(catalogResponse.status).toBe(200);
+          expect(await catalogResponse.text()).toContain('"playable":false');
+        }
         const profile = (await profileResponse.json()) as { version: number; publicHandle: string };
         const profileCommand = {
           schemaVersion: 1,
@@ -732,6 +763,15 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           await new Promise((resolve) => setTimeout(resolve, 200));
         }
         expect(profileRecovered).toBe(true);
+        let catalogRecovered = false;
+        for (let i = 0; i < 40; i++) {
+          if ((await a.catalogRate.consume(userId)).allowed) {
+            catalogRecovered = true;
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        expect(catalogRecovered).toBe(true);
         expect(
           (await a.server.inject({ method: "PATCH", url: "/v1/me", headers, payload: command }))
             .statusCode,

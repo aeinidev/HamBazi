@@ -258,7 +258,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 4) throw new Error();
+      if (result.rows[0].count !== 5) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -273,7 +273,12 @@ if (!bin) {
       stage = "API session integration";
       // The session suite asserts the pristine foundation fixture before seeding.
       // Keep suite setup/restart drills isolated; each suite still tests concurrent clients.
-      for (const suite of ["sessions.test.ts", "bot-delivery.test.mjs", "profile.test.ts"]) {
+      for (const suite of [
+        "sessions.test.ts",
+        "bot-delivery.test.mjs",
+        "profile.test.ts",
+        "catalog.test.ts",
+      ]) {
         const result = await run(
           process.execPath,
           [
@@ -310,6 +315,8 @@ if (!bin) {
             "SELECT * FROM profile_mutation_receipts ORDER BY id",
           );
           const settings = await client.query("SELECT * FROM user_settings ORDER BY user_id");
+          const catalog = await client.query("SELECT * FROM games WHERE id='coup'");
+          if (catalog.rows.length !== 1 || catalog.rows[0].status !== "DISABLED") throw new Error();
           if (!profiles.rows.length || !settings.rows.length) throw new Error();
           if (!receipts.rows.some((row) => row.phase === "REPLY") || !flows.rows.length)
             throw new Error();
@@ -320,6 +327,7 @@ if (!bin) {
             flows: flows.rows,
             profiles: profiles.rows,
             settings: settings.rows,
+            catalog: catalog.rows,
           });
         } finally {
           await client.end();

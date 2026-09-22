@@ -1,2 +1,8 @@
-// Public application surface for the games module; no use cases are implemented yet.
-export {};
+export { createCatalogPort } from "./module.js";
+export type { CatalogPort, CatalogGame } from "./application/catalog.js";
+export {
+  createCatalogHttpModule,
+  type CatalogHttpDependencies,
+} from "./infrastructure/catalog-http.js";
+export { createCatalogRate } from "./infrastructure/catalog-rate.js";
+export { catalogOpenApiDocument } from "./infrastructure/catalog-contract.js";

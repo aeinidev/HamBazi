@@ -3,7 +3,15 @@ export function createSafeLogger(destination?: DestinationStream) {
   const logger = pino({ base: null, timestamp: false }, destination);
   let profileReadFailOpen = 0;
   let profileWriteFailClosed = 0;
+  let catalogReadFailOpen = 0;
   return Object.freeze({
+    catalogRateUnavailable(requestId: string) {
+      catalogReadFailOpen++;
+      logger.warn({ event: "catalog.rate_read_fail_open", requestId, errorCode: "INTERNAL_ERROR" });
+    },
+    catalogMetrics() {
+      return Object.freeze({ catalog_rate_read_fail_open_total: catalogReadFailOpen });
+    },
     profileRateUnavailable(requestId: string, kind: "read" | "write") {
       if (kind === "read") profileReadFailOpen++;
       else profileWriteFailClosed++;

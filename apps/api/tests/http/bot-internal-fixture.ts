@@ -26,6 +26,7 @@ export const serviceEnvironment = {
   API_BIND_ADDRESS: "127.0.0.1",
   API_DB_POOL_MAX: "5",
   PROFILE_READ_LIMIT: "60",
+  CATALOG_READ_LIMIT: "60",
   PROFILE_WRITE_LIMIT: "10",
   BOT_SERVICE_ACTIVE_KEY_ID: "current",
   BOT_SERVICE_KEYS: JSON.stringify([

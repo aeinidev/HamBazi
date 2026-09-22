@@ -46,7 +46,7 @@ beforeAll(async () => {
   await Promise.all([admin.connect(), api.connect(), worker.connect(), database.connect()]);
   // Refuse a populated target before any fixture write or negative mutation test.
   const occupied = await admin.query(
-    "SELECT EXISTS (SELECT 1 FROM users UNION ALL SELECT 1 FROM games UNION ALL SELECT 1 FROM matches UNION ALL SELECT 1 FROM game_events UNION ALL SELECT 1 FROM outbox_events UNION ALL SELECT 1 FROM consumer_receipts) AS occupied",
+    "SELECT EXISTS (SELECT 1 FROM users UNION ALL SELECT 1 FROM games WHERE id <> 'coup' UNION ALL SELECT 1 FROM matches UNION ALL SELECT 1 FROM game_events UNION ALL SELECT 1 FROM outbox_events UNION ALL SELECT 1 FROM consumer_receipts) AS occupied",
   );
   if (occupied.rows[0].occupied)
     throw new Error("Integration tests require an empty isolated database.");
@@ -72,6 +72,47 @@ afterAll(async () => {
 });
 
 describe("PostgreSQL foundation", () => {
+  it("seeds a disabled catalog once and preserves existing configuration on replay", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const migration = await readFile(
+      new URL(
+        "../../prisma/migrations/202609220002_catalog_baseline/migration.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const initial = await admin.query("SELECT * FROM games WHERE id='coup'");
+    expect(initial.rows).toHaveLength(1);
+    expect(initial.rows[0]).toMatchObject({
+      slug: "coup",
+      title: "Coup",
+      min_players: 2,
+      max_players: 6,
+      status: "DISABLED",
+      matchmaking_enabled: false,
+      private_rooms_enabled: false,
+      chat_enabled: false,
+      voice_enabled: false,
+      config_schema_version: 1,
+      config_jsonb: {},
+    });
+    await admin.query("BEGIN");
+    try {
+      await admin.query("UPDATE games SET status='MAINTENANCE' WHERE id='coup'");
+      await admin.query(migration);
+      expect((await admin.query("SELECT status FROM games WHERE id='coup'")).rows[0].status).toBe(
+        "MAINTENANCE",
+      );
+      for (const role of [api, worker]) {
+        expect(await sqlState(role, "UPDATE games SET status='ACTIVE' WHERE id='coup'")).toBe(
+          "42501",
+        );
+        expect(await sqlState(role, "DELETE FROM games WHERE id='coup'")).toBe("42501");
+      }
+    } finally {
+      await admin.query("ROLLBACK");
+    }
+  });
   it("limits onboarding metadata to API-owned tables and excludes content columns", async () => {
     for (const table of ["bot_update_receipts", "bot_onboarding_flows"]) {
       expect(await sqlState(worker, `SELECT id, expires_at FROM ${table}`)).toBeUndefined();

@@ -9,10 +9,12 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import { authPaths, createAuthHttpModule, sendRateDecision } from "../auth/index.js";
 import type { SafeLogger } from "./safe-logger.js";
 import { createProfileHttpModule, type ProfileHttpDependencies } from "../users/index.js";
+import { createCatalogHttpModule, type CatalogHttpDependencies } from "../games/index.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
   profile?: ProfileHttpDependencies;
+  catalog?: CatalogHttpDependencies;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
   production: boolean;
@@ -100,6 +102,7 @@ export async function createHttpApplication(options: {
     imports: [
       createAuthHttpModule(options.auth),
       ...(options.profile ? [createProfileHttpModule(options.profile)] : []),
+      ...(options.catalog ? [createCatalogHttpModule(options.catalog)] : []),
     ],
   })
   class HttpModule {}
