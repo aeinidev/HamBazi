@@ -300,7 +300,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 6) throw new Error();
+      if (result.rows[0].count !== 7) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -321,6 +321,7 @@ if (!bin) {
         "profile.test.ts",
         "catalog.test.ts",
         "rooms.test.ts",
+        "match-admission.test.ts",
       ]) {
         const result = await run(
           process.execPath,
@@ -366,6 +367,16 @@ if (!bin) {
           );
           if (!rooms.rows.length || !members.rows.length || !roomCommands.rows.length)
             throw new Error();
+          const admissions = await client.query("SELECT * FROM match_admissions ORDER BY id");
+          const reservations = await client.query("SELECT * FROM match_reservations ORDER BY id");
+          const matches = await client.query("SELECT * FROM matches ORDER BY id");
+          const players = await client.query("SELECT * FROM match_players ORDER BY match_id, seat");
+          const outbox = await client.query("SELECT * FROM outbox_events ORDER BY id");
+          if (
+            !admissions.rows.some((r) => r.status === "MATCHED") ||
+            !reservations.rows.some((r) => r.match_id)
+          )
+            throw new Error();
           const settings = await client.query("SELECT * FROM user_settings ORDER BY user_id");
           const catalog = await client.query("SELECT * FROM games WHERE id='coup'");
           if (catalog.rows.length !== 1 || catalog.rows[0].status !== "DISABLED") throw new Error();
@@ -373,6 +384,11 @@ if (!bin) {
           if (!receipts.rows.some((row) => row.phase === "REPLY") || !flows.rows.length)
             throw new Error();
           return JSON.stringify({
+            admissions: admissions.rows,
+            reservations: reservations.rows,
+            matches: matches.rows,
+            players: players.rows,
+            outbox: outbox.rows,
             sessions: result.rows,
             accounts: accounts.rows,
             receipts: receipts.rows,

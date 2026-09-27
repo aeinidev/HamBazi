@@ -59,6 +59,21 @@ const engine = "packages/games/coup-engine/src/engine.ts";
 const repository = (owner) => api(owner, "infrastructure/repositories/postgres.ts");
 
 describe("source ownership boundaries", () => {
+  it("keeps admission arbitration in Matches and rejects foreign relation traversal", async () => {
+    for (const delegate of ["matchAdmission", "matchReservation"]) {
+      expect(
+        await messages(`db.${delegate}.findMany({where:{id}});`, repository("matches")),
+      ).toEqual([]);
+      expect(
+        (await messages(`db.${delegate}.findMany({where:{id}});`, repository("matchmaking")))
+          .length,
+      ).toBeGreaterThan(0);
+    }
+    expect(
+      (await messages("db.matchAdmission.findMany({include:{actor:true}});", repository("matches")))
+        .length,
+    ).toBeGreaterThan(0);
+  });
   it("allows only Auth repositories to select session storage", async () => {
     expect(
       await messages(

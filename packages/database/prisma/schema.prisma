@@ -24,6 +24,7 @@ model User {
   settings         UserSettings?
   hostedRooms      Room[]
   roomMembers      RoomMember[]
+  matchAdmissions  MatchAdmission[]
   matchPlayers     MatchPlayer[]
   events           GameEvent[]
   results          GameResult[]
@@ -139,6 +140,8 @@ model Game {
   results             GameResult[]
   stats               UserGameStats[]
 
+  admissions MatchAdmission[]
+
   @@map("games")
 }
 
@@ -203,6 +206,9 @@ model Match {
   commands           ProcessedCommand[]
   results            GameResult[]
   messages           ChatMessage[]
+
+  admissions  MatchAdmission[]
+  reservation MatchReservation?
 
   @@unique([id, gameId])
   @@index([gameId, status, createdAt])
@@ -346,4 +352,46 @@ model RoomCommandReceipt {
   @@id([actorUserId, commandId])
   @@index([roomId])
   @@map("room_command_receipts")
+}
+
+// Matches-owned arbitration metadata, not durable queue ordering.
+model MatchAdmission {
+  id               String    @id @db.Uuid
+  actorUserId      String    @map("actor_user_id") @db.Uuid
+  commandId        String    @map("command_id") @db.Uuid
+  gameId           String    @map("game_id")
+  mode             String
+  capacity         Int
+  status           String
+  activeKey        String?   @unique @map("active_key")
+  generation       Int       @default(0)
+  createdAt        DateTime  @map("created_at") @db.Timestamptz(3)
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(3)
+  reservationId    String?   @map("reservation_id") @db.Uuid
+  reservationUntil DateTime? @map("reservation_until") @db.Timestamptz(3)
+  matchId          String?   @map("match_id") @db.Uuid
+
+  schemaVersion Int               @default(1) @map("schema_version")
+  actor         User              @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  game          Game              @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  match         Match?            @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  reservation   MatchReservation? @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+
+  @@unique([actorUserId, commandId])
+  @@index([reservationId])
+  @@map("match_admissions")
+}
+
+model MatchReservation {
+  id            String    @id @db.Uuid
+  requestDigest String    @map("request_digest") @db.Char(64)
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  releasedAt    DateTime? @map("released_at") @db.Timestamptz(3)
+  matchId       String?   @unique @map("match_id") @db.Uuid
+
+  schemaVersion Int              @default(1) @map("schema_version")
+  match         Match?           @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  admissions    MatchAdmission[]
+
+  @@map("match_reservations")
 }

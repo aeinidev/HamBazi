@@ -13,7 +13,16 @@ const delegates = {
   users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
   rooms: ["room", "roomMember", "roomCommandReceipt"],
-  matches: ["match", "matchPlayer", "gameEvent", "processedCommand", "gameResult", "outboxEvent"],
+  matches: [
+    "matchAdmission",
+    "matchReservation",
+    "match",
+    "matchPlayer",
+    "gameEvent",
+    "processedCommand",
+    "gameResult",
+    "outboxEvent",
+  ],
   chat: ["chatMessage"],
   leaderboard: ["userGameStats", "consumerReceipt"],
 };

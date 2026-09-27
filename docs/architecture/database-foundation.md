@@ -20,16 +20,20 @@ payloads in these callbacks. Errors are sanitized. Match-specific locking,
 expected-version comparison, idempotent response selection, and bounded retries
 remain Phase 11A, not claims made by this generic foundation.
 
-| Owner       | Tables/delegates                                                                     |
-| ----------- | ------------------------------------------------------------------------------------ |
-| auth        | sessions, bot_update_receipts, bot_onboarding_flows                                  |
-| users       | users, user_settings, profile_mutation_receipts                                      |
-| games       | games                                                                                |
-| rooms       | rooms, room_members, room_command_receipts                                           |
-| matches     | matches, match_players, game_events, processed_commands, game_results, outbox_events |
-| chat        | chat_messages                                                                        |
-| leaderboard | user_game_stats, consumer_receipts                                                   |
-| outbox      | outbox_events                                                                        |
+| Owner       | Tables/delegates                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| auth        | sessions, bot_update_receipts, bot_onboarding_flows                                                                        |
+| users       | users, user_settings, profile_mutation_receipts                                                                            |
+| games       | games                                                                                                                      |
+| rooms       | rooms, room_members, room_command_receipts                                                                                 |
+| matches     | match_admissions, match_reservations, matches, match_players, game_events, processed_commands, game_results, outbox_events |
+| chat        | chat_messages                                                                                                              |
+| leaderboard | user_game_stats, consumer_receipts                                                                                         |
+| outbox      | outbox_events                                                                                                              |
+
+Phase 9A adds Matches-owned durable admission/reservation arbitration; see
+[matchmaking admission](matchmaking.md). Queue ordering remains Redis scope.
+The API has column-scoped metadata writes; Worker has no admission table grants.
 
 Foreign keys do not grant permission to traverse another module's relations.
 Request data through its application port instead. Repository adapters map all

@@ -24,4 +24,7 @@ GRANT SELECT, INSERT ON consumer_receipts TO hambazi_worker;
 GRANT SELECT ON user_game_stats TO hambazi_api;
 GRANT SELECT, INSERT, UPDATE ON user_game_stats TO hambazi_worker;
 GRANT SELECT, INSERT ON chat_messages TO hambazi_api;
+GRANT SELECT, INSERT ON match_admissions, match_reservations TO hambazi_api;
+GRANT UPDATE (status, active_key, generation, reservation_id, reservation_until, match_id) ON match_admissions TO hambazi_api;
+GRANT UPDATE (released_at, match_id) ON match_reservations TO hambazi_api;
 COMMIT;

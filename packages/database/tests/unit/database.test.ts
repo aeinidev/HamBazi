@@ -147,3 +147,18 @@ it("exposes room receipts only to the Rooms owner and keeps the migration additi
   expect(sql).toContain("PRIMARY KEY (actor_user_id, command_id)");
   expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE TABLE/);
 });
+
+it("keeps admission and reservation metadata exclusive to Matches", async () => {
+  const database = createDatabase(options);
+  await database.forModule("matches").execute(async (db) => {
+    expect("matchAdmission" in db).toBe(true);
+    expect("matchReservation" in db).toBe(true);
+    expect("user" in db).toBe(false);
+  });
+  for (const owner of ["auth", "users", "games", "rooms", "chat", "leaderboard", "outbox"] as const)
+    await database.forModule(owner).execute(async (db) => {
+      expect("matchAdmission" in db).toBe(false);
+      expect("matchReservation" in db).toBe(false);
+    });
+  await database.disconnect();
+});

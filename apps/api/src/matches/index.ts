@@ -1,2 +1,9 @@
-// Public application surface for the matches module; no use cases are implemented yet.
-export {};
+export { createMatchAdmissionPort } from "./module.js";
+export type {
+  MatchAdmissionPort,
+  AdmissionTicket,
+  ExecutableDescriptor,
+  AdmissionOutcome,
+} from "./application/admission.js";
+
+export { matchmakingFoundIntentSchema } from "./application/admission.js";
