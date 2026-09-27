@@ -450,12 +450,19 @@ The repository has workspace, configuration, database, contract and boundary-che
 ### Phase 8A — Private room domain and persistence
 
 - **Objective:** implement the durable private-room lifecycle and membership invariants.
-- **Scope:** create/read/join/leave/start, `WAITING -> FULL -> STARTING -> STARTED -> CLOSED/EXPIRED`, capacity, host transfer, idempotent join, and application ports.
-- **Expected deliverables:** Rooms domain/application/repository adapter and `/v1/rooms` contracts.
+- **Scope:** create/read/join/leave/start application ports, `WAITING -> FULL -> STARTING -> STARTED -> CLOSED`, waiting/full expiry, capacity, host transfer and idempotent commands. Per owner approval, REST exposes create/read only; Socket wiring remains Phase 12A.
+- **Expected deliverables:** Rooms domain/application/repository adapter and authenticated `/v1/rooms` create/read contracts.
 - **Dependencies:** Phases 7A/7B; live activation remains gated by 7C and gameplay readiness.
-- **Acceptance criteria:** only the host can start a full eligible room; concurrent joins cannot exceed capacity; leave/host-transfer transitions are deterministic.
-- **Required tests and validations:** state-machine unit tests, PostgreSQL integration tests, concurrent join/idempotency tests, REST authorization/contract tests, lint/typecheck/build.
-- **Status:** Pending
+- **Acceptance criteria:** only the host can request start of a full eligible room; concurrent joins cannot exceed capacity; leave/host-transfer transitions are deterministic; repeated commands cannot repeat effects.
+- **Required tests and validations:** state-machine unit tests, PostgreSQL integration tests, concurrent join/idempotency/expiry tests, REST authorization/contract tests, lint/typecheck/build.
+- **Status:** Completed
+- **Assessment / resolved pause (2026-09-22):** began on clean `main` at `9936da1` (Phase 7B), read the four required sources using the documented canonical architecture path, and verified only relevant Users/Games ports and Rooms storage/ownership. No earlier completed prerequisite required reimplementation. Initially paused because architecture section 15.1 listed REST membership routes while section 10.2 and AGENTS.md assigned them to Socket. The owner approved REST create/read plus application-port join/leave/start and subsequently requested continuation. [ADR-019](adr/019-private-room-foundation.md) records the resolution; architecture section 15.1 is reconciled. The earlier plan-only blocked assessment is superseded by this completion.
+- **Delivered (2026-09-27):** pure Rooms transitions, injected clock, Users/Games admission checks, member-only safe snapshots, lowest-free-seat allocation, deterministic oldest-member host transfer, empty-room closure, lazy/idempotent expiry and trusted Match confirmation/close callbacks. Serializable PostgreSQL transactions with bounded retries atomically commit room/member changes and minimal command receipts. Actor-scoped command IDs and canonical request digests preserve acknowledgements across retries/restarts and reject changed intents. Delayed join retries cannot rejoin a departed member; expected revisions protect start-versus-roster races.
+- **Persistence / transport:** additive room schema/revision/started-match identity and member join revision, Rooms-owned receipt table and API insert/read-only receipt grants; legacy data survives with compatible defaults. The required invite column receives CSPRNG material but no invite is exposed or resolved. Added ROOM_CONFLICT/GAME_UNAVAILABLE, opt-in complete room runtime configuration without default lifetime/budgets, independent distributed create/read limits that fail closed, authenticated REST create/read, generated/frozen Rooms OpenAPI and compatibility checking. [Room operations](architecture/private-rooms.md) records rollout, rollback, trusted-port boundaries and limitations. No dependency/lockfile change.
+- **Verification:** frozen-lockfile install; scoped API build/typecheck/test; Prisma format/validate/generation; OpenAPI initialization/generation/check; lint; final `pnpm check`; isolated `pnpm test:auth-http:local`; and diff checks passed. Final root gate: 1160 tests (580 API, 211 config, 48 Bot, 14 Worker, 158 architecture/tooling, 15 TypeScript, 17 database unit, 110 validation, 7 infra), 12 workspace typechecks and 11 builds, with unchanged tasks eligible for cache. Architecture audit covers 13 workspaces/114 source files; all five OpenAPI checks pass. The phase adds 53 root-gate cases and 13 integration cases, plus extensions to runtime/upgrade/restart checks.
+- **Integration evidence:** all 110 PostgreSQL/Redis tests pass (16 database, 88 API, 6 Worker). Rooms covers concurrent fresh create, eight duplicate joins, last-seat contention, delayed retries after leave, host transfer, start-versus-leave/join/expiry, trusted start/close idempotency, inactive users, disabled production catalog, rollback after receipt insertion failure, receipt privileges, database closure and distributed quotas. Actual configured HTTP startup rejects room creation through the disabled catalog. Migration deploy/redeploy, zero Prisma-visible drift, populated legacy room/member expansion and room/member/receipt persistence across a real PostgreSQL restart pass. PostgreSQL 18.6 packages were extracted into a task-specific temporary directory, not installed system-wide; the harness cleans its disposable clusters/Redis containers.
+- **Corrections during verification:** corrected test fixture literal/delegate typing; generated request JSON Schema using input mode to represent UUID normalization; initialized the new contract baseline after that correction; updated the pinned shared error-code assertion for the two additive codes. The deterministic sequence test now exercises repeated transitions rather than remaining in a terminal state. Final checks have no failures.
+- **Limits / mandatory stop:** no invitation resolution/link sharing, Socket transport/events, UI, engine, Match creation, live activation, production migration, commit, push, deployment or live Bot change. The future Match workflow must prove durable creation before confirmation and handle stuck STARTING recovery; final maintenance/admission ordering remains a 7C activation gate. Expiry is correct on access and through its explicit port; periodic job wiring is future integration. No room archival/receipt deletion policy is silently finalized. Live Telegram E2E remains owner-deferred; staging gameplay E2E cannot run without its environment and unimplemented gameplay. This is not load/soak, network-partition or production readiness evidence. Stop after the 8A report; Phase 8B is next and remains unauthorized.
 
 ### Phase 8B — Invite codes and Telegram deep links
 
@@ -679,14 +686,18 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 6A/6B implementation and available local gates are complete. The development
-Bot identity and commands were verified/configured as recorded in B3B; live
-webhook/chat E2E is explicitly deferred by the owner until public HTTPS exists.
-Phase 7A profile/settings is complete under ADR-017, including the approved
-GET-open/PATCH-closed Redis-failure distinction and available local verification.
-Stop after the 7A report; 7B Games catalog/registry is next and remains Pending.
-Parent Phase 7 remains In Progress. No application deployment was performed.
-Production ingress, centralized observability, global abuse hardening, full Docker
-PostgreSQL-volume recovery, network-partition and staging E2E/load gates remain
-outstanding. Authentication, onboarding and profile transports are runnable with
-documented configuration; the account-to-gameplay MVP loop is not implemented.
+Phase 8A is complete under ADR-019, including its available local verification.
+Stop after the 8A report. Phase 8B — Invite codes and Telegram deep links — is
+next, Pending and unauthorized. Socket wiring remains Phase 12A; no later phase
+has begun. Phase 7C and complete gameplay readiness remain mandatory before live
+activation, and parent Phase 7 remains In Progress for that deferred scope.
+
+Authentication, onboarding, profile and catalog transports are runnable with
+configured services. Room create/read transport can be explicitly configured;
+the production catalog still rejects new room admission. Join/leave/start are
+application ports only, and no playable account-to-gameplay loop exists yet.
+No application deployment, production migration, commit or live Telegram change
+was performed. Live webhook/chat E2E remains owner-deferred until public HTTPS
+exists. Production ingress, centralized observability, global abuse hardening,
+full Docker PostgreSQL-volume recovery, network-partition and staging E2E/load
+gates remain outstanding.

@@ -6,7 +6,7 @@ const ownership = {
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
   users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
-  rooms: ["room", "roomMember"],
+  rooms: ["room", "roomMember", "roomCommandReceipt"],
   matches: ["match", "matchPlayer", "gameEvent", "processedCommand", "gameResult", "outboxEvent"],
   chat: ["chatMessage"],
   leaderboard: ["userGameStats", "consumerReceipt"],

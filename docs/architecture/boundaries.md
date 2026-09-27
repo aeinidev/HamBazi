@@ -150,3 +150,8 @@ Future query builders, extra export surfaces, path aliases, or new module edges
 must extend policy and tests explicitly. No inline ignore is an approval mechanism.
 The tests' Turbo inputs include the external manifests, resolver settings, and
 Prisma schema they read; the architecture command remains uncached regardless.
+
+Phase 8A extends the Rooms-owned delegates with `roomCommandReceipt`; it is not
+available to Users, Games or Matches repositories. The Rooms public application
+port supports trusted Match lifecycle callbacks without a Rooms-to-Matches import.
+See [ADR-019](../adr/019-private-room-foundation.md).

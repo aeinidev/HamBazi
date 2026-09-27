@@ -285,6 +285,8 @@ describe("stable, sanitized errors", () => {
       "RATE_LIMITED",
       "GAME_STATE_CONFLICT",
       "PROFILE_CONFLICT",
+      "ROOM_CONFLICT",
+      "GAME_UNAVAILABLE",
       "CLIENT_UPGRADE_REQUIRED",
       "INTERNAL_ERROR",
     ]);

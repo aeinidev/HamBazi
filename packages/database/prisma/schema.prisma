@@ -143,31 +143,36 @@ model Game {
 }
 
 model Room {
-  id         String       @id @db.Uuid
-  gameId     String       @map("game_id")
-  hostUserId String       @map("host_user_id") @db.Uuid
-  capacity   Int
-  inviteCode String       @unique @map("invite_code")
-  status     String
-  expiresAt  DateTime     @map("expires_at") @db.Timestamptz(3)
-  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
-  game       Game         @relation(fields: [gameId], references: [id], onDelete: Restrict)
-  host       User         @relation(fields: [hostUserId], references: [id], onDelete: Restrict)
-  members    RoomMember[]
-  match      Match?
+  id              String               @id @db.Uuid
+  gameId          String               @map("game_id")
+  hostUserId      String               @map("host_user_id") @db.Uuid
+  capacity        Int
+  schemaVersion   Int                  @default(1) @map("schema_version")
+  stateVersion    Int                  @default(0) @map("state_version")
+  startedMatchId  String?              @unique @map("started_match_id") @db.Uuid
+  commandReceipts RoomCommandReceipt[]
+  inviteCode      String               @unique @map("invite_code")
+  status          String
+  expiresAt       DateTime             @map("expires_at") @db.Timestamptz(3)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  game            Game                 @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  host            User                 @relation(fields: [hostUserId], references: [id], onDelete: Restrict)
+  members         RoomMember[]
+  match           Match?
 
   @@index([status, expiresAt])
   @@map("rooms")
 }
 
 model RoomMember {
-  roomId   String   @map("room_id") @db.Uuid
-  userId   String   @map("user_id") @db.Uuid
-  seat     Int
-  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(3)
-  room     Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  roomId        String   @map("room_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  seat          Int
+  joinedVersion Int      @default(0) @map("joined_version")
+  joinedAt      DateTime @default(now()) @map("joined_at") @db.Timestamptz(3)
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@id([roomId, userId])
   @@unique([roomId, seat])
@@ -327,4 +332,18 @@ model ChatMessage {
 
   @@index([matchId, createdAt, id])
   @@map("chat_messages")
+}
+
+model RoomCommandReceipt {
+  actorUserId    String   @map("actor_user_id") @db.Uuid
+  commandId      String   @map("command_id") @db.Uuid
+  roomId         String   @map("room_id") @db.Uuid
+  requestDigest  String   @map("request_digest") @db.Char(64)
+  appliedVersion Int      @map("applied_version")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  room           Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  @@id([actorUserId, commandId])
+  @@index([roomId])
+  @@map("room_command_receipts")
 }

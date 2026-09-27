@@ -25,7 +25,7 @@ remain Phase 11A, not claims made by this generic foundation.
 | auth        | sessions, bot_update_receipts, bot_onboarding_flows                                  |
 | users       | users, user_settings, profile_mutation_receipts                                      |
 | games       | games                                                                                |
-| rooms       | rooms, room_members                                                                  |
+| rooms       | rooms, room_members, room_command_receipts                                           |
 | matches     | matches, match_players, game_events, processed_commands, game_results, outbox_events |
 | chat        | chat_messages                                                                        |
 | leaderboard | user_game_stats, consumer_receipts                                                   |

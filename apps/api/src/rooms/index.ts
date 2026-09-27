@@ -1,2 +1,5 @@
-// Public application surface for the rooms module; no use cases are implemented yet.
-export {};
+export { createRoomsPort } from "./module.js";
+export type { RoomsPort } from "./application/rooms.js";
+export { createRoomsHttpModule, type RoomsHttpDependencies } from "./infrastructure/rooms-http.js";
+export { createRoomsRate } from "./infrastructure/rooms-rate.js";
+export { roomsOpenApiDocument } from "./infrastructure/rooms-contract.js";

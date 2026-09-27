@@ -583,6 +583,9 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           API_DB_POOL_MAX: "5",
           PROFILE_READ_LIMIT: "60",
           CATALOG_READ_LIMIT: "60",
+          ROOM_TTL_SECONDS: "900",
+          ROOM_READ_LIMIT: "60",
+          ROOM_CREATE_LIMIT: "5",
           PROFILE_WRITE_LIMIT: "10",
           API_TRUSTED_PROXIES: "",
           TELEGRAM_BOT_TOKEN: botToken,
@@ -652,6 +655,22 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           expect(catalogResponse.status).toBe(200);
           expect(await catalogResponse.text()).toContain('"playable":false');
         }
+        const deniedRoom = await fetch(`http://127.0.0.1:${port}/v1/rooms`, {
+          method: "POST",
+          headers: profileHeaders,
+          body: JSON.stringify({
+            schemaVersion: 1,
+            commandId: randomUUID(),
+            gameId: "coup",
+            capacity: 2,
+          }),
+        });
+        expect(deniedRoom.status).toBe(409);
+        expect(await deniedRoom.json()).toMatchObject({ error: { code: "GAME_UNAVAILABLE" } });
+        const missingRoom = await fetch(`http://127.0.0.1:${port}/v1/rooms/${randomUUID()}`, {
+          headers: profileHeaders,
+        });
+        expect(missingRoom.status).toBe(404);
         const profile = (await profileResponse.json()) as { version: number; publicHandle: string };
         const profileCommand = {
           schemaVersion: 1,

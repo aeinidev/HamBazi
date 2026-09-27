@@ -104,12 +104,16 @@ if (!bin) {
     const require = createRequire(import.meta.url);
     let legacyId;
     let legacySessionId;
+    let legacyRoomId;
+    let legacyGameId;
     if (process.argv.includes("--api-auth")) {
       stage = "populated foundation upgrade setup";
       // Isolated-cluster rehearsal only: establish the previous schema and a
       // synthetic old-release row, then let normal deploy apply the expansion.
       legacyId = randomUUID();
       legacySessionId = randomUUID();
+      legacyRoomId = randomUUID();
+      legacyGameId = `legacy-room-${randomUUID()}`;
       const legacy = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
       await legacy.connect();
       try {
@@ -123,6 +127,18 @@ if (!bin) {
           "INSERT INTO users (id,telegram_user_id,display_name,public_handle,status,updated_at) VALUES ($1,17,'Legacy Synthetic','legacy_synthetic','ACTIVE',now())",
           [legacyId],
         );
+        await legacy.query(
+          "INSERT INTO games (id,slug,title,min_players,max_players,matchmaking_enabled,private_rooms_enabled,chat_enabled,voice_enabled,status,config_schema_version,config_jsonb,updated_at) VALUES ($1,$1,'Legacy',2,6,false,false,false,false,'DISABLED',1,'{}',now())",
+          [legacyGameId],
+        );
+        await legacy.query(
+          "INSERT INTO rooms (id,game_id,host_user_id,capacity,invite_code,status,expires_at,updated_at) VALUES ($1,$2,$3,2,$4,'WAITING','2031-01-01T00:00:00Z',now())",
+          [legacyRoomId, legacyGameId, legacyId, randomUUID()],
+        );
+        await legacy.query("INSERT INTO room_members (room_id,user_id,seat) VALUES ($1,$2,0)", [
+          legacyRoomId,
+          legacyId,
+        ]);
         await legacy.query(
           await readFile(
             new URL(
@@ -205,6 +221,32 @@ if (!bin) {
           ])
         )
           throw new Error();
+        const oldRoom = await legacy.query(
+          "SELECT schema_version,state_version,started_match_id,capacity,status FROM rooms WHERE id=$1",
+          [legacyRoomId],
+        );
+        if (
+          JSON.stringify(oldRoom.rows) !==
+          JSON.stringify([
+            {
+              schema_version: 1,
+              state_version: 0,
+              started_match_id: null,
+              capacity: 2,
+              status: "WAITING",
+            },
+          ])
+        )
+          throw new Error();
+        const oldMember = await legacy.query(
+          "SELECT joined_version,seat FROM room_members WHERE room_id=$1 AND user_id=$2",
+          [legacyRoomId, legacyId],
+        );
+        if (JSON.stringify(oldMember.rows) !== JSON.stringify([{ joined_version: 0, seat: 0 }]))
+          throw new Error();
+        await legacy.query("DELETE FROM room_members WHERE room_id=$1", [legacyRoomId]);
+        await legacy.query("DELETE FROM rooms WHERE id=$1", [legacyRoomId]);
+        await legacy.query("DELETE FROM games WHERE id=$1", [legacyGameId]);
         // Remove only our known synthetic upgrade probe before the empty-fixture suite.
         await legacy.query("DELETE FROM sessions WHERE id=$1", [legacySessionId]);
         await legacy.query("DELETE FROM users WHERE id=$1", [legacyId]);
@@ -212,7 +254,7 @@ if (!bin) {
         await legacy.end();
       }
       console.info(
-        "Populated previous-schema expansion preserved synthetic old-release account and session rows.",
+        "Populated previous-schema expansion preserved synthetic old-release account, session, room and membership rows.",
       );
     }
     stage = "schema drift";
@@ -258,7 +300,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 5) throw new Error();
+      if (result.rows[0].count !== 6) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -278,6 +320,7 @@ if (!bin) {
         "bot-delivery.test.mjs",
         "profile.test.ts",
         "catalog.test.ts",
+        "rooms.test.ts",
       ]) {
         const result = await run(
           process.execPath,
@@ -314,6 +357,15 @@ if (!bin) {
           const profiles = await client.query(
             "SELECT * FROM profile_mutation_receipts ORDER BY id",
           );
+          const rooms = await client.query("SELECT * FROM rooms ORDER BY id");
+          const members = await client.query(
+            "SELECT * FROM room_members ORDER BY room_id, user_id",
+          );
+          const roomCommands = await client.query(
+            "SELECT * FROM room_command_receipts ORDER BY actor_user_id, command_id",
+          );
+          if (!rooms.rows.length || !members.rows.length || !roomCommands.rows.length)
+            throw new Error();
           const settings = await client.query("SELECT * FROM user_settings ORDER BY user_id");
           const catalog = await client.query("SELECT * FROM games WHERE id='coup'");
           if (catalog.rows.length !== 1 || catalog.rows[0].status !== "DISABLED") throw new Error();
@@ -328,6 +380,9 @@ if (!bin) {
             profiles: profiles.rows,
             settings: settings.rows,
             catalog: catalog.rows,
+            rooms: rooms.rows,
+            members: members.rows,
+            roomCommands: roomCommands.rows,
           });
         } finally {
           await client.end();

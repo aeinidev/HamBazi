@@ -71,6 +71,10 @@ transport byte/depth/rate limits before validation; parsing does not impose them
 
 ## Errors and retry semantics
 
+Rooms adds `ROOM_CONFLICT` for stale or reused commands and `GAME_UNAVAILABLE`
+for denied game admission (both HTTP 409, no automatic blind retry). Existing
+code meanings remain unchanged. See [ADR-019](../adr/019-private-room-foundation.md).
+
 `createErrorEnvelope` accepts one of the initial public codes:
 
 | Code                    | Retryable hint | Required caller behavior                                 |

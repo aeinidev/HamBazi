@@ -126,3 +126,24 @@ describe("database infrastructure boundary", () => {
     expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE TABLE/);
   });
 });
+
+it("exposes room receipts only to the Rooms owner and keeps the migration additive", async () => {
+  const database = createDatabase(options);
+  await database.forModule("rooms").execute(async (db) => {
+    expect(Object.keys(db)).toEqual(["room", "roomMember", "roomCommandReceipt"]);
+    expect("user" in db).toBe(false);
+    expect("match" in db).toBe(false);
+  });
+  await database.forModule("users").execute(async (db) => {
+    expect("roomCommandReceipt" in db).toBe(false);
+  });
+  await database.disconnect();
+  const sql = await readFile(
+    new URL("../../prisma/migrations/202609220003_private_rooms/migration.sql", import.meta.url),
+    "utf8",
+  );
+  expect(sql.startsWith("BEGIN;")).toBe(true);
+  expect(sql.trim().endsWith("COMMIT;")).toBe(true);
+  expect(sql).toContain("PRIMARY KEY (actor_user_id, command_id)");
+  expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE TABLE/);
+});

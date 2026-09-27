@@ -3,7 +3,9 @@ import {
   parseAuthRuntimeConfig,
   parseProfileConfig,
   parseCatalogConfig,
+  parseRoomsConfig,
 } from "@hambazi/config";
+import { createRoomsPort, createRoomsRate } from "../rooms/index.js";
 import { createCatalogPort, createCatalogRate } from "../games/index.js";
 import { createDatabase } from "@hambazi/database";
 import {
@@ -32,6 +34,7 @@ export async function startApi(
   const auth = parseAuthRuntimeConfig(environment);
   const profileConfig = parseProfileConfig(environment);
   const catalogConfig = parseCatalogConfig(environment);
+  const roomsConfig = parseRoomsConfig(environment);
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: auth.poolMax,
@@ -57,6 +60,9 @@ export async function startApi(
     namespace: auth.signing.issuer,
     ...catalogConfig,
   });
+  const roomsRate = roomsConfig
+    ? createRoomsRate({ url: runtime.redisUrl, namespace: auth.signing.issuer, ...roomsConfig })
+    : undefined;
   let internal: Awaited<ReturnType<typeof startBotInternalTransport>>;
   try {
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
@@ -80,7 +86,24 @@ export async function startApi(
     await rate.connect().catch(() => {});
     await profileRate.connect().catch(() => {});
     await catalogRate.connect().catch(() => {});
+    await roomsRate?.connect().catch(() => {});
     http = await createHttpApplication({
+      ...(roomsConfig && roomsRate
+        ? {
+            rooms: {
+              rooms: createRoomsPort(
+                database,
+                { clock, ttlSeconds: roomsConfig.ttlSeconds },
+                { users: createUserIdentityPort(database), games: createCatalogPort(database) },
+              ),
+              authenticate: async (token: string) => {
+                const result = await sessions.authenticate(token);
+                return result.ok ? { ok: true as const, userId: result.session.userId } : result;
+              },
+              rate: roomsRate.consume,
+            },
+          }
+        : {}),
       auth: { sessions, telegram, clock, limiter: rate.limiter, onboarding },
       profile: {
         profile: createProfilePort(database, clock),
@@ -128,6 +151,7 @@ export async function startApi(
           rate.close();
           profileRate.close();
           catalogRate.close();
+          roomsRate?.close();
           await database.disconnect();
         }
         logger.lifecycle("api.stopped");
@@ -139,6 +163,7 @@ export async function startApi(
     rate.close();
     profileRate.close();
     catalogRate.close();
+    roomsRate?.close();
     await database.disconnect().catch(() => {});
     throw new Error("API startup failed");
   }

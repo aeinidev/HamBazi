@@ -11,6 +11,7 @@ GRANT SELECT, INSERT, UPDATE ON users, user_settings TO hambazi_api;
 GRANT SELECT, INSERT, DELETE ON profile_mutation_receipts TO hambazi_api;
 GRANT SELECT (id, expires_at), DELETE ON profile_mutation_receipts TO hambazi_worker;
 GRANT SELECT ON games TO hambazi_api, hambazi_worker;
+GRANT SELECT, INSERT ON room_command_receipts TO hambazi_api;
 GRANT SELECT, INSERT, UPDATE ON rooms TO hambazi_api;
 GRANT SELECT, UPDATE ON rooms TO hambazi_worker;
 GRANT SELECT, INSERT, UPDATE, DELETE ON room_members TO hambazi_api;

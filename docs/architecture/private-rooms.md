@@ -1,0 +1,68 @@
+# Private room foundation
+
+See [ADR-019](../adr/019-private-room-foundation.md) for the approved transport
+interpretation and persistence semantics. `apps/api/src/rooms/index.ts` is the
+public surface. Domain code has no I/O; repositories access only Rooms delegates.
+Auth is injected by composition; Users and Games are accessed through public ports.
+
+## HTTP and application use
+
+Configure all three values to register room routes: `ROOM_TTL_SECONDS`,
+`ROOM_READ_LIMIT`, `ROOM_CREATE_LIMIT`. No values are implied by their absence;
+without the group, existing API startup continues without room routes. These
+settings do not activate any game. The deployed Games port still denies creation.
+
+POST `/v1/rooms` accepts only `schemaVersion: 1`, UUID `commandId`, `gameId`, and
+integer `capacity`. It returns 201 with `ok`, schema version, command ID, room ID
+and applied revision. Retrying normalized identical input returns the original
+acknowledgement. Changed input/operation with the same actor/command returns
+`ROOM_CONFLICT` (409). Use a new command for a new intent.
+
+GET `/v1/rooms/:id` returns a current member's safe snapshot, including revision,
+status, host, capacity, expiry in Unix milliseconds, optional started-match ID and
+member IDs/seats/join order. Invite code and arbitrary database fields never leave
+the repository. Nonmembers receive NOT_FOUND. Clients must render snapshot data
+as data and must not infer authority from UUIDs or membership cached in the UI.
+
+Join/leave/start ports receive a server-established actor and version-1 command
+with UUID commandId/roomId and expectedVersion. Refresh the snapshot after a
+conflict. Old successful join retries after leave return the old acknowledgement
+without rejoining. A future 8B invite adapter must authorize invitation admission
+before invoking join; there is deliberately no REST join-by-ID endpoint. Phase
+12A will bind authorized intents to Socket and define its versioned event catalog.
+
+Only the full room host can request STARTING. No Match is created here. Future
+Match orchestration must durably create a Match, call confirmStarted with the
+STARTING revision and committed Match ID, and recover failed/ambiguous workflows.
+The trusted callback and match-bound close/expiry ports are not client endpoints.
+A STARTING roster cannot be modified by ordinary join/leave. No timer, ruleset or
+executable engine version is invented by Rooms.
+
+## Operations and compatibility
+
+Apply the additive migration and updated grants before enabling the routes.
+Old room rows receive schema version 1, revision 0 and member join revision 0;
+legacy equal-time membership uses a deterministic UUID tie-break. Invalid stored
+aggregates/schema versions fail closed without exposing database diagnostics.
+Receipts persist only request digests and minimal acknowledgements. No cleanup
+policy is implicit; do not delete receipts while retained room intents can retry.
+
+Run database migration redeploy/drift and restart verification through the existing
+isolated `pnpm test:auth-http:local` harness. It includes Rooms concurrency, expiry,
+rollback and receipt/grant tests and checks room/member/receipt persistence across
+PostgreSQL restart. Tests use synthetic eligible-game ports and do not activate the
+real catalog. `pnpm --filter @hambazi/api contract:generate` and `contract:check`
+include the new Rooms OpenAPI and baseline. Unit/domain and HTTP tests run through
+the API's existing test script.
+
+Redis failure denies both room HTTP routes with 503; it never removes room state.
+A limiter denial returns 429 with Retry-After. Database failure is sanitized and
+fails closed. Receipt acknowledgement is issued only after commit. Waiting/full
+expiry is checked at use time, so a lost/delayed future expiry job cannot allow
+late admission/start. The explicit expiry port can materialize unused-room expiry;
+periodic scheduling/event publication remain future integrations.
+
+Rollback by disabling the opt-in group or returning to the previous application
+release; keep the expanded schema and receipts. Do not revert the migration or
+activate Games through SQL. Phase 7C controls and complete gameplay readiness
+remain mandatory before live admission. No deployment was performed for 8A.

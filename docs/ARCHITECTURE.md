@@ -954,11 +954,10 @@ Retention نهایی، age policy، moderation و فرایند حذف/Export د�
 | Game config                       | GET /v1/games/:slug             |
 | ساخت Private Room                 | POST /v1/rooms                  |
 | خواندن lobby snapshot             | GET /v1/rooms/:id               |
-| Join idempotent                   | POST /v1/rooms/:id/join         |
-| Leave                             | POST /v1/rooms/:id/leave        |
-| Host start                        | POST /v1/rooms/:id/start        |
 | Leaderboard                       | GET /v1/leaderboards/:game      |
 | آمار کاربر                        | GET /v1/me/stats                |
+
+تصمیم تأییدشدهٔ مالک در ADR-019 (2026-09-22): REST اتاق فقط create/read است. فرمان‌های join/leave/start در فاز 8A به‌صورت application port پیاده می‌شوند و اتصال Socket آن‌ها در فاز 12A انجام می‌شود؛ مسیرهای REST عضویت/شروعِ فهرست قبلی حذف شدند.
 
 ## 15.2 WebSocket authentication
 

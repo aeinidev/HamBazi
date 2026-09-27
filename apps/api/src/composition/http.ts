@@ -11,10 +11,13 @@ import type { SafeLogger } from "./safe-logger.js";
 import { createProfileHttpModule, type ProfileHttpDependencies } from "../users/index.js";
 import { createCatalogHttpModule, type CatalogHttpDependencies } from "../games/index.js";
 
+import { createRoomsHttpModule, type RoomsHttpDependencies } from "../rooms/index.js";
+
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
   profile?: ProfileHttpDependencies;
   catalog?: CatalogHttpDependencies;
+  rooms?: RoomsHttpDependencies;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
   production: boolean;
@@ -101,6 +104,7 @@ export async function createHttpApplication(options: {
   @Module({
     imports: [
       createAuthHttpModule(options.auth),
+      ...(options.rooms ? [createRoomsHttpModule(options.rooms)] : []),
       ...(options.profile ? [createProfileHttpModule(options.profile)] : []),
       ...(options.catalog ? [createCatalogHttpModule(options.catalog)] : []),
     ],
