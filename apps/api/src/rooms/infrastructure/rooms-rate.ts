@@ -5,7 +5,7 @@ export type RoomsRateDecision =
   | { allowed: false; reason: "unavailable" }
   | { allowed: false; reason: "limited"; retryAfterSeconds: number };
 export type RoomsRate = (
-  operation: "read" | "create",
+  operation: "read" | "create" | "invite",
   userId: string,
 ) => Promise<RoomsRateDecision>;
 const script = `
@@ -25,8 +25,13 @@ export function createRoomsRate(options: {
   namespace: string;
   readLimit: number;
   createLimit: number;
+  inviteLimit?: number;
 }) {
   if (
+    (options.inviteLimit !== undefined &&
+      (!Number.isInteger(options.inviteLimit) ||
+        options.inviteLimit < 1 ||
+        options.inviteLimit > 600)) ||
     !Number.isInteger(options.readLimit) ||
     options.readLimit < 1 ||
     options.readLimit > 600 ||
@@ -48,13 +53,23 @@ export function createRoomsRate(options: {
   client.on("error", () => {});
   const namespace = createHash("sha256").update(options.namespace).digest("hex");
   const consume: RoomsRate = async (operation, userId) => {
+    if (operation === "invite" && options.inviteLimit === undefined)
+      return { allowed: false, reason: "unavailable" };
     if (!client.isReady || !/^[0-9a-f-]{36}$/i.test(userId))
       return { allowed: false, reason: "unavailable" };
     const key = `hambazi:rooms-rate:v1:${namespace}:${operation}:${createHash("sha256").update(userId.toLowerCase()).digest("hex")}`;
     try {
       const result = await client.withAbortSignal(AbortSignal.timeout(1000)).eval(script, {
         keys: [key],
-        arguments: [String(operation === "read" ? options.readLimit : options.createLimit)],
+        arguments: [
+          String(
+            operation === "invite"
+              ? options.inviteLimit
+              : operation === "read"
+                ? options.readLimit
+                : options.createLimit,
+          ),
+        ],
       });
       if (!Array.isArray(result) || result.length !== 2) throw new Error();
       const [allowed, ttl] = result;

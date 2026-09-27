@@ -5,9 +5,15 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import type { RoomsPort } from "../application/rooms.js";
 import type { RoomCode } from "../domain/room.js";
 import type { RoomsRate } from "./rooms-rate.js";
-import { roomAckSchema, roomResponseSchema } from "./rooms-contract.js";
+import {
+  roomAckSchema,
+  roomResponseSchema,
+  inviteResponseSchema,
+  invitePreviewSchema,
+} from "./rooms-contract.js";
 export interface RoomsHttpDependencies {
-  rooms: Pick<RoomsPort, "create" | "read">;
+  rooms: Pick<RoomsPort, "create" | "read"> &
+    Partial<Pick<RoomsPort, "shareInvite" | "resolveInvite">>;
   authenticate(
     token: string,
   ): Promise<
@@ -18,6 +24,8 @@ export interface RoomsHttpDependencies {
 }
 export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
   function fail(reply: FastifyReply, code: RoomCode) {
+    if (code === "RATE_LIMITED")
+      return reply.header("Retry-After", 60).code(429).send(createErrorEnvelope(code));
     return reply
       .code(
         code === "UNAUTHENTICATED"
@@ -34,7 +42,11 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
       )
       .send(createErrorEnvelope(code));
   }
-  async function handle(req: FastifyRequest, reply: FastifyReply, operation: "create" | "read") {
+  async function handle(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    operation: "create" | "read" | "shareInvite" | "resolveInvite",
+  ) {
     try {
       let count = 0;
       for (let i = 0; i < req.raw.rawHeaders.length; i += 2)
@@ -47,7 +59,10 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
       if (!token) return fail(reply, "UNAUTHENTICATED");
       const auth = await deps.authenticate(token);
       if (!auth.ok) return fail(reply, auth.error.code);
-      const rate = await deps.rate(operation, auth.userId);
+      const rate =
+        operation === "create" || operation === "read"
+          ? await deps.rate(operation, auth.userId)
+          : { allowed: true as const };
       if (!rate.allowed) {
         if (rate.reason === "unavailable") return fail(reply, "INTERNAL_ERROR");
         return reply
@@ -56,13 +71,24 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
           .send(createErrorEnvelope("RATE_LIMITED"));
       }
       const result =
-        operation === "create"
-          ? await deps.rooms.create(auth.userId, req.body)
-          : await deps.rooms.read(auth.userId, (req.params as { id?: unknown }).id);
+        operation === "shareInvite"
+          ? await deps.rooms.shareInvite?.(auth.userId, (req.params as { id?: unknown }).id)
+          : operation === "resolveInvite"
+            ? await deps.rooms.resolveInvite?.(auth.userId, req.body)
+            : operation === "create"
+              ? await deps.rooms.create(auth.userId, req.body)
+              : await deps.rooms.read(auth.userId, (req.params as { id?: unknown }).id);
+      if (!result) return fail(reply, "NOT_FOUND");
       if (!result.ok) return fail(reply, result.error.code);
-      const parsed = (operation === "create" ? roomAckSchema : roomResponseSchema).safeParse(
-        result,
-      );
+      const parsed = (
+        operation === "shareInvite"
+          ? inviteResponseSchema
+          : operation === "resolveInvite"
+            ? invitePreviewSchema
+            : operation === "create"
+              ? roomAckSchema
+              : roomResponseSchema
+      ).safeParse(result);
       return parsed.success
         ? reply.code(operation === "create" ? 201 : 200).send(parsed.data)
         : fail(reply, "INTERNAL_ERROR");
@@ -75,11 +101,20 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
     @Post() create(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return handle(req, reply, "create");
     }
+    @Get(":id/invite") share(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return handle(req, reply, "shareInvite");
+    }
     @Get(":id") read(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return handle(req, reply, "read");
     }
   }
-  @Module({ controllers: [RoomsController] })
+  @Controller("v1/room-invites")
+  class InvitesController {
+    @Post("resolve") resolve(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return handle(req, reply, "resolveInvite");
+    }
+  }
+  @Module({ controllers: [RoomsController, InvitesController] })
   class RoomsHttpModule {}
   return RoomsHttpModule;
 }

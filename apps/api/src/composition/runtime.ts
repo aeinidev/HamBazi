@@ -94,7 +94,18 @@ export async function startApi(
               rooms: createRoomsPort(
                 database,
                 { clock, ttlSeconds: roomsConfig.ttlSeconds },
-                { users: createUserIdentityPort(database), games: createCatalogPort(database) },
+                {
+                  users: createUserIdentityPort(database),
+                  games: createCatalogPort(database),
+                  ...(roomsConfig.target
+                    ? {
+                        invites: {
+                          target: roomsConfig.target,
+                          consume: (userId: string) => roomsRate.consume("invite", userId),
+                        },
+                      }
+                    : {}),
+                },
               ),
               authenticate: async (token: string) => {
                 const result = await sessions.authenticate(token);

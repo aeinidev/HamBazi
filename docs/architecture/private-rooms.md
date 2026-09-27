@@ -20,15 +20,13 @@ acknowledgement. Changed input/operation with the same actor/command returns
 
 GET `/v1/rooms/:id` returns a current member's safe snapshot, including revision,
 status, host, capacity, expiry in Unix milliseconds, optional started-match ID and
-member IDs/seats/join order. Invite code and arbitrary database fields never leave
-the repository. Nonmembers receive NOT_FOUND. Clients must render snapshot data
+member IDs/seats/join order. Invite code and arbitrary database fields are excluded from this snapshot. Nonmembers receive NOT_FOUND. Clients must render snapshot data
 as data and must not infer authority from UUIDs or membership cached in the UI.
 
 Join/leave/start ports receive a server-established actor and version-1 command
 with UUID commandId/roomId and expectedVersion. Refresh the snapshot after a
 conflict. Old successful join retries after leave return the old acknowledgement
-without rejoining. A future 8B invite adapter must authorize invitation admission
-before invoking join; there is deliberately no REST join-by-ID endpoint. Phase
+without rejoining. Join additionally requires a canonical inviteCode, verified inside its transaction; there is deliberately no REST join-by-ID endpoint. Phase
 12A will bind authorized intents to Socket and define its versioned event catalog.
 
 Only the full room host can request STARTING. No Match is created here. Future
@@ -55,7 +53,7 @@ real catalog. `pnpm --filter @hambazi/api contract:generate` and `contract:check
 include the new Rooms OpenAPI and baseline. Unit/domain and HTTP tests run through
 the API's existing test script.
 
-Redis failure denies both room HTTP routes with 503; it never removes room state.
+Redis failure denies room HTTP routes with 503; it never removes room state.
 A limiter denial returns 429 with Retry-After. Database failure is sanitized and
 fails closed. Receipt acknowledgement is issued only after commit. Waiting/full
 expiry is checked at use time, so a lost/delayed future expiry job cannot allow
@@ -66,3 +64,43 @@ Rollback by disabling the opt-in group or returning to the previous application
 release; keep the expanded schema and receipts. Do not revert the migration or
 activate Games through SQL. Phase 7C controls and complete gameplay readiness
 remain mandatory before live admission. No deployment was performed for 8A.
+
+## Invitations and Telegram handoff (8B)
+
+[ADR-020](../adr/020-room-invitations.md) records invitation semantics. Add all of
+`ROOM_BOT_USERNAME`, `ROOM_APP_NAME`, `ROOM_INVITE_LIMIT` to the existing Rooms
+configuration to enable invite operations. The limit is an explicit integer
+1–600 requests per active user per 60 seconds, shared by share/resolve/join across
+instances. No default target or rate is provided. Partial/invalid settings fail
+startup. Without this group, invite operations return sanitized unavailability.
+
+The authenticated host reads GET `/v1/rooms/:id/invite` to obtain `roomId`,
+`expiresAt`, `startParam`, and `deepLink` under the version-1 `invite` response.
+Only WAITING/FULL rooms are shareable. Already-issued links survive host transfer.
+Do not log, persist in browser storage, or put returned invitation material into
+analytics. Existing API logging omits request URLs/bodies and response bodies.
+
+The shared `@hambazi/contracts` helpers `buildRoomDeepLink` and
+`parseRoomStartParam` are transport adapters usable by Bot/Mini App callers. The
+link is `https://t.me/<bot>/<app>?startapp=room_<opaqueCode>`. The operator must
+register that named Mini App; the server does not silently change the Bot menu.
+Keep launch context in memory. If account creation is required, use the existing
+verified Mini App onboarding route and its returned `startParam`, then issue a
+session. Existing users issue their session directly. Do not trust any launch
+user ID or treat a verified signature as room authorization.
+
+POST `/v1/room-invites/resolve` with `{schemaVersion:1,startParam}` and a bearer
+session returns a limited current preview. It creates no membership/reservation
+and may show FULL. Unknown/expired/closed/starting/started codes return NOT_FOUND.
+An invalid canonical encoding returns INVALID_INPUT. Preview omits roster, host,
+invite code and executable game claims. The production catalog remains disabled.
+
+The later Socket adapter calls `join(authenticatedUserId, {schemaVersion:1,
+commandId,roomId,expectedVersion,inviteCode})`; parse the retained startParam to
+obtain the code. UUID alone is insufficient. Retrying the same code/intent returns
+the committed acknowledgement without a second membership. Re-resolve after a
+version conflict; expiry/capacity/Games checks remain authoritative at admission.
+Socket wiring and UI are still future phases. The isolated integration harness
+covers signed Telegram payload → account → session → preview → durable join.
+It makes no live Telegram requests. No schema migration is added in 8B; rollback
+keeps existing room records/receipts and must not expose the old raw join port.

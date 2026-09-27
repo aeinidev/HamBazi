@@ -27,3 +27,27 @@ it.each([{ ROOM_READ_LIMIT: "601" }, { ROOM_CREATE_LIMIT: "61" }, { ROOM_READ_LI
     ).toThrow();
   },
 );
+
+it("requires a complete explicit invite target and budget without changing prior startup", () => {
+  const rooms = { ROOM_TTL_SECONDS: "900", ROOM_READ_LIMIT: "60", ROOM_CREATE_LIMIT: "5" };
+  const invite = {
+    ROOM_BOT_USERNAME: "HamBaziBot",
+    ROOM_APP_NAME: "play",
+    ROOM_INVITE_LIMIT: "10",
+  };
+  expect(parseRoomsConfig({ ...rooms, ...invite })).toMatchObject({
+    inviteLimit: 10,
+    target: { botUsername: "HamBaziBot", appName: "play" },
+  });
+  expect(() => parseRoomsConfig(invite)).toThrow();
+  for (const patch of [
+    { ROOM_APP_NAME: undefined },
+    { ROOM_INVITE_LIMIT: "0" },
+    { ROOM_INVITE_LIMIT: "601" },
+    { ROOM_BOT_USERNAME: "bad/path" },
+    { ROOM_APP_NAME: "play\n" },
+  ])
+    expect(() => parseRoomsConfig({ ...rooms, ...invite, ...patch })).toThrow(
+      "Rooms configuration is invalid",
+    );
+});

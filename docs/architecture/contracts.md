@@ -74,6 +74,11 @@ transport byte/depth/rate limits before validation; parsing does not impose them
 Rooms adds `ROOM_CONFLICT` for stale or reused commands and `GAME_UNAVAILABLE`
 for denied game admission (both HTTP 409, no automatic blind retry). Existing
 code meanings remain unchanged. See [ADR-019](../adr/019-private-room-foundation.md).
+Phase 8B adds authenticated invite sharing and read-only resolution paths to the
+Rooms OpenAPI and v1 baseline without changing prior paths. It reuses RATE_LIMITED,
+INVALID_INPUT and NOT_FOUND; no new public error code is needed. Shared transport
+helpers encode/decode canonical Telegram room start parameters, while Rooms owns
+expiry, admission and authorization. See [ADR-020](../adr/020-room-invitations.md).
 
 `createErrorEnvelope` accepts one of the initial public codes:
 

@@ -586,6 +586,9 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           ROOM_TTL_SECONDS: "900",
           ROOM_READ_LIMIT: "60",
           ROOM_CREATE_LIMIT: "5",
+          ROOM_BOT_USERNAME: "HamBaziBot",
+          ROOM_APP_NAME: "play",
+          ROOM_INVITE_LIMIT: "20",
           PROFILE_WRITE_LIMIT: "10",
           API_TRUSTED_PROXIES: "",
           TELEGRAM_BOT_TOKEN: botToken,
@@ -671,6 +674,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           headers: profileHeaders,
         });
         expect(missingRoom.status).toBe(404);
+        const missingInvite = await fetch(`http://127.0.0.1:${port}/v1/room-invites/resolve`, {
+          method: "POST",
+          headers: profileHeaders,
+          body: JSON.stringify({ schemaVersion: 1, startParam: "room_" + "A".repeat(43) }),
+        });
+        expect(missingInvite.status).toBe(404);
+        expect(await missingInvite.json()).toMatchObject({ error: { code: "NOT_FOUND" } });
         const profile = (await profileResponse.json()) as { version: number; publicHandle: string };
         const profileCommand = {
           schemaVersion: 1,

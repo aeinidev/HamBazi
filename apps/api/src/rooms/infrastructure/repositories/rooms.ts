@@ -100,6 +100,16 @@ export function createRoomsRepository(
     kind: string,
     input: CreateRoomInput | RoomCommand,
   ): Promise<Ack | null> {
+    // Verify the capability even before returning an old acknowledgement. A valid
+    // retry may outlive expiry, but cannot create membership a second time.
+    if (kind === "join") {
+      if (!("roomId" in input) || !input.inviteCode) throw new RoomFault("NOT_FOUND");
+      const target = await db.room.findUnique({
+        where: { id: input.roomId },
+        select: { inviteCode: true },
+      });
+      if (!target || target.inviteCode !== input.inviteCode) throw new RoomFault("NOT_FOUND");
+    }
     const row = await db.roomCommandReceipt.findUnique({
       where: { actorUserId_commandId: { actorUserId: actor, commandId: input.commandId } },
       select: { requestDigest: true, roomId: true, appliedVersion: true },
@@ -264,6 +274,23 @@ export function createRoomsRepository(
         return record(db, actor, "create", input, room);
       }),
     read: (id) => transaction((db) => current(db, id)),
+    invitation: (input) =>
+      transaction(async (db) => {
+        const row =
+          "roomId" in input
+            ? await db.room.findUnique({
+                where: { id: input.roomId },
+                select: { id: true, inviteCode: true },
+              })
+            : await db.room.findUnique({
+                where: { inviteCode: input.inviteCode },
+                select: { id: true, inviteCode: true },
+              });
+        if (!row) return null;
+        const room = await current(db, row.id);
+        if (!room || !["WAITING", "FULL"].includes(room.status)) return null;
+        return { room, inviteCode: row.inviteCode };
+      }),
     command: (actor, kind, input) =>
       transaction(async (db) => {
         const cached = await receipt(db, actor, kind, input);

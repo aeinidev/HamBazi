@@ -10,3 +10,9 @@ export type {
 } from "./envelopes.js";
 export { createErrorEnvelope } from "./errors.js";
 export type { ErrorEnvelope } from "./errors.js";
+
+export {
+  roomInviteCodePattern,
+  parseRoomStartParam,
+  buildRoomDeepLink,
+} from "./telegram-room-invite.js";

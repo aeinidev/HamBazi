@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { beforeAll, afterAll, expect, it } from "vitest";
 import { createDatabase } from "@hambazi/database";
+import { createMiniAppOnboarding, createAuthSessions } from "../../src/auth/index.js";
+import { initData, signing, telegram } from "../auth/session-fixtures.js";
+import { parseRoomStartParam } from "@hambazi/contracts";
 import { createRoomsPort, createRoomsRate } from "../../src/rooms/index.js";
 import { createRoomsRepository } from "../../src/rooms/infrastructure/repositories/rooms.js";
 import { createAccountCreationPort, createUserIdentityPort } from "../../src/users/index.js";
@@ -65,6 +68,10 @@ const games: CatalogPort = {
     },
   }),
 };
+const invites = {
+  target: { botUsername: "HamBaziBot", appName: "play" },
+  consume: async () => ({ allowed: true as const }),
+};
 let seq = 980000;
 async function fixture(capacity = 3) {
   const users: string[] = [];
@@ -85,12 +92,12 @@ async function fixture(capacity = 3) {
   const first = createRoomsPort(
     a,
     { clock, ttlSeconds: 900 },
-    { users: createUserIdentityPort(a), games },
+    { users: createUserIdentityPort(a), games, invites },
   );
   const second = createRoomsPort(
     b,
     { clock, ttlSeconds: 900 },
-    { users: createUserIdentityPort(b), games },
+    { users: createUserIdentityPort(b), games, invites },
   );
   const input = { schemaVersion: 1 as const, commandId: randomUUID(), gameId: "coup", capacity };
   const result = await first.create(users[0]!, input);
@@ -101,7 +108,14 @@ async function fixture(capacity = 3) {
     roomId: result.roomId,
     expectedVersion,
   });
+  const invitation = await first.shareInvite(users[0]!, result.roomId);
+  if (!invitation.ok) throw new Error("Invite fixture failed");
+  const inviteCode = invitation.invite.startParam.slice(5);
+  const joinCommand = (version: number) => ({ ...command(version), inviteCode });
   return {
+    invitation,
+    inviteCode,
+    joinCommand,
     users,
     host: users[0]!,
     first,
@@ -153,7 +167,7 @@ it("races two fresh creates with the same command before any receipt exists", as
 it("concurrent last-seat joins never exceed capacity; losers can resync", async () => {
   const f = await fixture(2);
   const results = await Promise.all(
-    f.users.slice(1).map((user, i) => (i % 2 ? f.first : f.second).join(user, f.command(0))),
+    f.users.slice(1).map((user, i) => (i % 2 ? f.first : f.second).join(user, f.joinCommand(0))),
   );
   expect(results.filter((r) => r.ok)).toHaveLength(1);
   expect(results.filter((r) => !r.ok)).toHaveLength(6);
@@ -164,7 +178,7 @@ it("concurrent last-seat joins never exceed capacity; losers can resync", async 
 it("duplicate joins have one effect; delayed retries cannot rejoin a departed member", async () => {
   const f = await fixture();
   const user = f.users[1]!;
-  const input = f.command(0);
+  const input = f.joinCommand(0);
   const results = await Promise.all(
     Array.from({ length: 8 }, (_, i) => (i % 2 ? f.first : f.second).join(user, input)),
   );
@@ -183,8 +197,8 @@ it("duplicate joins have one effect; delayed retries cannot rejoin a departed me
 });
 it("host departure transfers to oldest remaining join, then closes empty room", async () => {
   const f = await fixture();
-  await f.first.join(f.users[1]!, f.command(0));
-  await f.first.join(f.users[2]!, f.command(1));
+  await f.first.join(f.users[1]!, f.joinCommand(0));
+  await f.first.join(f.users[2]!, f.joinCommand(1));
   expect(await f.first.start(f.users[1]!, f.command(2))).toMatchObject({
     error: { code: "FORBIDDEN" },
   });
@@ -205,7 +219,7 @@ it("host departure transfers to oldest remaining join, then closes empty room", 
 });
 it("start versus leave has one winner, and never leaves a partial starting roster", async () => {
   const f = await fixture(2);
-  await f.first.join(f.users[1]!, f.command(0));
+  await f.first.join(f.users[1]!, f.joinCommand(0));
   const results = await Promise.all([
     f.first.start(f.host, f.command(1)),
     f.second.leave(f.users[1]!, f.command(1)),
@@ -221,7 +235,7 @@ it("start versus leave has one winner, and never leaves a partial starting roste
 it("last-seat join versus stale start cannot start an incomplete roster", async () => {
   const f = await fixture(2);
   const results = await Promise.all([
-    f.first.join(f.users[1]!, f.command(0)),
+    f.first.join(f.users[1]!, f.joinCommand(0)),
     f.second.start(f.host, f.command(0)),
   ]);
   expect(results[0]).toMatchObject({ ok: true });
@@ -233,7 +247,7 @@ it("last-seat join versus stale start cannot start an incomplete roster", async 
 it("expiry wins at the deadline; late/duplicate expiry cannot change STARTING", async () => {
   for (const atDeadline of [false, true]) {
     const f = await fixture(2);
-    await f.first.join(f.users[1]!, f.command(0));
+    await f.first.join(f.users[1]!, f.joinCommand(0));
     f.clock.value += atDeadline ? 900000 : 899999;
     const [start] = await Promise.all([
       f.first.start(f.host, f.command(1)),
@@ -250,7 +264,7 @@ it("expiry wins at the deadline; late/duplicate expiry cannot change STARTING", 
 });
 it("confirms and closes only the committed workflow identity; receipts survive service reconstruction", async () => {
   const f = await fixture(2);
-  await f.first.join(f.users[1]!, f.command(0));
+  await f.first.join(f.users[1]!, f.joinCommand(0));
   const input = f.command(1);
   const start = await f.first.start(f.host, input);
   const matchId = randomUUID();
@@ -349,7 +363,7 @@ it("restricts receipt access and mutation; database failure exposes no internals
   const port = createRoomsPort(
     closed,
     { clock: f.clock, ttlSeconds: 900 },
-    { users: createUserIdentityPort(a), games },
+    { users: createUserIdentityPort(a), games, invites },
   );
   await closed.disconnect();
   expect(await port.read(f.host, f.roomId)).toMatchObject({ error: { code: "INTERNAL_ERROR" } });
@@ -362,6 +376,7 @@ it.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       namespace: randomUUID(),
       readLimit: 5,
       createLimit: 2,
+      inviteLimit: 3,
     };
     const one = createRoomsRate(options);
     const two = createRoomsRate(options);
@@ -373,6 +388,10 @@ it.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       );
       expect(decisions.filter((d) => d.allowed)).toHaveLength(2);
       expect(await one.consume("read", user)).toEqual({ allowed: true });
+      const invites = await Promise.all(
+        Array.from({ length: 10 }, (_, i) => (i % 2 ? one : two).consume("invite", user)),
+      );
+      expect(invites.filter((d) => d.allowed)).toHaveLength(3);
       one.close();
       expect(await one.consume("read", user)).toEqual({ allowed: false, reason: "unavailable" });
     } finally {
@@ -381,3 +400,117 @@ it.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
     }
   },
 );
+
+it("requires the matching opaque code even for cached joins and never leaks the roster in previews", async () => {
+  const f = await fixture();
+  const input = f.joinCommand(0);
+  const user = f.users[1]!;
+  const resolve = { schemaVersion: 1, startParam: f.invitation.invite.startParam };
+  const preview = await f.second.resolveInvite(user, resolve);
+  expect(preview).toMatchObject({ ok: true, room: { id: f.roomId, version: 0 } });
+  expect(JSON.stringify(preview)).not.toContain(f.host);
+  expect(await f.first.read(user, f.roomId)).toMatchObject({ error: { code: "NOT_FOUND" } });
+  expect(await f.first.join(user, { ...input, inviteCode: "A".repeat(43) })).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  expect(await f.first.join(user, input)).toMatchObject({ ok: true, appliedVersion: 1 });
+  expect(await f.second.join(user, { ...input, inviteCode: "A".repeat(43) })).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  const other = await fixture();
+  expect(await f.first.join(user, { ...input, inviteCode: other.inviteCode })).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+});
+it("expiry invalidates previews and fresh joins, while committed retries preserve one effect", async () => {
+  const f = await fixture();
+  const input = f.joinCommand(0);
+  const joined = await f.first.join(f.users[1]!, input);
+  f.clock.value += 900000;
+  expect(
+    await f.second.resolveInvite(f.users[2]!, {
+      schemaVersion: 1,
+      startParam: f.invitation.invite.startParam,
+    }),
+  ).toMatchObject({ error: { code: "NOT_FOUND" } });
+  expect(await f.first.shareInvite(f.host, f.roomId)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  expect((await f.first.join(f.users[2]!, f.joinCommand(1))).ok).toBe(false);
+  expect(await f.second.join(f.users[1]!, input)).toEqual(joined);
+  expect(await f.first.read(f.host, f.roomId)).toMatchObject({
+    room: { status: "EXPIRED", members: [{ userId: f.host }, { userId: f.users[1] }] },
+  });
+});
+it("host transfer changes sharing authority and start closes invitation resolution", async () => {
+  const f = await fixture(2);
+  await f.first.join(f.users[1]!, f.joinCommand(0));
+  const request = { schemaVersion: 1, startParam: f.invitation.invite.startParam };
+  expect(await f.first.resolveInvite(f.users[2]!, request)).toMatchObject({
+    room: { status: "FULL" },
+  });
+  expect(await f.first.shareInvite(f.users[1]!, f.roomId)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  await f.first.leave(f.host, f.command(1));
+  expect(await f.first.shareInvite(f.host, f.roomId)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  expect(await f.first.shareInvite(f.users[1]!, f.roomId)).toEqual(f.invitation);
+  await f.first.join(f.users[2]!, f.joinCommand(2));
+  await f.first.start(f.users[1]!, f.command(3));
+  expect(await f.second.resolveInvite(f.users[3]!, request)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+});
+
+it("preserves a signed invite through real account/session persistence and authenticated idempotent admission", async () => {
+  const f = await fixture();
+  const users = createUserIdentityPort(a);
+  const auth = createAuthSessions({
+    database: a,
+    users,
+    telegram,
+    clock: f.clock,
+    lifetimeSeconds: 300,
+    signing,
+  });
+  const onboarding = createMiniAppOnboarding({
+    accounts: createAccountCreationPort(a),
+    users,
+    telegram,
+    clock: f.clock,
+  });
+  const startParam = new URL(f.invitation.invite.deepLink).searchParams.get("startapp")!;
+  const signed = initData(++seq, f.clock.value / 1000, startParam);
+  expect(await auth.issue(signed, randomUUID())).toMatchObject({
+    error: { code: "UNAUTHENTICATED" },
+  });
+  const created = await onboarding.create(signed, randomUUID(), "Invite newcomer");
+  if (!created.ok) throw new Error("Synthetic account failed");
+  expect(created.startParam).toBe(startParam);
+  expect(await f.first.read(created.account.userId, f.roomId)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  const issued = await auth.issue(signed, randomUUID());
+  if (!issued.ok) throw new Error("Synthetic session failed");
+  const authenticated = await auth.authenticate(issued.accessToken.reveal());
+  if (!authenticated.ok) throw new Error("Synthetic authentication failed");
+  const actor = authenticated.session.userId;
+  expect(actor).toBe(created.account.userId);
+  const preview = await f.second.resolveInvite(actor, {
+    schemaVersion: 1,
+    startParam: created.startParam,
+  });
+  if (!preview.ok) throw new Error("Synthetic preview failed");
+  const join = {
+    ...f.command(preview.room.version),
+    inviteCode: parseRoomStartParam(created.startParam),
+  };
+  const joined = await f.first.join(actor, join);
+  expect(joined).toMatchObject({ ok: true, appliedVersion: 1 });
+  expect(await f.second.join(actor, join)).toEqual(joined);
+  expect(await f.second.read(actor, f.roomId)).toMatchObject({
+    room: { members: [{ userId: f.host }, { userId: actor }] },
+  });
+});

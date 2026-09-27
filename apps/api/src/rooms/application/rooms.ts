@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
+import {
+  buildRoomDeepLink,
+  parseRoomStartParam,
+  roomInviteCodePattern,
+  createErrorEnvelope,
+  type ErrorEnvelope,
+} from "@hambazi/contracts";
 import type { UserIdentityPort } from "../../users/index.js";
 import type { CatalogPort } from "../../games/index.js";
 import { RoomFault, type Room, type RoomCode } from "../domain/room.js";
@@ -17,8 +23,15 @@ export const roomCommandSchema = z.strictObject({
   roomId: uuid,
   expectedVersion: version,
 });
+export const resolveInviteSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  startParam: z.string().max(48),
+});
+export const joinRoomSchema = roomCommandSchema.extend({
+  inviteCode: z.string().regex(roomInviteCodePattern),
+});
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
-export type RoomCommand = z.infer<typeof roomCommandSchema>;
+export type RoomCommand = z.infer<typeof roomCommandSchema> & { inviteCode?: string };
 export type Ack = {
   ok: true;
   schemaVersion: 1;
@@ -35,6 +48,9 @@ export interface RoomsRepository {
   ): Promise<Ack | null>;
   create(actor: string, input: CreateRoomInput): Promise<Ack>;
   read(roomId: string): Promise<Room | null>;
+  invitation(
+    input: { roomId: string } | { inviteCode: string },
+  ): Promise<{ room: Room; inviteCode: string } | null>;
   command(actor: string, kind: "join" | "leave" | "start", input: RoomCommand): Promise<Ack>;
   confirmStarted(roomId: string, expectedVersion: number, matchId: string): Promise<void>;
   closeStarted(roomId: string, matchId: string): Promise<void>;
@@ -44,6 +60,12 @@ export function roomsService(deps: {
   repository: RoomsRepository;
   users: UserIdentityPort;
   games: CatalogPort;
+  invites?: {
+    target: { botUsername: string; appName: string };
+    consume(
+      userId: string,
+    ): Promise<{ allowed: true } | { allowed: false; reason: "unavailable" | "limited" }>;
+  };
 }) {
   async function safe<T>(operation: () => Promise<T>): Promise<Outcome<T>> {
     try {
@@ -72,10 +94,17 @@ export function roomsService(deps: {
     if (capacity < game.minPlayers || capacity > game.maxPlayers)
       throw new RoomFault("INVALID_INPUT");
   }
+  async function inviteBudget(userId: string) {
+    if (!deps.invites) throw new RoomFault("INTERNAL_ERROR");
+    const decision = await deps.invites.consume(userId);
+    if (!decision.allowed)
+      throw new RoomFault(decision.reason === "limited" ? "RATE_LIMITED" : "INTERNAL_ERROR");
+  }
   async function command(identity: unknown, kind: "join" | "leave" | "start", input: unknown) {
     return safe(async () => {
       const userId = await actor(identity);
-      const parsed = parse(roomCommandSchema, input);
+      if (kind === "join") await inviteBudget(userId);
+      const parsed = parse(kind === "join" ? joinRoomSchema : roomCommandSchema, input);
       const cached = await deps.repository.receipt(userId, kind, parsed);
       if (cached) return cached;
       const room = await deps.repository.read(parsed.roomId);
@@ -112,8 +141,41 @@ export function roomsService(deps: {
         return { ok: true as const, schemaVersion: 1 as const, room };
       });
     },
-    // Server-side invitation authorization is the responsibility of the future
-    // Rooms invite adapter (8B). Never expose this port as an arbitrary UUID join.
+    shareInvite(identity: unknown, roomId: unknown) {
+      return safe(async () => {
+        const userId = await actor(identity);
+        await inviteBudget(userId);
+        const value = await deps.repository.invitation({ roomId: parse(uuid, roomId) });
+        if (!value || value.room.hostUserId !== userId) throw new RoomFault("NOT_FOUND");
+        return {
+          ok: true as const,
+          schemaVersion: 1 as const,
+          invite: {
+            roomId: value.room.id,
+            expiresAt: value.room.expiresAt,
+            startParam: `room_${value.inviteCode}`,
+            deepLink: buildRoomDeepLink(deps.invites!.target, value.inviteCode),
+          },
+        };
+      });
+    },
+    resolveInvite(identity: unknown, input: unknown) {
+      return safe(async () => {
+        const userId = await actor(identity);
+        await inviteBudget(userId);
+        const parsed = parse(resolveInviteSchema, input);
+        const inviteCode = parseRoomStartParam(parsed.startParam);
+        if (!inviteCode) throw new RoomFault("INVALID_INPUT");
+        const value = await deps.repository.invitation({ inviteCode });
+        if (!value) throw new RoomFault("NOT_FOUND");
+        const { id, gameId, capacity, status, version, expiresAt } = value.room;
+        return {
+          ok: true as const,
+          schemaVersion: 1 as const,
+          room: { id, gameId, capacity, status, version, expiresAt },
+        };
+      });
+    },
     join: (identity: unknown, input: unknown) => command(identity, "join", input),
     leave: (identity: unknown, input: unknown) => command(identity, "leave", input),
     start: (identity: unknown, input: unknown) => command(identity, "start", input),

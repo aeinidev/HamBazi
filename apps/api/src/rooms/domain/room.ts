@@ -23,6 +23,7 @@ export type RoomCode =
   | "NOT_FOUND"
   | "ROOM_CONFLICT"
   | "GAME_UNAVAILABLE"
+  | "RATE_LIMITED"
   | "INTERNAL_ERROR";
 export class RoomFault extends Error {
   constructor(readonly code: RoomCode) {

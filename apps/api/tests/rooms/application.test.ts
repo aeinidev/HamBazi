@@ -25,6 +25,7 @@ function setup() {
     members: [{ userId: actor, seat: 0, joinedAt: 0, joinedVersion: 0 }],
   };
   const repository: RoomsRepository = {
+    invitation: vi.fn(async () => ({ room, inviteCode: "A".repeat(43) })),
     receipt: vi.fn(async () => null),
     create: vi.fn(async () => ack),
     read: vi.fn(async () => room),
@@ -58,14 +59,23 @@ function setup() {
       },
     })),
   };
+  const invites = {
+    target: { botUsername: "HamBaziBot", appName: "play" },
+    consume: vi.fn(
+      async (): Promise<
+        { allowed: true } | { allowed: false; reason: "unavailable" | "limited" }
+      > => ({ allowed: true }),
+    ),
+  };
   return {
+    invites,
     actor,
     room,
     ack,
     repository,
     users,
     games,
-    service: roomsService({ repository, users, games }),
+    service: roomsService({ repository, users, games, invites }),
     input: { schemaVersion: 1, commandId, gameId: "coup", capacity: 2 },
     command: { schemaVersion: 1, commandId, roomId, expectedVersion: 0 },
   };
@@ -113,7 +123,9 @@ it.each(["DISABLED", "MAINTENANCE"] as const)(
     expect(await f.service.create(f.actor, f.input)).toMatchObject({
       error: { code: "GAME_UNAVAILABLE" },
     });
-    expect(await f.service.join(f.actor, f.command)).toMatchObject({
+    expect(
+      await f.service.join(f.actor, { ...f.command, inviteCode: "A".repeat(43) }),
+    ).toMatchObject({
       error: { code: "GAME_UNAVAILABLE" },
     });
     expect(await f.service.leave(f.actor, f.command)).toEqual(f.ack);
@@ -160,5 +172,71 @@ it("sanitizes dependency errors and preserves stable domain errors", async () =>
   vi.mocked(f.repository.receipt).mockRejectedValue(new RoomFault("ROOM_CONFLICT"));
   expect(await f.service.create(f.actor, f.input)).toMatchObject({
     error: { code: "ROOM_CONFLICT" },
+  });
+});
+
+it("shares only with the current host and resolves without roster or membership writes", async () => {
+  const f = setup();
+  expect(await f.service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    ok: true,
+    invite: { startParam: "room_" + "A".repeat(43) },
+  });
+  expect(await f.service.shareInvite(randomUUID(), f.room.id)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  const result = await f.service.resolveInvite(randomUUID(), {
+    schemaVersion: 1,
+    startParam: "room_" + "A".repeat(43),
+  });
+  expect(result).toEqual({
+    ok: true,
+    schemaVersion: 1,
+    room: {
+      id: f.room.id,
+      gameId: "coup",
+      capacity: 2,
+      status: "WAITING",
+      version: 0,
+      expiresAt: 1000,
+    },
+  });
+  expect(f.repository.command).not.toHaveBeenCalled();
+});
+it.each(["limited", "unavailable"] as const)(
+  "invite %s fails closed before lookup or mutation",
+  async (reason) => {
+    const f = setup();
+    f.invites.consume.mockResolvedValue({ allowed: false, reason });
+    for (const result of [
+      await f.service.resolveInvite(f.actor, {}),
+      await f.service.shareInvite(f.actor, f.room.id),
+      await f.service.join(f.actor, f.command),
+    ])
+      expect(result).toMatchObject({
+        error: { code: reason === "limited" ? "RATE_LIMITED" : "INTERNAL_ERROR" },
+      });
+    expect(f.repository.invitation).not.toHaveBeenCalled();
+    expect(f.repository.receipt).not.toHaveBeenCalled();
+  },
+);
+it("requires current identity, canonical invitation, strict DTO and configured limiter", async () => {
+  const f = setup();
+  expect(await f.service.join(f.actor, f.command)).toMatchObject({
+    error: { code: "INVALID_INPUT" },
+  });
+  for (const input of [
+    { schemaVersion: 1, startParam: "room_bad" },
+    { schemaVersion: 1, startParam: "room_" + "A".repeat(43), userId: f.actor },
+  ])
+    expect(await f.service.resolveInvite(f.actor, input)).toMatchObject({
+      error: { code: "INVALID_INPUT" },
+    });
+  const disabled = roomsService({ repository: f.repository, users: f.users, games: f.games });
+  expect(await disabled.join(f.actor, f.command)).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+  f.users.findActiveById.mockResolvedValue(undefined!);
+  expect(await f.service.resolveInvite(f.actor, {})).toMatchObject({
+    error: { code: "UNAUTHENTICATED" },
   });
 });

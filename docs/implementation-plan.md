@@ -472,7 +472,13 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 8A and Phase 6B.
 - **Acceptance criteria:** codes are non-sequential and non-enumerable in practice; no unauthorized membership is created; retries preserve one membership.
 - **Required tests and validations:** entropy/format tests, expiry/not-found tests, invite onboarding integration tests, rate-limit tests, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization / prerequisite check (2026-09-27):** owner explicitly authorized Phase 8B. Clean starting worktree at `fdc18ee` (Phase 8A); confirmed Rooms durable lifecycle/receipts/CSPRNG invitation column, Users identity ports, Auth signed Mini App onboarding handoff/session ports and ADR-019's Socket boundary. No earlier phase was reimplemented and no blocking prerequisite was found.
+- **Delivered:** host-only authenticated sharing and read-only invite preview routes; strict canonical Telegram named-app link builder/parser in shared transport contracts; matching room/code checks inside join and receipt transactions; expiry/state restrictions; safe response projections; shared per-user Redis invite quota and explicit optional target/budget configuration. Added two additive OpenAPI paths and baseline entries while preserving every prior operation. [ADR-020](adr/020-room-invitations.md) and the [Rooms runbook](architecture/private-rooms.md) document handoff, capability semantics, rollback and remaining transport gates.
+- **Validation:** frozen-lockfile install; scoped contracts/config/API builds, API typecheck/tests and OpenAPI generation/check; formatting; full `pnpm check`; isolated `pnpm test:auth-http:local`; contract baseline comparison and `git diff --check` passed. Root gate: 1189 tests (608 API, 212 config, 48 Bot, 14 Worker, 158 architecture/tooling, 15 TypeScript, 17 database unit, 110 validation, 7 infra), with valid Turbo cache reuse for unchanged tasks; 12 workspace typechecks, 11 builds, 13-workspace/115-source architecture audit and five OpenAPI checks. Isolated PostgreSQL/Redis: 114 tests (16 database, 92 API, 6 Worker), including 17 Rooms cases. This phase adds 29 root-gate cases and four integration cases, and extends existing TCP/runtime, quota/race and restart coverage.
+- **Evidence / corrections:** signed synthetic launch → real account creation → durable session authentication → limited preview → idempotent membership passes. Wrong/mismatched capabilities cannot retrieve join receipts; expiry prevents new admission; roster remains private until join; host transfer changes sharing authority; FULL previews create no reservation; start invalidates resolution. Two Redis clients share one invite quota. Existing migration deploy/redeploy/drift and database restart checks pass without a new migration. Corrected a test credential property and a query-shape lint violation; final gates have zero failures. Temporary tool-state loss interrupted an earlier run, so verification was restarted and completed using extracted PostgreSQL 18.6 binaries and pinned Docker Redis. Harness-owned services/data/credentials were cleaned.
+- **Limits / mandatory stop:** no new dependency, schema/grant change, invite rotation/retention policy, production limit/target selection, Bot messaging/menu change, Socket wiring, frontend UI, game activation, Match creation, commit, push or deployment. Existing codes and room deadlines are reused; shared links remain bearer capabilities through host transfer until room state/deadline denies admission. Production Games remains disabled. Live Telegram smoke remains owner-deferred without public HTTPS/controlled credentials; staging gameplay E2E cannot run without its environment and unimplemented gameplay. Phase 7C, global abuse hardening and later load/soak/operational gates remain outstanding. Stop after the 8B report; Phase 9 is Pending and unauthorized.
 
 ### Phase 9 — Matchmaking and cancel-vs-match safety
 
@@ -686,15 +692,16 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 8A is complete under ADR-019, including its available local verification.
-Stop after the 8A report. Phase 8B — Invite codes and Telegram deep links — is
-next, Pending and unauthorized. Socket wiring remains Phase 12A; no later phase
-has begun. Phase 7C and complete gameplay readiness remain mandatory before live
+Phase 8B is complete, including its available local verification, under ADR-019's
+transport boundary and ADR-020's invitation implementation decisions. Stop after
+the 8B report. Phase 9 — Matchmaking and cancel-vs-match safety — is next, Pending
+and unauthorized. Socket wiring remains Phase 12A; no later phase has begun. Phase 7C and complete gameplay readiness remain mandatory before live
 activation, and parent Phase 7 remains In Progress for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
-configured services. Room create/read transport can be explicitly configured;
-the production catalog still rejects new room admission. Join/leave/start are
+configured services. Room create/read and invite share/resolve transport can be
+explicitly configured; the production catalog still rejects new room admission.
+Invite onboarding handoff and durable admission are locally verified. Join/leave/start are
 application ports only, and no playable account-to-gameplay loop exists yet.
 No application deployment, production migration, commit or live Telegram change
 was performed. Live webhook/chat E2E remains owner-deferred until public HTTPS

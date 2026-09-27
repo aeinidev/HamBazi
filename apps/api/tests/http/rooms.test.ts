@@ -38,6 +38,32 @@ async function setup() {
       members: [{ userId, seat: 0, joinedAt: 0, joinedVersion: 0 }],
     },
   }));
+  const shareInvite = vi.fn<NonNullable<RoomsHttpDependencies["rooms"]["shareInvite"]>>(
+    async () => ({
+      ok: true,
+      schemaVersion: 1,
+      invite: {
+        roomId,
+        expiresAt: 1000,
+        startParam: "room_" + "A".repeat(43),
+        deepLink: "https://t.me/HamBaziBot/play?startapp=room_" + "A".repeat(43),
+      },
+    }),
+  );
+  const resolveInvite = vi.fn<NonNullable<RoomsHttpDependencies["rooms"]["resolveInvite"]>>(
+    async () => ({
+      ok: true,
+      schemaVersion: 1,
+      room: {
+        id: roomId,
+        gameId: "coup",
+        capacity: 2,
+        status: "WAITING",
+        version: 0,
+        expiresAt: 1000,
+      },
+    }),
+  );
   const authenticate = vi.fn<RoomsHttpDependencies["authenticate"]>(async () => ({
     ok: true,
     userId,
@@ -54,7 +80,7 @@ async function setup() {
         consumeIdentity: async () => ({ allowed: true }),
       },
     },
-    rooms: { rooms: { create, read }, authenticate, rate },
+    rooms: { rooms: { create, read, shareInvite, resolveInvite }, authenticate, rate },
     allowedOrigins: ["https://mini.example"],
     trustedProxies: [],
     production: false,
@@ -67,6 +93,8 @@ async function setup() {
   active.push(http);
   return {
     ...http,
+    shareInvite,
+    resolveInvite,
     userId,
     roomId,
     commandId,
@@ -235,4 +263,67 @@ it("compares the generated contract and rejects authentication removal", () => {
   expect(compatibleAuthContract(baseline, document)).toBe(true);
   document.paths["/v1/rooms"].post.security = [];
   expect(compatibleAuthContract(baseline, document)).toBe(false);
+});
+
+it("authenticates invite routes, uses no-store and omits payloads from telemetry", async () => {
+  const f = await setup();
+  const payload = { schemaVersion: 1, startParam: "room_" + "A".repeat(43) };
+  expect(
+    (await f.server.inject({ method: "POST", url: "/v1/room-invites/resolve", payload }))
+      .statusCode,
+  ).toBe(401);
+  expect(f.resolveInvite).not.toHaveBeenCalled();
+  const share = await f.server.inject({ url: `/v1/rooms/${f.roomId}/invite`, headers: f.headers });
+  expect(share.statusCode).toBe(200);
+  expect(share.headers["cache-control"]).toBe("no-store");
+  const result = await f.server.inject({
+    method: "POST",
+    url: "/v1/room-invites/resolve",
+    headers: f.headers,
+    payload,
+  });
+  expect(result.statusCode).toBe(200);
+  expect(f.resolveInvite).toHaveBeenCalledWith(f.userId, payload);
+  expect(f.shareInvite).toHaveBeenCalledWith(f.userId, f.roomId);
+  expect(f.rate).not.toHaveBeenCalled(); // application port owns shared invite quota
+  expect(result.body + f.output.join("")).not.toContain(payload.startParam);
+  expect(result.headers["cache-control"]).toBe("no-store");
+});
+it.each([
+  ["RATE_LIMITED", 429],
+  ["INTERNAL_ERROR", 503],
+  ["NOT_FOUND", 404],
+  ["INVALID_INPUT", 400],
+] as const)("maps invite %s safely", async (code, status) => {
+  const f = await setup();
+  f.resolveInvite.mockResolvedValue({
+    ok: false,
+    error: { code, message: "PRIVATE_INVITE", retryable: false },
+  });
+  const response = await f.server.inject({
+    method: "POST",
+    url: "/v1/room-invites/resolve",
+    headers: f.headers,
+    payload: {},
+  });
+  expect(response.statusCode).toBe(status);
+  if (status === 429) expect(response.headers["retry-after"]).toBe("60");
+  expect(response.body + f.output.join("")).not.toContain("PRIVATE_INVITE");
+});
+it("rejects invite preview fields that could expose a member roster", async () => {
+  const f = await setup();
+  const result = await f.resolveInvite(f.userId, {});
+  if (!result.ok) throw new Error();
+  f.resolveInvite.mockResolvedValue({
+    ...result,
+    room: { ...result.room, members: ["PRIVATE_USER"] } as typeof result.room,
+  });
+  const response = await f.server.inject({
+    method: "POST",
+    url: "/v1/room-invites/resolve",
+    headers: f.headers,
+    payload: {},
+  });
+  expect(response.statusCode).toBe(503);
+  expect(response.body + f.output.join("")).not.toContain("PRIVATE_USER");
 });
