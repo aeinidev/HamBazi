@@ -544,7 +544,11 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 5B and Phase 7.
 - **Acceptance criteria:** engine has no I/O/framework dependency or direct `Date.now()`/`Math.random()` call; versions are explicit; seeded test dependencies reproduce state.
 - **Required tests and validations:** initialization/invariant/determinism tests, architecture checks, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Authorization / prerequisite check (2026-09-28):** owner authorized only 10A. The named reviewed architecture was read from `/home/mehdi/Downloads`; `docs/ARCHITECTURE.md` is the maintained repository copy with the approved ADR-019 REST amendment. Git started clean on `main`. Phase 5B boundary tooling, completed 7B read-only catalog, and Phase 9 admission ports are present. Phase 7C remains an explicitly deferred pre-activation gate, not a prerequisite for an offline game model. No earlier phase was reimplemented.
+- **Delivered:** `@hambazi/game-core` now exposes strict manifest/version descriptor schemas, typed engine lifecycle, injected clock/random/rules dependencies and standard result shape. `@hambazi/coup-engine` exposes a disabled foundation manifest, explicit non-executable descriptor, strict version-1 intent/event unions, rule and initial-input schemas, and a frozen Coup initial state. Creation validates unique 2–6 seats, time, rule config and random draws, shuffles/deals internally, snapshots rule config and preserves card counts. Version labels are provisional and never wired to production catalog/admission. [Foundation documentation](architecture/game-core-foundation.md) records privacy and later-phase boundaries. Existing Zod/Vitest/TypeScript pins are reused; the lockfile records new workspace edges only.
+- **Verification (2026-09-28):** frozen install, scoped builds/typechecks/tests (3 game-core and 9 Coup cases), root formatting/lint, uncached architecture check and `pnpm check` pass. The root check includes 1,262 tests (1,250 prior plus 12 new), 12 typecheck scripts, 11 builds and all five unchanged OpenAPI compatibility checks; unchanged workspaces may reuse valid Turbo cache. Architecture audit covers 13 workspaces and 123 product source files. Tests cover 2–6 seat card conservation, deterministic seeded fixtures, frozen state, strict commands/events and invalid inputs. No application or database integration was applicable to this isolated library phase; no staging E2E environment or playable gameplay exists.
+- **Limits / mandatory stop:** no Coup action execution, `PlayerView`/`SpectatorView`, result mapper, replay/migration, bot/frontend/timer policy, production CSPRNG adapter, catalog activation, schema migration, transport, deploy, commit or live Telegram change. Rule legality, safe projections and full replay are Phase 10B–10D work. OD-008 remains open; the provisional labels do not claim legal clearance. Stop here; 10B requires separate authorization.
 
 ### Phase 10B — Coup core actions and turn lifecycle
 
@@ -738,21 +742,22 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 9B — Redis matchmaking orchestration and admission credentials — and parent
-Phase 9 are complete with available local verification under ADR-021. Stop after
-the 9B report. Phase 10A — Game-core contract and Coup model foundation — is next
-and awaits explicit authorization. Socket wiring remains Phase 12A and dispatch
-remains 11B. Phase 7C and complete gameplay readiness remain mandatory before live
-activation; parent Phase 7 remains In Progress for that deferred scope.
+Phase 10A — Game-core contract and Coup model foundation — is complete with local
+library verification. Stop after the 10A report. Phase 10B — Coup core actions and
+turn lifecycle — is next and awaits explicit authorization. Socket wiring remains
+Phase 12A and dispatch remains 11B. Phase 7C and complete gameplay readiness
+remain mandatory before live activation; parent Phase 7 remains In Progress for
+that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
 explicitly configured; the production catalog still rejects new room admission.
 Invite onboarding, durable room admission and matchmaking arbitration/orchestration
 are locally verified. Matchmaking exposes authenticated search/cancel/status and
-session-bound admission ports plus trusted Redis coordination ticks. No production
-matcher scheduler, Socket transport or playable game exists yet. Join/leave/start
-remain application ports, and no playable account-to-gameplay loop exists.
+session-bound admission ports plus trusted Redis coordination ticks. The offline
+Coup initial model is now available, but no production matcher scheduler, Socket
+transport or playable game exists yet. Join/leave/start remain application ports,
+and no playable account-to-gameplay loop exists.
 
 No deployment, production migration, commit or live Telegram change was performed.
 Live webhook/chat E2E remains owner-deferred until public HTTPS exists. Production
