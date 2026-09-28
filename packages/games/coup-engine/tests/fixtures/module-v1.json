@@ -1,0 +1,2299 @@
+{
+  "initial": {
+    "engineVersion": "coup-v1",
+    "stateSchemaVersion": 4,
+    "rulesetVersion": "coup-provisional-complete-v1",
+    "phase": "WAITING_FOR_ACTION",
+    "createdAt": 1000,
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "rules": {
+      "rulesetVersion": "coup-provisional-complete-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "actionTimeoutMs": 1000,
+      "responseTimeoutMs": 100,
+      "decisionTimeoutMs": 500
+    },
+    "pendingAction": null,
+    "winnerId": null,
+    "eliminationOrder": [],
+    "actionCount": 0,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "influence": ["AMBASSADOR", "CAPTAIN"],
+        "revealed": []
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 7,
+        "influence": ["CONTESSA", "ASSASSIN"],
+        "revealed": []
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "seat": 2,
+        "coins": 7,
+        "influence": ["ASSASSIN", "CAPTAIN"],
+        "revealed": []
+      }
+    ],
+    "deck": [
+      "DUKE",
+      "CONTESSA",
+      "ASSASSIN",
+      "AMBASSADOR",
+      "DUKE",
+      "CAPTAIN",
+      "CONTESSA",
+      "AMBASSADOR",
+      "DUKE"
+    ],
+    "lastCommandAt": 1000,
+    "deadlineAt": 2000,
+    "metrics": {
+      "challenges": 0,
+      "claimsProved": 0,
+      "claimsConceded": 0,
+      "blocks": 0,
+      "exchanges": 0,
+      "timeouts": 0
+    },
+    "revision": 0,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "exchange": null
+  },
+  "events": [
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 0,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_EXCHANGE"
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1100
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 1,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "CHALLENGE",
+        "windowId": 1
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 2,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "PROVE_CLAIM",
+        "windowId": 2,
+        "cardIndex": 0
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1500,
+      "replacement": {
+        "card": "DUKE",
+        "deck": [
+          "CONTESSA",
+          "ASSASSIN",
+          "AMBASSADOR",
+          "DUKE",
+          "CAPTAIN",
+          "CONTESSA",
+          "AMBASSADOR",
+          "DUKE",
+          "AMBASSADOR"
+        ]
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 3,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 3,
+        "cardIndex": 0
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 4,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "SELECT_EXCHANGE",
+        "windowId": 4,
+        "cardIndices": [1, 3]
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 2000,
+      "returnedDeck": [
+        "AMBASSADOR",
+        "DUKE",
+        "CAPTAIN",
+        "CONTESSA",
+        "AMBASSADOR",
+        "DUKE",
+        "AMBASSADOR",
+        "DUKE",
+        "CONTESSA"
+      ]
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 5,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1100
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 6,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "BLOCK",
+        "windowId": 6,
+        "role": "DUKE"
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1100
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 7,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "CHALLENGE",
+        "windowId": 7
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 8,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "CONCEDE_CLAIM",
+        "windowId": 8
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 1500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 9,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 9,
+        "cardIndex": 0
+      },
+      "source": "PLAYER",
+      "occurredAt": 1000,
+      "deadlineAt": 2000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 10,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 2000,
+      "deadlineAt": 3000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 11,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 3000,
+      "deadlineAt": 4000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 12,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 4000,
+      "deadlineAt": 5000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 13,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 5000,
+      "deadlineAt": 6000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 14,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 6000,
+      "deadlineAt": 7000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 15,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_COUP",
+        "targetId": "00000000-0000-4000-8000-000000000000"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 7000,
+      "deadlineAt": 7500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 16,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 16,
+        "cardIndex": 0
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 7500,
+      "deadlineAt": 8500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 17,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 8500,
+      "deadlineAt": 9500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 18,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 9500,
+      "deadlineAt": 10500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 19,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 10500,
+      "deadlineAt": 11500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 20,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_COUP",
+        "targetId": "00000000-0000-4000-8000-000000000000"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 11500,
+      "deadlineAt": 12000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 21,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 21,
+        "cardIndex": 0
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 12000,
+      "deadlineAt": 13000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 22,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 13000,
+      "deadlineAt": 14000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 23,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 14000,
+      "deadlineAt": 15000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 24,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 15000,
+      "deadlineAt": 16000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 25,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 16000,
+      "deadlineAt": 17000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 26,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 17000,
+      "deadlineAt": 18000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 27,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 18000,
+      "deadlineAt": 19000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 28,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 19000,
+      "deadlineAt": 20000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 29,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 20000,
+      "deadlineAt": 21000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 30,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 21000,
+      "deadlineAt": 22000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 31,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 22000,
+      "deadlineAt": 23000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 32,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 23000,
+      "deadlineAt": 24000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 33,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "DECLARE_INCOME"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 24000,
+      "deadlineAt": 25000
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 34,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_COUP",
+        "targetId": "00000000-0000-4000-8000-000000000002"
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 25000,
+      "deadlineAt": 25500
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 3,
+      "expectedRevision": 35,
+      "actorId": "00000000-0000-4000-8000-000000000002",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 35,
+        "cardIndex": 0
+      },
+      "source": "TIMEOUT",
+      "occurredAt": 25500,
+      "deadlineAt": null
+    }
+  ],
+  "final": {
+    "engineVersion": "coup-v1",
+    "stateSchemaVersion": 4,
+    "rulesetVersion": "coup-provisional-complete-v1",
+    "phase": "GAME_OVER",
+    "createdAt": 1000,
+    "turnNumber": 25,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+    "rules": {
+      "rulesetVersion": "coup-provisional-complete-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "actionTimeoutMs": 1000,
+      "responseTimeoutMs": 100,
+      "decisionTimeoutMs": 500
+    },
+    "pendingAction": null,
+    "winnerId": "00000000-0000-4000-8000-000000000001",
+    "eliminationOrder": [
+      "00000000-0000-4000-8000-000000000000",
+      "00000000-0000-4000-8000-000000000002"
+    ],
+    "actionCount": 25,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 0,
+        "influence": [],
+        "revealed": ["CAPTAIN", "ASSASSIN"]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 3,
+        "influence": ["ASSASSIN"],
+        "revealed": ["CONTESSA"]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "seat": 2,
+        "coins": 0,
+        "influence": [],
+        "revealed": ["ASSASSIN", "CAPTAIN"]
+      }
+    ],
+    "deck": [
+      "AMBASSADOR",
+      "DUKE",
+      "CAPTAIN",
+      "CONTESSA",
+      "AMBASSADOR",
+      "DUKE",
+      "AMBASSADOR",
+      "DUKE",
+      "CONTESSA"
+    ],
+    "lastCommandAt": 25500,
+    "deadlineAt": null,
+    "metrics": {
+      "challenges": 2,
+      "claimsProved": 1,
+      "claimsConceded": 1,
+      "blocks": 1,
+      "exchanges": 1,
+      "timeouts": 26
+    },
+    "revision": 36,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "exchange": null
+  },
+  "result": {
+    "winnerId": "00000000-0000-4000-8000-000000000001",
+    "reason": "LAST_PLAYER_STANDING",
+    "placements": [
+      {
+        "playerId": "00000000-0000-4000-8000-000000000001",
+        "place": 1
+      },
+      {
+        "playerId": "00000000-0000-4000-8000-000000000002",
+        "place": 2
+      },
+      {
+        "playerId": "00000000-0000-4000-8000-000000000000",
+        "place": 3
+      }
+    ],
+    "metrics": {
+      "turnsPlayed": 25,
+      "actionsDeclared": 25,
+      "durationMs": 24500,
+      "challenges": 2,
+      "claimsProved": 1,
+      "claimsConceded": 1,
+      "blocks": 1,
+      "exchanges": 1,
+      "timeouts": 26
+    }
+  },
+  "goldens": {
+    "WAITING_FOR_ACTION": {
+      "revision": 0,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 0,
+          "phase": "WAITING_FOR_ACTION",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 2000,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["AMBASSADOR", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "DECLARE_INCOME"
+            },
+            {
+              "type": "DECLARE_FOREIGN_AID"
+            },
+            {
+              "type": "DECLARE_TAX"
+            },
+            {
+              "type": "DECLARE_EXCHANGE"
+            },
+            {
+              "type": "DECLARE_COUP",
+              "targetId": "00000000-0000-4000-8000-000000000001"
+            },
+            {
+              "type": "DECLARE_STEAL",
+              "targetId": "00000000-0000-4000-8000-000000000001"
+            },
+            {
+              "type": "DECLARE_ASSASSINATION",
+              "targetId": "00000000-0000-4000-8000-000000000001"
+            },
+            {
+              "type": "DECLARE_COUP",
+              "targetId": "00000000-0000-4000-8000-000000000002"
+            },
+            {
+              "type": "DECLARE_STEAL",
+              "targetId": "00000000-0000-4000-8000-000000000002"
+            },
+            {
+              "type": "DECLARE_ASSASSINATION",
+              "targetId": "00000000-0000-4000-8000-000000000002"
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 0,
+          "phase": "WAITING_FOR_ACTION",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 2000,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["CONTESSA", "ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 0,
+          "phase": "WAITING_FOR_ACTION",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 2000,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 0,
+        "phase": "WAITING_FOR_ACTION",
+        "turnNumber": 1,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+        "winnerId": null,
+        "deadlineAt": 2000,
+        "pendingAction": null,
+        "window": null,
+        "proof": null,
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "CHALLENGE": {
+      "revision": 1,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 1,
+          "phase": "CHALLENGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 1,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000001",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            }
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["AMBASSADOR", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 1,
+          "phase": "CHALLENGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 1,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000001",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            }
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["CONTESSA", "ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "PASS_CHALLENGE",
+              "windowId": 1
+            },
+            {
+              "type": "CHALLENGE",
+              "windowId": 1
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 1,
+          "phase": "CHALLENGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 1,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000001",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            }
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "PASS_CHALLENGE",
+              "windowId": 1
+            },
+            {
+              "type": "CHALLENGE",
+              "windowId": 1
+            }
+          ]
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 1,
+        "phase": "CHALLENGE",
+        "turnNumber": 1,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+        "winnerId": null,
+        "deadlineAt": 1100,
+        "pendingAction": {
+          "actorId": "00000000-0000-4000-8000-000000000000",
+          "kind": "EXCHANGE",
+          "targetId": null
+        },
+        "window": {
+          "id": 1,
+          "eligibleIds": [
+            "00000000-0000-4000-8000-000000000001",
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "passedIds": [],
+          "claim": {
+            "kind": "ACTION",
+            "claimantId": "00000000-0000-4000-8000-000000000000",
+            "role": "AMBASSADOR"
+          }
+        },
+        "proof": null,
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "PROOF": {
+      "revision": 2,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 2,
+          "phase": "PROOF",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 2,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": {
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            },
+            "challengerId": "00000000-0000-4000-8000-000000000001"
+          },
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["AMBASSADOR", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "CONCEDE_CLAIM",
+              "windowId": 2
+            },
+            {
+              "type": "PROVE_CLAIM",
+              "windowId": 2,
+              "cardIndex": 0
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 2,
+          "phase": "PROOF",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 2,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": {
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            },
+            "challengerId": "00000000-0000-4000-8000-000000000001"
+          },
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["CONTESSA", "ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 2,
+          "phase": "PROOF",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 2,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": {
+            "claim": {
+              "kind": "ACTION",
+              "claimantId": "00000000-0000-4000-8000-000000000000",
+              "role": "AMBASSADOR"
+            },
+            "challengerId": "00000000-0000-4000-8000-000000000001"
+          },
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 2,
+        "phase": "PROOF",
+        "turnNumber": 1,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+        "winnerId": null,
+        "deadlineAt": 1500,
+        "pendingAction": {
+          "actorId": "00000000-0000-4000-8000-000000000000",
+          "kind": "EXCHANGE",
+          "targetId": null
+        },
+        "window": {
+          "id": 2,
+          "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+          "passedIds": [],
+          "claim": null
+        },
+        "proof": {
+          "claim": {
+            "kind": "ACTION",
+            "claimantId": "00000000-0000-4000-8000-000000000000",
+            "role": "AMBASSADOR"
+          },
+          "challengerId": "00000000-0000-4000-8000-000000000001"
+        },
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "LOSS": {
+      "revision": 3,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 3,
+          "phase": "LOSS",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 3,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000001"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": {
+            "playerId": "00000000-0000-4000-8000-000000000001",
+            "reason": "CHALLENGE"
+          },
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["DUKE", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 3,
+          "phase": "LOSS",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 3,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000001"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": {
+            "playerId": "00000000-0000-4000-8000-000000000001",
+            "reason": "CHALLENGE"
+          },
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["CONTESSA", "ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "SELECT_CARD_TO_LOSE",
+              "windowId": 3,
+              "cardIndex": 0
+            },
+            {
+              "type": "SELECT_CARD_TO_LOSE",
+              "windowId": 3,
+              "cardIndex": 1
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 3,
+          "phase": "LOSS",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 3,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000001"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": {
+            "playerId": "00000000-0000-4000-8000-000000000001",
+            "reason": "CHALLENGE"
+          },
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 3,
+        "phase": "LOSS",
+        "turnNumber": 1,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+        "winnerId": null,
+        "deadlineAt": 1500,
+        "pendingAction": {
+          "actorId": "00000000-0000-4000-8000-000000000000",
+          "kind": "EXCHANGE",
+          "targetId": null
+        },
+        "window": {
+          "id": 3,
+          "eligibleIds": ["00000000-0000-4000-8000-000000000001"],
+          "passedIds": [],
+          "claim": null
+        },
+        "proof": null,
+        "loss": {
+          "playerId": "00000000-0000-4000-8000-000000000001",
+          "reason": "CHALLENGE"
+        },
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "EXCHANGE": {
+      "revision": 4,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 4,
+          "phase": "EXCHANGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 4,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["DUKE", "CAPTAIN"],
+          "exchangeChoices": ["DUKE", "CAPTAIN", "CONTESSA", "ASSASSIN"],
+          "legalCommands": [
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [0, 1]
+            },
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [0, 2]
+            },
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [1, 2]
+            },
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [0, 3]
+            },
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [1, 3]
+            },
+            {
+              "type": "SELECT_EXCHANGE",
+              "windowId": 4,
+              "cardIndices": [2, 3]
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 4,
+          "phase": "EXCHANGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 4,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 4,
+          "phase": "EXCHANGE",
+          "turnNumber": 1,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+          "winnerId": null,
+          "deadlineAt": 1500,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000000",
+            "kind": "EXCHANGE",
+            "targetId": null
+          },
+          "window": {
+            "id": 4,
+            "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 4,
+        "phase": "EXCHANGE",
+        "turnNumber": 1,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+        "winnerId": null,
+        "deadlineAt": 1500,
+        "pendingAction": {
+          "actorId": "00000000-0000-4000-8000-000000000000",
+          "kind": "EXCHANGE",
+          "targetId": null
+        },
+        "window": {
+          "id": 4,
+          "eligibleIds": ["00000000-0000-4000-8000-000000000000"],
+          "passedIds": [],
+          "claim": null
+        },
+        "proof": null,
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 1,
+            "revealed": ["CONTESSA"]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "BLOCK": {
+      "revision": 6,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 6,
+          "phase": "BLOCK",
+          "turnNumber": 2,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000001",
+            "kind": "FOREIGN_AID",
+            "targetId": null
+          },
+          "window": {
+            "id": 6,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000000",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": ["CAPTAIN", "ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "PASS_BLOCK",
+              "windowId": 6
+            },
+            {
+              "type": "BLOCK",
+              "windowId": 6,
+              "role": "DUKE"
+            }
+          ]
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 6,
+          "phase": "BLOCK",
+          "turnNumber": 2,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000001",
+            "kind": "FOREIGN_AID",
+            "targetId": null
+          },
+          "window": {
+            "id": 6,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000000",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 6,
+          "phase": "BLOCK",
+          "turnNumber": 2,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": null,
+          "deadlineAt": 1100,
+          "pendingAction": {
+            "actorId": "00000000-0000-4000-8000-000000000001",
+            "kind": "FOREIGN_AID",
+            "targetId": null
+          },
+          "window": {
+            "id": 6,
+            "eligibleIds": [
+              "00000000-0000-4000-8000-000000000000",
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "passedIds": [],
+            "claim": null
+          },
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 7,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 7,
+              "cardsRemaining": 2,
+              "revealed": []
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": ["ASSASSIN", "CAPTAIN"],
+          "exchangeChoices": null,
+          "legalCommands": [
+            {
+              "type": "PASS_BLOCK",
+              "windowId": 6
+            },
+            {
+              "type": "BLOCK",
+              "windowId": 6,
+              "role": "DUKE"
+            }
+          ]
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 6,
+        "phase": "BLOCK",
+        "turnNumber": 2,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+        "winnerId": null,
+        "deadlineAt": 1100,
+        "pendingAction": {
+          "actorId": "00000000-0000-4000-8000-000000000001",
+          "kind": "FOREIGN_AID",
+          "targetId": null
+        },
+        "window": {
+          "id": 6,
+          "eligibleIds": [
+            "00000000-0000-4000-8000-000000000000",
+            "00000000-0000-4000-8000-000000000002"
+          ],
+          "passedIds": [],
+          "claim": null
+        },
+        "proof": null,
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 7,
+            "cardsRemaining": 1,
+            "revealed": ["CONTESSA"]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 7,
+            "cardsRemaining": 2,
+            "revealed": []
+          }
+        ]
+      }
+    },
+    "GAME_OVER": {
+      "revision": 36,
+      "players": [
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 36,
+          "phase": "GAME_OVER",
+          "turnNumber": 25,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": "00000000-0000-4000-8000-000000000001",
+          "deadlineAt": null,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["CAPTAIN", "ASSASSIN"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 3,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["ASSASSIN", "CAPTAIN"]
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000000",
+          "myCards": [],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 36,
+          "phase": "GAME_OVER",
+          "turnNumber": 25,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": "00000000-0000-4000-8000-000000000001",
+          "deadlineAt": null,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["CAPTAIN", "ASSASSIN"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 3,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["ASSASSIN", "CAPTAIN"]
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000001",
+          "myCards": ["ASSASSIN"],
+          "exchangeChoices": null,
+          "legalCommands": []
+        },
+        {
+          "engineVersion": "coup-v1",
+          "stateSchemaVersion": 4,
+          "rulesetVersion": "coup-provisional-complete-v1",
+          "viewSchemaVersion": 1,
+          "kind": "PLAYER",
+          "revision": 36,
+          "phase": "GAME_OVER",
+          "turnNumber": 25,
+          "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+          "winnerId": "00000000-0000-4000-8000-000000000001",
+          "deadlineAt": null,
+          "pendingAction": null,
+          "window": null,
+          "proof": null,
+          "loss": null,
+          "players": [
+            {
+              "id": "00000000-0000-4000-8000-000000000000",
+              "seat": 0,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["CAPTAIN", "ASSASSIN"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "seat": 1,
+              "coins": 3,
+              "cardsRemaining": 1,
+              "revealed": ["CONTESSA"]
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000002",
+              "seat": 2,
+              "coins": 0,
+              "cardsRemaining": 0,
+              "revealed": ["ASSASSIN", "CAPTAIN"]
+            }
+          ],
+          "viewerId": "00000000-0000-4000-8000-000000000002",
+          "myCards": [],
+          "exchangeChoices": null,
+          "legalCommands": []
+        }
+      ],
+      "spectator": {
+        "engineVersion": "coup-v1",
+        "stateSchemaVersion": 4,
+        "rulesetVersion": "coup-provisional-complete-v1",
+        "viewSchemaVersion": 1,
+        "kind": "SPECTATOR",
+        "revision": 36,
+        "phase": "GAME_OVER",
+        "turnNumber": 25,
+        "turnPlayerId": "00000000-0000-4000-8000-000000000001",
+        "winnerId": "00000000-0000-4000-8000-000000000001",
+        "deadlineAt": null,
+        "pendingAction": null,
+        "window": null,
+        "proof": null,
+        "loss": null,
+        "players": [
+          {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "seat": 0,
+            "coins": 0,
+            "cardsRemaining": 0,
+            "revealed": ["CAPTAIN", "ASSASSIN"]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "seat": 1,
+            "coins": 3,
+            "cardsRemaining": 1,
+            "revealed": ["CONTESSA"]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "seat": 2,
+            "coins": 0,
+            "cardsRemaining": 0,
+            "revealed": ["ASSASSIN", "CAPTAIN"]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "initial": {
+    "engineVersion": "coup-claims-v1",
+    "stateSchemaVersion": 3,
+    "rulesetVersion": "coup-provisional-claims-v1",
+    "phase": "WAITING_FOR_ACTION",
+    "createdAt": 1000,
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "rules": {
+      "rulesetVersion": "coup-provisional-claims-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3
+    },
+    "pendingAction": null,
+    "winnerId": null,
+    "eliminationOrder": [],
+    "actionCount": 0,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "influence": ["DUKE", "DUKE"],
+        "revealed": []
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 7,
+        "influence": ["DUKE", "ASSASSIN"],
+        "revealed": []
+      }
+    ],
+    "deck": [
+      "ASSASSIN",
+      "ASSASSIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "CONTESSA",
+      "CONTESSA",
+      "CONTESSA"
+    ],
+    "revision": 0,
+    "window": null,
+    "proof": null,
+    "loss": null
+  },
+  "events": [
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 0,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_TAX"
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 1,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "CHALLENGE",
+        "windowId": 1
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 2,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "PROVE_CLAIM",
+        "windowId": 2,
+        "cardIndex": 0
+      },
+      "replacement": {
+        "card": "ASSASSIN",
+        "deck": [
+          "ASSASSIN",
+          "CAPTAIN",
+          "CAPTAIN",
+          "CAPTAIN",
+          "AMBASSADOR",
+          "AMBASSADOR",
+          "AMBASSADOR",
+          "CONTESSA",
+          "CONTESSA",
+          "CONTESSA",
+          "DUKE"
+        ]
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 3,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 3,
+        "cardIndex": 0
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 4,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "DECLARE_COUP",
+        "targetId": "00000000-0000-4000-8000-000000000000"
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 5,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 5,
+        "cardIndex": 0
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 6,
+      "actorId": "00000000-0000-4000-8000-000000000000",
+      "command": {
+        "type": "DECLARE_COUP",
+        "targetId": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "type": "COMMAND_RESOLVED",
+      "schemaVersion": 2,
+      "expectedRevision": 7,
+      "actorId": "00000000-0000-4000-8000-000000000001",
+      "command": {
+        "type": "SELECT_CARD_TO_LOSE",
+        "windowId": 7,
+        "cardIndex": 0
+      }
+    }
+  ],
+  "final": {
+    "engineVersion": "coup-claims-v1",
+    "stateSchemaVersion": 3,
+    "rulesetVersion": "coup-provisional-claims-v1",
+    "phase": "GAME_OVER",
+    "createdAt": 1000,
+    "turnNumber": 3,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "rules": {
+      "rulesetVersion": "coup-provisional-claims-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3
+    },
+    "pendingAction": null,
+    "winnerId": "00000000-0000-4000-8000-000000000000",
+    "eliminationOrder": ["00000000-0000-4000-8000-000000000001"],
+    "actionCount": 3,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 3,
+        "influence": ["DUKE"],
+        "revealed": ["ASSASSIN"]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 0,
+        "influence": [],
+        "revealed": ["DUKE", "ASSASSIN"]
+      }
+    ],
+    "deck": [
+      "ASSASSIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "CONTESSA",
+      "CONTESSA",
+      "CONTESSA",
+      "DUKE"
+    ],
+    "revision": 8,
+    "window": null,
+    "proof": null,
+    "loss": null
+  },
+  "result": {
+    "winnerId": "00000000-0000-4000-8000-000000000000",
+    "reason": "LAST_PLAYER_STANDING",
+    "placements": [
+      {
+        "playerId": "00000000-0000-4000-8000-000000000000",
+        "place": 1
+      },
+      {
+        "playerId": "00000000-0000-4000-8000-000000000001",
+        "place": 2
+      }
+    ],
+    "metrics": {
+      "turnsPlayed": 3,
+      "actionsDeclared": 3
+    }
+  }
+}

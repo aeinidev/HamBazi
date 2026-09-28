@@ -586,7 +586,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 10C; takeover reclaim stays disabled by the documented MVP baseline unless `OD-004` is explicitly changed via ADR.
 - **Acceptance criteria:** time/randomness are dependency-driven; bot has no hidden-state advantage; old fixtures migrate/replay or fail with a stable incompatibility code.
 - **Required tests and validations:** timer tests, deck property tests, bot-valid-command tests, replay/migration/golden-view tests, architecture checks, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Authorization / prerequisite check (2026-09-28):** owner approved 10C and explicitly authorized 10D. Started with a clean worktree at `e543cec` (Phase 10C). Read the named reviewed architecture, AGENTS, complete plan and execution protocol, then inspected manifests/task graph, Game Core, claims engine, activation ADR and tests. All 49 prerequisite Coup tests passed. No earlier phase repair or activation was necessary.
+- **Delivered:** additive `coupModule` / `coupEngine` (`coup-v1`, state schema 4, provisional complete ruleset, command/event schemas 3); Ambassador Exchange with private draw/selection and returned-card shuffle; explicit snapshotted action/response/decision durations; persisted deadlines and event timestamps; trusted timeout execution with stale/early/duplicate guards and deterministic fallbacks. Added server-computed legal commands, PlayerView-only bot policy, spectator-only post-takeover projection, frontend presentation/version contract, standard result metrics, validated snapshot/event compatibility hooks and synthetic replay/golden fixtures. Prior core/claims engines remain unchanged. [Module documentation](architecture/coup-module.md) describes the complete public surface and integration obligations.
+- **Decisions:** [ADR-022](adr/022-coup-module-version-and-policies.md) records offline version isolation, explicit configuration with no production timeout defaults, deterministic timer/bot policies, no deadline reset/reclaim on reconnect, and compatibility behavior. Current snapshots/events validate through identity migration/upcasting; old versions replay with their retained engines and cross-version migration fails with `INCOMPATIBLE_GAME_VERSION`, without inventing timestamps or altering pinned rules. The frontend artifact is an adapter contract, not a React renderer. OD-004 baseline and OD-008 remain unchanged; no activation decision was made.
+- **Verification:** frozen-lockfile installation; scoped Game Core build and Coup typecheck/test/build; targeted formatting; lint; architecture checks; full `pnpm check`; and `git diff --check` passed. Coup has 79 passing tests (30 new), including 50 mixed action/timeout games across 2–6 players, 20 differential games against claims-v1, static replay fixtures for state schemas 2/3/4, every-phase player/spectator goldens, hidden-state noninterference, bot-valid commands, deadline/race guards and corrupt restoration/replay rejection. Root gate: 1,332 passing tests including infra, 11 builds, typechecks, all five existing API contract checks, and 13-workspace/132-source architecture audit; unchanged tasks may use Turbo cache. Development schema-literal/fixture typing, a fixture-generation target typo and an expired-window test-driver assumption were corrected before the final passing run.
+- **Limits / mandatory stop:** no dependency/lockfile change, database migration, application command transaction, Worker job, Socket/UI implementation, catalog activation, production duration choice, commit, push, deploy or live Telegram change. Production CSPRNG composition, atomic Match persistence/idempotency, queue orchestration and authenticated bot/takeover integration remain their owning phases. Service-backed integration and staging E2E were not applicable to this pure library change; local verification is not live gameplay or launch readiness. Stop at 10D; Phase 11A requires separate authorization.
 
 ### Phase 11A — Match lifecycle and atomic command processing
 
@@ -750,9 +755,9 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 10C — Coup claims, challenges, and blocks — is complete with local
-library verification. Stop after the 10C report. Phase 10D — Exchange, timers,
-bot policy, and engine compatibility — is next and awaits explicit authorization. Socket
+Phase 10D — Exchange, timers, bot policy, and engine compatibility — is complete
+with local library verification. Stop after the 10D report. Phase 11A — Match
+lifecycle and atomic command processing — is next and awaits explicit authorization. Socket
 wiring remains Phase 12A and dispatch remains 11B. Phase 7C and complete
 gameplay readiness remain mandatory before live activation; parent Phase 7
 remains In Progress for that deferred scope.
@@ -763,9 +768,9 @@ explicitly configured; the production catalog still rejects new room admission.
 Invite onboarding, durable room admission and matchmaking arbitration/orchestration
 are locally verified. Matchmaking exposes authenticated search/cancel/status and
 session-bound admission ports plus trusted Redis coordination ticks. The offline
-Coup engines now handle core actions plus versioned claims, challenges, blocks,
-replacement draws and safe views, but no
-production matcher scheduler, Socket transport or complete playable game exists
+Coup module now includes all direct actions, Exchange, deadline/timeout policies,
+PlayerView-only bots, safe frontend projections, results and compatibility fixtures.
+No production matcher scheduler, Socket transport or integrated playable game exists
 yet. Join/leave/start remain application ports, and no playable
 account-to-gameplay loop exists.
 

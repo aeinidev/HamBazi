@@ -1,0 +1,406 @@
+{
+  "initial": {
+    "engineVersion": "coup-core-v1",
+    "stateSchemaVersion": 2,
+    "rulesetVersion": "coup-provisional-core-v1",
+    "phase": "WAITING_FOR_ACTION",
+    "createdAt": 1000,
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "rules": {
+      "rulesetVersion": "coup-provisional-core-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10
+    },
+    "pendingAction": null,
+    "winnerId": null,
+    "eliminationOrder": [],
+    "actionCount": 0,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "influence": ["DUKE", "DUKE"],
+        "revealed": []
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 7,
+        "influence": ["DUKE", "ASSASSIN"],
+        "revealed": []
+      }
+    ],
+    "deck": [
+      "ASSASSIN",
+      "ASSASSIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "CONTESSA",
+      "CONTESSA",
+      "CONTESSA"
+    ]
+  },
+  "events": [
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "COUP",
+      "targetId": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": -7
+    },
+    {
+      "type": "INFLUENCE_LOST",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "cardIndex": 0,
+      "role": "DUKE"
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 2
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "COUP",
+      "targetId": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": -7
+    },
+    {
+      "type": "INFLUENCE_LOST",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "cardIndex": 0,
+      "role": "DUKE"
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 3
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 4
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 5
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 6
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 7
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 8
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 9
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 10
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 11
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 12
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 13
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 14
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 15
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "turnNumber": 16
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "action": "INCOME"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "delta": 1
+    },
+    {
+      "type": "TURN_STARTED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "turnNumber": 17
+    },
+    {
+      "type": "ACTION_DECLARED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "action": "COUP",
+      "targetId": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "type": "COINS_CHANGED",
+      "playerId": "00000000-0000-4000-8000-000000000000",
+      "delta": -7
+    },
+    {
+      "type": "INFLUENCE_LOST",
+      "playerId": "00000000-0000-4000-8000-000000000001",
+      "cardIndex": 0,
+      "role": "ASSASSIN"
+    },
+    {
+      "type": "PLAYER_ELIMINATED",
+      "playerId": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "type": "GAME_ENDED",
+      "winnerId": "00000000-0000-4000-8000-000000000000",
+      "reason": "LAST_PLAYER_STANDING"
+    }
+  ],
+  "final": {
+    "engineVersion": "coup-core-v1",
+    "stateSchemaVersion": 2,
+    "rulesetVersion": "coup-provisional-core-v1",
+    "phase": "GAME_OVER",
+    "createdAt": 1000,
+    "turnNumber": 17,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "rules": {
+      "rulesetVersion": "coup-provisional-core-v1",
+      "copiesPerRole": 3,
+      "cardsPerPlayer": 2,
+      "startingCoins": 7,
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10
+    },
+    "pendingAction": null,
+    "winnerId": "00000000-0000-4000-8000-000000000000",
+    "eliminationOrder": ["00000000-0000-4000-8000-000000000001"],
+    "actionCount": 17,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 0,
+        "influence": ["DUKE"],
+        "revealed": ["DUKE"]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "seat": 1,
+        "coins": 7,
+        "influence": [],
+        "revealed": ["DUKE", "ASSASSIN"]
+      }
+    ],
+    "deck": [
+      "ASSASSIN",
+      "ASSASSIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "CAPTAIN",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "AMBASSADOR",
+      "CONTESSA",
+      "CONTESSA",
+      "CONTESSA"
+    ]
+  },
+  "result": {
+    "placements": [
+      {
+        "playerId": "00000000-0000-4000-8000-000000000000",
+        "place": 1
+      },
+      {
+        "playerId": "00000000-0000-4000-8000-000000000001",
+        "place": 2
+      }
+    ],
+    "winnerId": "00000000-0000-4000-8000-000000000000",
+    "reason": "LAST_PLAYER_STANDING",
+    "metrics": {
+      "turnsPlayed": 17,
+      "actionsDeclared": 17
+    }
+  }
+}

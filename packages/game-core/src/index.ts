@@ -85,3 +85,19 @@ export interface GameEngine<
   getResult(state: State): StandardGameResult | null;
   migrateState?(state: unknown, fromVersion: number): State;
 }
+
+/** Server-owned versioned strategy; receives the same projection as a human. */
+export interface GameBotPolicy<PlayerView, Command> {
+  readonly strategyVersion: string;
+  chooseCommand(view: PlayerView): Command | null;
+}
+/** Presentation boundary. Runtime adapters must reject unsupported/private payloads. */
+export interface GameFrontendAdapter<Presentation> {
+  readonly gameId: string;
+  readonly adapterVersion: string;
+  readonly engineVersion: string;
+  readonly route: string;
+  readonly rendererKey: string;
+  readonly assets: readonly string[];
+  toPresentation(view: unknown): Presentation;
+}
