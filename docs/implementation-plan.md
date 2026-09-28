@@ -572,7 +572,11 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 10B.
 - **Acceptance criteria:** every legal and illegal resolution path is specified; coins/cards/deck invariants hold; command ordering cannot double-resolve an action.
 - **Required tests and validations:** rule matrix tests, property/model tests, deterministic replay, hidden-state views, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Authorization / prerequisite check (2026-09-28):** owner approved 10B and explicitly authorized 10C. Worktree was clean at `196cf1b` (Phase 10B); 10B's engine, immutable state, safe views and replay tests were present. The required documents were read in this conversation; the current protocol, phase scope, code and manifests were reviewed. No earlier phase repair was necessary.
+- **Delivered:** additive offline `coupClaimsEngine`, descriptor `coup-claims-v1`, state schema 3, provisional claims ruleset and command/event schemas 2; Tax/Steal/Assassination, foreign-aid blocks, multiplayer challenge/pass/block windows, explicit proof/concession, replacement shuffle/draw, chosen influence losses, refund/payment ordering, elimination and next-turn/result handling. Revision/window guards reject duplicate or stale resolution; internal replay records replacement outcomes without RNG seed/material. Explicit player/spectator projections exclude other hands, deck and private continuation. Completed 10B version remains unchanged. See `docs/architecture/coup-claims.md` for the full resolution matrix and ordering.
+- **Verification:** frozen-lockfile installation passed without dependency changes. Package tests passed 49/49 (33 new cases, including a deterministic 60-game sweep across 2–6 players); package typecheck/build passed. Repository `pnpm check` passed formatting, lint, architecture boundaries (13 workspaces / 126 source files), typechecks, 1,302 tests including infra (unchanged tasks may use Turbo cache), 11 builds and all five API contract checks. Two test-fixture TypeScript errors found during development were corrected. `git diff --check` passed. No service-backed integration or staging E2E was needed for this isolated pure engine change; it does not establish live gameplay readiness.
+- **Decisions / limits:** new offline version preserves 10B semantics rather than changing pinned engines. All response windows require explicit input; timeout policy is 10D. Rule references and provisional sequencing are documented without resolving OD-008. No new architecture decision or ADR was required; existing activation gates remain. Exchange, bots, timers, upcasters, frontend adapter and compatibility fixtures remain 10D. No production registration, transport, persistence integration, migration, deployment, commit, push or live Telegram change. Stop at the 10C gate; 10D requires separate authorization.
 
 ### Phase 10D — Exchange, timers, bot policy, and engine compatibility
 
@@ -746,9 +750,9 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 10B — Coup core actions and turn lifecycle — is complete with local
-library verification. Stop after the 10B report. Phase 10C — Coup claims,
-challenges, and blocks — is next and awaits explicit authorization. Socket
+Phase 10C — Coup claims, challenges, and blocks — is complete with local
+library verification. Stop after the 10C report. Phase 10D — Exchange, timers,
+bot policy, and engine compatibility — is next and awaits explicit authorization. Socket
 wiring remains Phase 12A and dispatch remains 11B. Phase 7C and complete
 gameplay readiness remain mandatory before live activation; parent Phase 7
 remains In Progress for that deferred scope.
@@ -759,7 +763,8 @@ explicitly configured; the production catalog still rejects new room admission.
 Invite onboarding, durable room admission and matchmaking arbitration/orchestration
 are locally verified. Matchmaking exposes authenticated search/cancel/status and
 session-bound admission ports plus trusted Redis coordination ticks. The offline
-Coup core now handles income, provisional foreign aid, coup and results, but no
+Coup engines now handle core actions plus versioned claims, challenges, blocks,
+replacement draws and safe views, but no
 production matcher scheduler, Socket transport or complete playable game exists
 yet. Join/leave/start remain application ports, and no playable
 account-to-gameplay loop exists.

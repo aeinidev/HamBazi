@@ -20,3 +20,25 @@ export {
   getCoupResult,
 } from "./engine.js";
 export type { CoupErrorCode, CoupPlayerView, CoupSpectatorView } from "./engine.js";
+export {
+  coupClaimsDescriptor,
+  coupClaimsRulesSchema,
+  coupClaimsCommandSchema,
+  coupClaimsEventSchema,
+} from "./claims-model.js";
+export type {
+  CoupClaimsState,
+  CoupClaimsRules,
+  CoupClaimsCommand,
+  CoupClaimsEvent,
+} from "./claims-model.js";
+export {
+  coupClaimsEngine,
+  createCoupClaimsState,
+  validateCoupClaimsCommand,
+  executeCoupClaimsCommand,
+  applyCoupClaimsEvent,
+  getCoupClaimsPlayerView,
+  getCoupClaimsSpectatorView,
+  getCoupClaimsResult,
+} from "./claims-engine.js";
