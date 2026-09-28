@@ -224,6 +224,7 @@ model MatchPlayer {
   connectionEpoch  Int       @default(0) @map("connection_epoch")
   disconnectedAt   DateTime? @map("disconnected_at") @db.Timestamptz(3)
   replacedAt       DateTime? @map("replaced_at") @db.Timestamptz(3)
+  readyAt          DateTime? @map("ready_at") @db.Timestamptz(3)
   joinedAt         DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
   match            Match     @relation(fields: [matchId], references: [id], onDelete: Restrict)
   user             User      @relation(fields: [userId], references: [id], onDelete: Restrict)
@@ -253,14 +254,15 @@ model GameEvent {
 model ProcessedCommand {
   matchId          String   @map("match_id") @db.Uuid
   actionId         String   @map("action_id") @db.Uuid
-  actorUserId      String   @map("actor_user_id") @db.Uuid
+  actorUserId      String?  @map("actor_user_id") @db.Uuid
   schemaVersion    Int      @map("schema_version")
   expectedVersion  Int      @map("expected_version")
   resultingVersion Int      @map("resulting_version")
+  requestDigest    String?  @map("request_digest") @db.Char(64)
   resultJsonb      Json     @map("result_jsonb") @db.JsonB
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   match            Match    @relation(fields: [matchId], references: [id], onDelete: Restrict)
-  actor            User     @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  actor            User?    @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@id([matchId, actionId])
   @@map("processed_commands")

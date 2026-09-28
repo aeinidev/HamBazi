@@ -25,7 +25,8 @@ export type DatabaseOwner = keyof typeof ownership;
 type ScopedClient<O extends DatabaseOwner> = Pick<
   Prisma.TransactionClient,
   (typeof ownership)[O][number]
->;
+> &
+  (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object);
 
 export class DatabaseError extends Error {
   readonly code: string;
@@ -54,11 +55,25 @@ function failure(error: unknown): DatabaseError {
 function scope<O extends DatabaseOwner>(
   client: Prisma.TransactionClient,
   owner: O,
+  inTransaction = false,
 ): ScopedClient<O> {
   if (!Object.hasOwn(ownership, owner)) throw new DatabaseError("DATABASE_OWNER_INVALID");
-  return Object.freeze(
-    Object.fromEntries(ownership[owner].map((key) => [key, client[key]])),
-  ) as ScopedClient<O>;
+  return Object.freeze({
+    ...Object.fromEntries(ownership[owner].map((key) => [key, client[key]])),
+    ...(owner === "matches"
+      ? {
+          async lockMatch(id: string): Promise<void> {
+            if (
+              !inTransaction ||
+              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+            )
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            // Fixed table and parameterized identity; never expose arbitrary SQL.
+            await client.$queryRaw`SELECT id FROM matches WHERE id = ${id}::uuid FOR UPDATE`;
+          },
+        }
+      : {}),
+  }) as ScopedClient<O>;
 }
 
 export type DatabaseOptions = Readonly<{
@@ -127,7 +142,7 @@ export function createDatabase(options: DatabaseOptions) {
         ) =>
           safe(() =>
             client.$transaction(
-              (tx) => operation(scope(tx, owner)),
+              (tx) => operation(scope(tx, owner, true)),
               isolationLevel ? { isolationLevel } : {},
             ),
           ),

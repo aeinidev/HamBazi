@@ -162,3 +162,28 @@ it("keeps admission and reservation metadata exclusive to Matches", async () => 
     });
   await database.disconnect();
 });
+
+it("expands Match processing without rewriting history or exposing a general SQL interface", async () => {
+  const sql = await readFile(
+    new URL("../../prisma/migrations/202609290001_match_processing/migration.sql", import.meta.url),
+    "utf8",
+  );
+  expect(sql.startsWith("BEGIN;")).toBe(true);
+  expect(sql.trim().endsWith("COMMIT;")).toBe(true);
+  expect(sql).toContain("ADD COLUMN ready_at");
+  expect(sql).toContain("ADD COLUMN request_digest");
+  expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE|DELETE FROM|UPDATE processed_commands/);
+  const database = createDatabase(options);
+  await database.forModule("matches").execute(async (db) => {
+    expect("lockMatch" in db).toBe(true);
+    expect("$queryRaw" in db).toBe(false);
+    await expect(db.lockMatch("00000000-0000-4000-8000-000000000001")).rejects.toMatchObject({
+      code: "DATABASE_LOCK_INVALID",
+    });
+  });
+  for (const owner of ["users", "rooms", "outbox"] as const)
+    await database.forModule(owner).execute(async (db) => {
+      expect("lockMatch" in db).toBe(false);
+    });
+  await database.disconnect();
+});

@@ -189,3 +189,14 @@ and is independently idempotent. Cleanup selects at most the requested limit
 HTTPS admission and configured Worker scheduling; neither runs merely by
 applying grants. See [internal transport operations](bot-internal-transport.md)
 and [ADR-016](../adr/016-onboarding-transports.md).
+
+## Match writer extension (Phase 11A)
+
+Matches alone has a fixed `lockMatch(uuid)` helper on its scoped client. It is
+valid only inside a transaction and executes a parameterized row lock; there is
+still no arbitrary SQL escape hatch. Other owners cannot obtain this helper.
+The additive processing migration preserves old inserts/history while introducing
+nullable readiness/digest metadata and trusted lifecycle receipt actors.
+See [Match processing](match-processing.md) and [ADR-023](../adr/023-match-atomic-processing.md)
+for transaction ordering, compatibility and replay requirements. Future seat/state
+writers must serialize through the same Match lock.

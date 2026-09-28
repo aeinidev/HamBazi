@@ -17,6 +17,7 @@ const definitions = {
   NOT_FOUND: { message: "Resource not found", retryable: false },
   RATE_LIMITED: { message: "Request rate exceeded", retryable: true },
   GAME_STATE_CONFLICT: { message: "Client state is stale", retryable: true },
+  INCOMPATIBLE_GAME_VERSION: { message: "Unsupported game version", retryable: false },
   PROFILE_CONFLICT: { message: "Profile edit conflicts with current state", retryable: false },
   ROOM_CONFLICT: { message: "Room command conflicts with current state", retryable: false },
   MATCHMAKING_CONFLICT: {

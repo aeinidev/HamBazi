@@ -601,7 +601,15 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 10D and Phase 4B.
 - **Acceptance criteria:** accepted commands have at-most-once effect; state/event/version remain atomic; no network I/O occurs in the transaction.
 - **Required tests and validations:** lifecycle/domain tests, duplicate/stale/concurrent command integration tests, rollback/failure tests, deterministic replay, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization / prerequisites (2026-09-29):** owner authorized only 11A and confirmed continuation. Started from clean `main` at `6834457` (Phase 10D). Read the named reviewed architecture in `/home/mehdi/Downloads`, AGENTS, complete plan and execution protocol; the maintained architecture differs only in asset paths and the approved ADR-019 REST amendment. Inspected relevant manifests/task graph, database ownership/schema and existing Matches admission plus complete Coup interfaces. All 79 prerequisite Coup tests passed; no prior phase required repair or reimplementation.
+- **Delivered:** Matches lifecycle/application ports, strict v1 readiness/command/trusted lifecycle envelopes, pure lifecycle transition guard, synchronous generic game adapter and composition-only complete Coup integration with server CSPRNG. Durable readiness, recoverable STARTING, atomic initialization, engine-driven FINISHED and trusted TERMINATED transitions operate on existing CREATED records. Engine/state/ruleset pins remain immutable; restored snapshots must match the durable roster, and active commands use persisted rules even after adapter configuration changes.
+- **Atomicity / privacy:** Matches-only parameterized `SELECT … FOR UPDATE`, expectedVersion validation, actor/intent-bound `(match_id, action_id)` receipts and minimal cached acknowledgements. Lifecycle/seat changes, snapshot, ordered audit events, receipt and state-free `MATCH_CHANGED_V1` outbox intent commit together, with bounded transaction-conflict retries and no external network calls/publishing inside the transaction. Restricted initialization events permit replay without independent RNG-material storage. Additive nullable ready/digest metadata and trusted lifecycle actors preserve old insert shapes; legacy digest-less receipts fail closed. [ADR-023](adr/023-match-atomic-processing.md) and [Match processing](architecture/match-processing.md) record semantics and rollout/rollback limits.
+- **Verification:** frozen-lockfile install (including after recording two existing workspace dependency edges); Prisma format/validate/generation/build; scoped API typecheck/test/build; targeted formatting; lint; architecture checks; complete `pnpm check`; isolated `pnpm test:auth-http:local`; and diff review passed. Root gate: 1,347 tests including infrastructure, 12 workspace typecheck scripts, 11 builds, five unchanged OpenAPI compatibility checks and 13-workspace/136-source architecture audit. Unchanged tasks may use Turbo cache. Added 13 API unit/application/adapter tests, one database boundary/migration test and one additive shared-error case.
+- **Integration evidence:** 155 isolated PostgreSQL/Redis tests pass (16 database, 133 API, six Worker), including 14 new Match cases. Eight-request/two-client duplicates, distinct competing commands, ready/activation/termination races, stale/changed/foreign intents, post-commit retry after service reconstruction, bot-seat denial, unknown pins/corrupt state, rollback at each write stage, closed-database failure and complete persisted Coup replay/result equality pass. Migration deploy/redeploy, zero Prisma-visible drift and previous account/session/room expansion regressions pass. Real PostgreSQL restart comparison now includes Match snapshots, seats, game events, processed commands and outbox. Existing admission/matchmaking/Redis outage tests remain green.
+- **Corrections / environment:** corrected JSON type naming, nullable/UUID test-fixture typing, an out-of-range synthetic rule value and test commands using `INCOME` instead of the established `DECLARE_INCOME` intent. Final runs have zero failures. PostgreSQL 18.6 Ubuntu packages were checksum-verified against local package metadata and extracted into a phase-specific temporary directory without system installation. Harness-owned clusters, Redis containers and temporary credentials were cleaned; downloaded binary cache remains reusable.
+- **Limits / mandatory stop:** 11A is complete as an application boundary, not a live playable service. Only workspace dependency edges changed; no dependency versions, production duration/rules values, grants, live migration, commit, push, deploy or Telegram settings changed. No outbox dispatcher/result projection, Socket/resync transport, matcher scheduler, private-room-to-Match orchestration, timer/reconnect/takeover jobs, admin route or UI was added. These factories are opt-in; catalog/7C activation and OD-008 remain gated. Staging gameplay E2E has no configured environment, executable transport/UI or declared E2E script; local verification is not load/soak/network-partition or launch-readiness evidence. Stop after 11A; 11B requires separate authorization.
 
 ### Phase 11B — Transactional outbox and result projection inputs
 
@@ -755,12 +763,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 10D — Exchange, timers, bot policy, and engine compatibility — is complete
-with local library verification. Stop after the 10D report. Phase 11A — Match
-lifecycle and atomic command processing — is next and awaits explicit authorization. Socket
-wiring remains Phase 12A and dispatch remains 11B. Phase 7C and complete
-gameplay readiness remain mandatory before live activation; parent Phase 7
-remains In Progress for that deferred scope.
+Phase 11A — Match lifecycle and atomic command processing — is complete with
+local application/database verification. Stop after the 11A report. Phase 11B —
+Transactional outbox and result projection inputs — is next and awaits explicit
+authorization. Socket wiring remains Phase 12A. Phase 7C and complete gameplay
+readiness remain mandatory before live activation; parent Phase 7 remains In
+Progress for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
@@ -770,8 +778,10 @@ are locally verified. Matchmaking exposes authenticated search/cancel/status and
 session-bound admission ports plus trusted Redis coordination ticks. The offline
 Coup module now includes all direct actions, Exchange, deadline/timeout policies,
 PlayerView-only bots, safe frontend projections, results and compatibility fixtures.
-No production matcher scheduler, Socket transport or integrated playable game exists
-yet. Join/leave/start remain application ports, and no playable
+Matches now provides opt-in lifecycle/readiness and row-locked atomic command
+processing with pinned Coup integration, durable replay and safe retry acknowledgements.
+No production matcher scheduler, outbox dispatcher, Socket transport or integrated
+playable game exists yet. Join/leave/start remain application ports, and no playable
 account-to-gameplay loop exists.
 
 No deployment, production migration, commit or live Telegram change was performed.
