@@ -40,6 +40,7 @@ function fixture() {
     matchId: null,
   };
   const repository: AdmissionRepository = {
+    authorize: vi.fn(async () => ({ matchId: randomUUID() })),
     receipt: vi.fn(async () => null),
     register: vi.fn(async () => ticket),
     read: vi.fn(async () => ticket),

@@ -488,7 +488,7 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 8B and database/Redis foundations.
 - **Acceptance criteria:** exactly one of `MATCHED` or `CANCELLED` wins; match-found is exposed only after DB commit; Redis loss cannot erase a committed match.
 - **Required tests and validations:** unit/integration tests, cancel-vs-match concurrency tests, duplicate enqueue tests, Redis/DB failure tests, lint/typecheck/build.
-- **Status:** In Progress
+- **Status:** Completed
 - **Authorization / assessment (2026-09-27):** owner explicitly authorized Phase 9. Starting worktree was clean on `main` at `49f4083` (Phase 8B). Read the four required sources in full, using the documented canonical `docs/ARCHITECTURE.md` resolution. Inspected relevant manifests/task graph, Users eligibility, Games catalog, Rooms ports, database schema/ownership, Redis adapter conventions and the isolated integration harness. No earlier completed prerequisite was found defective or requiring reimplementation. Matchmaking and Matches are expected empty public surfaces; the match-creation port is an explicit Phase 9 deliverable, not a missing earlier-phase prerequisite.
 - **Historical decision gate (resolved):** architecture section 9.3 requires Redis TTL reservations, durable Match creation, compensation and exactly one cancellation/match winner, but does not specify cancellation during reservation or arbitration after an uncertain DB commit/Redis loss. A Redis-only release after timeout cannot establish that a delayed database transaction will not commit. The execution protocol's Handling Ambiguity section requires an owner decision before changes materially affecting persistence, security or public behavior. Pause before implementing the following proposed durable arbitration and cancellation contract; this is a Phase 9 design decision, not a claim that Phase 8B failed.
 - **Approved policy:** Redis owns FIFO queue ordering, atomic enqueue/claim and TTL reservations partitioned by game/mode/capacity. A minimal Matches-owned durable admission record fences each stable ticket identity and reservation generation through its public application port. It records actor/game/mode, immutable intent identity, deadlines, generation and terminal disposition, without queue payloads, credentials or game state. Registration serializes active attempts for the same user/game/mode; changing capacity while an attempt is active conflicts. Matchmaking never queries Matches tables directly.
@@ -497,6 +497,8 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Historical assessment-only result / verification:** only this plan is modified. No product implementation, dependency, schema/grant, accepted ADR, service startup, migration, commit, deployment or live Telegram change. `pnpm format:check` and `git diff --check` pass; final diff/status review confirms this is the sole modified file. Behavior/unit/integration/build/E2E checks were not run for this documentation-only assessment. Existing historical test results are not new evidence. Resume Phase 9 after the focused arbitration/cancellation decision, not Phase 10A.
 
 - **Approval / implementation split (2026-09-27):** owner explicitly answered “Approved” to the durable arbitration/cancellation proposal. [ADR-021](adr/021-matchmaking-arbitration.md) records acceptance. Split Phase 9 into independently reviewable 9A (durable arbitration/atomic creation) and 9B (Redis orchestration/admission credentials). Complete only 9A in this interaction and stop at its gate. The parent phase is not complete until both subphases pass.
+
+- **Completion (2026-09-28):** 9A and 9B are implemented and their available local verification passes. Matchmaking is usable through authenticated application ports and trusted ticks; production composition/activation, Socket transport and outbox dispatch remain explicitly deferred to the owning phases. Stop at the 9B report before 10A.
 
 ### Phase 9A — Durable admission arbitration and atomic match creation
 
@@ -523,7 +525,16 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** completed 9A and explicit authorization to proceed; current Users/Games admission checks. Production readiness remains subject to 7C and executable descriptor integration.
 - **Acceptance criteria:** FIFO selection within partition; duplicate enqueue and cancel-versus-match have one logical outcome; match-found requires DB commit; stale/foreign/expired admission credentials fail; Redis loss cannot erase or duplicate committed assignment.
 - **Required tests and validations:** real Redis/PostgreSQL races, duplicate enqueue, reservation expiry/release, Redis outage/restart loss, ambiguous DB commit, token tamper/expiry/identity checks, contracts, lint/boundaries/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization / implementation (2026-09-28):** owner approved continuing to 9B after the 9A gate. Re-read all four required sources using the documented canonical architecture path and inspected the clean committed 9A worktree on `main` at `330f986`. Verified the relevant public arbitration/session ports, Redis ACL/client conventions and existing integration harness; no completed prerequisite needed reimplementation. Implemented bounded FIFO coordination, durable recovery, session-bound credentials and current membership checks. No production activation, transport, dispatcher or later phase is included.
+
+- **Delivered:** Matchmaking application ports and strict v1 command/additive receiver schemas; bounded Lua FIFO queues partitioned by game/mode/capacity, generation-aware duplicate enqueue/cancellation cleanup, recoverable TTL claims and shared per-user search/read/cancel budgets. A trusted bounded tick reserves/commits/releases through Matches only; uncertain responses are durably reconciled before Redis compensation. Queue loss is recovered through stable command receipts, without losing or duplicating committed assignments. No background process or transport starts automatically.
+- **Admission / security:** dedicated-purpose rotatable local HS256 credentials bind user/session/ticket/Match, expire within an explicitly configured 1–300 seconds and never outlive the session. Current session and Matches-owned HUMAN membership/admissible lifecycle checks are required for issue/use. Credentials stay redacted and absent from Redis, PostgreSQL, outbox and telemetry. Redis failure denies new search but preserves durable authenticated cancellation/status/admission recovery; counters report rate degradation. Added only API Redis `+time` for lease time; Worker ACL and database grants/schema are unchanged. The existing token-free outbox remains the post-commit handoff. ADR-021 and the matchmaking runbook document these integration details and rollback/recovery boundaries.
+- **Verification:** frozen-lockfile install, scoped API typecheck/unit tests, formatting/lint, full `pnpm check`, isolated `pnpm test:auth-http:local` and final diff review pass. Root gate: 1,250 tests (665 API, 212 config, 159 architecture/tooling, 112 validation, 48 Bot, 18 database, 15 TypeScript, 14 Worker, seven infrastructure), 12 workspace typecheck scripts, 11 builds, all five existing OpenAPI checks and 13-workspace/122-source architecture audit. Unchanged tasks may reuse valid Turbo cache. Added 35 unit/application/credential tests and 12 real integration cases; existing infrastructure ACL assertions and admission fixtures are extended.
+- **Integration evidence:** all 141 isolated tests pass (16 database, 119 API, six Worker). Coverage includes eight concurrent duplicate searches across instances, FIFO/capacity isolation, 12 repeated cancel-versus-match races, abandoned claims and exact expiry, stale enqueue/cleanup fencing, lost commit responses, unavailable arbitration, current session/revocation/seat checks, distributed quota exhaustion/TTL, complete queue loss during a durable reservation, and actual Redis stop/restart with successful durable cancellation/committed admission recovery. Migration deploy/redeploy, prior-schema preservation, zero Prisma-visible drift and durable PostgreSQL restart regressions pass. Production catalog activation was not enabled.
+- **Corrections / environment:** corrected contextual typing of the frozen credential codec, added the read-only membership method to test fixtures, and fixed generation precedence during delayed Redis cleanup. The first integration runs exposed the new Lua lease script's denied TIME command; adding API-only `+time` resolved it, without broadening dangerous commands or key scopes. A temporary tool-environment reset removed earlier processes/logs/binaries, so final evidence was rerun using checksum-verified PostgreSQL 18.6 packages extracted into a task-specific temporary directory and the pinned Docker Redis image. Temporary diagnostics were removed. Harness-owned services/data/credentials were cleaned; no system packages were installed.
+- **Limits / mandatory stop:** Phase 9 is complete as an application boundary with local evidence, not a playable or deployed service. No dependency/lockfile change, database migration, live operator control, production values/key provisioning, matcher scheduler/runtime activation, Socket wiring, outbox dispatcher, engine or UI is introduced. Redis loss discards FIFO order; clients retry stable commands to rebuild pending tickets, and terminal receipts have no new deletion policy. Final maintenance/eligibility integration, executable descriptors and 7C remain activation gates. No commit, push, deployment, production data change or live Telegram change was performed. Staging gameplay E2E is unavailable without its environment and unfinished transport/gameplay; live Telegram smoke remains owner-deferred. Load/soak/network-partition and centralized metrics remain later gates. Stop here; 10A is next and unauthorized.
 
 ### Phase 10A — Game-core contract and Coup model foundation
 
@@ -727,23 +738,23 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 9A — Durable admission arbitration and atomic match creation — is complete
-with its available local verification under accepted ADR-021. Parent Phase 9
-remains In Progress. Stop after the 9A report; Phase 9B — Redis matchmaking
-orchestration and admission credentials — is next and awaits explicit subphase-gate
-authorization. Socket wiring remains Phase 12A and dispatch remains 11B. No later
-phase has begun. Phase 7C and complete gameplay readiness remain mandatory before
-live activation; parent Phase 7 remains In Progress for that deferred scope.
+Phase 9B — Redis matchmaking orchestration and admission credentials — and parent
+Phase 9 are complete with available local verification under ADR-021. Stop after
+the 9B report. Phase 10A — Game-core contract and Coup model foundation — is next
+and awaits explicit authorization. Socket wiring remains Phase 12A and dispatch
+remains 11B. Phase 7C and complete gameplay readiness remain mandatory before live
+activation; parent Phase 7 remains In Progress for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
 explicitly configured; the production catalog still rejects new room admission.
-Invite onboarding handoff and durable room admission are locally verified. Matches
-now also exposes a locally verified durable matchmaking-arbitration port, without
-a Redis matcher, transport or playable game. Join/leave/start are
-application ports only, and no playable account-to-gameplay loop exists yet.
-No application deployment, production migration, commit or live Telegram change
-was performed. Live webhook/chat E2E remains owner-deferred until public HTTPS
-exists. Production ingress, centralized observability, global abuse hardening,
-full Docker PostgreSQL-volume recovery, network-partition and staging E2E/load
-gates remain outstanding.
+Invite onboarding, durable room admission and matchmaking arbitration/orchestration
+are locally verified. Matchmaking exposes authenticated search/cancel/status and
+session-bound admission ports plus trusted Redis coordination ticks. No production
+matcher scheduler, Socket transport or playable game exists yet. Join/leave/start
+remain application ports, and no playable account-to-gameplay loop exists.
+
+No deployment, production migration, commit or live Telegram change was performed.
+Live webhook/chat E2E remains owner-deferred until public HTTPS exists. Production
+ingress, centralized observability, global abuse hardening, full Docker PostgreSQL
+volume recovery, network-partition and staging E2E/load gates remain outstanding.

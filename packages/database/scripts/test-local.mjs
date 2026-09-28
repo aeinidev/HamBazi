@@ -322,6 +322,7 @@ if (!bin) {
         "catalog.test.ts",
         "rooms.test.ts",
         "match-admission.test.ts",
+        "matchmaking.test.ts",
       ]) {
         const result = await run(
           process.execPath,

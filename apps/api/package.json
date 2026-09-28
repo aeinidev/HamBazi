@@ -23,7 +23,7 @@
     "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
-    "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches",
+    "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking",
     "test:integration": "vitest run tests/integration"
   },
   "dependencies": {

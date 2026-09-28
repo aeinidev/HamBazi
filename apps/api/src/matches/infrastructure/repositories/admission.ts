@@ -161,6 +161,26 @@ export function createAdmissionRepository(
           }),
         );
       }),
+    authorize: (actor, id) =>
+      transaction(async (db) => {
+        const ticket = await owned(db, actor, id);
+        if (ticket.status !== "MATCHED" || !ticket.matchId) throw new AdmissionFault("NOT_FOUND");
+        const match = await db.match.findUnique({ where: { id: ticket.matchId } });
+        const player = await db.matchPlayer.findFirst({
+          where: { matchId: ticket.matchId, userId: actor },
+        });
+        if (
+          !match ||
+          !["CREATED", "WAITING_FOR_PLAYERS", "READY", "STARTING", "ACTIVE"].includes(
+            match.status,
+          ) ||
+          !player ||
+          player.agentType !== "HUMAN" ||
+          player.connectionStatus === "REPLACED_BY_BOT"
+        )
+          throw new AdmissionFault("NOT_FOUND");
+        return { matchId: ticket.matchId };
+      }),
     reserve: (input) =>
       transaction(async (db) => {
         const refs = [...input.tickets].sort((a, b) => a.ticketId.localeCompare(b.ticketId));

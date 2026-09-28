@@ -118,6 +118,8 @@ describe("local service definition", () => {
     expect(redis).toContain("user default off");
     expect(redis.match(/~hambazi:\* &hambazi:\*/g)).toHaveLength(2);
     expect(redis.match(/-@dangerous/g)).toHaveLength(2);
+    expect(redis).toContain("-@dangerous +info +time\\nuser worker");
+    expect(redis.match(/\+time/g)).toHaveLength(1);
     expect(redis).toContain("--appendonly no --maxmemory-policy noeviction");
     expect(redis).toContain("--save ''");
   });

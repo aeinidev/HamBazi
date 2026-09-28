@@ -85,6 +85,7 @@ export interface AdmissionRepository {
   register(actor: string, input: TicketIntent): Promise<AdmissionTicket>;
   read(actor: string, ticketId: string): Promise<AdmissionTicket>;
   cancel(actor: string, ticketId: string): Promise<AdmissionTicket>;
+  authorize(actor: string, ticketId: string): Promise<{ matchId: string }>;
   reserve(input: ReservationIntent): Promise<AdmissionTicket[]>;
   release(reservationId: string): Promise<{ matchId: string | null }>;
   inspect(reservationId: string): Promise<{ matchId: string | null; tickets: AdmissionTicket[] }>;
@@ -170,6 +171,11 @@ export function admissionService(deps: {
       safe(async () => {
         const user = await actor(identity);
         return deps.repository.cancel(user, parse(ticketReferenceSchema, input).ticketId);
+      }),
+    authorize: (identity: unknown, input: unknown) =>
+      safe(async () => {
+        const user = await actor(identity);
+        return deps.repository.authorize(user, parse(ticketReferenceSchema, input).ticketId);
       }),
     // Trusted orchestration ports only. They are never directly exposed to clients.
     reserve: (input: unknown) =>
