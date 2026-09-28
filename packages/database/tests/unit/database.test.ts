@@ -187,3 +187,33 @@ it("expands Match processing without rewriting history or exposing a general SQL
     });
   await database.disconnect();
 });
+
+it("restricts outbox locks and consumer effects to their owning transaction boundary", async () => {
+  const database = createDatabase(options);
+  try {
+    await database.forModule("outbox").execute(async (db) => {
+      expect("$queryRaw" in db).toBe(false);
+      await expect(db.lockDueOutbox(new Date(0), 1)).rejects.toMatchObject({
+        code: "DATABASE_LOCK_INVALID",
+      });
+    });
+    let applied = false;
+    await expect(
+      database
+        .forModule("matches")
+        .consumeOnce("test-v1", "00000000-0000-4000-8000-000000000001", async () => {
+          applied = true;
+        }),
+    ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+    await expect(
+      database
+        .forModule("leaderboard")
+        .consumeOnce("invalid consumer", "00000000-0000-4000-8000-000000000001", async () => {
+          applied = true;
+        }),
+    ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+    expect(applied).toBe(false);
+  } finally {
+    await database.disconnect();
+  }
+});

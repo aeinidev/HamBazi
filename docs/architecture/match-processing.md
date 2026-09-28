@@ -58,7 +58,8 @@ operations and synchronous domain/engine work. Existing database pool/transactio
 limits apply; at most three transaction-conflict attempts are made.
 
 The transaction inserts ordered game_events, updates matches and any readiness
-marker, inserts the receipt and inserts one pending outbox row. Any failure rolls
+marker, inserts the receipt and inserts a pending MATCH_CHANGED_V1 outbox row. A finish
+also inserts MATCH_FINISHED_V1 in that transaction. Any failure rolls
 all writes back. A cache hit performs no writes or new random draws. No log/trace
 contains requests, cards, RNG material, state or database diagnostics.
 
@@ -71,8 +72,10 @@ for active stored versions; unsupported versions fail rather than silently upgra
 
 Outbox `MATCH_CHANGED_V1` schema 1 contains only `{schemaVersion, matchId,
 stateVersion, lastEventSeq, status}`. Treat it as a wake-up/reference, never as a
-raw gameplay broadcast or full finish-result contract. Phase 11B supplies dispatch,
-result inputs and correlation propagation; 12B supplies authorized projections.
+raw gameplay broadcast or full finish-result contract. Phase 11B supplies
+[transactional dispatch, result inputs and correlation propagation](match-outbox.md);
+12B supplies authorized projections. Trusted callers may pass validated requestId
+and traceparent context separately from the strict player envelope.
 
 `createCoupMatchGame(explicitRules)` is an opt-in composition adapter. It validates
 rules, uses `node:crypto.randomInt`, validates restored snapshots against the
@@ -95,7 +98,7 @@ engines. Never rewind Match versions, rewrite history, delete receipts or drop
 columns as an application rollback. A persisted STARTING Match can retry activation
 with the original action identity/version after recovery. An unavailable database
 returns a safe failure; callers retry the same identity after recovery. Redis loss
-has no effect on this writer. No dispatcher runs or externally publishes here.
+has no effect on this writer. This writer never publishes; the opt-in Phase 11B Worker dispatcher runs after commit.
 
 ## Verification
 

@@ -471,3 +471,67 @@ describe("PostgreSQL foundation", () => {
     expect(await sqlState(worker, sql, [gameId + "-other", eventId])).toBeUndefined();
   });
 });
+
+it("atomically deduplicates consumer effects across clients and rolls back failed effects/receipts", async () => {
+  const one = createDatabase({
+    ...options,
+    databaseUrl: { reveal: () => process.env.WORKER_DATABASE_URL! },
+  });
+  const two = createDatabase({
+    ...options,
+    databaseUrl: { reveal: () => process.env.WORKER_DATABASE_URL! },
+  });
+  const consumer = `fixture-${randomUUID()}`;
+  const eventId = randomUUID();
+  const identity = { userId, gameId, metric: "synthetic_consumer", period: "test" };
+  try {
+    const results = await Promise.all(
+      Array.from({ length: 8 }, (_, i) =>
+        (i % 2 ? one : two).forModule("leaderboard").consumeOnce(consumer, eventId, async (db) => {
+          await db.userGameStats.upsert({
+            where: { userId_gameId_metric_period: identity },
+            create: { ...identity, value: 1n },
+            update: { value: { increment: 1n } },
+          });
+        }),
+      ),
+    );
+    expect(results.filter((r) => r === "APPLIED")).toHaveLength(1);
+    expect(results.filter((r) => r === "DUPLICATE")).toHaveLength(7);
+    const failedId = randomUUID();
+    await expect(
+      one.forModule("leaderboard").consumeOnce(consumer, failedId, async (db) => {
+        await db.userGameStats.update({
+          where: { userId_gameId_metric_period: identity },
+          data: { value: { increment: 10n } },
+        });
+        throw new Error("synthetic rollback");
+      }),
+    ).rejects.toThrow();
+    expect(
+      await one
+        .forModule("leaderboard")
+        .execute((db) => db.consumerReceipt.count({ where: { consumer, eventId: failedId } })),
+    ).toBe(0);
+    expect(
+      (
+        await one.forModule("leaderboard").execute((db) =>
+          db.userGameStats.findUniqueOrThrow({
+            where: { userId_gameId_metric_period: identity },
+          }),
+        )
+      ).value,
+    ).toBe(1n);
+    expect(
+      await two.forModule("leaderboard").consumeOnce(consumer, failedId, async (db) => {
+        await db.userGameStats.update({
+          where: { userId_gameId_metric_period: identity },
+          data: { value: { increment: 1n } },
+        });
+      }),
+    ).toBe("APPLIED");
+  } finally {
+    await one.disconnect();
+    await two.disconnect();
+  }
+});

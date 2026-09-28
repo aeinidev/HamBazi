@@ -65,14 +65,18 @@ describe("Match application boundary", () => {
     const f = fixture();
     const input = request();
     await f.port.lifecycle({ ...input, operation: "WAIT" });
-    expect(f.process).toHaveBeenCalledWith(null, {
-      ...input,
-      kind: "LIFECYCLE",
-      operation: "WAIT",
-    });
+    expect(f.process).toHaveBeenCalledWith(
+      null,
+      {
+        ...input,
+        kind: "LIFECYCLE",
+        operation: "WAIT",
+      },
+      {},
+    );
     expect(f.users.findActiveById).not.toHaveBeenCalled();
     await f.port.ready(actor, input);
-    expect(f.process).toHaveBeenLastCalledWith(actor, { ...input, kind: "READY" });
+    expect(f.process).toHaveBeenLastCalledWith(actor, { ...input, kind: "READY" }, {});
   });
   it("sanitizes failures but preserves stable domain codes", async () => {
     const f = fixture();
@@ -120,4 +124,23 @@ describe("server Coup Match adapter", () => {
     ).toEqual(state);
     expect(() => game.execute(snapshot, { type: "CHEAT" }, actor, 1001)).toThrow("INVALID_INPUT");
   });
+});
+
+it("accepts correlation only as validated trusted context, not as player envelope fields", async () => {
+  const f = fixture();
+  const input = { ...request(), command: { type: "DECLARE_INCOME" } };
+  const correlation = {
+    requestId: randomUUID(),
+    traceparent: "00-11111111111111111111111111111111-2222222222222222-01",
+  };
+  await f.port.command(actor, input, correlation);
+  expect(f.process).toHaveBeenLastCalledWith(actor, { ...input, kind: "GAME" }, correlation);
+  expect(
+    await f.port.command(actor, { ...input, traceparent: correlation.traceparent }),
+  ).toMatchObject({ error: { code: "INVALID_INPUT" } });
+  expect(
+    await f.port.command(actor, input, {
+      traceparent: "00-00000000000000000000000000000000-2222222222222222-01",
+    }),
+  ).toMatchObject({ error: { code: "INVALID_INPUT" } });
 });

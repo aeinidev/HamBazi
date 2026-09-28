@@ -1,3 +1,4 @@
+import { matchCorrelationSchema, type MatchCorrelation } from "./correlation.js";
 import { z } from "zod";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
 import type { GameVersionDescriptor, StandardGameResult } from "@hambazi/game-core";
@@ -72,7 +73,11 @@ export interface MatchGame {
   };
 }
 export interface MatchProcessingRepository {
-  process(actor: string | null, request: MatchRequest): Promise<MatchAck>;
+  process(
+    actor: string | null,
+    request: MatchRequest,
+    correlation?: MatchCorrelation,
+  ): Promise<MatchAck>;
 }
 export function matchProcessingService(deps: {
   repository: MatchProcessingRepository;
@@ -98,23 +103,35 @@ export function matchProcessingService(deps: {
   }
   return Object.freeze({
     // Identity is supplied by authenticated composition, never extracted from the intent.
-    command: (identity: unknown, input: unknown) =>
+    command: (identity: unknown, input: unknown, context: unknown = {}) =>
       safe(async () => {
         const request = parse(matchCommandSchema, input);
-        return deps.repository.process(await actor(identity), { ...request, kind: "GAME" });
+        return deps.repository.process(
+          await actor(identity),
+          { ...request, kind: "GAME" },
+          parse(matchCorrelationSchema, context),
+        );
       }),
-    ready: (identity: unknown, input: unknown) =>
+    ready: (identity: unknown, input: unknown, context: unknown = {}) =>
       safe(async () => {
         const request = parse(matchReadySchema, input);
-        return deps.repository.process(await actor(identity), { ...request, kind: "READY" });
+        return deps.repository.process(
+          await actor(identity),
+          { ...request, kind: "READY" },
+          parse(matchCorrelationSchema, context),
+        );
       }),
     // Trusted orchestration only. An operator route must add separate admin authorization.
-    lifecycle: (input: unknown) =>
+    lifecycle: (input: unknown, context: unknown = {}) =>
       safe(() =>
-        deps.repository.process(null, {
-          ...parse(matchLifecycleSchema, input),
-          kind: "LIFECYCLE",
-        }),
+        deps.repository.process(
+          null,
+          {
+            ...parse(matchLifecycleSchema, input),
+            kind: "LIFECYCLE",
+          },
+          parse(matchCorrelationSchema, context),
+        ),
       ),
   });
 }

@@ -286,6 +286,36 @@ it("pins versions, fails unknown engines and corrupt snapshots closed", async ()
 it("finishes a complete game and exactly replays persisted initialization/events and result", async () => {
   const f = await fixture();
   await f.active();
+  const correlation = {
+    requestId: randomUUID(),
+    traceparent: "00-11111111111111111111111111111111-2222222222222222-01",
+  };
+  const scope = a.forModule("matches");
+  const rejectFinish = {
+    ...a,
+    forModule: () => ({
+      ...scope,
+      transaction: (operation: Parameters<typeof scope.transaction>[0]) =>
+        scope.transaction((db) =>
+          operation({
+            ...db,
+            outboxEvent: new Proxy(db.outboxEvent, {
+              get(target, key) {
+                if (key === "create")
+                  return (input: Parameters<typeof target.create>[0]) => {
+                    if (input.data.type === "MATCH_FINISHED_V1")
+                      throw new Error("synthetic finish insertion failure");
+                    return target.create(input);
+                  };
+                return Reflect.get(target, key);
+              },
+            }),
+          }),
+        ),
+    }),
+  } as typeof a;
+  const failurePort = createMatchProcessingPort(rejectFinish, f.config, f.users);
+  let rolledBackFinish = false;
   let previous:
     | { input: ReturnType<typeof f.request> & { command: unknown }; actor: string; ack: MatchAck }
     | undefined;
@@ -304,10 +334,17 @@ it("finishes a complete game and exactly replays persisted initialization/events
             }
           : { type: "DECLARE_INCOME" };
     const input = { ...f.request(saved.match.stateVersion), command };
-    previous = { input, actor, ack: value(await f.first.command(actor, input)) };
+    const attempt = await failurePort.command(actor, input, correlation);
+    if (!attempt.ok) {
+      expect(attempt.error.code).toBe("INTERNAL_ERROR");
+      expect(await f.stored()).toEqual(saved);
+      rolledBackFinish = true;
+      previous = { input, actor, ack: value(await f.first.command(actor, input, correlation)) };
+    } else previous = { input, actor, ack: attempt.value };
   }
   const saved = await f.stored();
   expect(saved.match.status).toBe("FINISHED");
+  expect(rolledBackFinish).toBe(true);
   expect(saved.match.finishedAt).not.toBeNull();
   const baseline = saved.events.find((event) => event.type === "MATCH_INITIALIZED_V1")!;
   let replay = migrateCoupState((baseline.payloadJsonb as { snapshot: unknown }).snapshot, 4);
@@ -321,7 +358,13 @@ it("finishes a complete game and exactly replays persisted initialization/events
     coupEngine.getResult(migrateCoupState(saved.match.stateJsonb, 4)),
   );
   expect(saved.commands).toHaveLength(saved.match.stateVersion);
-  expect(saved.outbox).toHaveLength(saved.match.stateVersion);
+  expect(saved.outbox).toHaveLength(saved.match.stateVersion + 1);
+  const finishes = saved.outbox.filter((event) => event.type === "MATCH_FINISHED_V1");
+  expect(finishes).toHaveLength(1);
+  expect(finishes[0]).toMatchObject(correlation);
+  expect((finishes[0]!.payloadJsonb as { result: unknown }).result).toEqual(
+    coupEngine.getResult(replay),
+  );
   expect(saved.events.map((event) => event.seq)).toEqual(
     Array.from({ length: saved.match.lastEventSeq }, (_, i) => i + 1),
   );

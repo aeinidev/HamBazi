@@ -2,7 +2,9 @@ import { pino } from "pino";
 import { startWorker } from "./runtime.js";
 const logger = pino({ base: null, timestamp: false });
 try {
-  const worker = await startWorker(process.env, (event) => logger.info({ event }));
+  const worker = await startWorker(process.env, (event, fields) =>
+    logger.info({ event, ...fields }),
+  );
   logger.info({ event: "worker.started" });
   let stopping = false;
   const shutdown = () => {

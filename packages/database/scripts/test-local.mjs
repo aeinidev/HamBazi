@@ -106,10 +106,12 @@ if (!bin) {
     let legacySessionId;
     let legacyRoomId;
     let legacyGameId;
+    let legacyOutboxId;
     if (process.argv.includes("--api-auth")) {
       stage = "populated foundation upgrade setup";
       // Isolated-cluster rehearsal only: establish the previous schema and a
       // synthetic old-release row, then let normal deploy apply the expansion.
+      legacyOutboxId = randomUUID();
       legacyId = randomUUID();
       legacySessionId = randomUUID();
       legacyRoomId = randomUUID();
@@ -122,6 +124,10 @@ if (!bin) {
             new URL("../prisma/migrations/202609130001_foundation/migration.sql", import.meta.url),
             "utf8",
           ),
+        );
+        await legacy.query(
+          "INSERT INTO outbox_events (id,aggregate_id,type,schema_version,payload_jsonb,status) VALUES ($1,$2,'legacy.fixture',1,'{}','PENDING')",
+          [legacyOutboxId, randomUUID()],
         );
         await legacy.query(
           "INSERT INTO users (id,telegram_user_id,display_name,public_handle,status,updated_at) VALUES ($1,17,'Legacy Synthetic','legacy_synthetic','ACTIVE',now())",
@@ -247,6 +253,24 @@ if (!bin) {
         await legacy.query("DELETE FROM room_members WHERE room_id=$1", [legacyRoomId]);
         await legacy.query("DELETE FROM rooms WHERE id=$1", [legacyRoomId]);
         await legacy.query("DELETE FROM games WHERE id=$1", [legacyGameId]);
+        const oldOutbox = await legacy.query(
+          "SELECT schema_version,status,attempts,payload_jsonb,claimed_until FROM outbox_events WHERE id=$1",
+          [legacyOutboxId],
+        );
+        if (
+          JSON.stringify(oldOutbox.rows) !==
+          JSON.stringify([
+            {
+              schema_version: 1,
+              status: "PENDING",
+              attempts: 0,
+              payload_jsonb: {},
+              claimed_until: null,
+            },
+          ])
+        )
+          throw new Error();
+        await legacy.query("DELETE FROM outbox_events WHERE id=$1", [legacyOutboxId]);
         // Remove only our known synthetic upgrade probe before the empty-fixture suite.
         await legacy.query("DELETE FROM sessions WHERE id=$1", [legacySessionId]);
         await legacy.query("DELETE FROM users WHERE id=$1", [legacyId]);
@@ -254,7 +278,7 @@ if (!bin) {
         await legacy.end();
       }
       console.info(
-        "Populated previous-schema expansion preserved synthetic old-release account, session, room and membership rows.",
+        "Populated previous-schema expansion preserved synthetic old-release account, session, room, membership and outbox rows.",
       );
     }
     stage = "schema drift";
@@ -300,7 +324,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 8) throw new Error();
+      if (result.rows[0].count !== 9) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -373,6 +397,9 @@ if (!bin) {
           const reservations = await client.query("SELECT * FROM match_reservations ORDER BY id");
           const matches = await client.query("SELECT * FROM matches ORDER BY id");
           const players = await client.query("SELECT * FROM match_players ORDER BY match_id, seat");
+          const consumerReceipts = await client.query(
+            "SELECT * FROM consumer_receipts ORDER BY consumer, event_id",
+          );
           const matchEvents = await client.query(
             "SELECT * FROM game_events ORDER BY match_id, seq",
           );
@@ -399,6 +426,7 @@ if (!bin) {
             outbox: outbox.rows,
             matchEvents: matchEvents.rows,
             matchCommands: matchCommands.rows,
+            consumerReceipts: consumerReceipts.rows,
             sessions: result.rows,
             accounts: accounts.rows,
             receipts: receipts.rows,

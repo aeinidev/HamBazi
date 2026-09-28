@@ -15,3 +15,4 @@ export {
 export { parseProfileConfig } from "./profile.js";
 export { parseCatalogConfig } from "./catalog.js";
 export { parseRoomsConfig } from "./rooms.js";
+export { parseOutboxWorkerConfig } from "./outbox-worker.js";

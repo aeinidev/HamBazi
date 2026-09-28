@@ -619,7 +619,15 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 11A.
 - **Acceptance criteria:** outbox row is written with state/events; nothing publishes before commit; retries may redeliver but cannot duplicate logical side effects.
 - **Required tests and validations:** commit/rollback tests, dispatcher retry and duplicate-delivery tests, failed-queue behavior, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization / prerequisites (2026-09-29):** owner explicitly approved 11B after the 11A gate. Starting worktree was clean at `b9a3472` (Phase 11A); required-source changes were checked against the fully reviewed versions, and the execution protocol, relevant plan, ADR-023 and Match implementation were reviewed. Verified only the existing atomic writer, outbox/receipt schema, ownership/grants and Worker/BullMQ composition. No blocking prerequisite or earlier-phase reimplementation was needed.
+- **Delivered:** Matches-owned outbox application/repository port exposed through `@hambazi/api/matches`; Worker polling and versioned BullMQ publication after claim commit; SKIP LOCKED bounded batches, expiring leases, monotonic attempt fencing, retry/backoff, quarantine and trusted same-event-ID redrive. Optional explicit configuration leaves dispatch disabled by default. Shutdown drains claims before closing publisher/database. The existing `matchmaking.found` v1 intent remains compatible.
+- **Atomic result / correlation:** finishing a Match now inserts strict `MATCH_FINISHED_V1` alongside its snapshot, audit events, receipt and change intent. Standard results must match the roster; finish-outbox failure rolls back the complete command and retry produces one result input. Validated trusted requestId/traceparent travels separately from player intent through transaction, outbox and job/consumer envelope. Telemetry projects only allowed identifiers/counters, never payload/state/raw errors.
+- **Persistence / consumer pattern:** additive nullable `claimed_until` migration and a single additional Worker delivery-column grant; fixed transaction-only outbox locking, no arbitrary SQL surface. Existing consumer receipts and owned effects commit atomically via the leaderboard-scoped `consumeOnce` primitive. Concurrent duplicates skip effects; failures roll back receipt/effect. [ADR-024](adr/024-transactional-outbox-delivery.md) and the [outbox runbook](architecture/match-outbox.md) document contracts, migration, recovery, rollout and rollback.
+- **Verification:** frozen-lockfile install; Prisma validation/generation; scoped API/Worker typechecks and API/Worker/Config/Database tests; targeted formatting; lint and architecture audit; complete `pnpm check`; isolated `pnpm test:auth-http:local`; and final diff/format review pass. Root gate: 1,368 tests, 12 workspace typecheck scripts, 11 builds, five unchanged OpenAPI checks, and 13-workspace/143-source architecture audit. Unchanged tasks may use Turbo cache. Added 21 root-gate cases and nine integration cases. Corrected a formatting-only failure and a new boundary test that initially expected an internal error code instead of the established sanitized database error. Final runs have zero failures. PostgreSQL 18.6 uses the previously verified extracted binaries; no system installation. The harness cleans its disposable clusters/Redis containers.
+- **Integration evidence:** all 164 isolated PostgreSQL/Redis tests pass (17 database, 133 API, 14 Worker), including nine added integration cases and extended finish/replay coverage. Verified uncommitted/rolled-back rows cannot dispatch, two-worker claims, stale/released fences, crash exhaustion, failed publication/backoff/redrive, malformed-event quarantine, legacy dispatch, BullMQ identity/context and publish-before-mark recovery, simulated queue-data loss with original-ID replay, Worker startup/drain, role restrictions, concurrent consumer deduplication and receipt/effect rollback. Nine migrations deploy/redeploy, populated legacy outbox expansion, zero Prisma-visible drift and real PostgreSQL restart comparisons including consumer receipts pass. Queue unavailability is injected at the publisher boundary; queue identity/replay uses real BullMQ/Redis. This is not a production Redis-loss drill.
+- **Limits:** PUBLISHED means enqueue acceptance, not consumer completion. Future real consumers remain in their owning phases; no placeholder consumer discards work. Realtime fanout/resync, gameplay jobs, result-table/statistics projection and automated incident detection remain pending. Trusted per-ID redrive preserves event IDs and fences; retained failed BullMQ jobs need owning-consumer retry after repair. No historical finish backfill, retention policy, production retry values, dependency version change, enabled deployment, live migration, commit, push or Telegram change. Staging gameplay E2E cannot run without its environment, integrated gameplay transport/UI and declared E2E script; live Telegram E2E remains owner-deferred. Phase 7C and full gameplay readiness still gate activation.
 
 ### Phase 12A — Versioned realtime contracts and authenticated gateway
 
@@ -763,12 +771,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 11A — Match lifecycle and atomic command processing — is complete with
-local application/database verification. Stop after the 11A report. Phase 11B —
-Transactional outbox and result projection inputs — is next and awaits explicit
-authorization. Socket wiring remains Phase 12A. Phase 7C and complete gameplay
-readiness remain mandatory before live activation; parent Phase 7 remains In
-Progress for that deferred scope.
+Phase 11B — Transactional outbox and result projection inputs — is complete with
+local application/database/Worker verification. Stop after the 11B report.
+Phase 12A — Versioned realtime contracts and authenticated gateway — is next and
+awaits explicit authorization. Phase 7C and complete gameplay readiness remain
+mandatory before live activation; parent Phase 7 remains In Progress for that
+deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
@@ -780,8 +788,10 @@ Coup module now includes all direct actions, Exchange, deadline/timeout policies
 PlayerView-only bots, safe frontend projections, results and compatibility fixtures.
 Matches now provides opt-in lifecycle/readiness and row-locked atomic command
 processing with pinned Coup integration, durable replay and safe retry acknowledgements.
-No production matcher scheduler, outbox dispatcher, Socket transport or integrated
-playable game exists yet. Join/leave/start remain application ports, and no playable
+The opt-in Worker outbox dispatcher now publishes committed versioned intents,
+with atomic finish inputs and a transactional consumer deduplication pattern.
+It remains disabled by default; real realtime/statistics consumers are future work.
+No production matcher scheduler, Socket transport or integrated playable game exists yet. Join/leave/start remain application ports, and no playable
 account-to-gameplay loop exists.
 
 No deployment, production migration, commit or live Telegram change was performed.

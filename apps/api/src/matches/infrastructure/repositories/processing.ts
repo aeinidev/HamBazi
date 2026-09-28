@@ -1,3 +1,8 @@
+import {
+  matchFinishedInputSchema,
+  standardResultInputSchema,
+} from "../../application/result-input.js";
+import type { MatchCorrelation } from "../../application/correlation.js";
 import type { z } from "zod";
 import { hash, randomUUID } from "node:crypto";
 import { DatabaseError, type createDatabase } from "@hambazi/database";
@@ -46,7 +51,12 @@ export function createMatchProcessingRepository(
   if (new Set(keys).size !== keys.length) throw new Error("Duplicate Match engine registration");
   type Client = Parameters<Parameters<typeof scope.transaction>[0]>[0];
   const conflict = () => new MatchFault("GAME_STATE_CONFLICT");
-  async function apply(db: Client, actor: string | null, request: MatchRequest): Promise<MatchAck> {
+  async function apply(
+    db: Client,
+    actor: string | null,
+    request: MatchRequest,
+    correlation: MatchCorrelation,
+  ): Promise<MatchAck> {
     await db.lockMatch(request.matchId);
     const found = await db.match.findUnique({ where: { id: request.matchId } });
     if (!found) throw new MatchFault("NOT_FOUND");
@@ -95,6 +105,7 @@ export function createMatchProcessingRepository(
     const at = options.clock.nowMs();
     if (!Number.isSafeInteger(at) || at < 0 || at > 8640000000000000)
       throw new MatchFault("INTERNAL_ERROR");
+    let resultInput: unknown = null;
     let status = row.status as MatchStatus;
     let state = row.stateJsonb;
     let startedAt = row.startedAt;
@@ -171,6 +182,14 @@ export function createMatchProcessingRepository(
         });
       }
       if (outcome.result !== null) {
+        const parsed = standardResultInputSchema.safeParse(outcome.result);
+        if (
+          !parsed.success ||
+          parsed.data.placements.length !== ids.length ||
+          parsed.data.placements.some((p) => !ids.includes(p.playerId))
+        )
+          throw new MatchFault("INTERNAL_ERROR");
+        resultInput = parsed.data;
         transition("FINISHED");
         finishedAt = new Date(at);
       }
@@ -250,20 +269,50 @@ export function createMatchProcessingRepository(
           status,
         },
         status: "PENDING",
+        requestId: correlation.requestId ?? null,
+        traceparent: correlation.traceparent ?? null,
         nextAttemptAt: new Date(at),
         createdAt: new Date(at),
       },
     });
+    if (resultInput !== null) {
+      const payload = matchFinishedInputSchema.parse({
+        schemaVersion: 1,
+        matchId: row.id,
+        gameId: row.gameId,
+        stateVersion: version,
+        lastEventSeq: seq,
+        finishedAt: at,
+        engineVersion: row.engineVersion,
+        stateSchemaVersion: row.stateSchemaVersion,
+        rulesetVersion: row.rulesetVersion,
+        result: resultInput,
+      });
+      await db.outboxEvent.create({
+        data: {
+          id: randomUUID(),
+          aggregateId: row.id,
+          type: "MATCH_FINISHED_V1",
+          schemaVersion: 1,
+          payloadJsonb: payload,
+          status: "PENDING",
+          nextAttemptAt: new Date(at),
+          createdAt: new Date(at),
+          requestId: correlation.requestId ?? null,
+          traceparent: correlation.traceparent ?? null,
+        },
+      });
+    }
     return ack;
   }
   return {
-    async process(actor, request) {
+    async process(actor, request, correlation = {}) {
       for (let attempt = 0; ; attempt++) {
         let fault: MatchFault | undefined;
         try {
           return await scope.transaction(async (db) => {
             try {
-              return await apply(db, actor, request);
+              return await apply(db, actor, request, correlation);
             } catch (error) {
               if (error instanceof MatchFault) fault = error;
               throw error;

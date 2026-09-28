@@ -277,6 +277,7 @@ model OutboxEvent {
   status        String
   attempts      Int       @default(0)
   nextAttemptAt DateTime  @default(now()) @map("next_attempt_at") @db.Timestamptz(3)
+  claimedUntil  DateTime? @map("claimed_until") @db.Timestamptz(3)
   publishedAt   DateTime? @map("published_at") @db.Timestamptz(3)
   requestId     String?   @map("request_id")
   traceparent   String?

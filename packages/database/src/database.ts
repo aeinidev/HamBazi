@@ -26,7 +26,10 @@ type ScopedClient<O extends DatabaseOwner> = Pick<
   Prisma.TransactionClient,
   (typeof ownership)[O][number]
 > &
-  (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object);
+  (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object) &
+  (O extends "outbox"
+    ? { lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> }
+    : object);
 
 export class DatabaseError extends Error {
   readonly code: string;
@@ -60,6 +63,25 @@ function scope<O extends DatabaseOwner>(
   if (!Object.hasOwn(ownership, owner)) throw new DatabaseError("DATABASE_OWNER_INVALID");
   return Object.freeze({
     ...Object.fromEntries(ownership[owner].map((key) => [key, client[key]])),
+    ...(owner === "outbox"
+      ? {
+          async lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> {
+            if (
+              !inTransaction ||
+              !Number.isFinite(at.getTime()) ||
+              !Number.isInteger(limit) ||
+              limit < 1 ||
+              limit > 100
+            )
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            const rows = await client.$queryRaw<{ id: string }[]>`
+          SELECT id FROM outbox_events WHERE status = 'PENDING' AND next_attempt_at <= ${at}
+          AND (claimed_until IS NULL OR claimed_until <= ${at})
+          ORDER BY next_attempt_at, created_at, id LIMIT ${limit} FOR UPDATE SKIP LOCKED`;
+            return rows.map((row) => row.id);
+          },
+        }
+      : {}),
     ...(owner === "matches"
       ? {
           async lockMatch(id: string): Promise<void> {
@@ -136,6 +158,29 @@ export function createDatabase(options: DatabaseOptions) {
       return Object.freeze({
         execute: <T>(operation: (db: ScopedClient<O>) => Promise<T>) =>
           safe(() => operation(scoped)),
+        // Consumer-owned DB effects and receipt commit together. No network effects here.
+        consumeOnce: (
+          consumer: string,
+          eventId: string,
+          operation: (db: ScopedClient<O>) => Promise<void>,
+        ) =>
+          safe(async () => {
+            if (
+              owner !== "leaderboard" ||
+              !/^[a-z][a-z0-9-]{0,63}$/.test(consumer) ||
+              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId)
+            )
+              throw new DatabaseError("DATABASE_CONSUMER_INVALID");
+            return client.$transaction(async (tx) => {
+              const receipt = await tx.consumerReceipt.createMany({
+                data: { consumer, eventId },
+                skipDuplicates: true,
+              });
+              if (receipt.count === 0) return "DUPLICATE" as const;
+              await operation(scope(tx, owner, true));
+              return "APPLIED" as const;
+            });
+          }),
         transaction: <T>(
           operation: (db: ScopedClient<O>) => Promise<T>,
           isolationLevel?: "Serializable",

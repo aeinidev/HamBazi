@@ -200,3 +200,20 @@ nullable readiness/digest metadata and trusted lifecycle receipt actors.
 See [Match processing](match-processing.md) and [ADR-023](../adr/023-match-atomic-processing.md)
 for transaction ordering, compatibility and replay requirements. Future seat/state
 writers must serialize through the same Match lock.
+
+## Outbox delivery extension (Phase 11B)
+
+Migration `202609290002_outbox_claims` adds nullable `claimed_until` without
+rewriting existing events. Worker receives only the additional delivery-column
+UPDATE grant. The outbox scope exposes fixed transaction-only
+`lockDueOutbox(at, limit)` SQL with SKIP LOCKED; no general SQL surface is added.
+Matches owns the repository and Worker uses its public application port.
+
+`forModule("leaderboard").consumeOnce(consumer, eventId, operation)` inserts a
+unique receipt and executes the consumer's owned database effects in one
+transaction. Concurrent duplicates skip effects; failure rolls back both. Other
+owners are rejected because they do not own consumer receipts. This is a reusable
+persistence primitive, not a stats projection or permission to perform network
+I/O inside the callback. The harness proves concurrent deduplication and rollback
+and compares receipts across restart. See [outbox delivery](match-outbox.md) and
+[ADR-024](../adr/024-transactional-outbox-delivery.md) for compatibility and recovery.

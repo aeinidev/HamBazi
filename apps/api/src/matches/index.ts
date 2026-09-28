@@ -21,3 +21,14 @@ export type {
   MatchAck,
   MatchOutcome,
 } from "./application/processing.js";
+
+export { createMatchOutboxPort } from "./module.js";
+export { matchDomainEventSchema } from "./application/outbox.js";
+export { matchFinishedInputSchema } from "./application/result-input.js";
+export type {
+  MatchOutboxPort,
+  OutboxClaim,
+  MatchDomainEvent,
+  OutboxPolicy,
+} from "./application/outbox.js";
+export type { MatchCorrelation } from "./application/correlation.js";

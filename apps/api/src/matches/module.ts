@@ -20,3 +20,11 @@ export function createMatchProcessingPort(
     users,
   });
 }
+
+import { createMatchOutboxRepository } from "./infrastructure/repositories/outbox.js";
+export function createMatchOutboxPort(
+  database: Parameters<typeof createMatchOutboxRepository>[0],
+  options: Parameters<typeof createMatchOutboxRepository>[1],
+) {
+  return createMatchOutboxRepository(database, options);
+}

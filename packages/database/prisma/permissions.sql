@@ -19,7 +19,7 @@ GRANT SELECT, INSERT, UPDATE ON matches, match_players TO hambazi_api, hambazi_w
 GRANT SELECT, INSERT ON game_events, processed_commands, game_results TO hambazi_api, hambazi_worker;
 GRANT SELECT, INSERT ON outbox_events TO hambazi_api;
 GRANT SELECT, INSERT ON outbox_events TO hambazi_worker;
-GRANT UPDATE (status, attempts, next_attempt_at, published_at) ON outbox_events TO hambazi_worker;
+GRANT UPDATE (status, attempts, next_attempt_at, published_at, claimed_until) ON outbox_events TO hambazi_worker;
 GRANT SELECT, INSERT ON consumer_receipts TO hambazi_worker;
 GRANT SELECT ON user_game_stats TO hambazi_api;
 GRANT SELECT, INSERT, UPDATE ON user_game_stats TO hambazi_worker;
