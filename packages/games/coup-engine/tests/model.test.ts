@@ -4,6 +4,7 @@ import {
   coupEventSchema,
   coupFoundationDescriptor,
   coupInitialInputSchema,
+  coupRuleConfigSchema,
   coupManifest,
   createCoupInitialState,
 } from "../src/index.js";
@@ -17,10 +18,14 @@ const playerIds = [
   "6c232945-797d-4fb3-96c4-f8855e68229c",
 ];
 const rules = {
-  rulesetVersion: "coup-provisional-v1",
+  rulesetVersion: "coup-provisional-core-v1",
   copiesPerRole: 3,
   cardsPerPlayer: 2,
   startingCoins: 2,
+  incomeCoins: 1,
+  foreignAidCoins: 2,
+  coupCost: 7,
+  mandatoryCoupAt: 10,
 } as const;
 function seeded(seed: number) {
   let value = seed;
@@ -115,6 +120,7 @@ describe("Coup initial model", () => {
         rules,
       }),
     ).toThrow(RangeError);
+    expect(coupRuleConfigSchema.safeParse({ ...rules, mandatoryCoupAt: 6 }).success).toBe(false);
   });
 
   it("validates strict version-1 intent and internal-event unions", () => {

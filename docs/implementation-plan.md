@@ -558,7 +558,11 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 10A; ruleset/legal wording remains subject to `OD-008`, so implementation must use an explicitly versioned provisional ruleset without claiming rights clearance.
 - **Acceptance criteria:** transitions are deterministic and replayable; invalid actors/states are rejected; views reveal no other player's cards.
 - **Required tests and validations:** example/unit, invariant, model/property, replay, result, and information-flow tests; lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Authorization / prerequisite check (2026-09-28):** owner explicitly authorized 10B. Worktree was clean on `main` at `95b76ae` (Phase 10A). The required sources had been read in this conversation; the named reviewed architecture checksum was unchanged, and the maintained plan/protocol plus relevant 10A code, manifests, ADR-018 and boundary policy were reviewed. Phase 10A's pure contract, initial state, schemas and tests were present and passing. No earlier phase required repair or reimplementation. Phase 7C remains a pre-activation, not offline-development, gate.
+- **Delivered:** pure `coupCoreEngine` lifecycle for income, provisional unblocked foreign aid and coup; strict actor/turn/target/cost/mandatory-coup checks; event generation and replay validation; target-selected influence loss, elimination, live-seat rotation and game end. Added standard placements/winner/reason/metrics and deny-by-default player/spectator projections that never include deck or another player's live cards. Coin economics are injected and snapshotted in `RuleConfig`; no production values are selected. The offline core descriptor moves to engine `coup-core-v1`, state schema 2 and ruleset `coup-provisional-core-v1`; the 10A foundation descriptor remains non-executable. `PLAYER_ELIMINATED` extends the internal event union without changing transport contracts. [Core action documentation](architecture/coup-core-actions.md) and the foundation note record versioning, provisional foreign aid behavior, privacy and future gates.
+- **Validation (2026-09-28):** frozen install, scoped Coup typecheck/tests, formatting/lint, uncached architecture check, full `pnpm check`, dependency audit and diff checks pass. Root gate: 1,269 tests (16 Coup, including seven new action/model/view cases), 12 workspace typecheck scripts, 11 builds and five unchanged OpenAPI checks; unaffected Turbo tasks may reuse valid cache. Architecture audit covers 13 workspaces and 124 product source files. A deterministic sweep finishes 60 games across 2–6 seats and 12 seeds each, checking card/coin/turn/elimination invariants and full event replay. Golden/metamorphic view tests check every seat and spectator. No database/Redis integration or staging E2E was applicable to this pure offline library phase.
+- **Limits / mandatory stop:** claims, challenges, blocks and their response windows are 10C; exchange, timer/bot policies and state migration/upcasters remain 10D. Foreign aid currently resolves without a block window only under the explicitly provisional offline ruleset; 10C must version any changed semantics before registration. The production catalog remains disabled with null descriptor. Match atomic commands/outbox, Socket, UI and activation are later phases. OD-008 remains open. No dependency, lockfile, database migration, production deployment, commit, push or live Telegram change was made. Stop at 10B; 10C requires separate authorization.
 
 ### Phase 10C — Coup claims, challenges, and blocks
 
@@ -742,12 +746,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 10A — Game-core contract and Coup model foundation — is complete with local
-library verification. Stop after the 10A report. Phase 10B — Coup core actions and
-turn lifecycle — is next and awaits explicit authorization. Socket wiring remains
-Phase 12A and dispatch remains 11B. Phase 7C and complete gameplay readiness
-remain mandatory before live activation; parent Phase 7 remains In Progress for
-that deferred scope.
+Phase 10B — Coup core actions and turn lifecycle — is complete with local
+library verification. Stop after the 10B report. Phase 10C — Coup claims,
+challenges, and blocks — is next and awaits explicit authorization. Socket
+wiring remains Phase 12A and dispatch remains 11B. Phase 7C and complete
+gameplay readiness remain mandatory before live activation; parent Phase 7
+remains In Progress for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
@@ -755,9 +759,10 @@ explicitly configured; the production catalog still rejects new room admission.
 Invite onboarding, durable room admission and matchmaking arbitration/orchestration
 are locally verified. Matchmaking exposes authenticated search/cancel/status and
 session-bound admission ports plus trusted Redis coordination ticks. The offline
-Coup initial model is now available, but no production matcher scheduler, Socket
-transport or playable game exists yet. Join/leave/start remain application ports,
-and no playable account-to-gameplay loop exists.
+Coup core now handles income, provisional foreign aid, coup and results, but no
+production matcher scheduler, Socket transport or complete playable game exists
+yet. Join/leave/start remain application ports, and no playable
+account-to-gameplay loop exists.
 
 No deployment, production migration, commit or live Telegram change was performed.
 Live webhook/chat E2E remains owner-deferred until public HTTPS exists. Production

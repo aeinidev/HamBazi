@@ -20,17 +20,17 @@ timer, activation rule, or production rule configuration has been selected.
 Initial-state creation validates two to six unique server-supplied player IDs,
 injected rules, epoch-millisecond time, and every integer returned by the random
 source. It shuffles a rule-configured deck, deals in seat order, snapshots the
-rule configuration, and freezes the state and nested card arrays. The remaining deck and all influence are internal
-highly sensitive data. They must never be sent to a client or telemetry. No
+rule configuration, and freezes the state and nested card arrays. The remaining
+deck and all influence are internal highly sensitive data. They must never be
+sent to a client or telemetry. Phase 10A did not implement
 `PlayerView`/`SpectatorView`, action execution, replay transition, migration,
-bot policy, frontend adapter or timer policy is implemented in 10A. Those are
-explicitly assigned to 10B–10D. The current command/event schemas define
-foundation v1 shapes; later behavior must validate rule legality and preserve
-version compatibility before production use.
+bot policy, frontend adapter or timer policy. Core actions and safe views now
+belong to [Phase 10B's offline engine](coup-core-actions.md); the rest remain
+assigned to 10C–10D. The foundation v1 descriptor remains non-executable.
 
 The generic `GameEngine` interface specifies the required completed-engine
-methods. This phase deliberately exports no Coup object that falsely claims to
-implement them. Tests cover manifest/version constraints, strict intent shapes,
-input rejection, card conservation for every supported capacity, frozen state,
-and repeatability under injected time/randomness. The existing uncached
+methods. Phase 10A deliberately exported no Coup object that falsely claimed to
+implement them. Its tests cover manifest/version constraints, strict intent
+shapes, input rejection, card conservation for every supported capacity, frozen
+state, and repeatability under injected time/randomness. The existing uncached
 architecture check enforces the pure-package import and ambient API bans.

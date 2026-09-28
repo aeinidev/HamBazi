@@ -24,6 +24,18 @@ export const coupFoundationDescriptor: GameVersionDescriptor = Object.freeze(
   }),
 );
 
+// Core actions change the state shape and provisional rule semantics. Neither
+// descriptor is registered for production admission.
+export const coupCoreDescriptor: GameVersionDescriptor = Object.freeze(
+  gameVersionDescriptorSchema.parse({
+    engineVersion: "coup-core-v1",
+    stateSchemaVersion: 2,
+    rulesetVersion: "coup-provisional-core-v1",
+    commandSchemaVersion: 1,
+    eventSchemaVersion: 1,
+  }),
+);
+
 const parsedManifest = gameManifestSchema.parse({
   id: "coup",
   slug: "coup",
@@ -48,12 +60,18 @@ export const coupInitialInputSchema = z
   })
   .refine((value) => new Set(value.playerIds).size === value.playerIds.length);
 
-export const coupRuleConfigSchema = z.strictObject({
-  rulesetVersion: z.literal(coupFoundationDescriptor.rulesetVersion),
-  copiesPerRole: z.number().int().min(1).max(10),
-  cardsPerPlayer: z.number().int().min(1).max(3),
-  startingCoins: z.number().int().min(0).max(20),
-});
+export const coupRuleConfigSchema = z
+  .strictObject({
+    rulesetVersion: z.literal(coupCoreDescriptor.rulesetVersion),
+    copiesPerRole: z.number().int().min(1).max(10),
+    cardsPerPlayer: z.number().int().min(1).max(3),
+    startingCoins: z.number().int().min(0).max(20),
+    incomeCoins: z.number().int().min(1).max(5),
+    foreignAidCoins: z.number().int().min(1).max(5),
+    coupCost: z.number().int().min(1).max(20),
+    mandatoryCoupAt: z.number().int().min(1).max(30),
+  })
+  .refine((value) => value.mandatoryCoupAt >= value.coupCost);
 export type CoupRuleConfig = Readonly<z.infer<typeof coupRuleConfigSchema>> & RuleConfig;
 
 // Intents are defined here; rule validation and event production start in 10B/10C.
@@ -101,6 +119,10 @@ export const coupEventSchema = z.discriminatedUnion("type", [
     role: roleSchema,
   }),
   z.strictObject({
+    type: z.literal("PLAYER_ELIMINATED"),
+    playerId,
+  }),
+  z.strictObject({
     type: z.literal("GAME_ENDED"),
     winnerId: playerId,
     reason: z.string().min(1).max(64),
@@ -110,18 +132,30 @@ export type CoupEvent = z.infer<typeof coupEventSchema>;
 
 export interface CoupState {
   readonly engineVersion: string;
-  readonly stateSchemaVersion: 1;
+  readonly stateSchemaVersion: 2;
   readonly rulesetVersion: string;
-  readonly phase: "WAITING_FOR_ACTION";
+  readonly phase:
+    "WAITING_FOR_ACTION" | "RESOLVING_ACTION" | "AWAITING_INFLUENCE_LOSS" | "GAME_OVER";
   readonly createdAt: number;
-  readonly turnNumber: 1;
+  readonly turnNumber: number;
   readonly turnPlayerId: string;
   readonly rules: CoupRuleConfig;
+  readonly pendingAction: Readonly<{
+    actorId: string;
+    kind: "INCOME" | "FOREIGN_AID" | "COUP";
+    targetId: string | null;
+    coinsApplied: boolean;
+    lossApplied: boolean;
+  }> | null;
+  readonly winnerId: string | null;
+  readonly eliminationOrder: readonly string[];
+  readonly actionCount: number;
   readonly players: readonly {
     readonly id: string;
     readonly seat: number;
     readonly coins: number;
     readonly influence: readonly CoupRole[];
+    readonly revealed: readonly CoupRole[];
   }[];
   readonly deck: readonly CoupRole[];
 }
@@ -154,17 +188,22 @@ export function createCoupInitialState(
       seat,
       coins: rules.startingCoins,
       influence: Object.freeze(cards.splice(0, rules.cardsPerPlayer)),
+      revealed: Object.freeze([] as CoupRole[]),
     }),
   );
   return Object.freeze({
-    engineVersion: coupFoundationDescriptor.engineVersion,
-    stateSchemaVersion: 1,
+    engineVersion: coupCoreDescriptor.engineVersion,
+    stateSchemaVersion: 2,
     rulesetVersion: rules.rulesetVersion,
     phase: "WAITING_FOR_ACTION",
     createdAt,
     turnNumber: 1,
     turnPlayerId: players[0]!.id,
     rules: Object.freeze(rules),
+    pendingAction: null,
+    winnerId: null,
+    eliminationOrder: Object.freeze([] as string[]),
+    actionCount: 0,
     players: Object.freeze(players),
     deck: Object.freeze(cards),
   });
