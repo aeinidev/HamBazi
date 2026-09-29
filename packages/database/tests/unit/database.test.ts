@@ -217,3 +217,25 @@ it("restricts outbox locks and consumer effects to their owning transaction boun
     await database.disconnect();
   }
 });
+
+it("keeps reconnect leases Matches-owned with additive metadata and immutable tombstones", async () => {
+  const sql = await readFile(
+    new URL("../../prisma/migrations/202609290003_match_reconnect/migration.sql", import.meta.url),
+    "utf8",
+  );
+  expect(sql.startsWith("BEGIN;")).toBe(true);
+  expect(sql.trim().endsWith("COMMIT;")).toBe(true);
+  expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|TRUNCATE|DELETE FROM/);
+  const database = createDatabase(options);
+  try {
+    await database.forModule("matches").execute(async (db) => {
+      expect("matchConnectionLease" in db).toBe(true);
+    });
+    for (const owner of ["users", "rooms", "auth", "outbox"] as const)
+      await database.forModule(owner).execute(async (db) => {
+        expect("matchConnectionLease" in db).toBe(false);
+      });
+  } finally {
+    await database.disconnect();
+  }
+});

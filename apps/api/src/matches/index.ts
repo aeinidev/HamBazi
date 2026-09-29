@@ -49,3 +49,13 @@ export type {
   MatchSnapshot,
   MatchCatchup,
 } from "./application/resync.js";
+
+export { createMatchReconnectPort } from "./module.js";
+export { disconnectTimeoutSchema, reconnectPolicySchema } from "./application/reconnect.js";
+export type {
+  MatchReconnectPort,
+  ReconnectPolicy,
+  ReconnectResult,
+  ReconnectOutcome,
+  DisconnectTimeout,
+} from "./application/reconnect.js";

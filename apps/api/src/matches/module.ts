@@ -44,3 +44,12 @@ export function createMatchResyncPort(
 ) {
   return matchResyncService(createMatchResyncRepository(database, games));
 }
+
+import { matchReconnectService } from "./application/reconnect.js";
+import { createMatchReconnectRepository } from "./infrastructure/repositories/reconnect.js";
+export function createMatchReconnectPort(
+  database: Parameters<typeof createMatchReconnectRepository>[0],
+  options: Parameters<typeof createMatchReconnectRepository>[1],
+) {
+  return matchReconnectService(createMatchReconnectRepository(database, options));
+}

@@ -12,6 +12,7 @@ const ownership = {
     "matchReservation",
     "match",
     "matchPlayer",
+    "matchConnectionLease",
     "gameEvent",
     "processedCommand",
     "gameResult",

@@ -184,28 +184,29 @@ model RoomMember {
 }
 
 model Match {
-  id                 String             @id @db.Uuid
-  gameId             String             @map("game_id")
-  roomId             String?            @unique @map("room_id") @db.Uuid
-  matchType          String             @map("match_type")
-  status             String
-  engineVersion      String             @map("engine_version")
-  stateSchemaVersion Int                @map("state_schema_version")
-  rulesetVersion     String             @map("ruleset_version")
-  stateJsonb         Json?              @map("state_jsonb") @db.JsonB
-  stateVersion       Int                @default(0) @map("state_version")
-  lastEventSeq       Int                @default(0) @map("last_event_seq")
-  startedAt          DateTime?          @map("started_at") @db.Timestamptz(3)
-  finishedAt         DateTime?          @map("finished_at") @db.Timestamptz(3)
-  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
-  game               Game               @relation(fields: [gameId], references: [id], onDelete: Restrict)
-  room               Room?              @relation(fields: [roomId], references: [id], onDelete: Restrict)
-  players            MatchPlayer[]
-  events             GameEvent[]
-  commands           ProcessedCommand[]
-  results            GameResult[]
-  messages           ChatMessage[]
+  id                   String             @id @db.Uuid
+  gameId               String             @map("game_id")
+  roomId               String?            @unique @map("room_id") @db.Uuid
+  matchType            String             @map("match_type")
+  status               String
+  engineVersion        String             @map("engine_version")
+  stateSchemaVersion   Int                @map("state_schema_version")
+  rulesetVersion       String             @map("ruleset_version")
+  reconnectPolicyJsonb Json?              @map("reconnect_policy_jsonb") @db.JsonB
+  stateJsonb           Json?              @map("state_jsonb") @db.JsonB
+  stateVersion         Int                @default(0) @map("state_version")
+  lastEventSeq         Int                @default(0) @map("last_event_seq")
+  startedAt            DateTime?          @map("started_at") @db.Timestamptz(3)
+  finishedAt           DateTime?          @map("finished_at") @db.Timestamptz(3)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  game                 Game               @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  room                 Room?              @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  players              MatchPlayer[]
+  events               GameEvent[]
+  commands             ProcessedCommand[]
+  results              GameResult[]
+  messages             ChatMessage[]
 
   admissions  MatchAdmission[]
   reservation MatchReservation?
@@ -216,18 +217,20 @@ model Match {
 }
 
 model MatchPlayer {
-  matchId          String    @map("match_id") @db.Uuid
-  userId           String    @map("user_id") @db.Uuid
-  seat             Int
-  agentType        String    @map("agent_type")
-  connectionStatus String    @map("connection_status")
-  connectionEpoch  Int       @default(0) @map("connection_epoch")
-  disconnectedAt   DateTime? @map("disconnected_at") @db.Timestamptz(3)
-  replacedAt       DateTime? @map("replaced_at") @db.Timestamptz(3)
-  readyAt          DateTime? @map("ready_at") @db.Timestamptz(3)
-  joinedAt         DateTime  @default(now()) @map("joined_at") @db.Timestamptz(3)
-  match            Match     @relation(fields: [matchId], references: [id], onDelete: Restrict)
-  user             User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  matchId              String                 @map("match_id") @db.Uuid
+  userId               String                 @map("user_id") @db.Uuid
+  seat                 Int
+  agentType            String                 @map("agent_type")
+  connectionStatus     String                 @map("connection_status")
+  connectionEpoch      Int                    @default(0) @map("connection_epoch")
+  disconnectDeadlineAt DateTime?              @map("disconnect_deadline_at") @db.Timestamptz(3)
+  connections          MatchConnectionLease[]
+  disconnectedAt       DateTime?              @map("disconnected_at") @db.Timestamptz(3)
+  replacedAt           DateTime?              @map("replaced_at") @db.Timestamptz(3)
+  readyAt              DateTime?              @map("ready_at") @db.Timestamptz(3)
+  joinedAt             DateTime               @default(now()) @map("joined_at") @db.Timestamptz(3)
+  match                Match                  @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@id([matchId, userId])
   @@unique([matchId, seat])
@@ -397,4 +400,19 @@ model MatchReservation {
   admissions    MatchAdmission[]
 
   @@map("match_reservations")
+}
+
+// Minimal durable fencing metadata; raw Socket/session credentials are never stored.
+model MatchConnectionLease {
+  matchId          String      @map("match_id") @db.Uuid
+  connectionId     String      @map("connection_id") @db.Uuid
+  userId           String      @map("user_id") @db.Uuid
+  sessionExpiresAt DateTime    @map("session_expires_at") @db.Timestamptz(3)
+  leaseUntil       DateTime    @map("lease_until") @db.Timestamptz(3)
+  closedAt         DateTime?   @map("closed_at") @db.Timestamptz(3)
+  player           MatchPlayer @relation(fields: [matchId, userId], references: [matchId, userId], onDelete: Restrict)
+
+  @@id([matchId, connectionId])
+  @@index([matchId, userId, leaseUntil])
+  @@map("match_connection_leases")
 }

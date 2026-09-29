@@ -27,4 +27,8 @@ GRANT SELECT, INSERT ON chat_messages TO hambazi_api;
 GRANT SELECT, INSERT ON match_admissions, match_reservations TO hambazi_api;
 GRANT UPDATE (status, active_key, generation, reservation_id, reservation_until, match_id) ON match_admissions TO hambazi_api;
 GRANT UPDATE (released_at, match_id) ON match_reservations TO hambazi_api;
+GRANT SELECT, INSERT ON match_connection_leases TO hambazi_api;
+GRANT UPDATE (lease_until, closed_at) ON match_connection_leases TO hambazi_api;
+-- Worker may inspect/expire leases through Matches; it cannot create or renew a connection.
+GRANT SELECT ON match_connection_leases TO hambazi_worker;
 COMMIT;

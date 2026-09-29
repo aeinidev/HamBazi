@@ -324,7 +324,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 9) throw new Error();
+      if (result.rows[0].count !== 10) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -348,6 +348,7 @@ if (!bin) {
         "match-admission.test.ts",
         "matchmaking.test.ts",
         "match-processing.test.ts",
+        "match-reconnect.test.ts",
         "realtime.test.ts",
       ]) {
         const result = await run(
@@ -398,6 +399,9 @@ if (!bin) {
           const reservations = await client.query("SELECT * FROM match_reservations ORDER BY id");
           const matches = await client.query("SELECT * FROM matches ORDER BY id");
           const players = await client.query("SELECT * FROM match_players ORDER BY match_id, seat");
+          const leases = await client.query(
+            "SELECT * FROM match_connection_leases ORDER BY match_id, connection_id",
+          );
           const consumerReceipts = await client.query(
             "SELECT * FROM consumer_receipts ORDER BY consumer, event_id",
           );
@@ -424,6 +428,7 @@ if (!bin) {
             reservations: reservations.rows,
             matches: matches.rows,
             players: players.rows,
+            leases: leases.rows,
             outbox: outbox.rows,
             matchEvents: matchEvents.rows,
             matchCommands: matchCommands.rows,
