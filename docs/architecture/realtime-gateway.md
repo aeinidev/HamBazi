@@ -40,3 +40,52 @@ connection epochs, timeout/takeover and chat belong to 13/15. This adapter
 factory is tested over a real loopback Socket.IO connection but is not enabled
 by `startApi` while production gameplay remains disabled by 7C and the absent
 runtime Matchmaking/rate configuration. See [ADR-025](../adr/025-versioned-realtime-gateway.md).
+
+## Phase 12B delivery boundary
+
+See [ADR-026](../adr/026-realtime-delivery-and-resynchronization.md). The added
+incoming intents are `match:snapshot {schemaVersion:1,matchId}` and
+`match:catchup {schemaVersion:1,matchId,afterSeq}`. Both require an acknowledgement,
+the current session and rate control; Matches rechecks membership. Snapshot
+acknowledgements return `{ok:true,value:<snapshot>}`; catch-up returns
+`{ok:true,value:{schemaVersion:1,mode,events,snapshot}}`. A prior subscription is
+not required for these authorized reads.
+
+On each connection, subscribe then request catch-up (or an initial snapshot).
+Listen before subscribing. `match:event` contains a durable ID, seq, originating
+stateVersion and empty invalidation payload. `match:snapshot` contains the pinned
+versions, role, lifecycle status, stateVersion, lastEventSeq and validated view
+(null before initialization). A pushed snapshot callback must receive exactly
+its lastEventSeq, even when the snapshot is already applied. Do not acknowledge
+an unvalidated or wrong-Match payload. Acknowledgement is delivery confirmation,
+not authority to change game state.
+
+Use `createMatchSequence` from `@hambazi/contracts` per identity/Match. Validate
+wire schemas first. Render a snapshot only on `APPLY`; a contiguous event is an
+invalidation, not a renderable state. A gap or reconnect requests catch-up using
+the last applied snapshot cursor. Buffer no private internal events. A catch-up
+snapshot covers its included events; large gaps use `mode:SNAPSHOT`. On transport
+failure retry with bounded client backoff and resync; application mutations retain
+their original action IDs. Later Mini App integration owns that UI lifecycle.
+
+Optional composition order:
+
+1. Create the Match resync port with the same pinned game adapter registrations.
+2. Connect `createRealtimeRedisAdapter` with private credentials and deployment
+   namespace; pass it and resync/ackTimeoutMs in gateway `delivery` dependencies.
+3. Wait for gateway `ready()` (includes completed Redis subscriptions); include
+   it in activation-time readiness. Start `createRealtimeConsumer` with the same
+   outbox queue namespace and `publish: gateway.publish`.
+4. During shutdown stop/await the consumer, close/drain the gateway, close its
+   Redis adapter, then close HTTP/database resources. Do not destroy Redis while
+   an intentional drain is waiting for acknowledgements.
+
+Each subscriber node must have the same namespace and registered versions.
+The consumer processes only `MATCH_CHANGED_V1`; result and matchmaking queues
+retain their own consumers. Failed fanout retries under existing queue policy;
+queue exhaustion needs operator redrive. Redis Pub/Sub does not persist packets,
+and an offline recipient always recovers from the Match read port. No Socket.IO
+connection-state-recovery claim is made. Failure latches the affected process
+unhealthy and reconnects its clients; restart it before readmitting traffic.
+All gateway/realtime composition remains disabled in `startApi` pending the
+existing activation and production configuration gates.

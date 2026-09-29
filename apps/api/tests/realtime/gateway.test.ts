@@ -2,7 +2,8 @@ import { createServer, type Server as HttpServer } from "node:http";
 import { once } from "node:events";
 import { io, type Socket as ClientSocket } from "socket.io-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createErrorEnvelope } from "@hambazi/contracts";
+import { realtimeDependencies as dependencies } from "../fixtures/realtime.js";
+import { createErrorEnvelope, createMatchSequence } from "@hambazi/contracts";
 import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { onboardingFixture } from "../auth/onboarding-fixtures.js";
@@ -30,103 +31,6 @@ afterEach(async () => {
   if (server?.listening) await new Promise<void>((resolve) => server!.close(() => resolve()));
   server = undefined;
 });
-
-function dependencies() {
-  const authenticate = vi.fn(async (token: unknown) =>
-    token === "valid"
-      ? {
-          ok: true as const,
-          session: { schemaVersion: 1 as const, userId, sessionId: otherId, expiresAt: 2000000000 },
-        }
-      : createErrorEnvelope("UNAUTHENTICATED"),
-  );
-  const readRoom = vi.fn(async (actor: unknown, id: unknown) =>
-    actor === userId && id === roomId
-      ? { ok: true as const, schemaVersion: 1 as const, room: { id: roomId } }
-      : createErrorEnvelope("NOT_FOUND"),
-  );
-  const roomAck = {
-    ok: true as const,
-    schemaVersion: 1 as const,
-    commandId: actionId,
-    roomId,
-    appliedVersion: 2,
-  };
-  const join = vi.fn(async () => roomAck);
-  const leave = vi.fn(async () => roomAck);
-  const start = vi.fn(async () => roomAck);
-  const matchAck = {
-    ok: true as const,
-    value: {
-      schemaVersion: 1 as const,
-      matchId,
-      actionId,
-      stateVersion: 2,
-      lastEventSeq: 3,
-      status: "ACTIVE" as const,
-    },
-  };
-  const command = vi.fn(async () => matchAck);
-  const ready = vi.fn(async () => matchAck);
-  const authorize = vi.fn(async (actor: unknown, input: unknown) =>
-    actor === userId &&
-    typeof input === "object" &&
-    input !== null &&
-    "matchId" in input &&
-    input.matchId === matchId
-      ? {
-          ok: true as const,
-          value: { schemaVersion: 1 as const, matchId, role: "PLAYER" as const },
-        }
-      : createErrorEnvelope("NOT_FOUND"),
-  );
-  const ticket = {
-    schemaVersion: 1 as const,
-    ticketId,
-    status: "SEARCHING",
-    expiresAt: 2000000000000,
-    matchId: null,
-  };
-  const search = vi.fn(async () => ({ ok: true as const, value: ticket }));
-  const read = vi.fn(async () => ({ ok: true as const, value: ticket }));
-  const cancel = vi.fn(async () => ({ ok: true as const, value: ticket }));
-  const found = vi.fn(async () => ({
-    ok: true as const,
-    value: {
-      schemaVersion: 1,
-      ticketId,
-      matchId,
-      expiresAt: 2000000000,
-      admissionToken: { reveal: () => "admission-secret" },
-    },
-  }));
-  const admit = vi.fn(async () => ({ ok: true as const, value: { schemaVersion: 1, matchId } }));
-  const rate = vi.fn<RealtimeDependencies["rate"]>(async () => ({ allowed: true }));
-  const ports = {
-    sessions: { authenticate },
-    rooms: { read: readRoom, join, leave, start },
-    matches: { command, ready },
-    membership: { authorize },
-    matchmaking: { search, read, cancel, found, admit },
-    rate,
-    allowedOrigins: [origin],
-    nowMs: () => 1000000000,
-  } as unknown as RealtimeDependencies;
-  return {
-    ports,
-    authenticate,
-    readRoom,
-    join,
-    leave,
-    start,
-    command,
-    ready,
-    authorize,
-    search,
-    found,
-    rate,
-  };
-}
 
 async function start(deps: RealtimeDependencies) {
   server = createServer();
@@ -198,7 +102,8 @@ describe("versioned realtime gateway", () => {
         value: { schemaVersion: 1 },
       });
     } finally {
-      await Promise.all([http.realtime?.close(), http.app.close()]);
+      await http.realtime?.close();
+      await http.app.close();
     }
   });
   it("freezes a strict v1 event catalog with no identity in intent payloads", () => {
@@ -344,4 +249,198 @@ describe("versioned realtime gateway", () => {
       expect.objectContaining({ requestId: expect.any(String) }),
     );
   });
+});
+
+function delivery(d: ReturnType<typeof dependencies>) {
+  const snapshot = {
+    schemaVersion: 1 as const,
+    matchId,
+    stateVersion: 2,
+    lastEventSeq: 3,
+    status: "ACTIVE" as const,
+    role: "PLAYER" as const,
+    gameId: "coup",
+    engineVersion: "coup-v1",
+    stateSchemaVersion: 4,
+    rulesetVersion: "test",
+    view: { viewer: userId },
+  };
+  const catchup = vi.fn(async () => ({
+    ok: true as const,
+    value: {
+      schemaVersion: 1 as const,
+      mode: "EVENTS" as const,
+      snapshot,
+      events: [1, 2, 3].map((seq) => ({
+        schemaVersion: 1 as const,
+        eventId: actionId,
+        matchId,
+        seq,
+        stateVersion: 2,
+        type: "MATCH_INVALIDATED_V1" as const,
+        payload: {},
+      })),
+    },
+  }));
+  d.ports.delivery = {
+    ackTimeoutMs: 100,
+    resync: { catchup, snapshot: async () => ({ ok: true, value: snapshot }) },
+  };
+  return { snapshot, catchup };
+}
+function wakeup() {
+  return {
+    schemaVersion: 1,
+    eventId: actionId,
+    aggregateId: matchId,
+    occurredAt: 1000,
+    correlation: {},
+    type: "MATCH_CHANGED_V1",
+    payload: { schemaVersion: 1, matchId, stateVersion: 2, lastEventSeq: 3, status: "ACTIVE" },
+  };
+}
+it("delivers ordered events and acknowledged snapshots independently to multiple sockets; duplicates stay harmless", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  const url = await start(d.ports);
+  const seen: number[][] = [[], []];
+  for (let i = 0; i < 2; i++) {
+    const client = await connect(url);
+    await connected(client);
+    const sequence = createMatchSequence(matchId);
+    client.on("match:event", (event: { seq: number }) => seen[i]!.push(event.seq));
+    client.on("match:snapshot", (snapshot: typeof f.snapshot, respond: (seq: number) => void) => {
+      sequence.snapshot(snapshot);
+      respond(snapshot.lastEventSeq);
+    });
+    await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  }
+  await gateway!.publish(wakeup());
+  await gateway!.publish(wakeup());
+  expect(seen).toEqual([
+    [1, 2, 3, 1, 2, 3],
+    [1, 2, 3, 1, 2, 3],
+  ]);
+  expect(f.catchup).toHaveBeenCalledWith(userId, { schemaVersion: 1, matchId, afterSeq: 3 });
+});
+it("fails delivery closed on session revocation", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  const url = await start(d.ports);
+  const client = await connect(url);
+  await connected(client);
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  const received = vi.fn();
+  client.on("match:snapshot", received);
+  d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED"));
+  await gateway!.publish(wakeup());
+  expect(f.catchup).not.toHaveBeenCalled();
+  expect(received).not.toHaveBeenCalled();
+});
+it("retries publication after missing snapshot acknowledgement and rejects raw internal events", async () => {
+  const d = dependencies();
+  delivery(d);
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  await expect(gateway!.publish(wakeup())).rejects.toThrow("Realtime publication failed");
+  await expect(
+    gateway!.publish({ ...wakeup(), type: "GAME_ENGINE_EVENT", payload: { deck: "private" } }),
+  ).rejects.toThrow("Invalid realtime wakeup");
+});
+it("drains an in-flight command, rejects new connections and closes idempotently", async () => {
+  const d = dependencies();
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let entered!: () => void;
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const previous = await d.command();
+  d.command.mockImplementation(async () => {
+    entered();
+    await blocked;
+    return previous;
+  });
+  const url = await start(d.ports);
+  const client = await connect(url);
+  await connected(client);
+  const result = ack(client, "game:command", {
+    schemaVersion: 1,
+    actionId,
+    matchId,
+    expectedVersion: 1,
+    command: { type: "DECLARE_INCOME" },
+  });
+  await started;
+  const close = gateway!.close();
+  expect(gateway!.ready()).toBe(false);
+  const denied = await connect(url);
+  await connectError(denied);
+  release();
+  expect(await result).toMatchObject({ ok: true });
+  await close;
+  await gateway!.close();
+});
+it("handles gaps, stale snapshots, foreign matches and initial version zero in the client cursor", () => {
+  const cursor = createMatchSequence(matchId);
+  const snap = { schemaVersion: 1, matchId, stateVersion: 0, lastEventSeq: 0 };
+  expect(cursor.snapshot(snap)).toBe("APPLY");
+  expect(cursor.event({ ...snap, seq: 2 })).toBe("GAP");
+  expect(cursor.cursor().needsResync).toBe(true);
+  expect(cursor.snapshot({ ...snap, stateVersion: 2, lastEventSeq: 3 })).toBe("APPLY");
+  expect(cursor.event({ ...snap, seq: 3 })).toBe("DUPLICATE");
+  expect(cursor.snapshot(snap)).toBe("STALE");
+  expect(cursor.snapshot({ ...snap, stateVersion: 3, lastEventSeq: 1 })).toBe("STALE");
+  expect(cursor.event({ ...snap, matchId: otherId, seq: 4 })).toBe("INVALID");
+  expect(cursor.event({ ...snap, seq: 4 })).toBe("ACCEPT");
+  expect(cursor.snapshot({ ...snap, stateVersion: 3, lastEventSeq: 4 })).toBe("APPLY");
+  expect(cursor.cursor().needsResync).toBe(false);
+});
+
+it("removes a subscription after membership loss and retries database projection failures without payload leakage", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  const received = vi.fn();
+  client.on("match:snapshot", received);
+  d.ports.delivery!.resync = {
+    ...d.ports.delivery!.resync,
+    catchup: async () => createErrorEnvelope("NOT_FOUND"),
+  };
+  await gateway!.publish(wakeup());
+  d.ports.delivery!.resync = { ...d.ports.delivery!.resync, catchup: f.catchup };
+  await gateway!.publish(wakeup());
+  expect(f.catchup).not.toHaveBeenCalled();
+  expect(received).not.toHaveBeenCalled();
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  d.ports.delivery!.resync = {
+    ...d.ports.delivery!.resync,
+    catchup: async () => {
+      throw new Error("private database payload");
+    },
+  };
+  await expect(gateway!.publish(wakeup())).rejects.toThrow("Realtime publication failed");
+  expect(received).not.toHaveBeenCalled();
+});
+it("exposes authenticated snapshot and catchup acknowledgements and validates cursor input", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  expect(await ack(client, "match:snapshot", { schemaVersion: 1, matchId })).toEqual({
+    ok: true,
+    value: f.snapshot,
+  });
+  expect(
+    await ack(client, "match:catchup", { schemaVersion: 1, matchId, afterSeq: 1 }),
+  ).toMatchObject({ ok: true, value: { snapshot: f.snapshot } });
+  expect(f.catchup).toHaveBeenCalledWith(userId, { schemaVersion: 1, matchId, afterSeq: 1 });
+  expect(
+    await ack(client, "match:catchup", { schemaVersion: 1, matchId, afterSeq: -1 }),
+  ).toMatchObject({ error: { code: "INVALID_INPUT" } });
 });

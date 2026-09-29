@@ -157,7 +157,8 @@ export async function startApi(
     return {
       async close() {
         try {
-          await Promise.all([http?.realtime?.close(), http?.app.close(), internal?.close()]);
+          await http?.realtime?.close();
+          await Promise.all([http?.app.close(), internal?.close()]);
         } finally {
           rate.close();
           profileRate.close();
@@ -170,7 +171,8 @@ export async function startApi(
     };
   } catch {
     await internal?.close().catch(() => {});
-    await Promise.all([http?.realtime?.close().catch(() => {}), http?.app.close().catch(() => {})]);
+    await http?.realtime?.close().catch(() => {});
+    await http?.app.close().catch(() => {});
     rate.close();
     profileRate.close();
     catalogRate.close();

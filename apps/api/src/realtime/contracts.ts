@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { roomCommandSchema, joinRoomSchema } from "../rooms/index.js";
 import { searchSchema, ticketSchema, admissionSchema } from "../matchmaking/index.js";
-import { matchCommandSchema, matchReadySchema } from "../matches/index.js";
+import {
+  matchCommandSchema,
+  matchReadySchema,
+  matchSnapshotRequestSchema,
+  matchCatchupRequestSchema,
+  matchSnapshotSchema,
+  matchDeliveryEventSchema,
+  matchCatchupSchema,
+} from "../matches/index.js";
 
 const uuid = z.uuid().transform((value) => value.toLowerCase());
 export const handshakeSchema = z.strictObject({
@@ -26,6 +34,8 @@ export const incomingEvents = Object.freeze({
   "matchmaking:found": ticketSchema,
   "matchmaking:admit": admissionSchema,
   "match:subscribe": matchSubscriptionSchema,
+  "match:snapshot": matchSnapshotRequestSchema,
+  "match:catchup": matchCatchupRequestSchema,
   "match:ready": matchReadySchema,
   "game:command": matchCommandSchema,
   "presence:ping": presencePingSchema,
@@ -64,6 +74,11 @@ export function realtimeEventCatalog() {
         z.toJSONSchema(schema, { io: "input" }),
       ]),
     ),
+    serverEvents: {
+      "match:snapshot": z.toJSONSchema(matchSnapshotSchema, { io: "input" }),
+      "match:event": z.toJSONSchema(matchDeliveryEventSchema, { io: "input" }),
+    },
+    catchupResult: z.toJSONSchema(matchCatchupSchema, { io: "input" }),
     reservedServerEvents: [...outgoingEvents],
     acknowledgement: {
       success: "{ok:true,value:<owner result>}",

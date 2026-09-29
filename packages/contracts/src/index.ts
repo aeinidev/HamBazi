@@ -16,3 +16,4 @@ export {
   parseRoomStartParam,
   buildRoomDeepLink,
 } from "./telegram-room-invite.js";
+export { createMatchSequence } from "./match-sequence.js";

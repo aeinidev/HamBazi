@@ -25,6 +25,22 @@ if (process.argv.includes("--initialize-baseline")) {
     )
   )
     throw new Error("Breaking realtime v1 event contract change");
+  const delivery = JSON.parse(
+    await readFile(
+      new URL("../../../docs/contracts/realtime.delivery.v1.baseline.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  if (
+    !isDeepStrictEqual(delivery.catchupResult, document.catchupResult) ||
+    Object.entries(delivery.serverEvents).some(
+      ([name, schema]) => !isDeepStrictEqual(schema, document.serverEvents[name]),
+    ) ||
+    Object.entries(delivery.clientEvents).some(
+      ([name, schema]) => !isDeepStrictEqual(schema, document.clientEvents[name]),
+    )
+  )
+    throw new Error("Breaking realtime v1 delivery contract change");
   if (process.argv.includes("--write")) await writeFile(target, generated);
   else if (!isDeepStrictEqual(JSON.parse(await readFile(target, "utf8")), document))
     throw new Error("Realtime event catalog drift");

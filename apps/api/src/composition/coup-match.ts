@@ -1,9 +1,17 @@
 import { randomInt } from "node:crypto";
-import { coupModule, coupRulesSchema, CoupModuleError } from "@hambazi/coup-engine";
-import { MatchFault, type MatchGame } from "../matches/index.js";
+import {
+  coupModule,
+  coupRulesSchema,
+  CoupModuleError,
+  getCoupModulePlayerView,
+  getCoupModuleSpectatorView,
+  coupPlayerViewSchema,
+  coupSpectatorViewSchema,
+} from "@hambazi/coup-engine";
+import { MatchFault, type MatchGame, type MatchViewGame } from "../matches/index.js";
 
 /** Opt-in adapter only: does not enable the catalog or select production rules/durations. */
-export function createCoupMatchGame(inputRules: unknown): MatchGame {
+export function createCoupMatchGame(inputRules: unknown): MatchGame & MatchViewGame {
   const parsed = coupRulesSchema.safeParse(inputRules);
   if (!parsed.success) throw new Error("Invalid Coup Match configuration");
   const rules = Object.freeze(parsed.data);
@@ -38,6 +46,13 @@ export function createCoupMatchGame(inputRules: unknown): MatchGame {
         ),
       ),
     restore: (snapshot, playerIds) => safe(() => restore(snapshot, playerIds)),
+    project: (snapshot, userId, role) =>
+      safe(() => {
+        const state = coupModule.migrateState(snapshot, coupModule.descriptor.stateSchemaVersion);
+        return role === "PLAYER"
+          ? coupPlayerViewSchema.parse(getCoupModulePlayerView(state, userId))
+          : coupSpectatorViewSchema.parse(getCoupModuleSpectatorView(state));
+      }),
     execute: (snapshot, command, actorId, at) =>
       safe(() => {
         const state = coupModule.migrateState(snapshot, coupModule.descriptor.stateSchemaVersion);
@@ -60,5 +75,5 @@ export function createCoupMatchGame(inputRules: unknown): MatchGame {
           })),
         };
       }),
-  } satisfies MatchGame);
+  } satisfies MatchGame & MatchViewGame);
 }

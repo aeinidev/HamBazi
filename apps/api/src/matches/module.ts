@@ -35,3 +35,12 @@ export function createMatchOutboxPort(
 ) {
   return createMatchOutboxRepository(database, options);
 }
+
+import { matchResyncService } from "./application/resync.js";
+import { createMatchResyncRepository } from "./infrastructure/repositories/resync.js";
+export function createMatchResyncPort(
+  database: Parameters<typeof createMatchResyncRepository>[0],
+  games: Parameters<typeof createMatchResyncRepository>[1],
+) {
+  return matchResyncService(createMatchResyncRepository(database, games));
+}

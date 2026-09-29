@@ -442,3 +442,62 @@ it("returns a safe failure when the database is closed", async () => {
     error: { code: "INTERNAL_ERROR" },
   });
 });
+
+it("returns bounded durable catch-up with safe per-player views, pinned versions and spectator downgrade", async () => {
+  const f = await fixture();
+  await f.active();
+  const { createMatchResyncPort } = await import("../../src/matches/index.js");
+  const resync = createMatchResyncPort(b, [createCoupMatchGame(rules)]);
+  const request = { schemaVersion: 1, matchId: f.matchId };
+  const one = await resync.catchup(f.ids[0], { ...request, afterSeq: 0 });
+  expect(one).toMatchObject({
+    ok: true,
+    value: {
+      mode: "EVENTS",
+      snapshot: { stateVersion: 5, lastEventSeq: 7, role: "PLAYER", view: { viewerId: f.ids[0] } },
+    },
+  });
+  if (!one.ok) throw new Error("Fixture unavailable");
+  expect(one.value.events.map((e) => [e.seq, e.stateVersion])).toEqual([
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [4, 3],
+    [5, 4],
+    [6, 5],
+    [7, 5],
+  ]);
+  expect(one.value.events.every((e) => Object.keys(e.payload).length === 0)).toBe(true);
+  expect(JSON.stringify(one)).not.toMatch(/deck|influence|drawn|snapshot.*snapshot/);
+  const other = await resync.snapshot(f.ids[1], request);
+  expect(other).toMatchObject({ ok: true, value: { view: { viewerId: f.ids[1] } } });
+  expect(await resync.snapshot(randomUUID(), request)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  expect(await resync.catchup(f.ids[0], { ...request, afterSeq: 1000 })).toMatchObject({
+    value: { mode: "SNAPSHOT", events: [] },
+  });
+  expect(await resync.catchup(f.ids[0], { ...request, afterSeq: 7 })).toMatchObject({
+    value: { mode: "EVENTS", events: [] },
+  });
+  expect(await resync.catchup(f.ids[0], { ...request, afterSeq: -1 })).toMatchObject({
+    error: { code: "INVALID_INPUT" },
+  });
+  expect(await createMatchResyncPort(b, []).snapshot(f.ids[0], request)).toMatchObject({
+    error: { code: "INCOMPATIBLE_GAME_VERSION" },
+  });
+  await a.forModule("matches").execute((db) =>
+    db.matchPlayer.update({
+      where: { matchId_userId: { matchId: f.matchId, userId: f.ids[0]! } },
+      data: { agentType: "BOT", replacedAt: new Date() },
+    }),
+  );
+  const spectator = await resync.snapshot(f.ids[0], request);
+  expect(spectator).toMatchObject({
+    ok: true,
+    value: { role: "SPECTATOR", view: { kind: "SPECTATOR" } },
+  });
+  expect(JSON.stringify(spectator)).not.toMatch(
+    /myCards|exchangeChoices|legalCommands|deck|influence/,
+  );
+});

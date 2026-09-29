@@ -34,3 +34,18 @@ export type {
 export type { MatchCorrelation } from "./application/correlation.js";
 export { createMatchMembershipPort } from "./module.js";
 export type { MatchMembershipPort, MatchMembership } from "./application/membership.js";
+
+export { createMatchResyncPort } from "./module.js";
+export {
+  matchSnapshotRequestSchema,
+  matchCatchupRequestSchema,
+  matchSnapshotSchema,
+  matchDeliveryEventSchema,
+  matchCatchupSchema,
+} from "./application/resync.js";
+export type {
+  MatchResyncPort,
+  MatchViewGame,
+  MatchSnapshot,
+  MatchCatchup,
+} from "./application/resync.js";

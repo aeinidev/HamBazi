@@ -348,6 +348,7 @@ if (!bin) {
         "match-admission.test.ts",
         "matchmaking.test.ts",
         "match-processing.test.ts",
+        "realtime.test.ts",
       ]) {
         const result = await run(
           process.execPath,

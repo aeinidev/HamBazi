@@ -4,7 +4,12 @@ import { Server, type Socket } from "socket.io";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
 import type { AuthSessions } from "../auth/index.js";
 import type { RoomsPort } from "../rooms/index.js";
-import type { MatchMembershipPort, MatchProcessingPort } from "../matches/index.js";
+import {
+  matchDomainEventSchema,
+  type MatchResyncPort,
+  type MatchMembershipPort,
+  type MatchProcessingPort,
+} from "../matches/index.js";
 import type { createMatchmaking } from "../matchmaking/index.js";
 import {
   handshakeSchema,
@@ -13,6 +18,8 @@ import {
   roomSubscriptionSchema,
   type IncomingEvent,
 } from "./contracts.js";
+
+import type { createRealtimeRedisAdapter } from "./redis-adapter.js";
 
 type MatchmakingPort = ReturnType<typeof createMatchmaking>;
 type Ack = (result: unknown) => void;
@@ -24,6 +31,11 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  delivery?: {
+    resync: MatchResyncPort;
+    redis?: Awaited<ReturnType<typeof createRealtimeRedisAdapter>>;
+    ackTimeoutMs: number;
+  };
   sessions: Pick<AuthSessions, "authenticate">;
   rooms: Pick<RoomsPort, "read" | "join" | "leave" | "start">;
   matches: Pick<MatchProcessingPort, "command" | "ready">;
@@ -52,6 +64,28 @@ function safeAck(ack: Ack, value: unknown) {
 
 /** Adapter only: every mutation and membership decision goes through a public port. */
 export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDependencies) {
+  let draining = false;
+  const pending = new Set<Promise<void>>();
+  const tails = new WeakMap<Socket, Promise<void>>();
+  const cursors = new WeakMap<Socket, Map<string, number>>();
+  const available = () => !draining && (deps.delivery?.redis?.ready() ?? true);
+  function enqueue(socket: Socket, operation: () => Promise<void>): Promise<void> {
+    const task = (tails.get(socket) ?? Promise.resolve()).then(operation);
+    const safe = task.catch(() => {
+      socket.conn.close();
+    });
+    tails.set(socket, safe);
+    pending.add(safe);
+    void safe.finally(() => pending.delete(safe));
+    return task;
+  }
+  if (
+    deps.delivery &&
+    (!Number.isInteger(deps.delivery.ackTimeoutMs) ||
+      deps.delivery.ackTimeoutMs < 100 ||
+      deps.delivery.ackTimeoutMs > 30000)
+  )
+    throw new Error("Invalid realtime delivery configuration");
   const io = new Server(httpServer, {
     path: "/v1/socket.io",
     serveClient: false,
@@ -64,13 +98,18 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       callback(null, origin === undefined || deps.allowedOrigins.includes(origin));
     },
   });
+  if (deps.delivery?.redis) io.adapter(deps.delivery.redis.adapter);
   io.of("/").use((_socket, next) => next(transportError(failure("INVALID_INPUT"))));
   const namespace = io.of("/v1");
+  const stopObserving = deps.delivery?.redis?.onUnavailable(() => {
+    for (const socket of namespace.sockets.values()) socket.conn.close();
+  });
   const identities = new WeakMap<
     Socket,
     { token: string; userId: string; sessionId: string; expiresAt: number }
   >();
   namespace.use(async (socket, next) => {
+    if (!available()) return next(transportError(failure("INTERNAL_ERROR")));
     const parsed = handshakeSchema.safeParse(socket.handshake.auth);
     if (!parsed.success) return next(transportError(failure("UNAUTHENTICATED")));
     const authenticated = await deps.sessions.authenticate(parsed.data.accessToken);
@@ -97,6 +136,11 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     next();
   });
   namespace.on("connection", (socket: Socket) => {
+    if (!available()) {
+      socket.conn.close();
+      return;
+    }
+    cursors.set(socket, new Map());
     const identity = identities.get(socket);
     if (!identity) {
       socket.disconnect(true);
@@ -112,6 +156,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     async function dispatch(name: IncomingEvent, payload: unknown, ack: unknown) {
       if (typeof ack !== "function") return; // No unacknowledged mutation.
       const respond = ack as Ack;
+      if (!available()) return safeAck(respond, failure("INTERNAL_ERROR"));
       try {
         const current = await deps.sessions.authenticate(token);
         if (
@@ -180,10 +225,23 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
           case "match:subscribe": {
             const input = matchSubscriptionSchema.parse(parsed.data);
             const result = await deps.membership.authorize(userId, input);
-            if (result.ok) await socket.join(`match:${input.matchId}`);
+            if (result.ok) {
+              await socket.join(`match:${input.matchId}`);
+              cursors.get(socket)?.set(input.matchId, 0);
+            }
             outcome = result;
             break;
           }
+          case "match:snapshot":
+            outcome = deps.delivery
+              ? await deps.delivery.resync.snapshot(userId, parsed.data)
+              : failure("INTERNAL_ERROR");
+            break;
+          case "match:catchup":
+            outcome = deps.delivery
+              ? await deps.delivery.resync.catchup(userId, parsed.data)
+              : failure("INTERNAL_ERROR");
+            break;
           case "match:ready":
             outcome = await deps.matches.ready(userId, parsed.data, { requestId: randomUUID() });
             break;
@@ -200,14 +258,128 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       }
     }
     for (const name of Object.keys(incomingEvents) as IncomingEvent[])
-      socket.on(name, (payload: unknown, ack: unknown) => void dispatch(name, payload, ack));
+      socket.on(name, (payload: unknown, ack: unknown) => {
+        void enqueue(socket, () => dispatch(name, payload, ack)).catch(() => {});
+      });
     socket.onAny((name, ...args: unknown[]) => {
       if (Object.hasOwn(incomingEvents, name)) return;
       const ack = args.at(-1);
       if (typeof ack === "function") safeAck(ack as Ack, failure("INVALID_INPUT"));
     });
   });
+  async function fanout(input: unknown) {
+    const event = matchDomainEventSchema.safeParse(input);
+    if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || !available() || !deps.delivery)
+      throw new Error("Realtime delivery unavailable");
+    const matchId = event.data.aggregateId;
+    const results = await Promise.allSettled(
+      [...namespace.sockets.values()]
+        .filter((s) => s.rooms.has(`match:${matchId}`))
+        .map((socket) =>
+          enqueue(socket, async () => {
+            if (!socket.connected) return;
+            const identity = identities.get(socket);
+            if (!identity) {
+              socket.disconnect(true);
+              return;
+            }
+            const session = await deps.sessions.authenticate(identity.token);
+            if (
+              !session.ok ||
+              session.session.userId !== identity.userId ||
+              session.session.sessionId !== identity.sessionId ||
+              session.session.expiresAt * 1000 <= deps.nowMs()
+            ) {
+              socket.disconnect(true);
+              return;
+            }
+            const result = await deps.delivery!.resync.catchup(identity.userId, {
+              schemaVersion: 1,
+              matchId,
+              afterSeq: cursors.get(socket)?.get(matchId) ?? 0,
+            });
+            if (!result.ok) {
+              if (result.error.code === "NOT_FOUND" || result.error.code === "FORBIDDEN") {
+                await socket.leave(`match:${matchId}`);
+                return;
+              }
+              throw new Error("Realtime projection unavailable");
+            }
+            if (!available()) throw new Error("Realtime delivery unavailable");
+            // Session may expire while waiting for the database/earlier socket work.
+            const current = await deps.sessions.authenticate(identity.token);
+            if (
+              !current.ok ||
+              current.session.userId !== identity.userId ||
+              current.session.sessionId !== identity.sessionId ||
+              current.session.expiresAt * 1000 <= deps.nowMs()
+            ) {
+              socket.disconnect(true);
+              return;
+            }
+            for (const item of result.value.events) socket.emit("match:event", item);
+            // Cursor advances only after recipient acknowledgement. Loss/disconnect retries from durable state.
+            const ack: unknown = await socket
+              .timeout(deps.delivery!.ackTimeoutMs)
+              .emitWithAck("match:snapshot", result.value.snapshot);
+            if (ack !== result.value.snapshot.lastEventSeq)
+              throw new Error("Realtime acknowledgement invalid");
+            cursors.get(socket)?.set(matchId, result.value.snapshot.lastEventSeq);
+          }),
+        ),
+    );
+    if (results.some((r) => r.status === "rejected"))
+      throw new Error("Realtime delivery incomplete");
+  }
+  namespace.on("match:wakeup:v1", (input: unknown, ack: unknown) => {
+    if (typeof ack !== "function") return;
+    void fanout(input).then(
+      () => (ack as Ack)({ ok: true }),
+      () => (ack as Ack)({ ok: false }),
+    );
+  });
+  let closing: Promise<void> | undefined;
   return Object.freeze({
-    close: () => new Promise<void>((resolve) => io.close(() => resolve())),
+    ready: available,
+    async publish(input: unknown) {
+      const event = matchDomainEventSchema.safeParse(input);
+      if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || !available())
+        throw new Error("Invalid realtime wakeup");
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const results = await Promise.race([
+          Promise.all([
+            fanout(event.data),
+            ...(deps.delivery?.redis
+              ? [namespace.serverSideEmitWithAck("match:wakeup:v1", event.data)]
+              : []),
+          ]),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error("Realtime deadline")), 30000);
+          }),
+        ]);
+        if (!available()) throw new Error();
+        const remote = results[1];
+        if (
+          Array.isArray(remote) &&
+          remote.some(
+            (r: unknown) => typeof r !== "object" || r === null || !("ok" in r) || r.ok !== true,
+          )
+        )
+          throw new Error();
+      } catch {
+        throw new Error("Realtime publication failed");
+      } finally {
+        clearTimeout(timer);
+      }
+    },
+    close: () =>
+      (closing ??= (async () => {
+        draining = true;
+        stopObserving?.();
+        await Promise.allSettled([...pending]);
+        for (const socket of namespace.sockets.values()) socket.conn.close();
+        await new Promise<void>((resolve) => io.close(() => resolve()));
+      })()),
   });
 }

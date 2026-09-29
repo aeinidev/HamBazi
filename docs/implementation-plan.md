@@ -652,7 +652,15 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 12A.
 - **Acceptance criteria:** only sanitized views leave the server; duplicates are harmless; gaps trigger catch-up; snapshots expose `stateVersion` and `lastEventSeq` and replace only older client state.
 - **Required tests and validations:** delivery/ordering/gap tests, multi-socket integration, Redis-adapter degradation test, drain test, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Implemented (2026-09-29):** Matches-owned snapshot/catch-up ports read a consistent roster, role, pinned descriptor, safe view and event checkpoint under the existing writer lock. Coup projects and schema-validates PlayerView/SpectatorView; replaced humans receive spectator views. Public invalidations expose only durable IDs, seq and originating stateVersion, with no internal event type/payload. Catch-up is bounded to 100 events with current-snapshot fallback. No migration or grant change was required.
+- **Delivery:** opt-in API BullMQ consumer owns only `match-changed-v1`. State-free committed outbox wakeups fan out through the Socket.IO static sharded Redis adapter; each node reauthenticates its own sockets and obtains recipient-specific projections. Socket work is serialized, snapshot acknowledgements advance per-socket cursors, and missing acknowledgements fail publication for retry/reconnect. Redis connection/subscription failure latches readiness false and closes transports. Drain waits for in-flight operations; API shutdown now drains realtime before HTTP. Production composition remains disabled.
+- **Contracts / decisions:** added snapshot/catch-up intents, snapshot/invalidation payload schemas, generated catalog and an additional frozen delivery baseline while preserving the 12A baseline. Shared `createMatchSequence` handles duplicate/gap detection and rejects older/equal snapshots. [ADR-026](adr/026-realtime-delivery-and-resynchronization.md) records snapshot-based rendering, ephemeral cross-node wakeups, retry semantics, private Redis channels, fail-closed recovery and composition order. No session, retention, CCU or production rules decision was resolved.
+- **Verification:** frozen-lockfile installation, scoped API/Contracts builds, API typecheck/tests, contract generation/check, lint, formatting, architecture checks, `pnpm check`, `pnpm build --force`, production dependency audit and final diff review pass. Final root gate: 1,387 tests (704 API), 12 workspace typecheck scripts, 11 builds and six API contract checks; architecture audit covers 13 workspaces/152 source files. The forced build ran all 11 builds without cache; unchanged checks may otherwise use Turbo cache. Nine unit/transport cases and two integration cases were added.
+- **Integration evidence:** all 167 isolated PostgreSQL/Redis tests pass (17 Database, 136 API, 14 Worker). New cases verify durable event/version mapping, safe per-player projections, denied foreign membership, spectator downgrade, incompatible versions, catch-up fallbacks, two real Socket.IO nodes with Redis, real BullMQ consumption, node-specific projections, Redis-adapter connection loss, healthy-node continuation and cleanup. Unit/transport tests cover duplicate/gap/stale snapshot handling, multiple sockets, revocation, membership loss, projection failure, invalid/missing acknowledgements, invalid/wrong-owner jobs, retries and an in-flight-command drain. Existing migrations/restart and outbox regressions pass through the declared harness.
+- **Corrections during verification:** missing temporary PostgreSQL tools were restored via checksum-verified Ubuntu 18.6 packages extracted under `/tmp`, without a system installation. Concurrent verification initially collided during Prisma generation; gates were then serialized and all builds forced once to refresh evidence. Fixed test-only readonly/socket typing and adapter declaration-export errors. The first Redis adapter variant could not establish pattern subscriptions under the existing ACL; static sharded subscriptions pass with the unchanged private ACL. Final runs have zero failures.
+- **Limits / mandatory stop:** no production activation, database migration, deployment, commit or push. Redis loss is exercised by dropping a real adapter connection, not a production partition/load drill. The two-node transport uses controlled application ports; durable Match projection is verified separately against PostgreSQL. The client sequence utility is ready for later Mini App integration; there is no declared gameplay E2E script or staging environment. Read-lock contention, capacity, reconnect-storm and Telegram/proxy validation remain later gates. Phase 7C remains mandatory before live activation. Stop after this report; Phase 13 is next and unauthorized.
 
 ### Phase 13 — Reconnection, timeout, and Bot takeover
 
@@ -776,12 +784,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 12A — Versioned realtime contracts and authenticated gateway — is complete
-as an opt-in adapter with local Socket and database verification. Stop after the
-12A report. Phase 12B — Ordered delivery, fanout, and resynchronization base —
-is next and awaits explicit authorization. Phase 7C and complete gameplay readiness remain
-mandatory before live activation; parent Phase 7 remains In Progress for that
-deferred scope.
+Phase 12B — Ordered delivery, fanout, and resynchronization base — is complete
+as an opt-in delivery boundary with local Socket, PostgreSQL, Redis and BullMQ
+verification. Stop after the 12B report. Phase 13 — Reconnection, timeout, and Bot
+takeover — is next and awaits explicit authorization. Phase 7C and complete gameplay
+readiness remain mandatory before live activation; parent Phase 7 remains In Progress
+for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
@@ -795,7 +803,9 @@ Matches now provides opt-in lifecycle/readiness and row-locked atomic command
 processing with pinned Coup integration, durable replay and safe retry acknowledgements.
 The opt-in Worker outbox dispatcher now publishes committed versioned intents,
 with atomic finish inputs and a transactional consumer deduplication pattern.
-It remains disabled by default; real realtime/statistics consumers are future work.
+It remains disabled by default. Realtime now has an opt-in Match wakeup consumer,
+recipient-safe fanout, bounded durable catch-up, client sequence handling and drain.
+Statistics consumers remain future work.
 No production matcher scheduler, enabled Socket transport or integrated playable game exists yet. Join/leave/start now have a tested Socket adapter boundary but no live composition, and no playable
 account-to-gameplay loop exists.
 
