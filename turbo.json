@@ -29,7 +29,8 @@
         "$TURBO_ROOT$/docs/contracts/bot-internal.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/profile.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/catalog.v1.baseline.json",
-        "$TURBO_ROOT$/docs/contracts/rooms.v1.baseline.json"
+        "$TURBO_ROOT$/docs/contracts/rooms.v1.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/realtime.v1.baseline.json"
       ],
       "outputs": []
     },

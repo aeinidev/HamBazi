@@ -12,12 +12,14 @@ import { createProfileHttpModule, type ProfileHttpDependencies } from "../users/
 import { createCatalogHttpModule, type CatalogHttpDependencies } from "../games/index.js";
 
 import { createRoomsHttpModule, type RoomsHttpDependencies } from "../rooms/index.js";
+import { createRealtimeGateway, type RealtimeDependencies } from "../realtime/index.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
   profile?: ProfileHttpDependencies;
   catalog?: CatalogHttpDependencies;
   rooms?: RoomsHttpDependencies;
+  realtime?: RealtimeDependencies;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
   production: boolean;
@@ -146,5 +148,8 @@ export async function createHttpApplication(options: {
   app.useGlobalFilters(filter);
   await app.init();
   await server.ready();
-  return { app, server };
+  const realtime = options.realtime
+    ? createRealtimeGateway(server.server, options.realtime)
+    : undefined;
+  return { app, server, realtime };
 }

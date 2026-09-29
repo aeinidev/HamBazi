@@ -4,6 +4,7 @@ import { createDatabase } from "@hambazi/database";
 import { coupEngine, migrateCoupState, upcastCoupEvent } from "@hambazi/coup-engine";
 import {
   createMatchProcessingPort,
+  createMatchMembershipPort,
   type MatchAck,
   type MatchOutcome,
   type MatchGame,
@@ -110,6 +111,29 @@ async function fixture(game: MatchGame = createCoupMatchGame(rules)) {
   }
   return { ids, matchId, first, second, config, users, request, active, stored };
 }
+it("authorizes only durable match members and downgrades a replaced human to spectator", async () => {
+  const f = await fixture();
+  const membership = createMatchMembershipPort(b);
+  const ref = { schemaVersion: 1, matchId: f.matchId };
+  expect(await membership.authorize(f.ids[0], ref)).toMatchObject({
+    ok: true,
+    value: { role: "PLAYER" },
+  });
+  expect(await membership.authorize(randomUUID(), ref)).toMatchObject({
+    ok: false,
+    error: { code: "NOT_FOUND" },
+  });
+  await a.forModule("matches").execute((db) =>
+    db.matchPlayer.update({
+      where: { matchId_userId: { matchId: f.matchId, userId: f.ids[0]! } },
+      data: { agentType: "BOT", connectionStatus: "REPLACED_BY_BOT", replacedAt: new Date() },
+    }),
+  );
+  expect(await membership.authorize(f.ids[0], ref)).toMatchObject({
+    ok: true,
+    value: { role: "SPECTATOR" },
+  });
+});
 it("persists the guarded lifecycle, ready seats, initialization and safe atomic wake-up", async () => {
   const f = await fixture();
   expect(await f.first.lifecycle({ ...f.request(0), operation: "ACTIVATE" })).toMatchObject({

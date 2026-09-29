@@ -637,7 +637,12 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 11B and Phase 6A.
 - **Acceptance criteria:** payload `userId` is never authoritative; invalid schemas and unauthorized subscriptions fail with stable codes; gateway owns no game/business rule.
 - **Required tests and validations:** Socket contract/integration/auth tests, architecture boundary checks, event catalog generation/diff, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+- **Authorization / prerequisites (2026-09-29):** owner authorized only 12A. The named reviewed architecture was read from `/home/mehdi/Downloads` alongside AGENTS, the complete plan and execution protocol. Worktree was clean on `main` at `407bce5` (11B). The required durable Auth session port, Rooms/Matchmaking/Matches application ports, outbox contract and API composition were present; no earlier phase needed repair. Phase 7C remains an activation gate, not an adapter prerequisite.
+- **Delivered:** opt-in Socket.IO v1 adapter on the API HTTP server, strict authenticated handshake, per-event durable session revalidation and absolute expiry disconnect, bound identity, required distributed-rate hook, allowlisted origins, 16 KiB packet cap, stable callback errors and no unacknowledged mutation. Room join/leave/start, Matchmaking search/status/cancel/found/admit, Match ready/game command, member-only room/match subscriptions and transport ping delegate to their public owner ports. A Matches-owned read-only membership port returns a minimal player/spectator role and treats Bot-replaced humans as spectators. No game rule or private Match state is read by the gateway.
+- **Contract / documentation:** v1 `/v1/socket.io` path and `/v1` namespace, strict incoming event schemas, generated/frozen event catalog and conservative compatibility script join the API contract gate. Server event names are reserved only; recipient-safe payload schemas and emission belong to 12B/13/15. [ADR-025](adr/025-versioned-realtime-gateway.md) and [realtime gateway documentation](architecture/realtime-gateway.md) record authentication, privacy, lifecycle and future fanout obligations. `socket.io` and test client 4.8.3 are pinned in the lockfile; no database migration/grant or shared error-code change was needed.
+- **Validation:** frozen-lockfile install, scoped API typecheck/build and real loopback Socket.IO tests, lint, architecture gate, full `pnpm check`, generated catalog compatibility, dependency audit and diff checks pass. The final root gate includes 695 API tests, 12 workspace typecheck scripts, 11 builds and six API contract checks; unchanged Turbo tasks may use cache. The architecture audit covers 13 workspaces/147 source files. Isolated `pnpm test:auth-http:local` passes 165 PostgreSQL/Redis integration tests, including the new durable Match member/Bot-spectator case; migration deploy/redeploy, zero Prisma drift and existing restart/outage regressions remain green. The live Socket test suite covers Nest/Fastify attachment/shutdown, handshake forgery/origin/rate denial, payload identity injection, invalid/unknown events, membership denial, session revocation, rate failure, admission credential privacy and delegated Match command. No staging E2E environment or declared gameplay E2E script exists.
+- **Limits / mandatory stop:** `createHttpApplication` accepts realtime dependencies, but `startApi` does not enable the adapter while the catalog is disabled and production Matchmaking/rate configuration is absent. No production Socket admission, outbox consumer/fanout, recipient PlayerView event, Redis multi-node adapter, resync, durable presence/reconnect, chat, scheduler, production migration, commit, push or deployment was performed. Client-visible result payloads remain the owner ports' validated v1 shapes. Live Telegram and staging gameplay E2E remain environment/activation gates. Stop after this report; 12B is next and unauthorized.
 
 ### Phase 12B — Ordered delivery, fanout, and resynchronization base
 
@@ -771,10 +776,10 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 11B — Transactional outbox and result projection inputs — is complete with
-local application/database/Worker verification. Stop after the 11B report.
-Phase 12A — Versioned realtime contracts and authenticated gateway — is next and
-awaits explicit authorization. Phase 7C and complete gameplay readiness remain
+Phase 12A — Versioned realtime contracts and authenticated gateway — is complete
+as an opt-in adapter with local Socket and database verification. Stop after the
+12A report. Phase 12B — Ordered delivery, fanout, and resynchronization base —
+is next and awaits explicit authorization. Phase 7C and complete gameplay readiness remain
 mandatory before live activation; parent Phase 7 remains In Progress for that
 deferred scope.
 
@@ -791,7 +796,7 @@ processing with pinned Coup integration, durable replay and safe retry acknowled
 The opt-in Worker outbox dispatcher now publishes committed versioned intents,
 with atomic finish inputs and a transactional consumer deduplication pattern.
 It remains disabled by default; real realtime/statistics consumers are future work.
-No production matcher scheduler, Socket transport or integrated playable game exists yet. Join/leave/start remain application ports, and no playable
+No production matcher scheduler, enabled Socket transport or integrated playable game exists yet. Join/leave/start now have a tested Socket adapter boundary but no live composition, and no playable
 account-to-gameplay loop exists.
 
 No deployment, production migration, commit or live Telegram change was performed.

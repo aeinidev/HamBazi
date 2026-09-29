@@ -32,3 +32,5 @@ export type {
   OutboxPolicy,
 } from "./application/outbox.js";
 export type { MatchCorrelation } from "./application/correlation.js";
+export { createMatchMembershipPort } from "./module.js";
+export type { MatchMembershipPort, MatchMembership } from "./application/membership.js";

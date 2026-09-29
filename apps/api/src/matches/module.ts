@@ -22,6 +22,13 @@ export function createMatchProcessingPort(
 }
 
 import { createMatchOutboxRepository } from "./infrastructure/repositories/outbox.js";
+import { matchMembershipService } from "./application/membership.js";
+import { createMatchMembershipRepository } from "./infrastructure/repositories/membership.js";
+export function createMatchMembershipPort(
+  database: Parameters<typeof createMatchMembershipRepository>[0],
+) {
+  return matchMembershipService(createMatchMembershipRepository(database));
+}
 export function createMatchOutboxPort(
   database: Parameters<typeof createMatchOutboxRepository>[0],
   options: Parameters<typeof createMatchOutboxRepository>[1],

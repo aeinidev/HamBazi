@@ -117,6 +117,9 @@ Preserve previous supported fixtures when introducing a new version. Generated
 OpenAPI/event catalogs and CI breaking-diff automation arrive with real transports
 and CI, not empty endpoint schemas in this phase.
 
+Phase 12A now generates the Socket.IO v1 event catalog and checks it against a
+frozen baseline. See [the realtime gateway contract](realtime-gateway.md).
+
 Tests in `packages/validation/tests` cover the three packages together: positive
 and negative schemas, typed envelope alignment, JSON round trips, unknown-field
 handling, unsupported versions, safe counters, stable errors, and redaction.

@@ -23,19 +23,19 @@
   },
   "scripts": {
     "start": "node dist/composition/main.js",
-    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write",
-    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs",
+    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write && node scripts/realtime-contract.mjs --write",
+    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
-    "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking",
+    "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime",
     "test:integration": "vitest run tests/integration"
   },
   "dependencies": {
     "@hambazi/config": "workspace:*",
     "@hambazi/contracts": "workspace:*",
+    "@hambazi/coup-engine": "workspace:*",
     "@hambazi/database": "workspace:*",
     "@hambazi/game-core": "workspace:*",
-    "@hambazi/coup-engine": "workspace:*",
     "@nestjs/common": "12.0.1",
     "@nestjs/core": "12.0.1",
     "@nestjs/platform-fastify": "12.0.1",
@@ -45,11 +45,13 @@
     "redis": "6.2.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
+    "socket.io": "4.8.3",
     "zod": "4.6.2"
   },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
     "@types/node": "24.13.4",
+    "socket.io-client": "4.8.3",
     "typescript": "6.0.3",
     "vitest": "5.0.0"
   }
