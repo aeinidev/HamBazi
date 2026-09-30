@@ -1,3 +1,4 @@
+import type { AutomationGame, AutomationIntent } from "./automation.js";
 import { matchCorrelationSchema, type MatchCorrelation } from "./correlation.js";
 import { z } from "zod";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
@@ -51,12 +52,15 @@ export class MatchFault extends Error {
 export type MatchOutcome = { ok: true; value: MatchAck } | ErrorEnvelope<MatchCode>;
 export type MatchRequest = z.infer<typeof envelope> &
   (
+    | { kind: "AUTOMATION"; intent: AutomationIntent }
     | { kind: "READY" }
     | { kind: "GAME"; command: z.infer<ReturnType<typeof z.json>> }
     | { kind: "LIFECYCLE"; operation: z.infer<typeof matchLifecycleSchema>["operation"] }
   );
 /** Synchronous server adapter. Never fetch config, Users, or another service under the lock. */
 export interface MatchGame {
+  automation?: AutomationGame["automation"];
+  automate?: AutomationGame["automate"];
   readonly gameId: string;
   readonly descriptor: GameVersionDescriptor;
   initialize(playerIds: readonly string[], at: number): unknown;

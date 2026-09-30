@@ -1,3 +1,4 @@
+import type { createMatchAutomationPort } from "./module.js";
 export { createMatchAdmissionPort } from "./module.js";
 export type {
   MatchAdmissionPort,
@@ -59,3 +60,10 @@ export type {
   ReconnectOutcome,
   DisconnectTimeout,
 } from "./application/reconnect.js";
+
+export { createMatchAutomationPort } from "./module.js";
+export { automationIntentSchema } from "./application/automation.js";
+export type { AutomationIntent } from "./application/automation.js";
+export type MatchAutomationPort = ReturnType<typeof createMatchAutomationPort>;
+
+export { matchCorrelationSchema } from "./application/correlation.js";

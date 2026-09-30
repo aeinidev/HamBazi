@@ -53,3 +53,11 @@ export function createMatchReconnectPort(
 ) {
   return matchReconnectService(createMatchReconnectRepository(database, options));
 }
+
+import { createMatchAutomationRepository } from "./infrastructure/repositories/automation.js";
+export function createMatchAutomationPort(
+  database: Parameters<typeof createMatchAutomationRepository>[0],
+  options: Parameters<typeof createMatchAutomationRepository>[1],
+) {
+  return createMatchAutomationRepository(database, options);
+}

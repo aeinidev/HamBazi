@@ -38,6 +38,59 @@ export function createCoupMatchGame(inputRules: unknown): MatchGame & MatchViewG
   return Object.freeze({
     gameId: "coup",
     descriptor: coupModule.descriptor,
+    automation: (snapshot, botIds, at) =>
+      safe(() => {
+        const state = coupModule.migrateState(snapshot, coupModule.descriptor.stateSchemaVersion);
+        const deadline = coupModule.timerPolicy.getDeadline(state);
+        if (!deadline) return null;
+        if (at >= deadline.deadlineAt)
+          return { ...deadline, playerId: null, kind: "TIMER" as const };
+        const playerId = botIds.find(
+          (id) => coupModule.botPolicy.chooseCommand(getCoupModulePlayerView(state, id)) !== null,
+        );
+        return playerId
+          ? { ...deadline, deadlineAt: state.lastCommandAt, playerId, kind: "BOT" as const }
+          : { ...deadline, playerId: null, kind: "TIMER" as const };
+      }),
+    automate: (snapshot, intent, at) =>
+      safe(() => {
+        const state = coupModule.migrateState(snapshot, coupModule.descriptor.stateSchemaVersion);
+        let events: ReturnType<typeof engine.execute> = [];
+        if (intent.expectedRevision === state.revision && at >= intent.deadlineAt) {
+          if (intent.kind === "TIMER")
+            events = coupModule.timerPolicy.executeTimeout(state, intent, {
+              clock: { now: () => at },
+              random,
+            });
+          else if (
+            intent.playerId !== null &&
+            intent.deadlineAt === state.lastCommandAt &&
+            state.deadlineAt !== null &&
+            at < state.deadlineAt
+          ) {
+            const view = coupPlayerViewSchema.parse(
+              getCoupModulePlayerView(state, intent.playerId),
+            );
+            const command = coupModule.botPolicy.chooseCommand(view);
+            if (command)
+              events = engine.execute(state, command, intent.playerId, {
+                clock: { now: () => at },
+                random,
+                rules: state.rules,
+              });
+          }
+        }
+        const next = events.reduce(engine.applyEvent, state);
+        return {
+          state: next,
+          events: events.map((event) => ({
+            type: event.type,
+            schemaVersion: event.schemaVersion,
+            payload: event,
+          })),
+          result: engine.getResult(next),
+        };
+      }),
     initialize: (playerIds, at) =>
       safe(() =>
         engine.createInitialState(

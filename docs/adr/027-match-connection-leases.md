@@ -81,9 +81,31 @@ close a lease on revocation/expiry and stop renewing on failed authentication;
 lease expiry bounds loss of a callback. Socket.IO liveness detection plus the
 configured lease duration bounds node-crash detection, followed by grace.
 
-13A delivers the dormant transactional foundation, versioned timeout contract and
-PostgreSQL race/privacy tests. 13B must wire Presence/gateway subscriptions and
+13A delivers the transactional foundation, versioned timeout contract and
+PostgreSQL race/privacy tests. 13B adds opt-in Presence/gateway subscriptions and
 heartbeats, resync, BullMQ delay/retry/cancellation, bounded recovery scanning and
-PlayerView-only bot/timer execution. Until 13B is complete there is no automated
-presence, takeover or bot play. Production configuration, activation, Phase 7C,
-OD-008, staging E2E and launch readiness remain gated.
+PlayerView-only bot/timer execution. Production configuration, activation, Phase
+7C, OD-008, staging E2E and launch readiness remain gated.
+
+## Phase 13B implementation (2026-09-30)
+
+The approved policy is wired through Presence and authenticated Engine.IO pongs
+(or the existing authenticated presence ping), with sequence-acknowledged snapshot
+resync on subscription. Gateway drain includes lease cleanup; abrupt node loss
+uses the unchanged lease-expiry rule. All heartbeat/lease/grace settings remain
+explicit. The existing Redis adapter retains ephemeral socket routing.
+
+A separate version-1 BullMQ queue is rebuilt by a bounded paginated PostgreSQL
+scan, avoiding a second competing consumer on the realtime outbox queue. Jobs are
+deduplicated by guarded descriptor, use bounded attempts/backoff, sanitize failure
+diagnostics and carry optional correlation. Cancellation is a best-effort injected
+optimization; durable guards remain mandatory. Completed/exhausted jobs can be
+reconstructed by the next scan. No durable queue receipt or new migration is needed.
+
+Generic trusted automation enters the existing Match writer; the pinned Coup
+adapter alone owns timer/bot decisions. Bots see PlayerView, expired timers take
+precedence, and late bot jobs are no-ops. Engine deadlines and replay semantics
+remain unchanged. Recovery scan latency and durable heartbeat load are explicit
+operational trade-offs requiring capacity validation before activation. The
+implementation supplies opt-in factories and Worker composition; it does not
+select production settings or lift the Phase 7C gate.

@@ -1,3 +1,4 @@
+import type { PresencePort } from "../presence/index.js";
 import { randomUUID } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
@@ -31,6 +32,12 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  presence?: {
+    port: PresencePort;
+    heartbeatIntervalMs: number;
+    heartbeatTimeoutMs: number;
+    leaseMs: number;
+  };
   delivery?: {
     resync: MatchResyncPort;
     redis?: Awaited<ReturnType<typeof createRealtimeRedisAdapter>>;
@@ -86,7 +93,24 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       deps.delivery.ackTimeoutMs > 30000)
   )
     throw new Error("Invalid realtime delivery configuration");
+  if (
+    deps.presence &&
+    (!deps.delivery ||
+      ![
+        deps.presence.heartbeatIntervalMs,
+        deps.presence.heartbeatTimeoutMs,
+        deps.presence.leaseMs,
+      ].every((x) => Number.isInteger(x) && x > 0 && x <= 86400000) ||
+      deps.presence.heartbeatIntervalMs + deps.presence.heartbeatTimeoutMs >= deps.presence.leaseMs)
+  )
+    throw new Error("Invalid presence heartbeat configuration");
   const io = new Server(httpServer, {
+    ...(deps.presence
+      ? {
+          pingInterval: deps.presence.heartbeatIntervalMs,
+          pingTimeout: deps.presence.heartbeatTimeoutMs,
+        }
+      : {}),
     path: "/v1/socket.io",
     serveClient: false,
     allowEIO3: false,
@@ -151,7 +175,31 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     const remaining = Math.max(0, expiryMs - deps.nowMs());
     const timer = setTimeout(() => socket.disconnect(true), Math.min(remaining, 2147483647));
     timer.unref();
-    socket.on("disconnect", () => clearTimeout(timer));
+    const presence = deps.presence?.port.open({ userId, sessionExpiresAt: expiryMs });
+    socket.on("disconnect", () => {
+      clearTimeout(timer);
+      void enqueue(socket, async () => {
+        await presence?.close();
+      }).catch(() => {});
+    });
+    // Only a received transport pong proves liveness; sending a ping never renews a lease.
+    socket.conn.on("packet", (packet) => {
+      if (packet.type !== "pong" || !presence || !available()) return;
+      void enqueue(socket, async () => {
+        if (!socket.connected || !available()) return;
+        const current = await deps.sessions.authenticate(token);
+        if (
+          !current.ok ||
+          current.session.userId !== userId ||
+          current.session.sessionId !== sessionId ||
+          current.session.expiresAt * 1000 <= deps.nowMs()
+        ) {
+          socket.disconnect(true);
+          return;
+        }
+        await presence.heartbeat();
+      }).catch(() => {});
+    });
 
     async function dispatch(name: IncomingEvent, payload: unknown, ack: unknown) {
       if (typeof ack !== "function") return; // No unacknowledged mutation.
@@ -225,11 +273,21 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
           case "match:subscribe": {
             const input = matchSubscriptionSchema.parse(parsed.data);
             const result = await deps.membership.authorize(userId, input);
+            outcome = result;
             if (result.ok) {
               await socket.join(`match:${input.matchId}`);
               cursors.get(socket)?.set(input.matchId, 0);
+              if (presence) {
+                const snapshot = await presence.subscribe(input.matchId);
+                const received: unknown = await socket
+                  .timeout(deps.delivery!.ackTimeoutMs)
+                  .emitWithAck("match:snapshot", snapshot);
+                if (received !== snapshot.lastEventSeq)
+                  throw new Error("Realtime acknowledgement invalid");
+                cursors.get(socket)?.set(input.matchId, snapshot.lastEventSeq);
+                outcome = { ok: true, value: { ...result.value, role: snapshot.role } };
+              }
             }
-            outcome = result;
             break;
           }
           case "match:snapshot":
@@ -249,11 +307,13 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
             outcome = await deps.matches.command(userId, parsed.data, { requestId: randomUUID() });
             break;
           case "presence:ping":
+            await presence?.heartbeat();
             outcome = { ok: true, value: { schemaVersion: 1 } };
             break;
         }
         safeAck(respond, outcome);
       } catch {
+        if (presence) socket.conn.close();
         safeAck(respond, failure("INTERNAL_ERROR"));
       }
     }
@@ -380,6 +440,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         await Promise.allSettled([...pending]);
         for (const socket of namespace.sockets.values()) socket.conn.close();
         await new Promise<void>((resolve) => io.close(() => resolve()));
+        await Promise.allSettled([...pending]);
       })()),
   });
 }

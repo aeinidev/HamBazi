@@ -1,2 +1,1 @@
-// Public surface for worker; behavior is introduced in its implementation phase.
-export {};
+export { startMatchAutomation } from "./match-automation.js";

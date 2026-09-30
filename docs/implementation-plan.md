@@ -670,7 +670,7 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** Phase 12B and Phase 10D.
 - **Acceptance criteria:** stale/duplicate jobs are no-ops; reconnect-vs-timeout has one valid winner; post-takeover humans receive only SpectatorView under the baseline policy.
 - **Required tests and validations:** timer/integration/E2E tests, reconnect-vs-timeout races, duplicate job tests, worker restart/retry tests, hidden-information checks, lint/typecheck/build.
-- **Status:** In Progress
+- **Status:** Completed
 
 - **Authorization / prerequisite assessment (2026-09-29):** owner authorized Phase 13 only. Started on clean `main` at `41cbb37` (Phase 12B). Reviewed all required sources, using the documented canonical architecture copy and comparing the named original in `/home/mehdi/Downloads`; differences are asset paths and the already approved ADR-019 amendment. Inspected manifests/workspace/task graph, the Match writer/resync ports, Coup timer/bot/reconnect policies, Socket subscription/disconnect handling and seat schema. No defective or missing earlier-phase prerequisite was identified; no earlier phase was redone.
 - **Historical decision blocker (resolved by owner approval below):** the existing gateway allows multiple simultaneous sockets for one user, and `gateway.test.ts` explicitly verifies independent delivery to multiple sockets. Its disconnect callback currently only clears the session-expiry timer. `match_players` has a seat-level epoch/status/disconnected timestamp, but no per-connection lease or durable grace deadline. Architecture section 12.4 specifies epoch/version fencing and no reclaim, while ADR-022 and ADR-026 leave presence implementation to this phase. None selects whether all healthy subscribed sockets or only the newest connection preserve human control, or how a crashed node's missing disconnect callback becomes an authoritative timeout. These choices affect visible seat loss and persistence; the execution protocol's Handling Ambiguity section requires an owner decision before implementing them. This is a Phase 13 policy gate, not an earlier-phase defect.
@@ -708,7 +708,17 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** completed 13A, existing 10D policies and 12B resync/outbox delivery. Explicit runtime settings remain required; production activation remains gated by 7C.
 - **Acceptance criteria:** all healthy sockets contribute; no lost disconnect after node death can stall a Match indefinitely; stale jobs are harmless; queue reconstruction preserves original deadlines; bots use only PlayerView; human return after takeover stays spectator-only; no gateway/Worker-owned game rules.
 - **Required tests and validations:** real Socket/PostgreSQL/Redis/BullMQ multi-node and restart/retry tests, reconnect-vs-timeout/command races, full bot/timeout progression and replay, hidden-information tests, contract compatibility, lint/typecheck/build and staging E2E when available.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization (2026-09-30):** owner approved 13B. Starting from clean `a9cc41b` (Phase 13A); implementing transport, recovery and trusted automation only.
+
+- **Delivered (2026-09-30):** Presence owns per-transport subscription/lease orchestration through public Matches ports. The gateway reauthenticates received Engine.IO pongs and existing presence pings, registers pre-activation subscriptions on a subsequent healthy heartbeat, resynchronizes using the existing acknowledged snapshot contract, reports the projected role in subscription acknowledgement, and drains disconnect cleanup after accepted socket work. Independent healthy sockets preserve the seat; actual killed API processes leave leases for expiry recovery. Returning replaced users remain spectators. Optional cancellation is fire-and-forget and cannot block resync/heartbeats.
+- **Trusted automation:** Matches exposes bounded cursor recovery, state-free planning and guarded execution. Bot/timer work reuses the atomic versioned writer, replay events, minimal checkpoints, result mapping and outbox. Bot seat/epoch and Match version are checked under the lock; pinned adapters guard engine revision/deadline. Coup uses only PlayerView for policy decisions, gives overdue timers precedence, and treats a bot job crossing its deadline as a no-op. Stale/duplicate work performs no writes. Adapter-version errors retain safe stable codes.
+- **Worker / recovery:** separate version-1 BullMQ disconnect/automation jobs avoid competing with realtime outbox delivery. Stable descriptor hashes deduplicate producers; validated optional correlation flows into committed outbox events. Explicit retry/backoff, one-page-per-tick recovery, original deadlines, failure isolation, queue reconstruction and an explicit application drain deadline are implemented. Shutdown closes queue connections even after a failed drain; the owning runtime closes its database pool. Worker composition remains opt-in with explicitly supplied pinned games/policy/settings. No production defaults, schema/grant/dependency/lockfile or wire-schema changes.
+- **Verification:** frozen-lockfile install, formatting, lint, architecture audit (13 workspaces/158 source files), all relevant workspace typechecks, 11 builds, six API contract checks and diff review pass. `pnpm exec turbo run test --concurrency=1 -- --testTimeout=15000` passes 1,410 workspace tests (726 API, 28 Worker); `pnpm test:infra` passes seven more, totaling 1,417. Added 21 unit/transport cases. Final Turbo runs reuse valid caches for unchanged work; modified API/Worker code was rebuilt/typechecked and its suites rerun through prerequisite tasks.
+- **Integration evidence:** final `pnpm test:auth-http:local` passes 192 isolated tests (17 Database, 157 API, 18 Worker), including ten new cases. Coverage includes two real API child processes with SIGKILL and a surviving healthy socket, last-crashed-lease deadline reconstruction, automated persisted Coup games with exact replay and one finish outbox, concurrent human/automated writers, stale bot epochs, bounded cursor scans, safe adapter/input rejection, actual BullMQ full bot progression, lost-queue reconstruction across Worker recreation, retry/deduplication/cancellation and bounded drain of blocked application work. Existing ten migrations, redeploy/drift and PostgreSQL restart checks pass. Child processes and harness-owned services are cleaned up; no live Telegram credentials were used.
+- **Corrections / default-gate limitation:** fixed overdue-bot versus engine-timeout ordering found by PostgreSQL tests; also corrected initial branch/query typings, test-only compiled-adapter import/decorator typing and public-surface placement before final checks. Unmodified `pnpm check` passes formatting/lint/boundaries/typechecks but again hits the unchanged Coup generated-model test's default five-second timeout. The explicit 15-second runner verification passes; no engine test, assertion or source timeout was changed, and a green default `pnpm check` is not claimed.
+- **Current result / mandatory stop:** 13B and parent Phase 13 are complete as locally verified opt-in backend capabilities. [ADR-027](adr/027-match-connection-leases.md) and the [runbook](architecture/match-reconnect.md) document composition, heartbeat constraints, recovery, drain and rollback. No declared gameplay E2E script or staging environment exists; production settings/activation, Phase 7C, capacity/reconnect-storm/soak and retention gates remain open. Recovery latency depends on active Match count and explicit scan settings. No commit, push, deployment or live migration. Stop here; Phase 14A remains unauthorized.
 
 ### Phase 14A — Telegram Mini App shell and shared platform UI
 
@@ -822,14 +832,14 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 13A — Durable connection leases and takeover transactions — is complete
-with the owner-approved policy and local PostgreSQL/Redis verification. Parent
-Phase 13 remains In Progress. Stop at the 13A gate; 13B is the next subphase for
-Presence/gateway wiring, delayed jobs, recovery and automated bot/timer execution.
-The default five-second Coup model-test timing limitation is recorded above;
-all assertions pass with the explicit 15-second runner limit. Phase 14A remains
-unauthorized. Phase 7C and complete gameplay readiness remain mandatory before
-live activation; parent Phase 7 remains In Progress for that deferred scope.
+Phase 13B — Presence transport, delayed jobs, recovery and bot execution — and
+parent Phase 13 are complete with the approved policy and local
+Socket/PostgreSQL/Redis/BullMQ verification. Stop at the Phase 13B gate.
+Phase 14A — Telegram Mini App shell and shared platform UI — is next and remains
+unauthorized. The unchanged default five-second Coup model-test timing limitation
+is recorded above; verification with the explicit 15-second runner limit passes.
+Phase 7C and complete gameplay readiness remain mandatory before live activation;
+parent Phase 7 remains In Progress for that deferred scope.
 
 Authentication, onboarding, profile and catalog transports are runnable with
 configured services. Room create/read and invite share/resolve transport can be
@@ -845,9 +855,11 @@ The opt-in Worker outbox dispatcher now publishes committed versioned intents,
 with atomic finish inputs and a transactional consumer deduplication pattern.
 It remains disabled by default. Realtime now has an opt-in Match wakeup consumer,
 recipient-safe fanout, bounded durable catch-up, client sequence handling and drain.
-Statistics consumers remain future work.
-No production matcher scheduler, enabled Socket transport or integrated playable game exists yet. Join/leave/start now have a tested Socket adapter boundary but no live composition, and no playable
-account-to-gameplay loop exists.
+Presence and trusted Worker automation now integrate lease expiry, irreversible
+Bot takeover, timer/bot commands and recovery with those opt-in boundaries.
+Statistics consumers remain future work. Runtime main entry points do not enable
+production matchmaking/Socket/gameplay composition implicitly. There is no Mini App
+shell or complete playable account-to-gameplay UI loop yet.
 
 No deployment, production migration, commit or live Telegram change was performed.
 Live webhook/chat E2E remains owner-deferred until public HTTPS exists. Production

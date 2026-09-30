@@ -1,8 +1,12 @@
+import { fork } from "node:child_process";
+import { once } from "node:events";
+import { io } from "socket.io-client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { createDatabase } from "@hambazi/database";
-import { migrateCoupState, getCoupModuleSpectatorView } from "@hambazi/coup-engine";
+import { coupModule, migrateCoupState, getCoupModuleSpectatorView } from "@hambazi/coup-engine";
 import {
+  createMatchAutomationPort,
   createMatchProcessingPort,
   createMatchReconnectPort,
   createMatchResyncPort,
@@ -537,4 +541,189 @@ it("allows Worker reconciliation/takeover but denies lease creation, renewal and
   } finally {
     await worker.disconnect();
   }
+});
+
+it.each(["BOT", "TIMER"] as const)(
+  "persists a full automated %s game with replay and one finish outbox",
+  async (kind) => {
+    const f = await connected();
+    const automation = createMatchAutomationPort(a, {
+      clock: f.options.clock,
+      games: f.config.games,
+    });
+    if (kind === "BOT") {
+      f.at(10000);
+      for (const playerId of f.ids) {
+        const result = state(await f.firstReconnect.reconcile({ ...f.ref, playerId }));
+        state(await f.firstReconnect.timeout(result.timeout));
+      }
+    }
+    let steps = 0;
+    while (steps++ < 500) {
+      const planned = await automation.plan(f.matchId);
+      if (!planned) break;
+      const intent = planned.intent!;
+      f.at(Math.max(10000, intent.deadlineAt));
+      await automation.execute(intent);
+      const before = await f.stored();
+      await automation.execute(intent);
+      expect(await f.stored()).toEqual(before);
+    }
+    const saved = await f.stored();
+    expect(saved.match.status).toBe("FINISHED");
+    expect(saved.outbox.filter((e) => e.type === "MATCH_FINISHED_V1")).toHaveLength(1);
+    const initial = saved.events.find((e) => e.type === "MATCH_INITIALIZED_V1")!;
+    const payload = initial.payloadJsonb as { snapshot: unknown };
+    let replay = migrateCoupState(payload.snapshot, 4);
+    for (const event of saved.events.filter((e) => e.type === "GAME_ENGINE_EVENT")) {
+      const payload = event.payloadJsonb as { event: unknown };
+      replay = coupModule.engine.applyEvent(replay, coupModule.schemas.event.parse(payload.event));
+    }
+    expect(replay).toEqual(saved.match.stateJsonb);
+    expect(await automation.plan(f.matchId)).toBeNull();
+  },
+  15000,
+);
+
+it("fences automation against human commands and duplicate jobs across independent writers", async () => {
+  const f = await connected();
+  f.at(3000);
+  const first = createMatchAutomationPort(a, { clock: f.options.clock, games: f.config.games });
+  const second = createMatchAutomationPort(b, { clock: f.options.clock, games: f.config.games });
+  const intent = (await first.plan(f.matchId))!.intent!;
+  const before = await f.stored();
+  const outcomes = await Promise.all([
+    first.execute(intent),
+    second.execute(intent),
+    f.first.command(f.ids[0], {
+      ...f.request(intent.expectedStateVersion),
+      command: { type: "DECLARE_INCOME" },
+    }),
+  ]);
+  expect(outcomes).toHaveLength(3);
+  expect((await f.stored()).match.stateVersion).toBe(before.match.stateVersion + 1);
+});
+it("rejects stale bot epochs and keeps recovery output free of private state", async () => {
+  const f = await connected();
+  f.at(10000);
+  for (const playerId of f.ids) {
+    const gone = state(await f.firstReconnect.reconcile({ ...f.ref, playerId }));
+    state(await f.firstReconnect.timeout(gone.timeout));
+  }
+  const port = createMatchAutomationPort(b, { clock: f.options.clock, games: f.config.games });
+  await port.execute((await port.plan(f.matchId))!.intent);
+  const plan = (await port.plan(f.matchId))!;
+  expect(plan.intent!.kind).toBe("BOT");
+  expect(JSON.stringify(plan)).not.toMatch(/myCards|deck|influence|command|token/);
+  const before = await f.stored();
+  await port.execute({ ...plan.intent, expectedConnectionEpoch: 999 });
+  expect(await f.stored()).toEqual(before);
+  let after: string | null = null;
+  const seen = new Set<string>();
+  do {
+    const page = await port.recover({ schemaVersion: 1, after, limit: 2 });
+    expect(page.matchIds.length).toBeLessThanOrEqual(2);
+    for (const id of page.matchIds) {
+      expect(seen.has(id)).toBe(false);
+      seen.add(id);
+    }
+    after = page.next;
+  } while (after !== null);
+  expect(seen.has(f.matchId)).toBe(true);
+});
+
+it("keeps another node live after SIGKILL and recovers the last crashed node's original lease deadline", async () => {
+  const f = await fixture();
+  await f.active();
+  const policy = { schemaVersion: 1 as const, leaseMs: 1500, graceMs: 1000, maxConnections: 4 };
+  const children: ReturnType<typeof fork>[] = [];
+  const clients: ReturnType<typeof io>[] = [];
+  async function node() {
+    const child = fork(new URL("../fixtures/presence-node.mjs", import.meta.url), [], {
+      stdio: ["ignore", "ignore", "ignore", "ipc"],
+    });
+    children.push(child);
+    const ready = once(child, "message");
+    child.send({
+      userId: f.ids[0],
+      sessionId: randomUUID(),
+      token: "fixture-token",
+      expiresAt: Math.floor(Date.now() / 1000) + 60,
+      policy,
+      rules,
+    });
+    const [message] = (await ready) as [{ port: number }];
+    if (!message.port) throw new Error("Presence child failed");
+    const client = io(`http://127.0.0.1:${message.port}/v1`, {
+      path: "/v1/socket.io",
+      transports: ["websocket"],
+      reconnection: false,
+      auth: { schemaVersion: 1, accessToken: "fixture-token" },
+    });
+    clients.push(client);
+    client.on("match:snapshot", (snapshot: { lastEventSeq: number }, ack: (seq: number) => void) =>
+      ack(snapshot.lastEventSeq),
+    );
+    await new Promise<void>((resolve, reject) => {
+      client.once("connect", () => resolve());
+      client.once("connect_error", reject);
+    });
+    const result: unknown = await client
+      .timeout(2000)
+      .emitWithAck("match:subscribe", { schemaVersion: 1, matchId: f.matchId });
+    expect(result).toMatchObject({ ok: true });
+    return child;
+  }
+  try {
+    const first = await node();
+    const second = await node();
+    const ended = once(first, "exit");
+    first.kill("SIGKILL");
+    await ended;
+    await new Promise((resolve) => setTimeout(resolve, 1700));
+    const realtime = createMatchReconnectPort(a, { clock: { nowMs: () => Date.now() }, policy });
+    const ref = { schemaVersion: 1, matchId: f.matchId, playerId: f.ids[0] };
+    expect(state(await realtime.reconcile(ref)).status).toBe("CONNECTED");
+    const endedSecond = once(second, "exit");
+    second.kill("SIGKILL");
+    await endedSecond;
+    const leases = await a
+      .forModule("matches")
+      .execute((db) => db.matchConnectionLease.findMany({ where: { matchId: f.matchId } }));
+    expect(leases).toHaveLength(2);
+    expect(leases.every((x) => x.closedAt === null)).toBe(true);
+    const expiry = Math.max(...leases.map((x) => x.leaseUntil.getTime()));
+    const recovered = createMatchReconnectPort(b, {
+      clock: { nowMs: () => expiry + policy.graceMs + 1 },
+      policy,
+    });
+    const gone = state(await recovered.reconcile(ref));
+    expect(gone.timeout!.deadlineAt).toBe(expiry + policy.graceMs);
+    state(await recovered.timeout(gone.timeout));
+    const snapshot = await createMatchResyncPort(
+      a,
+      f.config.games as ReturnType<typeof createCoupMatchGame>[],
+    ).snapshot(f.ids[0], { schemaVersion: 1, matchId: f.matchId });
+    expect(snapshot).toMatchObject({ ok: true, value: { role: "SPECTATOR" } });
+  } finally {
+    for (const client of clients) client.disconnect();
+    for (const child of children)
+      if (child.exitCode === null && child.signalCode === null) {
+        const ended = once(child, "exit");
+        child.kill("SIGKILL");
+        await ended;
+      }
+  }
+}, 15000);
+
+it("preserves incompatible-adapter faults and rejects invalid recovery or job authority", async () => {
+  const f = await connected();
+  const port = createMatchAutomationPort(a, { clock: f.options.clock, games: [] });
+  await expect(port.plan(f.matchId)).rejects.toMatchObject({ code: "INCOMPATIBLE_GAME_VERSION" });
+  await expect(port.recover({ schemaVersion: 1, after: null, limit: 101 })).rejects.toMatchObject({
+    code: "INVALID_INPUT",
+  });
+  await expect(
+    port.execute({ schemaVersion: 1, matchId: f.matchId, kind: "BOT", playerId: null }),
+  ).rejects.toMatchObject({ code: "INVALID_INPUT" });
 });

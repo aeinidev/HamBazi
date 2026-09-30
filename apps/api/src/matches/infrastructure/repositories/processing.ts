@@ -74,7 +74,28 @@ export function createMatchProcessingRepository(
         player.connectionStatus === "REPLACED_BY_BOT")
     )
       throw new MatchFault("FORBIDDEN");
-    if ((actor === null) !== (request.kind === "LIFECYCLE")) throw new MatchFault("FORBIDDEN");
+    if ((actor === null) !== (request.kind === "LIFECYCLE" || request.kind === "AUTOMATION"))
+      throw new MatchFault("FORBIDDEN");
+    if (request.kind === "AUTOMATION") {
+      const intent = request.intent;
+      const seat = players.find((p) => p.userId === intent.playerId);
+      if (
+        row.status !== "ACTIVE" ||
+        row.stateVersion !== intent.expectedStateVersion ||
+        (intent.kind === "BOT" &&
+          (!seat ||
+            seat.agentType !== "BOT" ||
+            seat.connectionEpoch !== intent.expectedConnectionEpoch))
+      )
+        return {
+          schemaVersion: 1,
+          matchId: row.id,
+          actionId: request.actionId,
+          stateVersion: row.stateVersion,
+          lastEventSeq: row.lastEventSeq,
+          status: row.status as MatchStatus,
+        };
+    }
     const digest = hash("sha256", canonical(request));
     const previous = await db.processedCommand.findUnique({
       where: { matchId_actionId: { matchId: row.id, actionId: request.actionId } },
@@ -167,10 +188,26 @@ export function createMatchProcessingRepository(
         finishedAt = new Date(at);
       }
     } else {
-      if (status !== "ACTIVE" || state === null || actor === null) throw conflict();
+      if (status !== "ACTIVE" || state === null) throw conflict();
       const adapter = game();
-      const outcome = adapter.execute(adapter.restore(state, ids), request.command, actor, at);
-      if (!outcome.events.length) throw conflict();
+      const restored = adapter.restore(state, ids);
+      if (request.kind === "AUTOMATION" && !adapter.automate)
+        throw new MatchFault("INCOMPATIBLE_GAME_VERSION");
+      const outcome =
+        request.kind === "AUTOMATION"
+          ? adapter.automate!(restored, request.intent, at)
+          : adapter.execute(restored, request.command, actor!, at);
+      if (!outcome.events.length) {
+        if (request.kind !== "AUTOMATION") throw conflict();
+        return {
+          schemaVersion: 1,
+          matchId: row.id,
+          actionId: request.actionId,
+          stateVersion: row.stateVersion,
+          lastEventSeq: row.lastEventSeq,
+          status,
+        };
+      }
       state = json(adapter.restore(outcome.state, ids));
       for (const event of outcome.events) {
         if (event.schemaVersion !== adapter.descriptor.eventSchemaVersion)

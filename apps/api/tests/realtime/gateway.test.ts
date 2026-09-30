@@ -444,3 +444,67 @@ it("exposes authenticated snapshot and catchup acknowledgements and validates cu
     await ack(client, "match:catchup", { schemaVersion: 1, matchId, afterSeq: -1 }),
   ).toMatchObject({ error: { code: "INVALID_INPUT" } });
 });
+
+it("renews only after authenticated transport pongs and drains disconnect cleanup", async () => {
+  const d = dependencies();
+  const snapshot = {
+    schemaVersion: 1 as const,
+    matchId,
+    status: "ACTIVE" as const,
+    stateVersion: 1,
+    lastEventSeq: 1,
+    role: "SPECTATOR" as const,
+    gameId: "coup",
+    engineVersion: "coup-v1",
+    stateSchemaVersion: 4,
+    rulesetVersion: "coup-provisional-complete-v1",
+    view: null,
+  };
+  const heartbeat = vi.fn(async () => {});
+  const close = vi.fn(async () => {});
+  const subscribe = vi.fn(async () => snapshot);
+  const open = vi.fn(() => ({ heartbeat, close, subscribe }));
+  d.ports.delivery = {
+    ackTimeoutMs: 100,
+    resync: {
+      snapshot: vi.fn(async () => ({ ok: true as const, value: snapshot })),
+      catchup: vi.fn(),
+    },
+  };
+  d.ports.presence = {
+    port: { open },
+    heartbeatIntervalMs: 30,
+    heartbeatTimeoutMs: 30,
+    leaseMs: 500,
+  };
+  const client = await connect(await start(d.ports));
+  client.on("match:snapshot", (view: typeof snapshot, ack: (seq: number) => void) =>
+    ack(view.lastEventSeq),
+  );
+  await connected(client);
+  expect(await ack(client, "match:subscribe", { schemaVersion: 1, matchId })).toMatchObject({
+    ok: true,
+    value: { role: "SPECTATOR" },
+  });
+  expect(subscribe).toHaveBeenCalledWith(matchId);
+  await vi.waitFor(() => expect(heartbeat).toHaveBeenCalled(), { timeout: 2000, interval: 10 });
+  expect(open).toHaveBeenCalledWith({ userId, sessionExpiresAt: 2000000000000 });
+  d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED") as never);
+  await vi.waitFor(() => expect(client.connected).toBe(false), { timeout: 2000, interval: 10 });
+  await gateway!.close();
+  expect(close).toHaveBeenCalledTimes(1);
+});
+
+it("rejects heartbeat settings that cannot keep a lease alive", async () => {
+  const d = dependencies();
+  d.ports.presence = {
+    port: { open: vi.fn() },
+    heartbeatIntervalMs: 100,
+    heartbeatTimeoutMs: 100,
+    leaseMs: 200,
+  };
+  server = createServer();
+  expect(() => createRealtimeGateway(server!, d.ports)).toThrow(
+    "Invalid presence heartbeat configuration",
+  );
+});

@@ -1,3 +1,10 @@
+import { startMatchAutomation } from "../match-automation.js";
+import {
+  createMatchAutomationPort,
+  createMatchReconnectPort,
+  type MatchGame,
+  type ReconnectPolicy,
+} from "@hambazi/api/matches";
 import { parseOutboxWorkerConfig } from "@hambazi/config";
 import { createMatchOutboxPort } from "@hambazi/api/matches";
 import {
@@ -19,6 +26,15 @@ export async function startWorker(
       | Parameters<OutboxReporter>[0],
     fields?: Parameters<OutboxReporter>[1],
   ) => void,
+  resilience?: {
+    games: readonly MatchGame[];
+    policy: ReconnectPolicy;
+    intervalMs: number;
+    batchSize: number;
+    attempts: number;
+    backoffMs: number;
+    drainTimeoutMs: number;
+  },
 ) {
   const runtime = parseRuntimeConfig(environment, "worker");
   const config = parseOnboardingWorkerConfig(environment);
@@ -31,6 +47,7 @@ export async function startWorker(
     transactionMaxWaitMs: 2000,
     transactionTimeoutMs: 5000,
   });
+  let automation: Awaited<ReturnType<typeof startMatchAutomation>> | undefined;
   let queue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
   let profileQueue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
   let publisher: Awaited<ReturnType<typeof createBullMqDomainPublisher>> | undefined;
@@ -73,6 +90,21 @@ export async function startWorker(
         outboxConfig.intervalMs,
       );
     }
+    if (resilience) {
+      const clock = { nowMs: () => Date.now() };
+      automation = await startMatchAutomation({
+        redisUrl: runtime.redisUrl,
+        namespace: config.namespace,
+        intervalMs: resilience.intervalMs,
+        batchSize: resilience.batchSize,
+        attempts: resilience.attempts,
+        backoffMs: resilience.backoffMs,
+        drainTimeoutMs: resilience.drainTimeoutMs,
+        event,
+        automation: createMatchAutomationPort(database, { clock, games: resilience.games }),
+        reconnect: createMatchReconnectPort(database, { clock, policy: resilience.policy }),
+      });
+    }
     let closing: Promise<void> | undefined;
     return {
       close() {
@@ -82,6 +114,7 @@ export async function startWorker(
               queue!.close(),
               profileQueue!.close(),
               outboxLoop?.close(),
+              automation?.close(),
             ]);
             await publisher?.close();
             if (drains.some((result) => result.status === "rejected"))
@@ -93,6 +126,7 @@ export async function startWorker(
       },
     };
   } catch {
+    await automation?.close().catch(() => {});
     await outboxLoop?.close().catch(() => {});
     await publisher?.close().catch(() => {});
     await queue?.close().catch(() => {});
