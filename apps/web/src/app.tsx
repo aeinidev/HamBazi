@@ -10,8 +10,15 @@ import { MatchmakingScreen } from "./features/matchmaking/index.js";
 import { MatchScreen } from "./platform/match-screen.js";
 import { RuntimeContext, go, useRuntime, useSession } from "./ui/shared.js";
 import { profileSchema } from "./platform/contracts.js";
-function Shell({ telegram }: { telegram?: TelegramApp | undefined }) {
+function Shell({
+  telegram,
+  localPreview,
+}: {
+  telegram?: TelegramApp | undefined;
+  localPreview: boolean;
+}) {
   const runtime = useRuntime();
+  const preview = import.meta.env.DEV && localPreview;
   const session = useSession((s) => s.session);
   const connection = useSession((s) => s.connection);
   const ticket = useSession((s) => s.ticket);
@@ -75,6 +82,11 @@ function Shell({ telegram }: { telegram?: TelegramApp | undefined }) {
           </span>
         )}
       </header>
+      {preview && (
+        <div className="notice" role="status">
+          Local preview · synthetic Telegram identity and server data
+        </div>
+      )}
       {session && connection !== "connected" && (
         <div className="notice" role="status">
           Live connection unavailable. Your server session is preserved.{" "}
@@ -84,7 +96,7 @@ function Shell({ telegram }: { telegram?: TelegramApp | undefined }) {
         </div>
       )}
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
-        {session ? screen : <AuthScreen />}
+        {session ? screen : <AuthScreen localPreview={preview} />}
       </main>
       {session && (
         <nav aria-label="Main navigation">
@@ -107,14 +119,16 @@ function Shell({ telegram }: { telegram?: TelegramApp | undefined }) {
 export function App({
   runtime,
   telegram,
+  localPreview = false,
 }: {
   runtime: Runtime;
   telegram?: TelegramApp | undefined;
+  localPreview?: boolean;
 }) {
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
-        <Shell telegram={telegram} />
+        <Shell telegram={telegram} localPreview={localPreview} />
       </QueryClientProvider>
     </RuntimeContext.Provider>
   );

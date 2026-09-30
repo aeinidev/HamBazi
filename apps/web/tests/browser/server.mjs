@@ -6,6 +6,7 @@ const roomId = "22222222-2222-4222-8222-222222222222";
 const matchId = "33333333-3333-4333-8333-333333333333";
 const ticketId = "44444444-4444-4444-8444-444444444444";
 const code = "A".repeat(43);
+const previewMode = process.env.HAMBAZI_PREVIEW_MODE === "1";
 let state;
 function reset() {
   state = {
@@ -94,6 +95,24 @@ const http = createServer(async (req, res) => {
   const body = text ? JSON.parse(text) : {};
   const send = (value) => res.end(JSON.stringify(value));
   if (req.url === "/health") return send({ ok: true });
+  if (previewMode) {
+    if (req.url?.startsWith("/__test/")) {
+      res.statusCode = 404;
+      return send({ ok: false, error: { code: "NOT_FOUND" } });
+    }
+    if (req.url?.startsWith("/v1/auth/telegram-mini-app")) {
+      if (new URLSearchParams(body.initData).get("preview") !== "synthetic") {
+        res.statusCode = 401;
+        return send({ ok: false, error: { code: "UNAUTHENTICATED" } });
+      }
+    } else if (
+      req.url?.startsWith("/v1/") &&
+      req.headers.authorization !== "Bearer synthetic-access"
+    ) {
+      res.statusCode = 401;
+      return send({ ok: false, error: { code: "UNAUTHENTICATED" } });
+    }
+  }
   if (req.url === "/__test/reset") {
     reset();
     return send({ ok: true });
@@ -210,6 +229,12 @@ const http = createServer(async (req, res) => {
   send({ ok: false, error: { code: "NOT_FOUND", retryable: false } });
 });
 const io = new Server(http, { path: "/v1/socket.io", cors: { origin: "http://127.0.0.1:4173" } });
+if (previewMode)
+  io.of("/v1").use((socket, next) => {
+    if (socket.handshake.auth?.accessToken !== "synthetic-access")
+      return next(new Error("UNAUTHENTICATED"));
+    next();
+  });
 io.of("/v1").on("connection", (socket) =>
   socket.onAny((event, input, ack) => {
     state.commands.push({

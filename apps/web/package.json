@@ -11,10 +11,12 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --project tsconfig.build.json && vite build",
+    "dev:preview": "node dev/preview.mjs",
+    "build": "tsc --project tsconfig.build.json && vite build && node dev/check-preview-boundary.mjs",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
     "test": "vitest run tests/unit",
     "test:browser": "playwright test",
+    "test:preview": "playwright test --config preview.playwright.config.ts",
     "preview": "vite preview --host 127.0.0.1"
   },
   "devDependencies": {

@@ -9,6 +9,29 @@ allow the web origin. `pnpm --filter @hambazi/web build` emits module declaratio
 and a static browser bundle in `apps/web/dist/client`. `preview` serves that bundle.
 No deployment, Bot setting or production runtime is enabled by these commands.
 
+For an isolated browser preview without Telegram or a running API, run
+`pnpm --filter @hambazi/web dev:preview` and open `http://127.0.0.1:4173`.
+The command starts the existing synthetic browser-test HTTP/Socket fixture on
+`127.0.0.1:4174` and a separate Vite development configuration on loopback.
+Its mock Telegram bridge supplies a visibly labelled preview identity; the
+fixture issues a synthetic session so the catalog, profile, lobby and shared
+platform flows can be explored. Preview data is disposable and does not
+represent a real Telegram account or active production game. The test fixture
+has control endpoints for browser tests; preview mode disables them. Keep this
+command local. Stop it to stop both
+servers. `pnpm --filter @hambazi/web test:preview` checks this entry path in
+Chromium.
+
+The normal `dev` command and production build use the official Telegram bridge.
+The preview-only Vite config rejects build/production mode, injects the mock
+bridge only into its local development HTML, and never changes backend Telegram
+signature verification. Real API authentication still requires valid Telegram
+`initData`; the preview command forces requests to its separate loopback
+fixture. Preview mode disables the fixture's test-control endpoints and requires
+its synthetic credential for mock protected routes and sockets. The production
+build checks that the official bridge remains and preview markers are absent
+from its browser output.
+
 The repository's configured API can provide auth/profile/catalog/optional room
 REST. Socket and matchmaking composition remain opt-in. The production catalog
 remains non-playable, so an ordinary runtime correctly displays disabled lobby
@@ -85,7 +108,8 @@ without inventing profile reads or leaking identifiers into visible names.
 late-result fencing, mode discovery, sequence and reconnect behavior.
 `pnpm --filter @hambazi/web test:browser` starts disposable loopback HTTP/Socket
 fixtures plus Vite and runs Chromium flows, axe accessibility and viewport checks.
-The fixture bridge and playable catalog exist only under tests, never in the bundle.
+The synthetic fixture also serves the local preview; its playable catalog and
+mock bridge never enter the production bundle.
 This is component/contract-client browser evidence, not live Telegram or durable
 PostgreSQL gameplay E2E. Screenshots are generated under ignored test-results.
 

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Panel, go, useRuntime, useSession, useTask } from "../../ui/shared.js";
-export function AuthScreen() {
+export function AuthScreen({ localPreview = false }: { localPreview?: boolean }) {
   const runtime = useRuntime();
+  const preview = import.meta.env.DEV && localPreview;
   const expired = useSession((s) => s.expired);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -45,7 +46,9 @@ export function AuthScreen() {
             <p>
               {creating
                 ? "Choose the name other players will see."
-                : "Sign in securely with your Telegram account."}
+                : preview
+                  ? "Explore with a synthetic local session."
+                  : "Sign in securely with your Telegram account."}
             </p>
             {creating && (
               <label>
@@ -66,7 +69,9 @@ export function AuthScreen() {
                 ? "Connecting…"
                 : creating
                   ? "Create account & continue"
-                  : "Continue with Telegram"}
+                  : preview
+                    ? "Continue preview"
+                    : "Continue with Telegram"}
             </button>
             <button
               type="button"

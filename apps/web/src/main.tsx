@@ -9,7 +9,16 @@ const runtime = createRuntime(
   telegram.initData,
 );
 const root = createRoot(document.getElementById("root")!);
-root.render(<App runtime={runtime} telegram={telegram.app} />);
+root.render(
+  <App
+    runtime={runtime}
+    telegram={telegram.app}
+    localPreview={
+      import.meta.env.DEV &&
+      document.querySelector('meta[name="hambazi-local-preview"][content="synthetic"]') !== null
+    }
+  />,
+);
 if (import.meta.hot)
   import.meta.hot.dispose(() => {
     root.unmount();

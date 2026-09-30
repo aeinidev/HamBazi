@@ -43,6 +43,9 @@ test("Telegram-only entry is accessible and keeps a narrow viewport", async ({ p
   await expect(
     page.getByText("Open HamBazi from Telegram to sign in and play with friends."),
   ).toBeVisible();
+  await expect(
+    page.getByText("Local preview · synthetic Telegram identity and server data"),
+  ).toHaveCount(0);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("entry-mobile.png"), fullPage: true });

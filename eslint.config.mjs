@@ -12,6 +12,7 @@ export default defineConfig([
       "tooling/**/*.{js,mjs,cjs,ts}",
       "apps/{api,bot,worker}/src/**/*.ts",
       "apps/web/tests/**/*.mjs",
+      "apps/web/dev/**/*.mjs",
       "packages/config/**/*.ts",
       "packages/database/**/*.{ts,mjs}",
       "infra/**/*.mjs",
