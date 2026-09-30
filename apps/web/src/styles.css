@@ -363,6 +363,91 @@ p,
 main:focus {
   outline: none;
 }
+.coup-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.coup-seat,
+.coup-hand,
+.coup-exchange {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: var(--bg);
+  min-width: 0;
+}
+.coup-seat h3,
+.coup-hand h3 {
+  margin: 0 0 0.35rem;
+}
+.coup-seat p {
+  margin: 0.2rem 0 0.75rem;
+}
+.coup-cards,
+.coup-actions,
+.coup-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.coup-card {
+  display: inline-grid;
+  place-items: center;
+  min-width: 4rem;
+  min-height: 5rem;
+  padding: 0.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  background: var(--wash);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.coup-card.hidden {
+  background: var(--panel);
+  border-style: dashed;
+}
+.coup-card.revealed {
+  border-style: double;
+}
+.coup-actions {
+  margin: 0.7rem 0 1rem;
+}
+.coup-actions button {
+  flex: 1 1 145px;
+}
+.coup-exchange {
+  margin: 1rem 0;
+}
+.coup-choices label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  font-weight: 400;
+}
+.coup-choices input {
+  width: auto;
+  min-height: 0;
+}
+.coup-timer {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coup-seat,
+  .coup-hand {
+    animation: coup-enter 180ms ease-out;
+  }
+  @keyframes coup-enter {
+    from {
+      opacity: 0.5;
+      transform: translateY(4px);
+    }
+  }
+}
 /* At narrow widths keep enlarged navigation in document flow, avoiding an overlay. */
 @media (max-width: 360px) {
   nav {

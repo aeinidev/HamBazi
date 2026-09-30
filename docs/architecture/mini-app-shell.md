@@ -91,8 +91,9 @@ authentication credentials. Reloaded users re-authenticate before those routes.
 - Shared sequence handling rejects stale/duplicate snapshots and requests catch-up
   on invalidations/gaps. Snapshot acknowledgements use lastEventSeq. Disconnect
   discards the old view; a returning spectator cannot keep a cached player view.
-  Role changes and server status drive the shared session screen. The actual Coup
-  table, cards, commands and timer rendering are exclusively Phase 14B.
+  Role changes and server status drive the shared session screen. Phase 14B adds
+  the Coup player/spectator projection and controls described in
+  [Coup Mini App UI](coup-mini-app-ui.md).
 
 ## UI and validation
 

@@ -12,11 +12,13 @@ import {
   type Ticket,
 } from "./contracts.js";
 import { ClientError } from "./errors.js";
+import { publicSnapshot } from "../games/index.js";
 export interface State {
   session: Session | null;
   expired: boolean;
   connection: Connection;
   snapshot: Snapshot | null;
+  resyncNeeded: boolean;
   realtimeError: ClientError | null;
   invite: string | null;
   ticket: Ticket | null;
@@ -45,6 +47,7 @@ export function createRuntime(
     expired: false,
     connection: "offline",
     snapshot: null,
+    resyncNeeded: false,
     realtimeError: null,
     invite: startParam && parseRoomStartParam(startParam) ? startParam : null,
     ticket: null,
@@ -68,6 +71,7 @@ export function createRuntime(
       expired,
       connection: "offline",
       snapshot: null,
+      resyncNeeded: false,
       realtimeError: null,
       ticket: null,
     });
@@ -98,7 +102,14 @@ export function createRuntime(
     );
     realtime = realtimeFactory(origin, token, {
       state: (connection) => store.setState({ connection }),
-      snapshot: (snapshot) => store.setState({ snapshot }),
+      snapshot: (snapshot) =>
+        store.setState({
+          snapshot:
+            snapshot && store.getState().session
+              ? publicSnapshot(snapshot, store.getState().session!.userId)
+              : null,
+        }),
+      resync: (resyncNeeded) => store.setState({ resyncNeeded }),
       expired: () => clear(true),
       error: (realtimeError) => store.setState({ realtimeError }),
     });

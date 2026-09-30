@@ -47,7 +47,13 @@ function fixture() {
       handlers.clear();
     },
   };
-  const callbacks = { state: vi.fn(), snapshot: vi.fn(), expired: vi.fn(), error: vi.fn() };
+  const callbacks = {
+    state: vi.fn(),
+    snapshot: vi.fn(),
+    expired: vi.fn(),
+    error: vi.fn(),
+    resync: vi.fn(),
+  };
   const connect = vi.fn(() => socket) as unknown as typeof io;
   const realtime = createRealtime("https://api.example", "synthetic", callbacks, connect);
   return { socket, handlers, emitted, callbacks, realtime };
@@ -83,6 +89,8 @@ it("gap events request bounded catchup and duplicates do not request again", asy
   };
   f.handlers.get("match:event")?.(event);
   await vi.waitFor(() => expect(f.emitted).toHaveBeenCalledTimes(1));
+  expect(f.callbacks.snapshot).toHaveBeenLastCalledWith(null);
+  expect(f.callbacks.resync).toHaveBeenCalledWith(true);
   f.handlers.get("match:event")?.(event);
   expect(f.emitted).toHaveBeenCalledTimes(1);
   await new Promise((resolve) => setTimeout(resolve, 0));

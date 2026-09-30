@@ -2,12 +2,13 @@ import { useEffect } from "react";
 import { matchAckSchema, okValue } from "./contracts.js";
 import { ClientError } from "./errors.js";
 import { ErrorNotice, Loading, Panel, useRuntime, useSession, useTask } from "../ui/shared.js";
-// Shared session boundary. Game-specific rendering is owned by Phase 14B.
+import { CoupMatch } from "../games/coup/index.js";
 export function MatchScreen({ id }: { id: string }) {
   const runtime = useRuntime();
   const snapshot = useSession((s) => s.snapshot);
   const connection = useSession((s) => s.connection);
   const error = useSession((s) => s.realtimeError);
+  const resyncNeeded = useSession((s) => s.resyncNeeded);
   const task = useTask();
   useEffect(() => {
     if (connection === "connected")
@@ -34,7 +35,13 @@ export function MatchScreen({ id }: { id: string }) {
         />
       )}
       {!current ? (
-        <Loading />
+        resyncNeeded ? (
+          <p className="notice" role="status">
+            Synchronizing the table…
+          </p>
+        ) : (
+          <Loading />
+        )
       ) : (
         <Panel title={current.role === "SPECTATOR" ? "Watching the table" : "At the table"}>
           <p role="status">{current.status.toLowerCase().replaceAll("_", " ")}</p>
@@ -60,11 +67,12 @@ export function MatchScreen({ id }: { id: string }) {
               I’m ready
             </button>
           )}
-          <p className="quiet">
-            {current.status === "ACTIVE"
-              ? "The game view is not available in this app version."
-              : "Match status is synchronized with the server."}
-          </p>
+          {(current.status === "ACTIVE" || current.status === "FINISHED") &&
+          current.gameId === "coup" ? (
+            <CoupMatch snapshot={current} />
+          ) : (
+            <p className="quiet">Match status is synchronized with the server.</p>
+          )}
           {task.notice}
         </Panel>
       )}

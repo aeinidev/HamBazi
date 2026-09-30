@@ -1,7 +1,16 @@
 // Disposable synthetic transport fixture. Never imported by product code.
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-const userId = "11111111-1111-4111-8111-111111111111";
+import { readFileSync } from "node:fs";
+const goldens = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../../../packages/games/coup-engine/tests/fixtures/module-v1.json",
+      import.meta.url,
+    ),
+  ),
+).goldens;
+const userId = () => goldens.WAITING_FOR_ACTION.players[state.viewerIndex].viewerId;
 const roomId = "22222222-2222-4222-8222-222222222222";
 const matchId = "33333333-3333-4333-8333-333333333333";
 const ticketId = "44444444-4444-4444-8444-444444444444";
@@ -21,7 +30,10 @@ function reset() {
     search: null,
     commands: [],
     snapshotVersion: 2,
+    deadlineAt: Date.now() + 30000,
     role: "PLAYER",
+    viewerIndex: 0,
+    coupPhase: "WAITING_FOR_ACTION",
     failCreate: false,
     createIds: [],
     conflict: false,
@@ -47,14 +59,14 @@ const game = () => ({
 const room = () => ({
   id: roomId,
   gameId: "coup",
-  hostUserId: userId,
+  hostUserId: userId(),
   capacity: 2,
   version: state.roomVersion,
   status: state.roomStatus,
   expiresAt: Date.now() + 600000,
   startedMatchId: state.roomStatus === "STARTED" ? matchId : null,
   members: [
-    { userId, seat: 0, joinedAt: 1000, joinedVersion: 1 },
+    { userId: userId(), seat: 0, joinedAt: 1000, joinedVersion: 1 },
     ...(state.roomStatus === "FULL"
       ? [{ userId: ticketId, seat: 1, joinedAt: 2000, joinedVersion: 2 }]
       : []),
@@ -72,13 +84,27 @@ const snapshot = () => ({
   matchId,
   stateVersion: state.snapshotVersion,
   lastEventSeq: state.snapshotVersion,
-  status: "ACTIVE",
+  status: state.coupPhase === "GAME_OVER" ? "FINISHED" : "ACTIVE",
   role: state.role,
   gameId: "coup",
   engineVersion: "coup-v1",
   stateSchemaVersion: 4,
-  rulesetVersion: "coup-provisional-v1",
-  view: null,
+  rulesetVersion: state.rulesetVersion ?? "coup-provisional-complete-v1",
+  view:
+    state.invalidView ??
+    (state.role === "SPECTATOR"
+      ? {
+          ...goldens[state.coupPhase].spectator,
+          deadlineAt:
+            goldens[state.coupPhase].spectator.deadlineAt === null ? null : state.deadlineAt,
+        }
+      : {
+          ...goldens[state.coupPhase].players[state.viewerIndex],
+          deadlineAt:
+            goldens[state.coupPhase].players[state.viewerIndex].deadlineAt === null
+              ? null
+              : state.deadlineAt,
+        }),
 });
 const ok = (value) => ({ ok: true, value });
 const http = createServer(async (req, res) => {
@@ -135,7 +161,7 @@ const http = createServer(async (req, res) => {
       schemaVersion: 1,
       account: {
         schemaVersion: 1,
-        userId,
+        userId: userId(),
         displayName: body.displayName,
         publicHandle: "test_12345",
       },
@@ -148,8 +174,8 @@ const http = createServer(async (req, res) => {
       accessToken: "synthetic-access",
       session: {
         schemaVersion: 1,
-        userId,
-        sessionId: userId,
+        userId: userId(),
+        sessionId: userId(),
         expiresAt: Math.floor(Date.now() / 1000) + 900,
       },
     });
@@ -174,7 +200,7 @@ const http = createServer(async (req, res) => {
     }
     return send({
       schemaVersion: 1,
-      userId,
+      userId: userId(),
       displayName: state.displayName,
       publicHandle: "test_12345",
       version: state.profileVersion,
@@ -279,6 +305,25 @@ io.of("/v1").on("connection", (socket) =>
     }
     if (event === "match:catchup")
       return ack(ok({ schemaVersion: 1, mode: "SNAPSHOT", events: [], snapshot: snapshot() }));
+    if (event === "game:command") {
+      state.snapshotVersion++;
+      if (state.nextPhase) {
+        state.coupPhase = state.nextPhase;
+        state.nextPhase = null;
+      }
+      ack(
+        ok({
+          schemaVersion: 1,
+          actionId: input.actionId,
+          matchId,
+          stateVersion: state.snapshotVersion,
+          lastEventSeq: state.snapshotVersion,
+          status: state.coupPhase === "GAME_OVER" ? "FINISHED" : "ACTIVE",
+        }),
+      );
+      socket.emit("match:snapshot", snapshot(), () => {});
+      return;
+    }
     return ack({ ok: false, error: { code: "INVALID_INPUT", retryable: false } });
   }),
 );

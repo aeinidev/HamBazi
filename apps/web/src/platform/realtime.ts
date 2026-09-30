@@ -19,6 +19,7 @@ export function createRealtime(
     snapshot(value: Snapshot | null): void;
     expired(): void;
     error(value: ClientError | null): void;
+    resync(value: boolean): void;
   },
   connect: typeof io = io,
 ) {
@@ -58,7 +59,10 @@ export function createRealtime(
     if (!result.success || result.data.matchId !== matchId || !sequence) return false;
     const action = sequence.snapshot(result.data);
     if (action === "INVALID") return false;
-    if (action === "APPLY") callbacks.snapshot(result.data);
+    if (action === "APPLY") {
+      callbacks.snapshot(result.data);
+      callbacks.resync(false);
+    }
     callbacks.error(null);
     return result.data.lastEventSeq;
   }
@@ -72,7 +76,11 @@ export function createRealtime(
         { schemaVersion: 1, matchId, afterSeq: sequence?.cursor().lastEventSeq ?? 0 },
         okValue(catchupSchema),
       );
-      if (epoch === generation) apply(result.value.snapshot);
+      if (epoch === generation) {
+        const applied = apply(result.value.snapshot);
+        if (applied === false || sequence?.cursor().needsResync)
+          callbacks.error(new ClientError("INVALID_RESPONSE"));
+      }
     } catch (error) {
       if (!disposed)
         callbacks.error(
@@ -88,6 +96,7 @@ export function createRealtime(
       matchId = id;
       sequence = createMatchSequence(id);
       callbacks.snapshot(null);
+      callbacks.resync(true);
       socket.connect();
       return;
     }
@@ -95,6 +104,7 @@ export function createRealtime(
       matchId = id;
       sequence = createMatchSequence(id);
       callbacks.snapshot(null);
+      callbacks.resync(true);
     }
     await request("match:subscribe", { schemaVersion: 1, matchId: id }, okValue(memberSchema));
     // Older gateways may not push an initial snapshot on subscription.
@@ -109,7 +119,11 @@ export function createRealtime(
     const parsed = eventSchema.safeParse(value);
     if (!parsed.success || parsed.data.matchId !== matchId) return;
     const action = sequence?.event(parsed.data);
-    if (action === "GAP" || action === "ACCEPT") void sync();
+    if (action === "GAP" || action === "ACCEPT") {
+      callbacks.snapshot(null);
+      callbacks.resync(true);
+      void sync();
+    }
   });
   socket.on("connect", () => {
     callbacks.state("connected");
@@ -124,6 +138,7 @@ export function createRealtime(
     syncing = false;
     sequence = matchId ? createMatchSequence(matchId) : undefined;
     callbacks.snapshot(null);
+    callbacks.resync(true);
     callbacks.state("reconnecting");
     if (reason === "io server disconnect") callbacks.expired();
   });
@@ -148,6 +163,7 @@ export function createRealtime(
       socket.disconnect();
       socket.auth = {};
       callbacks.snapshot(null);
+      callbacks.resync(false);
       callbacks.state("offline");
     },
   };
