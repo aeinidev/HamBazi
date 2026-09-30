@@ -1,0 +1,382 @@
+@import "tailwindcss";
+@theme {
+  --font-sans: "Segoe UI", Tahoma, sans-serif;
+}
+:root {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #152d35;
+  --muted: #52666e;
+  --line: #ccd7db;
+  --accent: #145e48;
+  --wash: #e3eee9;
+  background: var(--bg);
+  color: var(--ink);
+}
+:root[data-theme="dark"],
+:root[data-theme="system"][data-telegram-theme="dark"] {
+  color-scheme: dark;
+  --bg: #10242a;
+  --panel: #19333a;
+  --ink: #eef5f5;
+  --muted: #bacdd0;
+  --line: #49636a;
+  --accent: #a4ebc7;
+  --wash: #294b43;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+a {
+  color: inherit;
+}
+button,
+.button {
+  min-height: 48px;
+  padding: 0.8rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--panel);
+  font-weight: 650;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+:focus-visible {
+  outline: 3px solid #b06809;
+  outline-offset: 4px;
+}
+button.secondary {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--line);
+}
+button.text-button {
+  color: var(--accent);
+  background: transparent;
+  padding-inline: 0.4rem;
+}
+input,
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--bg);
+}
+label {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-weight: 600;
+}
+p {
+  line-height: 1.65;
+  margin: 0.7rem 0 1rem;
+}
+h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  font-weight: 750;
+  margin: 0.65rem 0 1.25rem;
+}
+h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.8rem;
+}
+.app-shell {
+  max-width: 920px;
+  margin: auto;
+  min-height: var(--telegram-height, 100dvh);
+  padding: max(1rem, var(--telegram-top, 0px), env(safe-area-inset-top))
+    max(1.25rem, var(--telegram-right, 0px), env(safe-area-inset-right))
+    max(6rem, var(--telegram-bottom, 0px), env(safe-area-inset-bottom))
+    max(1.25rem, var(--telegram-left, 0px), env(safe-area-inset-left));
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0 1.8rem;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-size: 1.3rem;
+}
+.brand-mark {
+  background: var(--ink);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  flex-shrink: 0;
+  line-height: 1;
+  border-radius: 9px;
+  font-size: 1.25rem;
+}
+.connection {
+  font-size: 0.875rem;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b06809;
+}
+.dot.online {
+  background: var(--accent);
+}
+main {
+  padding: 1rem 0;
+  outline: none;
+}
+.eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+.intro,
+.quiet {
+  color: var(--muted);
+}
+.quiet {
+  font-size: 0.875rem;
+}
+.panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 1.5rem;
+  border-radius: 18px;
+  margin: 1.25rem 0;
+}
+.welcome {
+  max-width: 510px;
+  margin: 2rem auto;
+}
+.welcome form > button:first-of-type {
+  width: 100%;
+  margin-top: 0.7rem;
+}
+.welcome .text-button {
+  display: flex;
+  margin: 0.5rem auto 0;
+}
+.notice {
+  background: var(--wash);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+}
+.error {
+  border: 1px solid #a14c38;
+  background: var(--panel);
+}
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.game-card {
+  padding: 1.7rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--accent);
+  border-radius: 18px;
+  background: var(--panel);
+  text-decoration: none;
+  min-height: 245px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.game-card h2 {
+  font-size: 2.6rem;
+  letter-spacing: -0.06em;
+  margin: 1.25rem 0 0.15rem;
+}
+.game-card p {
+  color: var(--muted);
+}
+.tag {
+  background: var(--wash);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.card-link {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 650;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+.actions > * {
+  flex: 1;
+}
+.seats {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 1.5rem;
+}
+.seats li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--line);
+  padding: 0.9rem 0;
+}
+.seats li .tag {
+  margin-left: auto;
+}
+.seat-number {
+  color: var(--muted);
+  width: 2rem;
+  font-variant-numeric: tabular-nums;
+}
+nav {
+  display: flex;
+  gap: 0.5rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  justify-content: center;
+  padding: 0.6rem 1rem max(0.6rem, env(safe-area-inset-bottom), var(--telegram-bottom, 0px));
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  z-index: 10;
+}
+nav a {
+  min-height: 44px;
+  min-width: 90px;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 10px;
+}
+nav a[aria-current="page"] {
+  background: var(--wash);
+  font-weight: 700;
+}
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  background: var(--panel);
+  padding: 1rem;
+  z-index: 20;
+}
+.skip:focus {
+  top: 1rem;
+}
+.handle,
+.share input {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 700px) {
+  main {
+    max-width: 760px;
+    margin: auto;
+  }
+  .panel {
+    padding: 2rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Reflow at enlarged text sizes rather than clipping controls or navigation. */
+header,
+nav {
+  flex-wrap: wrap;
+}
+input,
+select,
+label,
+form {
+  min-width: 0;
+  max-width: 100%;
+}
+h1,
+h2,
+p,
+.handle {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .panel {
+    padding: 1rem;
+  }
+  nav a {
+    padding-inline: 0.5rem;
+  }
+}
+
+main:focus {
+  outline: none;
+}
+/* At narrow widths keep enlarged navigation in document flow, avoiding an overlay. */
+@media (max-width: 360px) {
+  nav {
+    position: static;
+    margin-top: 1rem;
+    border-radius: 12px;
+  }
+  .app-shell {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+button,
+.button {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

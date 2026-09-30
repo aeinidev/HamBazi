@@ -30,6 +30,7 @@ it.each(["ACTIVE", "MAINTENANCE", "DISABLED"])(
       ok: true,
       game: {
         status,
+        matchmakingModes: [{ id: "standard", title: "Standard" }],
         playable: false,
         descriptor: null,
         readiness: "NOT_IMPLEMENTED",

@@ -46,3 +46,14 @@ exhaustion, write-route absence and contract compatibility. Isolated PostgreSQL/
 Redis tests cover seed preservation, grants, repository failure/projection,
 restart persistence, multi-client quota races and authenticated runtime TCP reads.
 These do not claim production deployment, playable gameplay or operator readiness.
+
+## Phase 14A mode discovery
+
+[ADR-028](../adr/028-catalog-matchmaking-modes.md) adds optional `matchmakingModes`
+to list/detail responses. Current registry output is
+`[{"id":"standard","title":"Standard"}]`. IDs are extensible slugs; browser code
+selects and sends an ID from this response, never a Coup-specific constant.
+Absent modes on older servers disable mode selection. Metadata is independent
+of effective availability: all production capabilities remain false and
+`descriptor` remains null. No row, migration, grant or operator-control change.
+The original baseline and the new modes baseline are both checked.

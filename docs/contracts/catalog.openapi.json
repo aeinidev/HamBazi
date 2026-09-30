@@ -77,6 +77,24 @@
                           "descriptor": {
                             "type": "null"
                           },
+                          "matchmakingModes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                                },
+                                "title": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": ["id", "title"],
+                              "additionalProperties": false
+                            }
+                          },
                           "matchmakingEnabled": {
                             "type": "boolean"
                           },
@@ -479,6 +497,24 @@
                         },
                         "descriptor": {
                           "type": "null"
+                        },
+                        "matchmakingModes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                              },
+                              "title": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["id", "title"],
+                            "additionalProperties": false
+                          }
                         },
                         "matchmakingEnabled": {
                           "type": "boolean"

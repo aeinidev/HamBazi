@@ -728,7 +728,22 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** backend contracts through Phase 13.
 - **Acceptance criteria:** no token is stored in `localStorage`; server state is not treated as authoritative game logic; status/errors/reconnect states are usable in Telegram viewport constraints.
 - **Required tests and validations:** component/unit tests, contract-client tests, accessibility checks, responsive visual verification, lint/typecheck/build.
-- **Status:** Pending
+- **Status:** Completed
+
+- **Authorization / assessment (2026-09-30):** owner authorized only 14A. Starting worktree was clean on `main` at `573df11` (Phase 13B). Reviewed the required architecture, guide, complete plan and execution protocol, manifests/workspace/task graph and the relevant catalog, room, matchmaking and realtime contracts. The named architecture exists under `/home/mehdi/Downloads`; comparison with the fully reviewed canonical `docs/ARCHITECTURE.md` confirms only asset paths and the approved ADR-019 amendment differ. No earlier phase was reimplemented.
+- **Contract prerequisite blocker:** `apps/api/src/matchmaking/application/contracts.ts` requires `mode` in every search intent, but the strict Games response in `apps/api/src/games/application/catalog.ts` exposes neither supported modes nor an executable descriptor. `docs/architecture/matchmaking.md` assigns supported modes to the trusted server registry; ADR-018 explicitly prohibits invented modes. There is no backend-provided choice from which the generic lobby can construct a supported search. Hard-coding a test fixture's mode, accepting arbitrary technical mode input, or inventing a new public response in the frontend would not complete the backend-driven matchmaking UI contract. This blocks full 14A completion; authentication/profile/catalog shell work is independently feasible, but the starter explicitly requires stopping on a blocking prerequisite.
+- **Boundary / required decision:** the deliberately disabled production catalog and deferred 7C activation are not themselves treated as defects or reasons to activate gameplay. Request a separately authorized prerequisite to define and expose registry-owned matchmaking mode metadata through an additive catalog contract, with compatibility tests and documentation, while preserving disabled production admission. Alternatively, the owner can explicitly narrow/split 14A to deliver the independent shell first and defer matchmaking integration. Neither scope change is made implicitly.
+- **Assessment verification:** `pnpm format:check` and `git diff --check` pass. Final Git status/diff review confirms that only this implementation plan changed. No component, contract-client, accessibility, responsive-browser, integration or build checks ran because implementation stopped before product changes.
+- **Safe partial result:** assessment and this plan update only. No web implementation, dependency change, backend repair, new ADR, migration, service startup, commit, push, deployment or live Telegram change. No behavior tests or build results are claimed for this documentation-only stop. Phase 14B remains Pending and unauthorized.
+
+- **Owner approval / resumption (2026-09-30):** owner approved exposing Coup's supported matchmaking mode as an extensible, backward-compatible backend catalog field and then resuming 14A. ADR-028 records optional `matchmakingModes` entries with server-owned IDs/titles, initially `standard` / `Standard`. Production admission remains disabled. The original v1 baseline is preserved; a separate modes baseline freezes the additive response. The blocker above is historical and resolved by this authorized prerequisite.
+
+- **Delivered:** React/Vite Mini App with official Telegram bootstrap, URL credential cleanup, BackButton/theme/viewport/safe-area handling, memory-only authentication and explicit account creation. Added profile/settings, backend catalog/lobby/mode selection, private-room create/read/share/join/leave/start UI, invitation continuity, matchmaking search/status/cancel/found/admit and shared realtime Match status. TanStack Query owns fetched data; Zustand holds only in-memory session/UI state; tokens remain in a private closure. Added strict response projections, bounded HTTP requests, fixed-code errors, stable command retries, logout/expiry cleanup, late-result fencing, Socket reconnect/resubscription, sequence/catch-up and spectator-safe view replacement. No Coup rule or card/action renderer is introduced.
+- **Contracts / decisions:** ADR-028 and Games list/detail project `matchmakingModes: [{id: "standard", title: "Standard"}]` while keeping production capabilities false and the descriptor null. The field is optional for older-server compatibility and extensible for future IDs; UI has no mode fallback/constant. Original catalog v1 baseline is preserved and checked with the approved addition projected out; a second baseline freezes the extended contract. No schema, migration, stored config or server activation changes. Feature public surfaces remain enforced. New pinned frontend/build/browser dependencies are recorded in the lockfile; Vite's compatible patch and peer snapshots are shared with existing tooling.
+- **Verification (2026-09-30):** frozen-lockfile installation and supply-chain policy checks pass. Scoped API typecheck/tests (727), Web typecheck/unit tests (12), Web build, all six API contract checks, root formatting/lint, architecture audit (13 workspaces / 169 source files), all workspace typechecks and 11 builds pass. `pnpm exec turbo run test --concurrency=1 -- --testTimeout=15000` passes all 1,423 workspace tests through 30 uncached prerequisite/test tasks. `pnpm test:infra` adds seven passing tests. Unmodified `pnpm check` again stops at the unchanged five-second Coup generated-model timeout; no green default check or source timeout change is claimed. Separate build/contract commands completed the gates after that known failure; unchanged builds may reuse valid caches.
+- **Browser evidence:** `pnpm --filter @hambazi/web test:browser` passes eight Chromium scenarios using disposable synthetic HTTP/Socket/Telegram fixtures, including unknown backend-selected modes, older/disabled catalogs, explicit invite onboarding/join, ambiguous create retry with the same command ID, host/roster/start status, cancel losing to MATCHED, admission, disconnect/reconnect spectator return, stale snapshot rejection, profile conflict/plain-text rendering, logout storage checks and direct Match-route re-authentication. Axe reports zero violations on tested entry/catalog/lobby/profile states. Responsive screenshots were generated at 320/375/768/1280 widths and dark 200-percent text, and inspected visually. No fixture or auth bypass is included in the product bundle. Test-owned servers are stopped by Playwright.
+- **Corrections / security evidence:** corrected Socket declaration inference, catalog-checker declaration/lint typing, an initial browser fixture that the browser retried automatically, and enlarged-text overflow. Final source contains no hardcoded mode, persistent browser credential storage, raw error logging or synthetic data. `pnpm audit --prod` reports six advisories (two high, four moderate) in pre-existing unchanged `brace-expansion@5.0.9` and `fast-uri@3.1.7/4.1.4`; comparison with HEAD confirms those exact versions were already present. These are outstanding tooling/API dependency hardening work, not a clean audit or launch-readiness claim; unrelated dependencies were not silently upgraded.
+- **Limits / mandatory stop:** English screen copy with persisted locale preference, safe bidi text and light/dark presentation; translated screens are not claimed. Room/search read polling is explicit because reserved push names do not provide those updates. Full reload loses in-memory search context; room/Match routes can re-authenticate and resync. Production catalog/Socket/matcher composition and room-to-Match orchestration remain their existing activation/integration gates. No new PostgreSQL/Redis service integration, migration or staging/live Telegram E2E was run: this phase changes catalog projection/browser code, not transactions or jobs, and no controlled HTTPS/WebView environment exists. Phase 7C, production CSP/ingress, inherited dependency advisories, capacity/soak and existing open decisions remain outstanding. No commit, push, deployment or live Telegram change. [Mini App documentation](architecture/mini-app-shell.md) records execution, ownership and limits. Stop here; 14B remains Pending and unauthorized.
 
 ### Phase 14B — Coup frontend adapter and game UI
 
@@ -832,36 +847,24 @@ The repository has workspace, configuration, database, contract and boundary-che
 
 ## Current gate
 
-Phase 13B — Presence transport, delayed jobs, recovery and bot execution — and
-parent Phase 13 are complete with the approved policy and local
-Socket/PostgreSQL/Redis/BullMQ verification. Stop at the Phase 13B gate.
-Phase 14A — Telegram Mini App shell and shared platform UI — is next and remains
-unauthorized. The unchanged default five-second Coup model-test timing limitation
-is recorded above; verification with the explicit 15-second runner limit passes.
+Phase 14A — Telegram Mini App shell and shared platform UI — is complete after
+the owner-approved catalog mode prerequisite (ADR-028). Stop at the 14A gate.
+Phase 14B — Coup frontend adapter and game UI — is next and remains unauthorized.
+The default five-second Coup model-test timeout and inherited dependency audit
+findings are recorded above; explicit 15-second runner verification passes.
 Phase 7C and complete gameplay readiness remain mandatory before live activation;
 parent Phase 7 remains In Progress for that deferred scope.
 
-Authentication, onboarding, profile and catalog transports are runnable with
-configured services. Room create/read and invite share/resolve transport can be
-explicitly configured; the production catalog still rejects new room admission.
-Invite onboarding, durable room admission and matchmaking arbitration/orchestration
-are locally verified. Matchmaking exposes authenticated search/cancel/status and
-session-bound admission ports plus trusted Redis coordination ticks. The offline
-Coup module now includes all direct actions, Exchange, deadline/timeout policies,
-PlayerView-only bots, safe frontend projections, results and compatibility fixtures.
-Matches now provides opt-in lifecycle/readiness and row-locked atomic command
-processing with pinned Coup integration, durable replay and safe retry acknowledgements.
-The opt-in Worker outbox dispatcher now publishes committed versioned intents,
-with atomic finish inputs and a transactional consumer deduplication pattern.
-It remains disabled by default. Realtime now has an opt-in Match wakeup consumer,
-recipient-safe fanout, bounded durable catch-up, client sequence handling and drain.
-Presence and trusted Worker automation now integrate lease expiry, irreversible
-Bot takeover, timer/bot commands and recovery with those opt-in boundaries.
-Statistics consumers remain future work. Runtime main entry points do not enable
-production matchmaking/Socket/gameplay composition implicitly. There is no Mini App
-shell or complete playable account-to-gameplay UI loop yet.
+The Web workspace now builds a runnable React/Vite shell with authentication,
+profile, catalog, server-owned modes, room/invite/search and shared realtime Match
+status. Memory-only auth, retries, reconnect/catch-up and spectator status have
+local unit/browser evidence. Actual Coup table/card/action/timer rendering remains
+14B. Chat and stats remain Phase 15. Production catalog admission remains disabled.
+The existing API/Worker gameplay capabilities remain opt-in; this phase did not
+add production matchmaking/Socket composition or private-room Match orchestration.
 
 No deployment, production migration, commit or live Telegram change was performed.
-Live webhook/chat E2E remains owner-deferred until public HTTPS exists. Production
-ingress, centralized observability, global abuse hardening, full Docker PostgreSQL
-volume recovery, network-partition and staging E2E/load gates remain outstanding.
+Live webhook/WebView E2E remains owner-deferred until public HTTPS exists. Production
+ingress/CSP, centralized observability, global abuse hardening, inherited dependency
+advisories, full Docker PostgreSQL volume recovery, network-partition and staging
+E2E/load gates remain outstanding.

@@ -8,6 +8,7 @@ import { catalogService } from "../../src/games/application/catalog.js";
 import { catalogOpenApiDocument } from "../../src/games/index.js";
 import type { CatalogRateDecision } from "../../src/games/infrastructure/catalog-rate.js";
 import type { CatalogHttpDependencies } from "../../src/games/infrastructure/catalog-http.js";
+import { compatibleLegacyCatalog } from "../../scripts/catalog-compatibility.mjs";
 import { compatibleAuthContract } from "../../scripts/contract-compatibility.mjs";
 const row = {
   id: "coup",
@@ -157,7 +158,21 @@ it("checks generated contract and rejects authentication removal", () => {
     ),
   );
   const contract = catalogOpenApiDocument();
-  expect(compatibleAuthContract(baseline, contract)).toBe(true);
+  expect(compatibleLegacyCatalog(baseline, contract)).toBe(true);
   contract.paths["/v1/games"].get.security = [];
-  expect(compatibleAuthContract(baseline, contract)).toBe(false);
+  expect(compatibleLegacyCatalog(baseline, contract)).toBe(false);
+});
+
+it("freezes the optional mode addition and rejects changes to old fields", () => {
+  const baseline = JSON.parse(
+    readFileSync(
+      new URL("../../../../docs/contracts/catalog.modes.v1.baseline.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const contract = catalogOpenApiDocument();
+  expect(compatibleAuthContract(baseline, contract)).toBe(true);
+  const changed = structuredClone(contract);
+  changed.paths["/v1/games"].get.security = [];
+  expect(compatibleAuthContract(baseline, changed)).toBe(false);
 });

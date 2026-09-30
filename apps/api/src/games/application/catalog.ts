@@ -25,6 +25,10 @@ export const gameSchema = z.strictObject({
   playable: z.boolean(),
   readiness: z.enum(["NOT_IMPLEMENTED"]),
   descriptor: z.null(),
+  // Optional on the wire for compatibility with older catalog servers.
+  matchmakingModes: z
+    .array(z.strictObject({ id: slugSchema, title: z.string().min(1) }))
+    .optional(),
   matchmakingEnabled: z.boolean(),
   privateRoomsEnabled: z.boolean(),
   chatEnabled: z.boolean(),
@@ -48,6 +52,7 @@ function project(raw: unknown): CatalogGame {
     playable: false,
     readiness: "NOT_IMPLEMENTED",
     descriptor: null,
+    matchmakingModes: [{ id: "standard", title: "Standard" }],
     matchmakingEnabled: false,
     privateRoomsEnabled: false,
     chatEnabled: false,

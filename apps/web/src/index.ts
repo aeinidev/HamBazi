@@ -1,2 +1,2 @@
-// Public surface for web; behavior is introduced in its implementation phase.
-export {};
+export { App } from "./app.js";
+export { createRuntime } from "./platform/runtime.js";
