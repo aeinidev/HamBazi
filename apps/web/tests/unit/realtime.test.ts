@@ -127,3 +127,29 @@ it("uses stable authentication codes rather than reflecting transport errors", (
   expect(f.callbacks.expired).toHaveBeenCalledOnce();
   f.realtime.close();
 });
+
+it("validates and acknowledges Chat delivery locally, rejects foreign content and disposes listeners", async () => {
+  const f = fixture();
+  await f.realtime.subscribe(id);
+  const listener = vi.fn();
+  const stop = f.realtime.onChat(listener);
+  const message = {
+    schemaVersion: 1,
+    matchId: id,
+    messageId: id,
+    userId: id,
+    seq: 1,
+    text: "<b>text</b>",
+    createdAt: 1000,
+  };
+  const ack = vi.fn();
+  f.handlers.get("chat:message")?.(message, ack);
+  expect(listener).toHaveBeenCalledWith(message);
+  expect(ack).toHaveBeenCalledWith(id);
+  f.handlers.get("chat:message")?.({ ...message, matchId: "foreign" }, ack);
+  expect(listener).toHaveBeenCalledTimes(1);
+  stop();
+  f.handlers.get("chat:message")?.(message, ack);
+  expect(listener).toHaveBeenCalledTimes(1);
+  f.realtime.close();
+});

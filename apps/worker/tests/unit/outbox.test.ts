@@ -5,7 +5,11 @@ import {
   type MatchDomainEvent,
   type MatchOutboxPort,
 } from "@hambazi/api/matches";
-import { createOutboxDispatcher, domainEventProcessor } from "../../src/outbox-dispatcher.js";
+import {
+  createOutboxDispatcher,
+  domainEventProcessor,
+  decodeDelivery,
+} from "../../src/outbox-dispatcher.js";
 function event(): MatchDomainEvent {
   const id = randomUUID();
   return {
@@ -142,4 +146,42 @@ describe("versioned consumer adapter", () => {
     );
     await expect(run({ name: e.type, data: e })).rejects.toThrow(/^Domain consumer failed$/);
   });
+});
+
+it("decodes only content-free Chat delivery and keeps its telemetry allowlisted", async () => {
+  const matchId = randomUUID();
+  const chat = {
+    schemaVersion: 1 as const,
+    eventId: randomUUID(),
+    aggregateId: matchId,
+    occurredAt: 1000,
+    type: "CHAT_MESSAGE_V1" as const,
+    correlation: { requestId: randomUUID() },
+    payload: { schemaVersion: 1 as const, matchId, messageId: randomUUID(), seq: 1 },
+  };
+  expect(decodeDelivery(chat)).toEqual(chat);
+  expect(
+    decodeDelivery({ ...chat, payload: { ...chat.payload, text: "PRIVATE_CHAT" } }),
+  ).toBeNull();
+  const report = vi.fn();
+  const published = vi.fn(async () => true);
+  const dispatcher = createOutboxDispatcher({
+    outbox: {
+      claim: async () => [{ eventId: chat.eventId, attempt: 1, event: chat }],
+      published,
+      failed: async () => true,
+      redrive: async () => true,
+    },
+    publisher: { publish: async () => {}, close: async () => {} },
+    event: report,
+    batchSize: 1,
+    publishTimeoutMs: 100,
+  });
+  await dispatcher.runOnce();
+  expect(published).toHaveBeenCalledWith(chat.eventId, 1);
+  expect(report).toHaveBeenCalledWith("worker.outbox_published", {
+    matchId,
+    requestId: chat.correlation.requestId,
+  });
+  expect(JSON.stringify(report.mock.calls)).not.toMatch(/payload|text|seq|messageId/);
 });

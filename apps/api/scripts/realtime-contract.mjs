@@ -41,8 +41,29 @@ if (process.argv.includes("--initialize-baseline")) {
     )
   )
     throw new Error("Breaking realtime v1 delivery contract change");
+  const chatTarget = new URL(
+    "../../../docs/contracts/realtime.chat.v1.baseline.json",
+    import.meta.url,
+  );
+  const chat = {
+    clientEvents: {
+      "chat:send": document.clientEvents["chat:send"],
+      "chat:list": document.clientEvents["chat:list"],
+    },
+    message: document.serverEvents["chat:message"],
+    sendResult: document.chatSendResult,
+    listResult: document.chatListResult,
+  };
+  if (process.argv.includes("--initialize-chat-baseline")) {
+    await writeFile(chatTarget, JSON.stringify(chat, null, 2) + "\n", { flag: "wx", mode: 0o644 });
+  } else if (!isDeepStrictEqual(JSON.parse(await readFile(chatTarget, "utf8")), chat)) {
+    throw new Error("Breaking realtime v1 chat contract change");
+  }
   if (process.argv.includes("--write")) await writeFile(target, generated);
-  else if (!isDeepStrictEqual(JSON.parse(await readFile(target, "utf8")), document))
+  else if (
+    !process.argv.includes("--initialize-chat-baseline") &&
+    !isDeepStrictEqual(JSON.parse(await readFile(target, "utf8")), document)
+  )
     throw new Error("Realtime event catalog drift");
 }
 console.log("Realtime event catalog verified/generated");

@@ -34,3 +34,31 @@ it("quarantines malformed/wrong-owner jobs and safely retries failed publication
   });
   expect(publish).toHaveBeenCalledTimes(3);
 });
+
+it("consumes only content-free Chat jobs with the explicit Chat owner", async () => {
+  const publish = vi.fn(async () => {});
+  const event = {
+    schemaVersion: 1,
+    eventId: id,
+    aggregateId: id,
+    occurredAt: 1000,
+    type: "CHAT_MESSAGE_V1",
+    correlation: {},
+    payload: { schemaVersion: 1, matchId: id, messageId: id, seq: 1 },
+  };
+  const chat = realtimeJobProcessor(publish, "CHAT_MESSAGE_V1");
+  await expect(
+    chat({
+      name: "CHAT_MESSAGE_V1",
+      data: { ...event, payload: { ...event.payload, text: "PRIVATE" } },
+    }),
+  ).rejects.toThrow("Invalid realtime job");
+  await expect(
+    realtimeJobProcessor(publish)({ name: "CHAT_MESSAGE_V1", data: event }),
+  ).rejects.toThrow("Invalid realtime job");
+  expect(await chat({ name: "CHAT_MESSAGE_V1", data: event })).toEqual({
+    schemaVersion: 1,
+    status: "DELIVERED",
+  });
+  expect(publish).toHaveBeenCalledTimes(1);
+});

@@ -5,15 +5,18 @@ import {
   type MatchOutboxPort,
   type OutboxClaim,
   type OutboxPolicy,
+  type OutboxEvent,
+  type MatchDomainEvent,
 } from "../../application/outbox.js";
 
-export function createMatchOutboxRepository(
+export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainEvent>(
   database: ReturnType<typeof createDatabase>,
   options: {
     clock: { nowMs(): number };
     policy: OutboxPolicy;
+    decode?: (input: unknown) => T | null;
   },
-): MatchOutboxPort {
+): MatchOutboxPort<T> {
   const policy = outboxPolicySchema.safeParse(options.policy);
   if (!policy.success) throw new Error("Invalid outbox policy");
   const { leaseMs, maxAttempts, backoffMs, maxBackoffMs } = policy.data;
@@ -40,7 +43,7 @@ export function createMatchOutboxRepository(
       return scope.transaction(async (db) => {
         const at = now();
         const ids = await db.lockDueOutbox(at, limit);
-        const claims: OutboxClaim[] = [];
+        const claims: OutboxClaim<T>[] = [];
         for (const id of ids) {
           const row = await db.outboxEvent.findUniqueOrThrow({ where: { id } });
           if (
@@ -61,7 +64,7 @@ export function createMatchOutboxRepository(
               claimedUntil: new Date(at.getTime() + leaseMs),
             },
           });
-          const parsed = matchDomainEventSchema.safeParse({
+          const raw = {
             schemaVersion: row.schemaVersion,
             eventId: row.id,
             aggregateId: row.aggregateId,
@@ -72,11 +75,17 @@ export function createMatchOutboxRepository(
               ...(row.requestId === null ? {} : { requestId: row.requestId }),
               ...(row.traceparent === null ? {} : { traceparent: row.traceparent }),
             },
-          });
+          };
+          const decoded = options.decode
+            ? options.decode(raw)
+            : (() => {
+                const parsed = matchDomainEventSchema.safeParse(raw);
+                return parsed.success ? (parsed.data as unknown as T) : null;
+              })();
           claims.push({
             eventId: id,
             attempt: row.attempts + 1,
-            event: parsed.success ? parsed.data : null,
+            event: decoded,
           });
         }
         return claims;

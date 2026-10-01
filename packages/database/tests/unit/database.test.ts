@@ -239,3 +239,24 @@ it("keeps reconnect leases Matches-owned with additive metadata and immutable to
     await database.disconnect();
   }
 });
+
+it("gives Chat an independent stream and insert-only outbox without Match state", async () => {
+  const database = createDatabase(options);
+  await database.forModule("chat").execute(async (db) => {
+    expect(Object.keys(db)).toEqual(["chatMessage", "chatStream", "outboxEvent"]);
+    expect(Object.keys(db.outboxEvent)).toEqual(["create"]);
+    expect("match" in db).toBe(false);
+    expect("gameEvent" in db).toBe(false);
+  });
+  await database.forModule("matches").execute(async (db) => {
+    expect("chatMessage" in db).toBe(false);
+    expect("chatStream" in db).toBe(false);
+  });
+  await database.disconnect();
+  const sql = await readFile(
+    new URL("../../prisma/migrations/202610010001_chat/migration.sql", import.meta.url),
+    "utf8",
+  );
+  expect(sql).not.toMatch(/DELETE FROM|DROP COLUMN|DROP TABLE|UPDATE chat_messages/);
+  expect(sql).toContain("command_id IS NULL AND seq IS NULL");
+});

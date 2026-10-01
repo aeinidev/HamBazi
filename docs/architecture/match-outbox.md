@@ -122,3 +122,15 @@ real BullMQ job identity/context, queue-loss replay, restricted grants and confi
 Worker startup/drain. Database integration covers concurrent transactional consumer
 effects and receipt rollback. This is local verification, not deployment, staging
 E2E, load/soak or a production Redis-loss drill.
+
+## Phase 15A Chat owner integration
+
+The scanner now accepts an optional owner-event decoder; the original Match
+schema remains its default. Worker injects the combined public Match/Chat decoder
+and publishes `CHAT_MESSAGE_V1` to `chat-message-v1` with eventId as jobId. Its
+payload contains only `{schemaVersion:1,matchId,messageId,seq}` plus the standard
+metadata/correlation envelope. Worker receives no Chat-content grants. Observer
+fields remain IDs/counters only. Deploy the decoder before enabling producers;
+retain compatible handlers through rollback/drain. A separate explicit realtime
+consumer invokes Chat fanout, while the existing queues keep their owners. See
+[Match chat](match-chat.md) and ADR-029.

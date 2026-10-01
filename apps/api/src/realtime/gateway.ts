@@ -1,3 +1,4 @@
+import { chatDeliverySchema, type ChatPort } from "../chat/index.js";
 import type { PresencePort } from "../presence/index.js";
 import { randomUUID } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
@@ -32,6 +33,7 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  chat?: { port: ChatPort; ackTimeoutMs: number };
   presence?: {
     port: PresencePort;
     heartbeatIntervalMs: number;
@@ -86,6 +88,13 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     void safe.finally(() => pending.delete(safe));
     return task;
   }
+  if (
+    deps.chat &&
+    (!Number.isInteger(deps.chat.ackTimeoutMs) ||
+      deps.chat.ackTimeoutMs < 100 ||
+      deps.chat.ackTimeoutMs > 30000)
+  )
+    throw new Error("Invalid chat delivery configuration");
   if (
     deps.delivery &&
     (!Number.isInteger(deps.delivery.ackTimeoutMs) ||
@@ -306,6 +315,19 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
           case "game:command":
             outcome = await deps.matches.command(userId, parsed.data, { requestId: randomUUID() });
             break;
+          case "chat:send":
+            outcome = deps.chat
+              ? await deps.chat.port.send(userId, parsed.data, { requestId: randomUUID() })
+              : failure("INTERNAL_ERROR");
+            break;
+          case "chat:list": {
+            const result = deps.chat
+              ? await deps.chat.port.list(userId, parsed.data)
+              : failure("INTERNAL_ERROR");
+            if (result.ok) await socket.join(`chat:${result.value.matchId}`);
+            outcome = result;
+            break;
+          }
           case "presence:ping":
             await presence?.heartbeat();
             outcome = { ok: true, value: { schemaVersion: 1 } };
@@ -391,6 +413,58 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     if (results.some((r) => r.status === "rejected"))
       throw new Error("Realtime delivery incomplete");
   }
+  async function chatFanout(input: unknown) {
+    const event = chatDeliverySchema.safeParse(input);
+    if (!event.success || !available() || !deps.chat) throw new Error("Chat delivery unavailable");
+    const matchId = event.data.aggregateId;
+    const results = await Promise.allSettled(
+      [...namespace.sockets.values()]
+        .filter((socket) => socket.rooms.has(`chat:${matchId}`))
+        .map((socket) =>
+          enqueue(socket, async () => {
+            if (!socket.connected) return;
+            const identity = identities.get(socket);
+            if (!identity) {
+              socket.disconnect(true);
+              return;
+            }
+            const session = await deps.sessions.authenticate(identity.token);
+            if (
+              !session.ok ||
+              session.session.userId !== identity.userId ||
+              session.session.sessionId !== identity.sessionId ||
+              session.session.expiresAt * 1000 <= deps.nowMs()
+            ) {
+              socket.disconnect(true);
+              return;
+            }
+            const result = await deps.chat!.port.delivery(identity.userId, event.data);
+            if (!result.ok) {
+              if (["NOT_FOUND", "FORBIDDEN"].includes(result.error.code)) {
+                await socket.leave(`chat:${matchId}`);
+                return;
+              }
+              throw new Error("Chat projection unavailable");
+            }
+            if (!available()) throw new Error("Chat delivery unavailable");
+            // Local socket only: user content must not enter the Redis broadcast adapter.
+            const ack: unknown = await socket
+              .timeout(deps.chat!.ackTimeoutMs)
+              .emitWithAck("chat:message", result.value);
+            if (ack !== result.value.messageId) throw new Error("Chat acknowledgement invalid");
+          }),
+        ),
+    );
+    if (results.some((result) => result.status === "rejected"))
+      throw new Error("Chat fanout failed");
+  }
+  namespace.on("chat:wakeup:v1", (input: unknown, ack: unknown) => {
+    if (typeof ack !== "function") return;
+    void chatFanout(input).then(
+      () => (ack as Ack)({ ok: true }),
+      () => (ack as Ack)({ ok: false }),
+    );
+  });
   namespace.on("match:wakeup:v1", (input: unknown, ack: unknown) => {
     if (typeof ack !== "function") return;
     void fanout(input).then(
@@ -401,6 +475,41 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   let closing: Promise<void> | undefined;
   return Object.freeze({
     ready: available,
+    async publishChat(input: unknown) {
+      const event = chatDeliverySchema.safeParse(input);
+      if (!event.success || !available() || !deps.chat) throw new Error("Invalid chat wakeup");
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const results = await Promise.race([
+          Promise.all([
+            chatFanout(event.data),
+            ...(deps.delivery?.redis
+              ? [namespace.serverSideEmitWithAck("chat:wakeup:v1", event.data)]
+              : []),
+          ]),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error("Chat deadline")), 30000);
+          }),
+        ]);
+        const remote = results[1];
+        if (
+          !available() ||
+          (Array.isArray(remote) &&
+            remote.some(
+              (result: unknown) =>
+                typeof result !== "object" ||
+                result === null ||
+                !("ok" in result) ||
+                result.ok !== true,
+            ))
+        )
+          throw new Error();
+      } catch {
+        throw new Error("Chat publication failed");
+      } finally {
+        clearTimeout(timer);
+      }
+    },
     async publish(input: unknown) {
       const event = matchDomainEventSchema.safeParse(input);
       if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || !available())

@@ -18,15 +18,20 @@ const ownership = {
     "gameResult",
     "outboxEvent",
   ],
-  chat: ["chatMessage"],
+  chat: ["chatMessage", "chatStream", "outboxEvent"],
   leaderboard: ["userGameStats", "consumerReceipt"],
   outbox: ["outboxEvent"],
 } as const;
 export type DatabaseOwner = keyof typeof ownership;
-type ScopedClient<O extends DatabaseOwner> = Pick<
+type OwnedClient<O extends DatabaseOwner> = Pick<
   Prisma.TransactionClient,
   (typeof ownership)[O][number]
-> &
+>;
+type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
+  ? Omit<OwnedClient<O>, "outboxEvent"> & {
+      outboxEvent: Pick<Prisma.TransactionClient["outboxEvent"], "create">;
+    }
+  : OwnedClient<O>) &
   (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object) &
   (O extends "outbox"
     ? { lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> }
@@ -63,7 +68,14 @@ function scope<O extends DatabaseOwner>(
 ): ScopedClient<O> {
   if (!Object.hasOwn(ownership, owner)) throw new DatabaseError("DATABASE_OWNER_INVALID");
   return Object.freeze({
-    ...Object.fromEntries(ownership[owner].map((key) => [key, client[key]])),
+    ...Object.fromEntries(
+      ownership[owner].map((key) => [
+        key,
+        owner === "chat" && key === "outboxEvent"
+          ? Object.freeze({ create: client.outboxEvent.create.bind(client.outboxEvent) })
+          : client[key],
+      ]),
+    ),
     ...(owner === "outbox"
       ? {
           async lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> {

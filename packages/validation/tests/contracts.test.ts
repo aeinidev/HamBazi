@@ -287,6 +287,7 @@ describe("stable, sanitized errors", () => {
       "INCOMPATIBLE_GAME_VERSION",
       "PROFILE_CONFLICT",
       "ROOM_CONFLICT",
+      "CHAT_CONFLICT",
       "MATCHMAKING_CONFLICT",
       "MATCHMAKING_UNAVAILABLE",
       "GAME_UNAVAILABLE",

@@ -29,6 +29,7 @@ export { matchFinishedInputSchema } from "./application/result-input.js";
 export type {
   MatchOutboxPort,
   OutboxClaim,
+  OutboxEvent,
   MatchDomainEvent,
   OutboxPolicy,
 } from "./application/outbox.js";

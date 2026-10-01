@@ -1,3 +1,4 @@
+import { chatMessageSchema, type ChatMessage } from "../features/chat/index.js";
 import { io, type Socket } from "socket.io-client";
 import { createMatchSequence } from "@hambazi/contracts";
 import type { z } from "zod";
@@ -23,6 +24,7 @@ export function createRealtime(
   },
   connect: typeof io = io,
 ) {
+  const chatListeners = new Set<(message: ChatMessage) => void>();
   let disposed = false;
   let matchId: string | null = null;
   let sequence: ReturnType<typeof createMatchSequence> | undefined;
@@ -110,6 +112,12 @@ export function createRealtime(
     // Older gateways may not push an initial snapshot on subscription.
     await sync();
   }
+  socket.on("chat:message", (input: unknown, ack: unknown) => {
+    const parsed = chatMessageSchema.safeParse(input);
+    if (!parsed.success || parsed.data.matchId !== matchId || disposed) return;
+    for (const listener of chatListeners) listener(parsed.data);
+    if (typeof ack === "function") ack(parsed.data.messageId);
+  });
   socket.on("match:snapshot", (value: unknown, ack: unknown) => {
     const seq = apply(value);
     if (seq !== false && typeof ack === "function") ack(seq);
@@ -150,6 +158,12 @@ export function createRealtime(
   callbacks.state("connecting");
   socket.connect();
   return {
+    onChat(listener: (message: ChatMessage) => void) {
+      chatListeners.add(listener);
+      return () => {
+        chatListeners.delete(listener);
+      };
+    },
     request,
     subscribe,
     sync,
@@ -158,6 +172,7 @@ export function createRealtime(
     },
     close() {
       disposed = true;
+      chatListeners.clear();
       generation++;
       socket.removeAllListeners();
       socket.disconnect();

@@ -7,6 +7,7 @@ import {
   createBullMqDomainPublisher,
   createOutboxDispatcher,
   outboxQueueNames,
+  decodeDelivery,
 } from "../../src/outbox-dispatcher.js";
 import { queueConnection } from "../../src/queue-connection.js";
 if (
@@ -315,5 +316,54 @@ it("starts configured polling in the Worker runtime and drains before closing da
   } finally {
     await runtime.close();
     await runtime.close();
+  }
+});
+
+it("claims and publishes Chat delivery with no message content in BullMQ storage", async () => {
+  const matchId = randomUUID();
+  const eventId = randomUUID();
+  await admin.forModule("matches").execute((db) =>
+    db.outboxEvent.create({
+      data: {
+        id: eventId,
+        aggregateId: matchId,
+        schemaVersion: 1,
+        type: "CHAT_MESSAGE_V1",
+        status: "PENDING",
+        createdAt: new Date(at),
+        nextAttemptAt: new Date(at),
+        payloadJsonb: { schemaVersion: 1, matchId, messageId: randomUUID(), seq: 1 },
+      },
+    }),
+  );
+  const outbox = createMatchOutboxPort(a, { clock, policy, decode: decodeDelivery });
+  const namespace = randomUUID();
+  const redisUrl = { reveal: () => process.env.TEST_WORKER_REDIS_URL! };
+  const publisher = await createBullMqDomainPublisher({
+    redisUrl,
+    namespace,
+    timeoutMs: 1000,
+    attempts: 2,
+    backoffMs: 100,
+    event: () => {},
+  });
+  const queue = new Queue("chat-message-v1", {
+    prefix: `hambazi:jobs:${namespace}`,
+    connection: queueConnection(redisUrl, false, 1000),
+  });
+  try {
+    const claims = await outbox.claim(100);
+    const claim = claims.find((claim) => claim.eventId === eventId);
+    if (!claim?.event) throw new Error("Missing chat claim");
+    expect(claim.event.type).toBe("CHAT_MESSAGE_V1");
+    await publisher.publish(claim.event);
+    expect(await outbox.published(eventId, claim.attempt)).toBe(true);
+    const job = await queue.getJob(eventId);
+    expect(job?.data).toEqual(claim.event);
+    expect(JSON.stringify(job?.data)).not.toMatch(/text|cards|token/);
+  } finally {
+    await publisher.close();
+    await queue.obliterate({ force: true });
+    await queue.close();
   }
 });

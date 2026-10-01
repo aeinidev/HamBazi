@@ -300,3 +300,83 @@ test("spectator, unsupported version and malformed view fail closed", async ({ p
   await expect(page.getByRole("alert")).toContainText("newer version");
   await expect(page.getByRole("region", { name: "Available actions" })).toHaveCount(0);
 });
+
+test("Chat escapes markup, retries one committed send, supports history and clears on logout", async ({
+  page,
+  request,
+}, info) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await enterMatch(page);
+  await expect(page.getByLabel("Message", { exact: true })).toBeEnabled();
+  await request.post(`${fixture}/__test/state`, { data: { chatFailure: true } });
+  const text = "<img src=x onerror=alert(1)> سلام 👩‍💻";
+  await page.getByLabel("Message", { exact: true }).fill(text);
+  await page.getByRole("button", { name: "Send message", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Connection interrupted");
+  await page.getByRole("button", { name: "Retry", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Chat messages" })).toContainText(text);
+  await expect(
+    page.getByRole("list", { name: "Chat messages" }).locator("img,a,script"),
+  ).toHaveCount(0);
+  const state = await (await request.get(`${fixture}/__test/state`)).json();
+  expect(state.chatMessages).toHaveLength(1);
+  const sends = state.commands.filter((entry: { event: string }) => entry.event === "chat:send");
+  expect(sends).toHaveLength(2);
+  expect(sends[0].input.commandId).toBe(sends[1].input.commandId);
+  expect(JSON.stringify(sends)).not.toContain(text);
+  const reads = state.commands.filter(
+    (entry: { event: string }) => entry.event === "chat:list",
+  ).length;
+  const catchups = state.commands.filter(
+    (entry: { event: string }) => entry.event === "match:catchup",
+  ).length;
+  await request.post(`${fixture}/__test/match-event`);
+  await expect
+    .poll(async () => {
+      const next = await (await request.get(`${fixture}/__test/state`)).json();
+      return next.commands.filter((entry: { event: string }) => entry.event === "match:catchup")
+        .length;
+    })
+    .toBeGreaterThan(catchups);
+  await expect(page.getByRole("region", { name: "Available actions" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Chat messages" })).toContainText(text);
+  const refreshed = await (await request.get(`${fixture}/__test/state`)).json();
+  expect(
+    refreshed.commands.filter((entry: { event: string }) => entry.event === "chat:list"),
+  ).toHaveLength(reads);
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: info.outputPath("chat-mobile.png"), fullPage: true });
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await expect(page.getByText(text, { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page.getByText(text, { exact: true })).toHaveCount(0);
+});
+test("Chat reconnect restores bounded history and Bot-replaced members remain read-only", async ({
+  page,
+  request,
+}) => {
+  await enterMatch(page);
+  await expect(page.getByLabel("Message", { exact: true })).toBeEnabled();
+  const state = await (await request.get(`${fixture}/__test/state`)).json();
+  const history = Array.from({ length: 60 }, (_, index) => ({
+    schemaVersion: 1,
+    matchId,
+    messageId: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    userId: state.search?.userId ?? "11111111-1111-4111-8111-111111111111",
+    seq: index + 1,
+    text: `History ${index + 1}`,
+    createdAt: 1000,
+  }));
+  await request.post(`${fixture}/__test/state`, {
+    data: { role: "SPECTATOR", snapshotVersion: 3, chatMessages: history },
+  });
+  await request.post(`${fixture}/__test/disconnect`);
+  await expect(page.getByText("Chat is read-only for spectators.")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Chat messages" }).locator("li")).toHaveCount(50);
+  await expect(page.getByLabel("Message", { exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Earlier messages" }).click();
+  await expect(page.getByRole("list", { name: "Chat messages" }).locator("li")).toHaveCount(60);
+  await expect(page.getByText("History 1", { exact: true })).toBeVisible();
+});

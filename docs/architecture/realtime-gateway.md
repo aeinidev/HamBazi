@@ -89,3 +89,15 @@ connection-state-recovery claim is made. Failure latches the affected process
 unhealthy and reconnects its clients; restart it before readmitting traffic.
 All gateway/realtime composition remains disabled in `startApi` pending the
 existing activation and production configuration gates.
+
+## Phase 15A Chat delivery
+
+The optional Chat port implements `chat:send`, `chat:list` and the formerly
+reserved `chat:message` payload. A Chat list authorizes and subscribes a local
+socket; fanout reauthenticates and rechecks membership through Chat. An explicit
+Chat queue consumer calls `publishChat`. Cross-node wakeups are content-free;
+each node fetches authorized text and emits only to its local sockets. Chat has
+its own sequence/catch-up and acknowledgements (`messageId`), independent of game
+versions. The new Chat baseline is checked alongside the unchanged earlier
+baselines. Production composition remains opt-in and disabled in `startApi`.
+See [Match chat](match-chat.md) for policy, composition and recovery.

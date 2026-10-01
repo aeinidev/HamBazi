@@ -155,3 +155,9 @@ Phase 8A extends the Rooms-owned delegates with `roomCommandReceipt`; it is not
 available to Users, Games or Matches repositories. The Rooms public application
 port supports trusted Match lifecycle callbacks without a Rooms-to-Matches import.
 See [ADR-019](../adr/019-private-room-foundation.md).
+
+Phase 15A adds Chat's `chatStream` delegate and only `outboxEvent.create` to its
+owned repository scope. Runtime scoping and ESLint fixtures deny outbox reads,
+claims/updates and Match delegates. The common scanner accepts an injected owner
+decoder, so Matches does not import Chat. Worker composition uses the explicit
+`@hambazi/api/chat` public export. See [Match chat](match-chat.md) and ADR-029.

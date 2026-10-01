@@ -324,7 +324,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 10) throw new Error();
+      if (result.rows[0].count !== 11) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -350,6 +350,7 @@ if (!bin) {
         "match-processing.test.ts",
         "match-reconnect.test.ts",
         "realtime.test.ts",
+        "chat.test.ts",
       ]) {
         const result = await run(
           process.execPath,
@@ -411,6 +412,12 @@ if (!bin) {
           const matchCommands = await client.query(
             "SELECT * FROM processed_commands ORDER BY match_id, action_id",
           );
+          const chatMessages = await client.query(
+            "SELECT * FROM chat_messages ORDER BY match_id, seq, id",
+          );
+          const chatStreams = await client.query("SELECT * FROM chat_streams ORDER BY match_id");
+          if (!chatStreams.rows.length || !chatMessages.rows.some((row) => row.seq !== null))
+            throw new Error();
           const outbox = await client.query("SELECT * FROM outbox_events ORDER BY id");
           if (
             !admissions.rows.some((r) => r.status === "MATCHED") ||
@@ -430,6 +437,8 @@ if (!bin) {
             players: players.rows,
             leases: leases.rows,
             outbox: outbox.rows,
+            chatMessages: chatMessages.rows,
+            chatStreams: chatStreams.rows,
             matchEvents: matchEvents.rows,
             matchCommands: matchCommands.rows,
             consumerReceipts: consumerReceipts.rows,

@@ -9,6 +9,7 @@ import { parseOutboxWorkerConfig } from "@hambazi/config";
 import { createMatchOutboxPort } from "@hambazi/api/matches";
 import {
   createOutboxDispatcher,
+  decodeDelivery,
   createBullMqDomainPublisher,
   startOutboxLoop,
   type OutboxReporter,
@@ -81,6 +82,7 @@ export async function startWorker(
           outbox: createMatchOutboxPort(database, {
             clock: { nowMs: () => Date.now() },
             policy: outboxConfig.policy,
+            decode: decodeDelivery,
           }),
           publisher,
           batchSize: outboxConfig.batchSize,

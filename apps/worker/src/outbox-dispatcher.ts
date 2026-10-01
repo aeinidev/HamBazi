@@ -1,3 +1,4 @@
+import { chatDeliverySchema, type ChatDelivery } from "@hambazi/api/chat";
 import { Queue, UnrecoverableError } from "bullmq";
 import {
   matchDomainEventSchema,
@@ -5,10 +6,18 @@ import {
   type MatchOutboxPort,
 } from "@hambazi/api/matches";
 import { queueConnection } from "./queue-connection.js";
+export type DeliveryEvent = MatchDomainEvent | ChatDelivery;
+export function decodeDelivery(input: unknown): DeliveryEvent | null {
+  const match = matchDomainEventSchema.safeParse(input);
+  if (match.success) return match.data;
+  const chat = chatDeliverySchema.safeParse(input);
+  return chat.success ? chat.data : null;
+}
 export const outboxQueueNames = Object.freeze({
   "matchmaking.found": "matchmaking-found-v1",
   MATCH_CHANGED_V1: "match-changed-v1",
   MATCH_FINISHED_V1: "match-finished-v1",
+  CHAT_MESSAGE_V1: "chat-message-v1",
 });
 export type OutboxEventName =
   | "worker.outbox_published"
@@ -22,11 +31,11 @@ export interface OutboxObservation {
 }
 export type OutboxReporter = (event: OutboxEventName, fields?: OutboxObservation) => void;
 export interface DomainPublisher {
-  publish(event: MatchDomainEvent): Promise<void>;
+  publish(event: DeliveryEvent): Promise<void>;
   close(): Promise<void>;
 }
 export function createOutboxDispatcher(options: {
-  outbox: MatchOutboxPort;
+  outbox: MatchOutboxPort<DeliveryEvent>;
   publisher: DomainPublisher;
   batchSize: number;
   publishTimeoutMs: number;
@@ -42,7 +51,7 @@ export function createOutboxDispatcher(options: {
     throw new Error("Invalid dispatcher configuration");
   let active: Promise<void> | undefined;
   let closed = false;
-  function report(name: OutboxEventName, event?: MatchDomainEvent) {
+  function report(name: OutboxEventName, event?: DeliveryEvent) {
     // Observer failures cannot change delivery or database decisions.
     try {
       options.event(
@@ -152,16 +161,16 @@ export async function createBullMqDomainPublisher(options: {
       });
       return [type, queue];
     }),
-  ) as Record<MatchDomainEvent["type"], Queue>;
+  ) as Record<DeliveryEvent["type"], Queue>;
   let closing: Promise<void> | undefined;
   return {
     async publish(input) {
       if (closing) throw new Error("Outbox publisher closed");
-      const event = matchDomainEventSchema.safeParse(input);
-      if (!event.success) throw new Error("Invalid domain event");
+      const event = decodeDelivery(input);
+      if (!event) throw new Error("Invalid domain event");
       try {
-        await queues[event.data.type].add(event.data.type, event.data, {
-          jobId: event.data.eventId,
+        await queues[event.type].add(event.type, event, {
+          jobId: event.eventId,
           attempts: options.attempts,
           backoff: { type: "exponential", delay: options.backoffMs },
           removeOnComplete: true,
@@ -179,7 +188,7 @@ export async function createBullMqDomainPublisher(options: {
 /** Owning consumer must atomically commit its effect and receipt via consumeOnce. */
 export function domainEventProcessor(
   type: MatchDomainEvent["type"],
-  consume: (event: MatchDomainEvent) => Promise<"APPLIED" | "DUPLICATE">,
+  consume: (event: DeliveryEvent) => Promise<"APPLIED" | "DUPLICATE">,
 ) {
   return async (job: { name: string; data: unknown }) => {
     const parsed = matchDomainEventSchema.safeParse(job.data);

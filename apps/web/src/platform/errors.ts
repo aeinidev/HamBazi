@@ -30,6 +30,7 @@ export function errorMessage(error: unknown) {
     INVALID_INPUT: "Check your details and try again.",
     RATE_LIMITED: "Too many requests. Wait a moment before retrying.",
     PROFILE_CONFLICT: "Your profile changed. Reload it before making another edit.",
+    CHAT_CONFLICT: "This message differs from its original request. Start a new message.",
     ROOM_CONFLICT: "The room changed. Refresh it before trying again.",
     GAME_STATE_CONFLICT: "The match changed. Synchronize before continuing.",
     GAME_UNAVAILABLE: "This game is not accepting players yet.",

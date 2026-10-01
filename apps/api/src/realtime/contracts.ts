@@ -1,3 +1,9 @@
+import {
+  chatSendSchema,
+  chatListSchema,
+  chatMessageSchema,
+  chatPageSchema,
+} from "../chat/index.js";
 import { z } from "zod";
 import { roomCommandSchema, joinRoomSchema } from "../rooms/index.js";
 import { searchSchema, ticketSchema, admissionSchema } from "../matchmaking/index.js";
@@ -39,6 +45,8 @@ export const incomingEvents = Object.freeze({
   "match:ready": matchReadySchema,
   "game:command": matchCommandSchema,
   "presence:ping": presencePingSchema,
+  "chat:send": chatSendSchema,
+  "chat:list": chatListSchema,
 });
 export type IncomingEvent = keyof typeof incomingEvents;
 
@@ -77,7 +85,10 @@ export function realtimeEventCatalog() {
     serverEvents: {
       "match:snapshot": z.toJSONSchema(matchSnapshotSchema, { io: "input" }),
       "match:event": z.toJSONSchema(matchDeliveryEventSchema, { io: "input" }),
+      "chat:message": z.toJSONSchema(chatMessageSchema, { io: "input" }),
     },
+    chatSendResult: z.toJSONSchema(chatMessageSchema, { io: "input" }),
+    chatListResult: z.toJSONSchema(chatPageSchema, { io: "input" }),
     catchupResult: z.toJSONSchema(matchCatchupSchema, { io: "input" }),
     reservedServerEvents: [...outgoingEvents],
     acknowledgement: {

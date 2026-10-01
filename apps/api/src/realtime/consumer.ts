@@ -1,10 +1,17 @@
+import { chatDeliverySchema } from "../chat/index.js";
 import { Worker, UnrecoverableError } from "bullmq";
 import { matchDomainEventSchema } from "../matches/index.js";
-/** Only the MATCH_CHANGED queue is consumed here. Results and matchmaking retain their owners. */
-export function realtimeJobProcessor(publish: (event: unknown) => Promise<void>) {
+/** One explicit Match or Chat delivery queue; results and matchmaking retain their owners. */
+export function realtimeJobProcessor(
+  publish: (event: unknown) => Promise<void>,
+  kind: "MATCH_CHANGED_V1" | "CHAT_MESSAGE_V1" = "MATCH_CHANGED_V1",
+) {
   return async (job: { name: string; data: unknown }) => {
-    const event = matchDomainEventSchema.safeParse(job.data);
-    if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || job.name !== "MATCH_CHANGED_V1")
+    const event =
+      kind === "CHAT_MESSAGE_V1"
+        ? chatDeliverySchema.safeParse(job.data)
+        : matchDomainEventSchema.safeParse(job.data);
+    if (!event.success || event.data.type !== kind || job.name !== kind)
       throw new UnrecoverableError("Invalid realtime job");
     try {
       await publish(event.data);
@@ -15,6 +22,7 @@ export function realtimeJobProcessor(publish: (event: unknown) => Promise<void>)
   };
 }
 export function createRealtimeConsumer(options: {
+  kind?: "MATCH_CHANGED_V1" | "CHAT_MESSAGE_V1";
   redisUrl: { reveal(): string };
   namespace: string;
   publish(event: unknown): Promise<void>;
@@ -31,20 +39,24 @@ export function createRealtimeConsumer(options: {
   const db = Number(url.pathname.slice(1) || 0);
   if (!Number.isInteger(db) || db < 0 || db > 15)
     throw new Error("Invalid realtime queue configuration");
-  const worker = new Worker("match-changed-v1", realtimeJobProcessor(options.publish), {
-    prefix: `hambazi:jobs:${options.namespace}`,
-    connection: {
-      host: url.hostname.replace(/^\[|\]$/g, ""),
-      port: Number(url.port || 6379),
-      username: decodeURIComponent(url.username),
-      password: decodeURIComponent(url.password),
-      db,
-      ...(url.protocol === "rediss:" ? { tls: {} } : {}),
-      maxRetriesPerRequest: null,
-      connectTimeout: 2000,
+  const worker = new Worker(
+    options.kind === "CHAT_MESSAGE_V1" ? "chat-message-v1" : "match-changed-v1",
+    realtimeJobProcessor(options.publish, options.kind),
+    {
+      prefix: `hambazi:jobs:${options.namespace}`,
+      connection: {
+        host: url.hostname.replace(/^\[|\]$/g, ""),
+        port: Number(url.port || 6379),
+        username: decodeURIComponent(url.username),
+        password: decodeURIComponent(url.password),
+        db,
+        ...(url.protocol === "rediss:" ? { tls: {} } : {}),
+        maxRetriesPerRequest: null,
+        connectTimeout: 2000,
+      },
+      concurrency: 1,
     },
-    concurrency: 1,
-  });
+  );
   worker.on("error", () => {
     try {
       options.unavailable();

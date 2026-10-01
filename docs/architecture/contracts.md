@@ -139,3 +139,9 @@ Passing these tests does not prove persistence, replay, player-view secrecy,
 deduplication, gap recovery, or connection handling. Each remains an explicit
 feature-phase acceptance gate. No internal Match state may be serialized merely
 because it fits the generic JSON envelope.
+
+Phase 15A adds the owner-approved `chat:send`/`chat:list` intents, `chat:message`
+payload, independent Chat sequence and `CHAT_CONFLICT` without changing old error
+meanings or existing baselines. The new Chat v1 baseline is checked by the same
+realtime generator. See [Match chat](match-chat.md) for Unicode normalization,
+server-side limits, retry identity and content-free delivery jobs.

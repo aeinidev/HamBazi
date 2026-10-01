@@ -32,7 +32,8 @@
         "$TURBO_ROOT$/docs/contracts/catalog.modes.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/rooms.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/realtime.v1.baseline.json",
-        "$TURBO_ROOT$/docs/contracts/realtime.delivery.v1.baseline.json"
+        "$TURBO_ROOT$/docs/contracts/realtime.delivery.v1.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/realtime.chat.v1.baseline.json"
       ],
       "outputs": []
     },

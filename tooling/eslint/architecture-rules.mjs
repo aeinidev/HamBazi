@@ -24,7 +24,7 @@ const delegates = {
     "gameResult",
     "outboxEvent",
   ],
-  chat: ["chatMessage"],
+  chat: ["chatMessage", "chatStream", "outboxEvent"],
   leaderboard: ["userGameStats", "consumerReceipt"],
 };
 const operations = new Set([
@@ -319,6 +319,13 @@ export function architecturePlugin(policy) {
                 report(
                   node,
                   "Repository queries must directly name an owned delegate; foreign or aliased delegates are forbidden.",
+                );
+                return;
+              }
+              if (owner === "chat" && name === "outboxEvent" && key(node.callee) !== "create") {
+                report(
+                  node,
+                  "Chat may only insert a content-free delivery intent into the common outbox.",
                 );
                 return;
               }

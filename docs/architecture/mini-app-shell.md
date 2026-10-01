@@ -128,3 +128,10 @@ Production static hosting must supply restrictive CSP with the configured API/WS
 origin and official Telegram bridge, known-origin CORS, HTTPS/WSS, HSTS and security
 headers under the later hosting/security phases. Telegram client compatibility,
 live HTTPS smoke, actual mobile WebViews and production admission remain unverified.
+
+Phase 15A adds [Match chat](match-chat.md) through the Chat feature's public index.
+It uses separate memory/cursors from game synchronization, bounded plain-text
+history, stable ambiguous-send retries and server-derived send permissions. It
+clears on Match switch/logout and refreshes after reconnect; Bot-replaced humans
+remain read-only. Production Chat activation and final retention/moderation/age
+policy remain separate gates.

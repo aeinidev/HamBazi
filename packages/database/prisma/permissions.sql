@@ -31,4 +31,8 @@ GRANT SELECT, INSERT ON match_connection_leases TO hambazi_api;
 GRANT UPDATE (lease_until, closed_at) ON match_connection_leases TO hambazi_api;
 -- Worker may inspect/expire leases through Matches; it cannot create or renew a connection.
 GRANT SELECT ON match_connection_leases TO hambazi_worker;
+
+-- Chat owns its independent stream; Worker never reads user content.
+GRANT SELECT, INSERT ON chat_streams TO hambazi_api;
+GRANT UPDATE (last_seq) ON chat_streams TO hambazi_api;
 COMMIT;

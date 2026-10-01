@@ -19,6 +19,7 @@ const definitions = {
   GAME_STATE_CONFLICT: { message: "Client state is stale", retryable: true },
   INCOMPATIBLE_GAME_VERSION: { message: "Unsupported game version", retryable: false },
   PROFILE_CONFLICT: { message: "Profile edit conflicts with current state", retryable: false },
+  CHAT_CONFLICT: { message: "Chat command conflicts with its original intent", retryable: false },
   ROOM_CONFLICT: { message: "Room command conflicts with current state", retryable: false },
   MATCHMAKING_CONFLICT: {
     message: "Matchmaking intent conflicts with current state",

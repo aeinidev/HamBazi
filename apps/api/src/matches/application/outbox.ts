@@ -31,13 +31,22 @@ export const matchDomainEventSchema = z
   ])
   .refine((event) => event.aggregateId === event.payload.matchId);
 export type MatchDomainEvent = z.infer<typeof matchDomainEventSchema>;
-export interface OutboxClaim {
+export interface OutboxEvent {
+  schemaVersion: 1;
+  eventId: string;
+  aggregateId: string;
+  occurredAt: number;
+  type: string;
+  payload: Readonly<{ matchId: string }>;
+  correlation: Readonly<{ requestId?: string | undefined; traceparent?: string | undefined }>;
+}
+export interface OutboxClaim<T extends OutboxEvent = MatchDomainEvent> {
   eventId: string;
   attempt: number;
-  event: MatchDomainEvent | null;
+  event: T | null;
 }
-export interface MatchOutboxPort {
-  claim(limit: number): Promise<readonly OutboxClaim[]>;
+export interface MatchOutboxPort<T extends OutboxEvent = MatchDomainEvent> {
+  claim(limit: number): Promise<readonly OutboxClaim<T>[]>;
   published(eventId: string, attempt: number): Promise<boolean>;
   failed(eventId: string, attempt: number, permanent?: boolean): Promise<boolean>;
   /** Trusted recovery only: one more attempt; retains event identity and fencing counter. */

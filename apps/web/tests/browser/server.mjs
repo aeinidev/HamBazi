@@ -29,6 +29,9 @@ function reset() {
     ticketStatus: "SEARCHING",
     search: null,
     commands: [],
+    chatMessages: [],
+    chatCommands: {},
+    chatFailure: false,
     snapshotVersion: 2,
     deadlineAt: Date.now() + 30000,
     role: "PLAYER",
@@ -156,6 +159,20 @@ const http = createServer(async (req, res) => {
       socket.emit("match:snapshot", snapshot(), () => {});
     return send({ ok: true });
   }
+  if (req.url === "/__test/match-event") {
+    state.snapshotVersion++;
+    for (const socket of io.of("/v1").sockets.values())
+      socket.emit("match:event", {
+        schemaVersion: 1,
+        eventId: crypto.randomUUID(),
+        matchId,
+        seq: state.snapshotVersion,
+        stateVersion: state.snapshotVersion,
+        type: "MATCH_INVALIDATED_V1",
+        payload: {},
+      });
+    return send({ ok: true });
+  }
   if (req.url === "/v1/auth/telegram-mini-app/account")
     return send({
       schemaVersion: 1,
@@ -265,7 +282,12 @@ io.of("/v1").on("connection", (socket) =>
   socket.onAny((event, input, ack) => {
     state.commands.push({
       event,
-      input: event === "matchmaking:admit" ? { ticketId: input.ticketId } : input,
+      input:
+        event === "matchmaking:admit"
+          ? { ticketId: input.ticketId }
+          : event === "chat:send"
+            ? { commandId: input.commandId, matchId: input.matchId }
+            : input,
     });
     if (event === "matchmaking:search") {
       state.search = input;
@@ -298,6 +320,59 @@ io.of("/v1").on("connection", (socket) =>
         roomId,
         appliedVersion: state.roomVersion,
       });
+    }
+    if (event === "chat:list") {
+      if (input.matchId !== matchId)
+        return ack({ ok: false, error: { code: "NOT_FOUND", retryable: false } });
+      const history = state.chatMessages.filter(
+        (message) =>
+          (input.beforeSeq === undefined || message.seq < input.beforeSeq) &&
+          (input.afterSeq === undefined || message.seq > input.afterSeq),
+      );
+      const latest = input.afterSeq === undefined;
+      const messages = latest ? history.slice(-50) : history.slice(0, 50);
+      return ack(
+        ok({
+          schemaVersion: 1,
+          matchId,
+          role: state.role,
+          canSend: state.role === "PLAYER",
+          messageLimit: 500,
+          messages,
+          lastSeq: state.chatMessages.at(-1)?.seq ?? 0,
+          hasMore: history.length > 50,
+        }),
+      );
+    }
+    if (event === "chat:send") {
+      if (input.matchId !== matchId)
+        return ack({ ok: false, error: { code: "NOT_FOUND", retryable: false } });
+      if (state.role !== "PLAYER")
+        return ack({ ok: false, error: { code: "FORBIDDEN", retryable: false } });
+      const text = input.text.normalize("NFC").trim();
+      let message = state.chatCommands[input.commandId];
+      if (message && message.text !== text)
+        return ack({ ok: false, error: { code: "CHAT_CONFLICT", retryable: false } });
+      if (!message) {
+        message = {
+          schemaVersion: 1,
+          matchId,
+          messageId: crypto.randomUUID(),
+          userId: userId(),
+          seq: (state.chatMessages.at(-1)?.seq ?? 0) + 1,
+          text,
+          createdAt: Date.now(),
+        };
+        state.chatMessages.push(message);
+        state.chatCommands[input.commandId] = message;
+      }
+      if (state.chatFailure) {
+        state.chatFailure = false;
+        return ack({ ok: false, error: { code: "NETWORK_ERROR", retryable: true } });
+      }
+      ack(ok(message));
+      socket.emit("chat:message", message, () => {});
+      return;
     }
     if (event === "match:subscribe") {
       socket.emit("match:snapshot", snapshot(), () => {});

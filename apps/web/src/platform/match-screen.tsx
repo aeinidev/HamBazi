@@ -1,3 +1,4 @@
+import { MatchChat } from "../features/chat/index.js";
 import { useEffect } from "react";
 import { matchAckSchema, okValue } from "./contracts.js";
 import { ClientError } from "./errors.js";
@@ -76,6 +77,10 @@ export function MatchScreen({ id }: { id: string }) {
           {task.notice}
         </Panel>
       )}
+      <MatchChat
+        key={`${id}:${runtime.store.getState().session?.sessionId ?? "none"}`}
+        matchId={id}
+      />
     </>
   );
 }

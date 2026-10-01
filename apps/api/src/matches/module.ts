@@ -1,3 +1,4 @@
+import type { OutboxEvent, MatchDomainEvent } from "./application/outbox.js";
 import { admissionService } from "./application/admission.js";
 import { createAdmissionRepository } from "./infrastructure/repositories/admission.js";
 export function createMatchAdmissionPort(
@@ -29,9 +30,9 @@ export function createMatchMembershipPort(
 ) {
   return matchMembershipService(createMatchMembershipRepository(database));
 }
-export function createMatchOutboxPort(
+export function createMatchOutboxPort<T extends OutboxEvent = MatchDomainEvent>(
   database: Parameters<typeof createMatchOutboxRepository>[0],
-  options: Parameters<typeof createMatchOutboxRepository>[1],
+  options: Parameters<typeof createMatchOutboxRepository<T>>[1],
 ) {
   return createMatchOutboxRepository(database, options);
 }

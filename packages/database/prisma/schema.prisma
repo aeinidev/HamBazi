@@ -206,6 +206,7 @@ model Match {
   events               GameEvent[]
   commands             ProcessedCommand[]
   results              GameResult[]
+  chatStream           ChatStream?
   messages             ChatMessage[]
 
   admissions  MatchAdmission[]
@@ -332,16 +333,28 @@ model UserGameStats {
   @@map("user_game_stats")
 }
 
+model ChatStream {
+  matchId String @id @map("match_id") @db.Uuid
+  lastSeq Int    @default(0) @map("last_seq")
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Restrict)
+
+  @@map("chat_streams")
+}
+
 model ChatMessage {
   id            String   @id @db.Uuid
   matchId       String   @map("match_id") @db.Uuid
   userId        String   @map("user_id") @db.Uuid
   schemaVersion Int      @map("schema_version")
   text          String
+  commandId     String?  @map("command_id") @db.Uuid
+  seq           Int?
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   match         Match    @relation(fields: [matchId], references: [id], onDelete: Restrict)
   user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
 
+  @@unique([matchId, userId, commandId])
+  @@unique([matchId, seq])
   @@index([matchId, createdAt, id])
   @@map("chat_messages")
 }

@@ -27,7 +27,7 @@ remain Phase 11A, not claims made by this generic foundation.
 | games       | games                                                                                                                      |
 | rooms       | rooms, room_members, room_command_receipts                                                                                 |
 | matches     | match_admissions, match_reservations, matches, match_players, game_events, processed_commands, game_results, outbox_events |
-| chat        | chat_messages                                                                                                              |
+| chat        | chat_messages, chat_streams; insert-only outbox_events                                                                     |
 | leaderboard | user_game_stats, consumer_receipts                                                                                         |
 | outbox      | outbox_events                                                                                                              |
 
@@ -217,3 +217,13 @@ persistence primitive, not a stats projection or permission to perform network
 I/O inside the callback. The harness proves concurrent deduplication and rollback
 and compares receipts across restart. See [outbox delivery](match-outbox.md) and
 [ADR-024](../adr/024-transactional-outbox-delivery.md) for compatibility and recovery.
+
+## Phase 15A Chat expansion
+
+Migration `202610010001_chat` preserves previous Chat insert shapes while adding
+nullable retry/sequence metadata, unique keys and an independent stream counter.
+Chat gets message read/insert, stream read/insert/counter-update and insert-only
+outbox access. Worker cannot read Chat content. The isolated suite preserves the
+populated preceding schema and checks committed messages/streams across a real
+PostgreSQL restart. See [Match chat](match-chat.md) for legacy-row visibility,
+authorization, transaction boundaries and rollback.

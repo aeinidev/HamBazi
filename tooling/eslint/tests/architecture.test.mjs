@@ -457,3 +457,25 @@ describe("manifest architecture gate", () => {
     expect(auditResolution(root)).toEqual([]);
   });
 });
+
+it("allows Chat's stream/intent insertion but rejects outbox reads and foreign Match queries", async () => {
+  const file = repository("chat");
+  expect(
+    await messages(
+      'database.forModule("chat").execute(db => db.chatStream.findUnique({where:{matchId}}));',
+      file,
+    ),
+  ).toEqual([]);
+  expect(
+    await messages(
+      'database.forModule("chat").execute(db => db.outboxEvent.create({data:{id,aggregateId,type,schemaVersion:1,payloadJsonb:{matchId},status:"PENDING"}}));',
+      file,
+    ),
+  ).toEqual([]);
+  for (const query of [
+    "db.outboxEvent.findMany({});",
+    'db.outboxEvent.update({where:{id},data:{status:"PUBLISHED"}});',
+    "db.matchPlayer.findMany({});",
+  ])
+    expect((await messages(query, file)).length).toBeGreaterThan(0);
+});
