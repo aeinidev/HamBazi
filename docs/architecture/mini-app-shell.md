@@ -22,6 +22,16 @@ command local. Stop it to stop both
 servers. `pnpm --filter @hambazi/web test:preview` checks this entry path in
 Chromium.
 
+To inspect Coup directly, open `http://127.0.0.1:4173/#/preview/coup` after
+starting `dev:preview`, or use the **Open Coup table** link in its banner. This
+route creates the synthetic fixture session automatically and opens the Coup
+Match screen without catalog, lobby, room or matchmaking steps. The table uses
+checked-in golden public PlayerView data from the disposable fixture. Its
+command acknowledgements are synthetic UI wiring, not engine gameplay. The
+route requires the preview-only HTML marker and Vite development mode. The
+ordinary app leaves that route inert, and the production build rejects the
+route marker and preview data in its output.
+
 The normal `dev` command and production build use the official Telegram bridge.
 The preview-only Vite config rejects build/production mode, injects the mock
 bridge only into its local development HTML, and never changes backend Telegram

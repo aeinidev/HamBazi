@@ -36,3 +36,8 @@ preview remains a loopback-only development tool. The production catalog
 remains disabled pending its existing admission/activation gate. Live Telegram
 WebView, staged durable gameplay and actual transport/engine integration are
 still separate validations.
+
+For direct local inspection, `pnpm --filter @hambazi/web dev:preview` serves
+`http://127.0.0.1:4173/#/preview/coup`. That route automatically obtains only
+the fixture's synthetic session and opens its golden Coup PlayerView. It has
+no production entry point and does not change Telegram authentication.

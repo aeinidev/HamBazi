@@ -8,21 +8,31 @@ import { CatalogScreen, LobbyScreen } from "./features/game-catalog/index.js";
 import { InviteScreen, RoomScreen } from "./features/room/index.js";
 import { MatchmakingScreen } from "./features/matchmaking/index.js";
 import { MatchScreen } from "./platform/match-screen.js";
+import { DirectCoupPreview } from "./dev/coup-preview.js";
 import { RuntimeContext, go, useRuntime, useSession } from "./ui/shared.js";
 import { profileSchema } from "./platform/contracts.js";
 function Shell({
   telegram,
   localPreview,
+  directCoupPreviewMatchId,
 }: {
   telegram?: TelegramApp | undefined;
   localPreview: boolean;
+  directCoupPreviewMatchId?: string | undefined;
 }) {
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
+  const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
+  const directPreview =
+    preview &&
+    route === "/preview/coup" &&
+    !!directCoupPreviewMatchId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      directCoupPreviewMatchId,
+    );
   const session = useSession((s) => s.session);
   const connection = useSession((s) => s.connection);
   const ticket = useSession((s) => s.ticket);
-  const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
   const profile = useQuery({
     queryKey: ["profile"],
     queryFn: ({ signal }) => runtime.http("/v1/me", profileSchema, undefined, "GET", true, signal),
@@ -84,7 +94,8 @@ function Shell({
       </header>
       {preview && (
         <div className="notice" role="status">
-          Local preview · synthetic Telegram identity and server data
+          Local preview · synthetic Telegram identity and server data ·{" "}
+          <a href="#/preview/coup">Open Coup table</a>
         </div>
       )}
       {session && connection !== "connected" && (
@@ -96,7 +107,13 @@ function Shell({
         </div>
       )}
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
-        {session ? screen : <AuthScreen localPreview={preview} />}
+        {directPreview ? (
+          <DirectCoupPreview matchId={directCoupPreviewMatchId} />
+        ) : session ? (
+          screen
+        ) : (
+          <AuthScreen localPreview={preview} />
+        )}
       </main>
       {session && (
         <nav aria-label="Main navigation">
@@ -120,15 +137,21 @@ export function App({
   runtime,
   telegram,
   localPreview = false,
+  directCoupPreviewMatchId,
 }: {
   runtime: Runtime;
   telegram?: TelegramApp | undefined;
   localPreview?: boolean;
+  directCoupPreviewMatchId?: string | undefined;
 }) {
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
-        <Shell telegram={telegram} localPreview={localPreview} />
+        <Shell
+          telegram={telegram}
+          localPreview={localPreview}
+          directCoupPreviewMatchId={directCoupPreviewMatchId}
+        />
       </QueryClientProvider>
     </RuntimeContext.Provider>
   );

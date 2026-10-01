@@ -60,6 +60,17 @@ test("Telegram-only entry is accessible and keeps a narrow viewport", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("entry-mobile.png"), fullPage: true });
 });
+test("direct Coup preview route is inert in the ordinary app", async ({ page }) => {
+  await page.route("https://telegram.org/**", (route) =>
+    route.fulfill({ body: "", contentType: "text/javascript" }),
+  );
+  await page.goto("/#/preview/coup");
+  await expect(
+    page.getByText("Open HamBazi from Telegram to sign in and play with friends."),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "At the table" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Open Coup table" })).toHaveCount(0);
+});
 test("catalog mode comes from server and cancel-vs-match leads to the committed match", async ({
   page,
   request,

@@ -13,6 +13,8 @@ const markers = [
   "preview=synthetic",
   "Continue preview",
   "Local preview · synthetic Telegram identity and server data",
+  "hambazi-coup-preview-match",
+  "/preview/coup",
 ];
 async function check(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {

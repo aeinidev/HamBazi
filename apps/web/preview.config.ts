@@ -22,6 +22,7 @@ export default defineConfig(({ command, mode }) => {
           return html.replace(
             telegramScript,
             `<meta name="hambazi-local-preview" content="synthetic" />
+<meta name="hambazi-coup-preview-match" content="33333333-3333-4333-8333-333333333333" />
 <script>
 window.Telegram = { WebApp: {
   initData: ${JSON.stringify(previewIdentity)},
