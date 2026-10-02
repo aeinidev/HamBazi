@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { z } from "zod";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
 import { matchCorrelationSchema, type MatchCorrelation } from "./correlation.js";
@@ -74,14 +75,15 @@ export function matchReconnectService(repository: ReconnectRepository) {
     }
   }
   return Object.freeze({
-    connect: (input: unknown, context: unknown = {}) =>
+    connect: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       run(connectionLeaseSchema, input, "CONNECT", context),
-    renew: (input: unknown, context: unknown = {}) =>
+    renew: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       run(connectionLeaseSchema, input, "RENEW", context),
-    disconnect: (input: unknown, context: unknown = {}) =>
+    disconnect: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       run(connectionCloseSchema, input, "DISCONNECT", context),
-    reconcile: (input: unknown, context: unknown = {}) => run(seat, input, "RECONCILE", context),
-    timeout: (input: unknown, context: unknown = {}) =>
+    reconcile: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
+      run(seat, input, "RECONCILE", context),
+    timeout: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       run(disconnectTimeoutSchema, input, "TIMEOUT", context),
   });
 }

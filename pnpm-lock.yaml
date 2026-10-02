@@ -207,6 +207,9 @@ importers:
       '@hambazi/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
+      '@hambazi/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@nestjs/common':
         specifier: 12.0.1
         version: 12.0.1(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -228,9 +231,6 @@ importers:
       jose:
         specifier: 6.2.12
         version: 6.2.12
-      pino:
-        specifier: 10.3.1
-        version: 10.3.1
       redis:
         specifier: 6.2.1
         version: 6.2.1
@@ -274,15 +274,15 @@ importers:
       '@hambazi/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@hambazi/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       fastify:
         specifier: 5.12.4
         version: 5.12.4
       grammy:
         specifier: 1.46.0
         version: 1.46.0
-      pino:
-        specifier: 10.3.1
-        version: 10.3.1
       zod:
         specifier: 4.6.2
         version: 4.6.2
@@ -378,15 +378,15 @@ importers:
       '@hambazi/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@hambazi/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       bullmq:
         specifier: 6.3.8
         version: 6.3.8(ioredis@6.0.0)(pg@8.23.0)(redis@6.2.1)
       ioredis:
         specifier: 6.0.0
         version: 6.0.0
-      pino:
-        specifier: 10.3.1
-        version: 10.3.1
       zod:
         specifier: 4.6.2
         version: 4.6.2
@@ -498,6 +498,28 @@ importers:
       '@hambazi/typescript':
         specifier: workspace:*
         version: link:../../../tooling/typescript
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 5.0.0
+        version: 5.0.0(@types/node@24.13.4)(vite@8.3.1(@types/node@24.13.4)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/observability:
+    dependencies:
+      '@hambazi/shared':
+        specifier: workspace:*
+        version: link:../shared
+      pino:
+        specifier: 10.3.1
+        version: 10.3.1
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
       '@types/node':
         specifier: 24.13.4
         version: 24.13.4

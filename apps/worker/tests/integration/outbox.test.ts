@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { beforeAll, beforeEach, afterAll, expect, it } from "vitest";
-import { Queue } from "bullmq";
+import { Queue, Worker } from "bullmq";
+import { currentCorrelation, createTelemetryLogger } from "@hambazi/observability";
 import { createDatabase } from "@hambazi/database";
 import { createMatchOutboxPort, type MatchDomainEvent } from "@hambazi/api/matches";
 import {
@@ -8,6 +9,7 @@ import {
   createOutboxDispatcher,
   outboxQueueNames,
   decodeDelivery,
+  domainEventProcessor,
 } from "../../src/outbox-dispatcher.js";
 import { queueConnection } from "../../src/queue-connection.js";
 if (
@@ -233,6 +235,87 @@ it("survives publish-before-mark failure and preserves eventId/context through r
     await dispatch.close();
     await publisher.close();
     await queue.close();
+  }
+});
+it("continues durable outbox correlation into real queue consumption without exporting payloads", async () => {
+  const id = await seed();
+  const row = await read(id);
+  const namespace = randomUUID();
+  const redisUrl = { reveal: () => process.env.TEST_WORKER_REDIS_URL! };
+  const output: string[] = [];
+  const telemetry = createTelemetryLogger({
+    write: (line: string) => {
+      output.push(line);
+    },
+  });
+  const publisher = await createBullMqDomainPublisher({
+    redisUrl,
+    namespace,
+    timeoutMs: 1000,
+    attempts: 2,
+    backoffMs: 100,
+    event: () => {},
+  });
+  const dispatch = createOutboxDispatcher({
+    outbox: first,
+    publisher,
+    batchSize: 1,
+    publishTimeoutMs: 500,
+    event: (event, fields) => telemetry.emit(event, fields),
+  });
+  let complete!: () => void;
+  const consumed = new Promise<void>((resolve) => {
+    complete = resolve;
+  });
+  const worker = new Worker(
+    outboxQueueNames.MATCH_CHANGED_V1,
+    domainEventProcessor(
+      "MATCH_CHANGED_V1",
+      async (e) => {
+        const context = currentCorrelation();
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        expect(currentCorrelation()).toEqual(context);
+        expect(context?.requestId).toBe(row.requestId);
+        expect(context?.traceparent.slice(3, 35)).toBe(row.traceparent?.slice(3, 35));
+        expect(e.eventId).toBe(id);
+        return "APPLIED";
+      },
+      telemetry,
+    ),
+    { prefix: `hambazi:jobs:${namespace}`, connection: queueConnection(redisUrl, true) },
+  );
+  worker.on("completed", () => complete());
+  worker.on("error", () => {});
+  try {
+    await worker.waitUntilReady();
+    await dispatch.runOnce();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        consumed,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Correlation consumer deadline")), 5000);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+    expect((await read(id)).status).toBe("PUBLISHED");
+    const lines = output.map((v) => JSON.parse(v));
+    expect(lines).toHaveLength(2);
+    expect(
+      lines.every(
+        (v) => v.requestId === row.requestId && v.traceId === row.traceparent?.slice(3, 35),
+      ),
+    ).toBe(true);
+    expect(new Set(lines.map((v) => v.spanId)).size).toBe(2);
+    expect(output.join("")).not.toMatch(
+      /payload|status|lastEventSeq|traceparent|secret|deck|cards/,
+    );
+  } finally {
+    await dispatch.close();
+    await worker.close();
+    await publisher.close();
   }
 });
 it("keeps the database pending after an unavailable queue and recovers with the same event", async () => {

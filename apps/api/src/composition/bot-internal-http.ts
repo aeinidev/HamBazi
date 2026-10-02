@@ -1,3 +1,9 @@
+import {
+  createCorrelation,
+  currentCorrelation,
+  safeTraceparent,
+  withCorrelation,
+} from "@hambazi/observability";
 import "reflect-metadata";
 import { randomUUID } from "node:crypto";
 import { TLSSocket } from "node:tls";
@@ -45,6 +51,9 @@ export async function createBotInternalHttpApplication(options: {
   const server = adapter.getInstance();
   server.server.headersTimeout = 10000;
   const contexts = new WeakMap<FastifyRequest, BotServiceContext>();
+  server.addHook("onRequest", (request, _reply, done) => {
+    withCorrelation(createCorrelation({ requestId: request.id }), done);
+  });
   server.addHook("onRequest", async (request, reply) => {
     reply
       .header("Cache-Control", "no-store")
@@ -71,6 +80,17 @@ export async function createBotInternalHttpApplication(options: {
       return reply;
     if (request.url.includes("?"))
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+  });
+  server.addHook("onRequest", (request, _reply, done) => {
+    // A private, service-authenticated peer can continue a trace; public listeners ignore it.
+    const parent = contexts.has(request) ? safeTraceparent(request.headers.traceparent) : undefined;
+    withCorrelation(
+      createCorrelation({
+        requestId: request.id,
+        traceparent: parent ?? currentCorrelation()?.traceparent,
+      }),
+      done,
+    );
   });
   server.addHook("onResponse", async (request, reply) =>
     options.logger.completed(request.id, reply.elapsedTime, reply.statusCode),

@@ -127,6 +127,8 @@ describe("Mini App onboarding HTTP boundary", () => {
         "event",
         "level",
         "requestId",
+        "spanId",
+        "traceId",
       ]);
   });
   it.each(["limited", "unavailable"] as const)(

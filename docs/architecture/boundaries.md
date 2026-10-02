@@ -171,3 +171,11 @@ recovery/read and projection ports; no Leaderboard Match table access or Match
 mutation edge is introduced. Positive and negative fitness fixtures cover this
 extension. The old user_game_stats/consumeOnce callback shape remains available
 for release overlap; new generation projections use stats_values.
+
+Phase 16A's [ADR-031](../adr/031-safe-telemetry-and-correlation.md) registers
+Observability as Node-only infrastructure depending only on Shared and the existing
+Pino pin. API/Bot/Worker may use its root export; Web, domain and pure engines may
+not. Pino runtime ownership belongs only to Observability and product-source
+console calls fail lint. Positive/negative fixtures cover these edges. This is
+telemetry metadata, not an extra inter-domain application edge or database owner;
+engines and the synchronous module matrix remain unchanged.

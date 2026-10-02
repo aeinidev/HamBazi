@@ -29,7 +29,10 @@ function fixture() {
 it("routes strict versioned jobs and returns no state", async () => {
   const f = fixture();
   expect(await f.run({ name: "match-automation-v1", data: f.data })).toEqual({ schemaVersion: 1 });
-  expect(f.timeout).toHaveBeenCalledWith(f.data.payload, { requestId: expect.any(String) });
+  expect(f.timeout).toHaveBeenCalledWith(f.data.payload, {
+    requestId: expect.any(String),
+    traceparent: expect.any(String),
+  });
   expect(f.execute).not.toHaveBeenCalled();
 });
 it.each([null, { schemaVersion: 2 }, { schemaVersion: 1, kind: "UNKNOWN" }])(

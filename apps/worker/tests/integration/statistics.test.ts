@@ -311,10 +311,10 @@ it("executes the declared trusted maintenance CLI and recovers an abandoned buil
     timeout: 15000,
     maxBuffer: 8192,
   });
-  expect(aborted.stdout).toContain("Statistics maintenance completed");
+  expect(aborted.stdout).toContain('"event":"worker.statistics_maintenance_completed"');
   expect(await projection.building()).toBeNull();
   const rebuilt = await run("pnpm", ["stats:rebuild"], { env, timeout: 15000, maxBuffer: 8192 });
-  expect(rebuilt.stdout).toContain("Statistics maintenance completed");
+  expect(rebuilt.stdout).toContain('"event":"worker.statistics_maintenance_completed"');
   expect(await projection.building()).toBeNull();
   expect(rebuilt.stdout).not.toContain(process.env.WORKER_DATABASE_URL!);
 }, 35000);

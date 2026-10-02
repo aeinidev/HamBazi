@@ -1,11 +1,9 @@
-import { pino } from "pino";
+import { createTelemetryLogger } from "@hambazi/observability";
 import { startWorker } from "./runtime.js";
-const logger = pino({ base: null, timestamp: false });
+const logger = createTelemetryLogger();
 try {
-  const worker = await startWorker(process.env, (event, fields) =>
-    logger.info({ event, ...fields }),
-  );
-  logger.info({ event: "worker.started" });
+  const worker = await startWorker(process.env, (event, fields) => logger.emit(event, fields));
+  logger.emit("worker.started");
   let stopping = false;
   const shutdown = () => {
     if (stopping) return;
@@ -15,10 +13,10 @@ try {
     void worker.close().then(
       () => {
         clearTimeout(deadline);
-        logger.info({ event: "worker.stopped" });
+        logger.emit("worker.stopped");
       },
       () => {
-        logger.info({ event: "worker.failed" });
+        logger.emit("worker.failed");
         process.exitCode = 1;
       },
     );
@@ -26,6 +24,6 @@ try {
   process.once("SIGTERM", shutdown);
   process.once("SIGINT", shutdown);
 } catch {
-  logger.info({ event: "worker.failed" });
+  logger.emit("worker.failed");
   process.exitCode = 1;
 }

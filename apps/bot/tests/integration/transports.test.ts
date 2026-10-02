@@ -8,6 +8,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
 import { createBotHttp, webhookPath } from "../../src/composition/http.js";
 import { createBotLogger } from "../../src/composition/logger.js";
+import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import { createBackend, RetryDelivery } from "../../src/backend.js";
 import { createDeliveryHandler } from "../../src/delivery.js";
 import { fixture, raw, delivery } from "../unit/fixtures.js";
@@ -207,15 +208,19 @@ describe("private backend HTTPS client", () => {
   it("sends a scoped bearer to the fixed path and validates its response", async () => {
     let auth: unknown;
     let path: unknown;
+    let traceparent: unknown;
     const c = await client((req, res) => {
       auth = req.headers.authorization;
       path = req.url;
+      traceparent = req.headers.traceparent;
       res.setHeader("content-type", "application/json");
       res.end(JSON.stringify({ schemaVersion: 1, ok: true }));
     });
-    await c.admit(AbortSignal.timeout(1000));
+    const context = createCorrelation();
+    await withCorrelation(context, () => c.admit(AbortSignal.timeout(1000)));
     expect(auth).toBe("Bearer synthetic");
     expect(path).toBe("/v1/internal/bot/admit");
+    expect(traceparent).toBe(context.traceparent);
   });
   it.each([301, 302, 400, 401, 403, 429, 500, 503])(
     "rejects HTTP %s without following redirects",

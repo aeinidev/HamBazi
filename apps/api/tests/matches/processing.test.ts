@@ -72,10 +72,23 @@ describe("Match application boundary", () => {
         kind: "LIFECYCLE",
         operation: "WAIT",
       },
-      {},
+      {
+        requestId: expect.any(String),
+        traceparent: expect.stringMatching(/^00-[0-9a-f]{32}-[0-9a-f]{16}-00$/),
+      },
     );
     expect(f.users.findActiveById).not.toHaveBeenCalled();
     await f.port.ready(actor, input);
+    expect(f.process).toHaveBeenLastCalledWith(
+      actor,
+      { ...input, kind: "READY" },
+      {
+        requestId: expect.any(String),
+        traceparent: expect.stringMatching(/^00-[0-9a-f]{32}-[0-9a-f]{16}-00$/),
+      },
+    );
+    // A supported explicit old-release context remains valid rather than being rewritten.
+    await f.port.ready(actor, input, {});
     expect(f.process).toHaveBeenLastCalledWith(actor, { ...input, kind: "READY" }, {});
   });
   it("sanitizes failures but preserves stable domain codes", async () => {

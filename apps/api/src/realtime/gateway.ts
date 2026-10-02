@@ -1,6 +1,11 @@
 import { chatDeliverySchema, type ChatPort } from "../chat/index.js";
 import type { PresencePort } from "../presence/index.js";
-import { randomUUID } from "node:crypto";
+import {
+  createCorrelation,
+  currentCorrelation,
+  withCorrelation,
+  type Telemetry,
+} from "@hambazi/observability";
 import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
@@ -33,6 +38,7 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  telemetry?: Telemetry;
   chat?: { port: ChatPort; ackTimeoutMs: number };
   presence?: {
     port: PresencePort;
@@ -79,7 +85,11 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   const cursors = new WeakMap<Socket, Map<string, number>>();
   const available = () => !draining && (deps.delivery?.redis?.ready() ?? true);
   function enqueue(socket: Socket, operation: () => Promise<void>): Promise<void> {
-    const task = (tails.get(socket) ?? Promise.resolve()).then(operation);
+    // Capture when queued, not when the preceding socket operation finishes.
+    const context = currentCorrelation() ?? createCorrelation();
+    const task = (tails.get(socket) ?? Promise.resolve()).then(() =>
+      withCorrelation(context, operation),
+    );
     const safe = task.catch(() => {
       socket.conn.close();
     });
@@ -213,8 +223,24 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     async function dispatch(name: IncomingEvent, payload: unknown, ack: unknown) {
       if (typeof ack !== "function") return; // No unacknowledged mutation.
       const respond = ack as Ack;
-      if (!available()) return safeAck(respond, failure("INTERNAL_ERROR"));
+      const started = performance.now();
+      const fields: Record<string, unknown> = { userId };
+      const complete = (value: unknown) => {
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          "ok" in value &&
+          value.ok === false &&
+          "error" in value
+        ) {
+          const error = value.error;
+          if (typeof error === "object" && error !== null && "code" in error)
+            fields.errorCode = error.code;
+        }
+        safeAck(respond, value);
+      };
       try {
+        if (!available()) return complete(failure("INTERNAL_ERROR"));
         const current = await deps.sessions.authenticate(token);
         if (
           !current.ok ||
@@ -222,20 +248,19 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
           current.session.sessionId !== sessionId ||
           current.session.expiresAt * 1000 <= deps.nowMs()
         ) {
-          safeAck(respond, current.ok ? failure("UNAUTHENTICATED") : current);
+          complete(current.ok ? failure("UNAUTHENTICATED") : current);
           socket.disconnect(true);
           return;
         }
         const decision = await deps.rate(userId, "event");
         if (!decision.allowed) {
-          safeAck(
-            respond,
-            failure(decision.reason === "limited" ? "RATE_LIMITED" : "INTERNAL_ERROR"),
-          );
+          complete(failure(decision.reason === "limited" ? "RATE_LIMITED" : "INTERNAL_ERROR"));
           return;
         }
         const parsed = incomingEvents[name].safeParse(payload);
-        if (!parsed.success) return safeAck(respond, failure("INVALID_INPUT"));
+        if (!parsed.success) return complete(failure("INVALID_INPUT"));
+        for (const key of ["matchId", "roomId", "actionId"] as const)
+          if (key in parsed.data) fields[key] = parsed.data[key as keyof typeof parsed.data];
         let outcome: unknown;
         switch (name) {
           case "room:subscribe": {
@@ -310,14 +335,14 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
               : failure("INTERNAL_ERROR");
             break;
           case "match:ready":
-            outcome = await deps.matches.ready(userId, parsed.data, { requestId: randomUUID() });
+            outcome = await deps.matches.ready(userId, parsed.data, currentCorrelation());
             break;
           case "game:command":
-            outcome = await deps.matches.command(userId, parsed.data, { requestId: randomUUID() });
+            outcome = await deps.matches.command(userId, parsed.data, currentCorrelation());
             break;
           case "chat:send":
             outcome = deps.chat
-              ? await deps.chat.port.send(userId, parsed.data, { requestId: randomUUID() })
+              ? await deps.chat.port.send(userId, parsed.data, currentCorrelation())
               : failure("INTERNAL_ERROR");
             break;
           case "chat:list": {
@@ -333,15 +358,26 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
             outcome = { ok: true, value: { schemaVersion: 1 } };
             break;
         }
-        safeAck(respond, outcome);
+        complete(outcome);
       } catch {
         if (presence) socket.conn.close();
-        safeAck(respond, failure("INTERNAL_ERROR"));
+        complete(failure("INTERNAL_ERROR"));
+      } finally {
+        try {
+          deps.telemetry?.emit("socket.completed", {
+            ...fields,
+            durationMs: performance.now() - started,
+          });
+        } catch {
+          /* Observation cannot change an acknowledgement or durable effect. */
+        }
       }
     }
     for (const name of Object.keys(incomingEvents) as IncomingEvent[])
       socket.on(name, (payload: unknown, ack: unknown) => {
-        void enqueue(socket, () => dispatch(name, payload, ack)).catch(() => {});
+        withCorrelation(createCorrelation(), () => {
+          void enqueue(socket, () => dispatch(name, payload, ack)).catch(() => {});
+        });
       });
     socket.onAny((name, ...args: unknown[]) => {
       if (Object.hasOwn(incomingEvents, name)) return;
@@ -353,110 +389,114 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     const event = matchDomainEventSchema.safeParse(input);
     if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || !available() || !deps.delivery)
       throw new Error("Realtime delivery unavailable");
-    const matchId = event.data.aggregateId;
-    const results = await Promise.allSettled(
-      [...namespace.sockets.values()]
-        .filter((s) => s.rooms.has(`match:${matchId}`))
-        .map((socket) =>
-          enqueue(socket, async () => {
-            if (!socket.connected) return;
-            const identity = identities.get(socket);
-            if (!identity) {
-              socket.disconnect(true);
-              return;
-            }
-            const session = await deps.sessions.authenticate(identity.token);
-            if (
-              !session.ok ||
-              session.session.userId !== identity.userId ||
-              session.session.sessionId !== identity.sessionId ||
-              session.session.expiresAt * 1000 <= deps.nowMs()
-            ) {
-              socket.disconnect(true);
-              return;
-            }
-            const result = await deps.delivery!.resync.catchup(identity.userId, {
-              schemaVersion: 1,
-              matchId,
-              afterSeq: cursors.get(socket)?.get(matchId) ?? 0,
-            });
-            if (!result.ok) {
-              if (result.error.code === "NOT_FOUND" || result.error.code === "FORBIDDEN") {
-                await socket.leave(`match:${matchId}`);
+    return withCorrelation(createCorrelation(event.data.correlation), async () => {
+      const matchId = event.data.aggregateId;
+      const results = await Promise.allSettled(
+        [...namespace.sockets.values()]
+          .filter((s) => s.rooms.has(`match:${matchId}`))
+          .map((socket) =>
+            enqueue(socket, async () => {
+              if (!socket.connected) return;
+              const identity = identities.get(socket);
+              if (!identity) {
+                socket.disconnect(true);
                 return;
               }
-              throw new Error("Realtime projection unavailable");
-            }
-            if (!available()) throw new Error("Realtime delivery unavailable");
-            // Session may expire while waiting for the database/earlier socket work.
-            const current = await deps.sessions.authenticate(identity.token);
-            if (
-              !current.ok ||
-              current.session.userId !== identity.userId ||
-              current.session.sessionId !== identity.sessionId ||
-              current.session.expiresAt * 1000 <= deps.nowMs()
-            ) {
-              socket.disconnect(true);
-              return;
-            }
-            for (const item of result.value.events) socket.emit("match:event", item);
-            // Cursor advances only after recipient acknowledgement. Loss/disconnect retries from durable state.
-            const ack: unknown = await socket
-              .timeout(deps.delivery!.ackTimeoutMs)
-              .emitWithAck("match:snapshot", result.value.snapshot);
-            if (ack !== result.value.snapshot.lastEventSeq)
-              throw new Error("Realtime acknowledgement invalid");
-            cursors.get(socket)?.set(matchId, result.value.snapshot.lastEventSeq);
-          }),
-        ),
-    );
-    if (results.some((r) => r.status === "rejected"))
-      throw new Error("Realtime delivery incomplete");
+              const session = await deps.sessions.authenticate(identity.token);
+              if (
+                !session.ok ||
+                session.session.userId !== identity.userId ||
+                session.session.sessionId !== identity.sessionId ||
+                session.session.expiresAt * 1000 <= deps.nowMs()
+              ) {
+                socket.disconnect(true);
+                return;
+              }
+              const result = await deps.delivery!.resync.catchup(identity.userId, {
+                schemaVersion: 1,
+                matchId,
+                afterSeq: cursors.get(socket)?.get(matchId) ?? 0,
+              });
+              if (!result.ok) {
+                if (result.error.code === "NOT_FOUND" || result.error.code === "FORBIDDEN") {
+                  await socket.leave(`match:${matchId}`);
+                  return;
+                }
+                throw new Error("Realtime projection unavailable");
+              }
+              if (!available()) throw new Error("Realtime delivery unavailable");
+              // Session may expire while waiting for the database/earlier socket work.
+              const current = await deps.sessions.authenticate(identity.token);
+              if (
+                !current.ok ||
+                current.session.userId !== identity.userId ||
+                current.session.sessionId !== identity.sessionId ||
+                current.session.expiresAt * 1000 <= deps.nowMs()
+              ) {
+                socket.disconnect(true);
+                return;
+              }
+              for (const item of result.value.events) socket.emit("match:event", item);
+              // Cursor advances only after recipient acknowledgement. Loss/disconnect retries from durable state.
+              const ack: unknown = await socket
+                .timeout(deps.delivery!.ackTimeoutMs)
+                .emitWithAck("match:snapshot", result.value.snapshot);
+              if (ack !== result.value.snapshot.lastEventSeq)
+                throw new Error("Realtime acknowledgement invalid");
+              cursors.get(socket)?.set(matchId, result.value.snapshot.lastEventSeq);
+            }),
+          ),
+      );
+      if (results.some((r) => r.status === "rejected"))
+        throw new Error("Realtime delivery incomplete");
+    });
   }
   async function chatFanout(input: unknown) {
     const event = chatDeliverySchema.safeParse(input);
     if (!event.success || !available() || !deps.chat) throw new Error("Chat delivery unavailable");
-    const matchId = event.data.aggregateId;
-    const results = await Promise.allSettled(
-      [...namespace.sockets.values()]
-        .filter((socket) => socket.rooms.has(`chat:${matchId}`))
-        .map((socket) =>
-          enqueue(socket, async () => {
-            if (!socket.connected) return;
-            const identity = identities.get(socket);
-            if (!identity) {
-              socket.disconnect(true);
-              return;
-            }
-            const session = await deps.sessions.authenticate(identity.token);
-            if (
-              !session.ok ||
-              session.session.userId !== identity.userId ||
-              session.session.sessionId !== identity.sessionId ||
-              session.session.expiresAt * 1000 <= deps.nowMs()
-            ) {
-              socket.disconnect(true);
-              return;
-            }
-            const result = await deps.chat!.port.delivery(identity.userId, event.data);
-            if (!result.ok) {
-              if (["NOT_FOUND", "FORBIDDEN"].includes(result.error.code)) {
-                await socket.leave(`chat:${matchId}`);
+    return withCorrelation(createCorrelation(event.data.correlation), async () => {
+      const matchId = event.data.aggregateId;
+      const results = await Promise.allSettled(
+        [...namespace.sockets.values()]
+          .filter((socket) => socket.rooms.has(`chat:${matchId}`))
+          .map((socket) =>
+            enqueue(socket, async () => {
+              if (!socket.connected) return;
+              const identity = identities.get(socket);
+              if (!identity) {
+                socket.disconnect(true);
                 return;
               }
-              throw new Error("Chat projection unavailable");
-            }
-            if (!available()) throw new Error("Chat delivery unavailable");
-            // Local socket only: user content must not enter the Redis broadcast adapter.
-            const ack: unknown = await socket
-              .timeout(deps.chat!.ackTimeoutMs)
-              .emitWithAck("chat:message", result.value);
-            if (ack !== result.value.messageId) throw new Error("Chat acknowledgement invalid");
-          }),
-        ),
-    );
-    if (results.some((result) => result.status === "rejected"))
-      throw new Error("Chat fanout failed");
+              const session = await deps.sessions.authenticate(identity.token);
+              if (
+                !session.ok ||
+                session.session.userId !== identity.userId ||
+                session.session.sessionId !== identity.sessionId ||
+                session.session.expiresAt * 1000 <= deps.nowMs()
+              ) {
+                socket.disconnect(true);
+                return;
+              }
+              const result = await deps.chat!.port.delivery(identity.userId, event.data);
+              if (!result.ok) {
+                if (["NOT_FOUND", "FORBIDDEN"].includes(result.error.code)) {
+                  await socket.leave(`chat:${matchId}`);
+                  return;
+                }
+                throw new Error("Chat projection unavailable");
+              }
+              if (!available()) throw new Error("Chat delivery unavailable");
+              // Local socket only: user content must not enter the Redis broadcast adapter.
+              const ack: unknown = await socket
+                .timeout(deps.chat!.ackTimeoutMs)
+                .emitWithAck("chat:message", result.value);
+              if (ack !== result.value.messageId) throw new Error("Chat acknowledgement invalid");
+            }),
+          ),
+      );
+      if (results.some((result) => result.status === "rejected"))
+        throw new Error("Chat fanout failed");
+    });
   }
   namespace.on("chat:wakeup:v1", (input: unknown, ack: unknown) => {
     if (typeof ack !== "function") return;

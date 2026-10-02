@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import { z } from "zod";
 import {
@@ -52,7 +53,11 @@ export function chatService(options: {
     return authorize(userId, matchId, kind === "send");
   }
   return Object.freeze({
-    async send(identity: unknown, input: unknown, correlation: unknown = {}) {
+    async send(
+      identity: unknown,
+      input: unknown,
+      correlation: unknown = currentCorrelation() ?? createCorrelation(),
+    ) {
       const actor = z
         .uuid()
         .transform((value) => value.toLowerCase())

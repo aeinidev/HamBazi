@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { createDatabase } from "@hambazi/database";
 import { coupEngine, migrateCoupState, upcastCoupEvent } from "@hambazi/coup-engine";
@@ -113,6 +114,18 @@ async function fixture(game: MatchGame = createCoupMatchGame(rules)) {
   }
   return { ids, matchId, first, second, config, users, request, active, stored };
 }
+it("persists inherited transaction correlation and retains the original context on idempotent retry", async () => {
+  const f = await fixture();
+  const context = createCorrelation();
+  const command = { ...f.request(0), operation: "WAIT" };
+  const initial = await withCorrelation(context, () => f.first.lifecycle(command));
+  const retry = await withCorrelation(createCorrelation(), () => f.second.lifecycle(command));
+  expect(retry).toEqual(initial);
+  const saved = await f.stored();
+  expect(saved.outbox).toHaveLength(1);
+  expect(saved.outbox[0]).toMatchObject(context);
+  expect(saved.match.stateVersion).toBe(1);
+});
 it("authorizes only durable match members and downgrades a replaced human to spectator", async () => {
   const f = await fixture();
   const membership = createMatchMembershipPort(b);

@@ -29,6 +29,7 @@ const fixtures = workspaces.map((workspace) => ({
       "socket.io": "fixture",
       grammy: "fixture",
       zod: "fixture",
+      pino: "fixture",
     },
     ...(workspace.id === "api"
       ? {
@@ -59,6 +60,33 @@ const engine = "packages/games/coup-engine/src/engine.ts";
 const repository = (owner) => api(owner, "infrastructure/repositories/postgres.ts");
 
 describe("source ownership boundaries", () => {
+  it("allows telemetry only through the server infrastructure surface", async () => {
+    for (const workspace of ["api", "bot", "worker"])
+      expect(
+        await messages(
+          'import { createTelemetryLogger } from "@hambazi/observability";',
+          `apps/${workspace}/src/composition/telemetry.ts`,
+        ),
+      ).toEqual([]);
+    expect(
+      await messages('import { pino } from "pino";', "packages/observability/src/logger.ts"),
+    ).toEqual([]);
+    for (const file of [
+      api("realtime"),
+      "apps/worker/src/composition/logger.ts",
+      engine,
+      "apps/web/src/index.ts",
+    ])
+      expect((await messages('import { pino } from "pino";', file)).length).toBeGreaterThan(0);
+    for (const file of [engine, "apps/web/src/index.ts", api("matches", "domain/model.ts")])
+      expect(
+        (await messages('import { createTelemetryLogger } from "@hambazi/observability";', file))
+          .length,
+      ).toBeGreaterThan(0);
+    expect((await messages('console.error("payload");', api("realtime"))).length).toBeGreaterThan(
+      0,
+    );
+  });
   it("keeps connection lease authority in Matches, not Presence or Realtime", async () => {
     const query = "db.matchConnectionLease.findMany({where:{matchId,userId}});";
     expect(await messages(query, repository("matches"))).toEqual([]);

@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { z } from "zod";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
 import type { UserIdentityPort } from "../../users/index.js";
@@ -195,6 +196,7 @@ export function admissionService(deps: {
         for (const ticket of existing.tickets) await actor(ticket.actorUserId);
         const descriptor = await eligible(first);
         return deps.repository.commit(id, descriptor, {
+          ...(currentCorrelation() ?? createCorrelation()),
           ...(command.requestId === undefined ? {} : { requestId: command.requestId }),
           ...(command.traceparent === undefined ? {} : { traceparent: command.traceparent }),
         });

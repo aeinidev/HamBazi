@@ -1,4 +1,5 @@
 import { request, Agent } from "node:https";
+import { currentCorrelation } from "@hambazi/observability";
 import type { z } from "zod";
 import {
   botInternalPaths,
@@ -68,6 +69,7 @@ export function createBackend(options: {
             agent,
             signal: bounded,
             headers: {
+              ...(currentCorrelation() ? { traceparent: currentCorrelation()!.traceparent } : {}),
               authorization: options.bearer.reveal(),
               "content-type": "application/json",
               "content-length": Buffer.byteLength(encoded),

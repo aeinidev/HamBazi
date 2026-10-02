@@ -1,10 +1,9 @@
-import { pino, type DestinationStream } from "pino";
+import { createTelemetryLogger, type DestinationStream } from "@hambazi/observability";
 export function createBotLogger(destination?: DestinationStream) {
-  const logger = pino({ base: null, timestamp: false }, destination);
+  const telemetry = createTelemetryLogger(destination);
   return {
     completed(requestId: string, durationMs: number, status: number) {
-      logger.info({
-        event: "bot.webhook_completed",
+      telemetry.emit("bot.webhook_completed", {
         requestId,
         durationMs: Math.max(0, Math.round(durationMs)),
         ...(status >= 400
@@ -24,7 +23,7 @@ export function createBotLogger(destination?: DestinationStream) {
       });
     },
     lifecycle(event: "bot.started" | "bot.stopped" | "bot.failed") {
-      logger.info({ event });
+      telemetry.emit(event);
     },
   };
 }

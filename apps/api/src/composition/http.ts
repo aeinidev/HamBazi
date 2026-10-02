@@ -1,3 +1,4 @@
+import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import {
   createStatisticsHttpModule,
   type StatisticsHttpDependencies,
@@ -44,6 +45,9 @@ export async function createHttpApplication(options: {
   });
   const server = adapter.getInstance();
   server.server.headersTimeout = 10000;
+  server.addHook("onRequest", (request, _reply, done) => {
+    withCorrelation(createCorrelation({ requestId: request.id }), done);
+  });
   server.addHook("onRequest", async (request, reply) => {
     reply
       .header("Cache-Control", "no-store")
@@ -163,7 +167,10 @@ export async function createHttpApplication(options: {
   await app.init();
   await server.ready();
   const realtime = options.realtime
-    ? createRealtimeGateway(server.server, options.realtime)
+    ? createRealtimeGateway(server.server, {
+        ...options.realtime,
+        telemetry: options.realtime.telemetry ?? options.logger.telemetry,
+      })
     : undefined;
   return { app, server, realtime };
 }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { createTelemetryLogger, currentCorrelation } from "@hambazi/observability";
 import { describe, expect, it, vi } from "vitest";
 import {
   matchDomainEventSchema,
@@ -122,6 +123,72 @@ describe("outbox dispatch boundaries", () => {
   });
 });
 describe("versioned consumer adapter", () => {
+  it("continues independent traces across parallel consumers, failures and duplicate retries", async () => {
+    const events = [event(), event()];
+    events[1]!.correlation = {
+      requestId: randomUUID(),
+      traceparent: "00-33333333333333333333333333333333-4444444444444444-00",
+    };
+    const output: string[] = [];
+    const telemetry = createTelemetryLogger({
+      write: (line: string) => {
+        output.push(line);
+      },
+    });
+    const process = domainEventProcessor(
+      "MATCH_CHANGED_V1",
+      async (e) => {
+        const context = currentCorrelation();
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        expect(currentCorrelation()).toEqual(context);
+        expect(context?.requestId).toBe(e.correlation.requestId);
+        expect(context?.traceparent.slice(3, 35)).toBe(e.correlation.traceparent?.slice(3, 35));
+        expect(context?.traceparent.slice(36, 52)).not.toBe(
+          e.correlation.traceparent?.slice(36, 52),
+        );
+        return "DUPLICATE";
+      },
+      telemetry,
+    );
+    await Promise.all(events.map((e) => process({ name: e.type, data: e })));
+    await process({ name: events[0]!.type, data: events[0] });
+    const lines = output.map((v) => JSON.parse(v));
+    expect(lines.map((v) => v.traceId).sort()).toEqual([
+      "1".repeat(32),
+      "1".repeat(32),
+      "3".repeat(32),
+    ]);
+    expect(new Set(lines.map((v) => v.spanId)).size).toBe(3);
+    expect(output.join("")).not.toMatch(/payload|command|token|traceparent/);
+    expect(currentCorrelation()).toBeUndefined();
+    const brokenObserver = {
+      emit: () => {
+        throw new Error("PRIVATE_OBSERVER");
+      },
+    };
+    expect(
+      await domainEventProcessor(
+        "MATCH_CHANGED_V1",
+        async () => "APPLIED",
+        brokenObserver,
+      )({ name: events[0]!.type, data: events[0] }),
+    ).toMatchObject({ status: "APPLIED" });
+    await expect(
+      domainEventProcessor(
+        "MATCH_CHANGED_V1",
+        async () => {
+          throw new Error("PRIVATE_STATE");
+        },
+        telemetry,
+      )({ name: events[0]!.type, data: events[0] }),
+    ).rejects.toThrow(/^Domain consumer failed$/);
+    expect(output.join("")).not.toContain("PRIVATE_STATE");
+    expect(JSON.parse(output.at(-1)!)).toMatchObject({
+      event: "worker.domain_failed",
+      errorCode: "INTERNAL_ERROR",
+      requestId: events[0]!.correlation.requestId,
+    });
+  });
   it("retains correlation and recognizes a durable duplicate", async () => {
     const e = event();
     const consume = vi.fn(async () => "DUPLICATE" as const);

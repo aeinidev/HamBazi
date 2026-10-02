@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation, withCorrelation } from "@hambazi/observability";
 import { createErrorEnvelope, type ErrorEnvelope } from "@hambazi/contracts";
 import type { AdmissionOutcome, AdmissionTicket, MatchAdmissionPort } from "../../matches/index.js";
 import {
@@ -152,16 +153,18 @@ export function createMatchmaking(options: {
       }),
     // Bounded, trusted tick: recover one expired claim, then select at most one group.
     run: (input: unknown) =>
-      safe(async () => {
-        const parsed = partitionSchema.safeParse(input);
-        if (!parsed.success) throw new Fault(createErrorEnvelope("INVALID_INPUT"));
-        const stale = await queue.expired(parsed.data);
-        if (stale) return settle(parsed.data, stale, false);
-        const claim = await queue.claim(parsed.data);
-        return claim
-          ? settle(parsed.data, claim, true)
-          : { schemaVersion: 1 as const, matchId: null };
-      }),
+      withCorrelation(createCorrelation(currentCorrelation()), () =>
+        safe(async () => {
+          const parsed = partitionSchema.safeParse(input);
+          if (!parsed.success) throw new Fault(createErrorEnvelope("INVALID_INPUT"));
+          const stale = await queue.expired(parsed.data);
+          if (stale) return settle(parsed.data, stale, false);
+          const claim = await queue.claim(parsed.data);
+          return claim
+            ? settle(parsed.data, claim, true)
+            : { schemaVersion: 1 as const, matchId: null };
+        }),
+      ),
     found: (token: unknown, input: unknown) =>
       safe(async () => {
         const parsed = ticketSchema.safeParse(input);

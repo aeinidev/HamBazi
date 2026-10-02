@@ -1,3 +1,4 @@
+import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import Fastify from "fastify";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { TLSSocket } from "node:tls";
@@ -38,6 +39,9 @@ export function createBotHttp(options: {
     { controller: AbortController; timer: ReturnType<typeof setTimeout> }
   >();
   let draining = false;
+  server.addHook("onRequest", (request, _reply, done) => {
+    withCorrelation(createCorrelation({ requestId: request.id }), done);
+  });
   server.addHook("onRequest", async (req, reply) => {
     reply
       .header("Cache-Control", "no-store")

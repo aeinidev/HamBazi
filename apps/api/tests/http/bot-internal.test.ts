@@ -1,4 +1,5 @@
 import { beforeAll, afterEach, describe, expect, it, vi } from "vitest";
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { readFileSync } from "node:fs";
 import { request as plainRequest } from "node:http";
 import {
@@ -41,6 +42,33 @@ async function setup(allowedPeers?: string) {
   return { ...f, ...h, ip, identity, process, output };
 }
 describe("internal HTTPS boundary", () => {
+  it("continues only validated service-authenticated trace headers", async () => {
+    const f = await setup();
+    const parent = createCorrelation();
+    f.process.mockImplementationOnce(async () => {
+      expect(currentCorrelation()?.traceparent.slice(3, 35)).toBe(parent.traceparent.slice(3, 35));
+      expect(currentCorrelation()?.traceparent.slice(36, 52)).not.toBe(
+        parent.traceparent.slice(36, 52),
+      );
+      return { ok: true, schemaVersion: 1, status: "DONE" } as never;
+    });
+    const good = await f.post(paths.process, update("START"), { traceparent: parent.traceparent });
+    expect(good.status).toBe(200);
+    expect(f.output.map((v) => JSON.parse(v)).at(-1)).toMatchObject({
+      traceId: parent.traceparent.slice(3, 35),
+    });
+    const denied = await f.post(paths.process, update("START"), {
+      authorization: "Bearer wrong",
+      traceparent: parent.traceparent,
+    });
+    expect(denied.status).toBe(401);
+    expect(f.output.map((v) => JSON.parse(v)).at(-1).traceId).not.toBe(
+      parent.traceparent.slice(3, 35),
+    );
+    await f.post(paths.admit, { schemaVersion: 1 }, { traceparent: "PRIVATE_TRACE" });
+    expect(f.output.join("")).not.toContain("PRIVATE_TRACE");
+    expect(currentCorrelation()).toBeUndefined();
+  });
   it("processes, acknowledges and suppresses completed duplicate delivery", async () => {
     const f = await setup();
     expect((await f.post(paths.admit, { schemaVersion: 1 })).status).toBe(200);

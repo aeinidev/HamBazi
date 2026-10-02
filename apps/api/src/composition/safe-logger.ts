@@ -1,13 +1,14 @@
-import { pino, type DestinationStream } from "pino";
+import { createTelemetryLogger, type DestinationStream } from "@hambazi/observability";
 export function createSafeLogger(destination?: DestinationStream) {
-  const logger = pino({ base: null, timestamp: false }, destination);
+  const telemetry = createTelemetryLogger(destination);
   let profileReadFailOpen = 0;
   let profileWriteFailClosed = 0;
   let catalogReadFailOpen = 0;
   return Object.freeze({
+    telemetry,
     catalogRateUnavailable(requestId: string) {
       catalogReadFailOpen++;
-      logger.warn({ event: "catalog.rate_read_fail_open", requestId, errorCode: "INTERNAL_ERROR" });
+      telemetry.emit("catalog.rate_read_fail_open", { requestId, errorCode: "INTERNAL_ERROR" });
     },
     catalogMetrics() {
       return Object.freeze({ catalog_rate_read_fail_open_total: catalogReadFailOpen });
@@ -15,11 +16,13 @@ export function createSafeLogger(destination?: DestinationStream) {
     profileRateUnavailable(requestId: string, kind: "read" | "write") {
       if (kind === "read") profileReadFailOpen++;
       else profileWriteFailClosed++;
-      logger.warn({
-        event: kind === "read" ? "profile.rate_read_fail_open" : "profile.rate_write_fail_closed",
-        requestId,
-        errorCode: "INTERNAL_ERROR",
-      });
+      telemetry.emit(
+        kind === "read" ? "profile.rate_read_fail_open" : "profile.rate_write_fail_closed",
+        {
+          requestId,
+          errorCode: "INTERNAL_ERROR",
+        },
+      );
     },
     profileMetrics() {
       return Object.freeze({
@@ -44,15 +47,14 @@ export function createSafeLogger(destination?: DestinationStream) {
                     : status >= 400
                       ? "INVALID_INPUT"
                       : undefined;
-      logger.info({
-        event: "http.completed",
+      telemetry.emit("http.completed", {
         requestId,
         durationMs: Math.max(0, Math.round(durationMs)),
         ...(code ? { errorCode: code } : {}),
       });
     },
     lifecycle(event: "api.started" | "api.stopped" | "api.failed") {
-      logger.info({ event });
+      telemetry.emit(event);
     },
   });
 }

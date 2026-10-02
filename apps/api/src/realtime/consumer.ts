@@ -1,10 +1,18 @@
 import { chatDeliverySchema } from "../chat/index.js";
+import {
+  createCorrelation,
+  withCorrelation,
+  createTelemetryLogger,
+  reportTelemetry,
+  type Telemetry,
+} from "@hambazi/observability";
 import { Worker, UnrecoverableError } from "bullmq";
 import { matchDomainEventSchema } from "../matches/index.js";
 /** One explicit Match or Chat delivery queue; results and matchmaking retain their owners. */
 export function realtimeJobProcessor(
   publish: (event: unknown) => Promise<void>,
   kind: "MATCH_CHANGED_V1" | "CHAT_MESSAGE_V1" = "MATCH_CHANGED_V1",
+  telemetry: Telemetry = createTelemetryLogger(),
 ) {
   return async (job: { name: string; data: unknown }) => {
     const event =
@@ -13,12 +21,24 @@ export function realtimeJobProcessor(
         : matchDomainEventSchema.safeParse(job.data);
     if (!event.success || event.data.type !== kind || job.name !== kind)
       throw new UnrecoverableError("Invalid realtime job");
-    try {
-      await publish(event.data);
-    } catch {
-      throw new Error("Realtime delivery failed");
-    }
-    return { schemaVersion: 1, status: "DELIVERED" };
+    return withCorrelation(createCorrelation(event.data.correlation), async () => {
+      const started = performance.now();
+      try {
+        await publish(event.data);
+        reportTelemetry(telemetry, "realtime.delivery_completed", {
+          matchId: event.data.aggregateId,
+          durationMs: performance.now() - started,
+        });
+      } catch {
+        reportTelemetry(telemetry, "realtime.delivery_failed", {
+          matchId: event.data.aggregateId,
+          errorCode: "INTERNAL_ERROR",
+          durationMs: performance.now() - started,
+        });
+        throw new Error("Realtime delivery failed");
+      }
+      return { schemaVersion: 1, status: "DELIVERED" };
+    });
   };
 }
 export function createRealtimeConsumer(options: {

@@ -1,4 +1,12 @@
-import { hash, randomUUID } from "node:crypto";
+import { hash } from "node:crypto";
+import {
+  createCorrelation,
+  currentCorrelation,
+  withCorrelation,
+  createTelemetryLogger,
+  reportTelemetry,
+  type Telemetry,
+} from "@hambazi/observability";
 import { Queue, Worker, UnrecoverableError } from "bullmq";
 import { z } from "zod";
 import {
@@ -37,25 +45,41 @@ export const matchJobId = (job: MatchJob) => {
     }),
   );
 };
-export function matchJobProcessor(ports: {
-  automation: MatchAutomationPort;
-  reconnect: MatchReconnectPort;
-}) {
+export function matchJobProcessor(
+  ports: {
+    automation: MatchAutomationPort;
+    reconnect: MatchReconnectPort;
+  },
+  telemetry: Telemetry = createTelemetryLogger(),
+) {
   return async (job: { name: string; data: unknown }) => {
     const parsed = matchJobSchema.safeParse(job.data);
     if (job.name !== name || !parsed.success) throw new UnrecoverableError("Invalid Match job");
-    try {
-      const input = parsed.data;
-      const context = input.correlation ?? { requestId: randomUUID() };
-      if (input.kind === "AUTOMATION") await ports.automation.execute(input.payload, context);
-      else {
-        const result = await ports.reconnect.timeout(input.payload, context);
-        if (!result.ok) throw new Error();
+    const context = createCorrelation(parsed.data.correlation);
+    return withCorrelation(context, async () => {
+      const started = performance.now();
+      try {
+        const input = parsed.data;
+        if (input.kind === "AUTOMATION") await ports.automation.execute(input.payload, context);
+        else {
+          const result = await ports.reconnect.timeout(input.payload, context);
+          if (!result.ok) throw new Error();
+        }
+        reportTelemetry(telemetry, "worker.job_completed", {
+          matchId: input.payload.matchId,
+          stateVersion: input.payload.expectedStateVersion,
+          durationMs: performance.now() - started,
+        });
+        return { schemaVersion: 1 };
+      } catch {
+        reportTelemetry(telemetry, "worker.job_failed", {
+          matchId: parsed.data.payload.matchId,
+          errorCode: "INTERNAL_ERROR",
+          durationMs: performance.now() - started,
+        });
+        throw new Error("Match job failed");
       }
-      return { schemaVersion: 1 };
-    } catch {
-      throw new Error("Match job failed");
-    }
+    });
   };
 }
 const settings = z.strictObject({
@@ -124,7 +148,7 @@ export async function startMatchAutomation(
     const parsed = matchJobSchema.parse(job);
     await queue.add(
       name,
-      { ...parsed, correlation: parsed.correlation ?? { requestId: randomUUID() } },
+      { ...parsed, correlation: parsed.correlation ?? currentCorrelation() ?? createCorrelation() },
       {
         jobId: matchJobId(job),
         delay: Math.max(0, job.payload.deadlineAt - Date.now()),
@@ -162,7 +186,7 @@ export async function startMatchAutomation(
     after = page.next;
   }
   function tick() {
-    running = recover()
+    running = withCorrelation(createCorrelation(), () => recover())
       .catch(() => options.event("worker.queue_unavailable"))
       .finally(() => {
         if (!stopping) {

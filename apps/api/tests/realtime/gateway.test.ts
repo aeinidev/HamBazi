@@ -1,4 +1,5 @@
 import { createServer, type Server as HttpServer } from "node:http";
+import { createTelemetryLogger, currentCorrelation } from "@hambazi/observability";
 import { once } from "node:events";
 import { io, type Socket as ClientSocket } from "socket.io-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -71,6 +72,62 @@ function ack(client: ClientSocket, name: string, payload: unknown): Promise<unkn
 }
 
 describe("versioned realtime gateway", () => {
+  it("gives queued commands separate server traces and logs only validated metadata", async () => {
+    const d = dependencies();
+    const output: string[] = [];
+    const observed: unknown[] = [];
+    const ports: RealtimeDependencies = {
+      ...d.ports,
+      telemetry: createTelemetryLogger({
+        write: (line: string) => {
+          output.push(line);
+        },
+      }),
+      matches: {
+        ...d.ports.matches,
+        command: async (_actor, _input, context) => {
+          const before = currentCorrelation();
+          await new Promise<void>((resolve) => setImmediate(resolve));
+          expect(currentCorrelation()).toEqual(before);
+          expect(context).toEqual(before);
+          observed.push(before);
+          return {
+            ok: true,
+            value: {
+              matchId,
+              actionId,
+              schemaVersion: 1,
+              stateVersion: 2,
+              lastEventSeq: 3,
+              status: "ACTIVE",
+            },
+          };
+        },
+      },
+    };
+    const client = await connect(await start(ports));
+    await connected(client);
+    const command = {
+      schemaVersion: 1,
+      matchId,
+      actionId,
+      expectedVersion: 1,
+      command: { type: "PRIVATE_COMMAND", text: "PRIVATE_CHAT", cards: ["PRIVATE_CARD"] },
+    };
+    const outcomes = await Promise.all([
+      ack(client, "game:command", command),
+      ack(client, "game:command", { ...command, actionId: "77777777-7777-4777-8777-777777777777" }),
+    ]);
+    expect(outcomes.every((x) => (x as { ok: boolean }).ok)).toBe(true);
+    expect(observed).toHaveLength(2);
+    const lines = output.map((v) => JSON.parse(v));
+    expect(lines).toHaveLength(2);
+    expect(new Set(lines.map((v) => v.requestId)).size).toBe(2);
+    expect(new Set(lines.map((v) => v.traceId)).size).toBe(2);
+    expect(lines[0]).toMatchObject({ event: "socket.completed", matchId, actionId, userId });
+    expect(output.join("")).not.toMatch(/PRIVATE|command|cards|text|token|expectedVersion/);
+    expect(currentCorrelation()).toBeUndefined();
+  });
   it("attaches to the Nest/Fastify HTTP server and closes with the API", async () => {
     const f = onboardingFixture();
     const d = dependencies();

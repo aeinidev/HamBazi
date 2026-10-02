@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { createDatabase } from "@hambazi/database";
@@ -106,7 +107,7 @@ export function createMatchAutomationRepository(
           throw fault ?? error;
         }
       }),
-    execute: (input: unknown, context: unknown = {}) =>
+    execute: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       safe(async () => {
         const intent = automationIntentSchema.safeParse(input);
         const correlation = matchCorrelationSchema.safeParse(context);

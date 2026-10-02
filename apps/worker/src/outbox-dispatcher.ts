@@ -1,4 +1,11 @@
 import { chatDeliverySchema, type ChatDelivery } from "@hambazi/api/chat";
+import {
+  createCorrelation,
+  withCorrelation,
+  createTelemetryLogger,
+  reportTelemetry,
+  type Telemetry,
+} from "@hambazi/observability";
 import { Queue, UnrecoverableError } from "bullmq";
 import {
   matchDomainEventSchema,
@@ -75,34 +82,36 @@ export function createOutboxDispatcher(options: {
   async function dispatch() {
     const claims = await options.outbox.claim(options.batchSize);
     const results = await Promise.allSettled(
-      claims.map(async (claim) => {
-        if (claim.event === null) {
-          await options.outbox.failed(claim.eventId, claim.attempt, true);
-          report("worker.outbox_failed");
-          return;
-        }
-        let timer: ReturnType<typeof setTimeout> | undefined;
-        try {
-          await Promise.race([
-            options.publisher.publish(claim.event),
-            new Promise<never>((_, reject) => {
-              timer = setTimeout(
-                () => reject(new Error("Publish deadline")),
-                options.publishTimeoutMs,
-              );
-            }),
-          ]);
-        } catch {
-          await options.outbox.failed(claim.eventId, claim.attempt);
-          report("worker.outbox_retry", claim.event);
-          return;
-        } finally {
-          clearTimeout(timer);
-        }
-        // A failed/uncertain mark is not treated as a failed publication. Lease recovery redelivers.
-        if (await options.outbox.published(claim.eventId, claim.attempt))
-          report("worker.outbox_published", claim.event);
-      }),
+      claims.map((claim) =>
+        withCorrelation(createCorrelation(claim.event?.correlation), async () => {
+          if (claim.event === null) {
+            await options.outbox.failed(claim.eventId, claim.attempt, true);
+            report("worker.outbox_failed");
+            return;
+          }
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            await Promise.race([
+              options.publisher.publish(claim.event),
+              new Promise<never>((_, reject) => {
+                timer = setTimeout(
+                  () => reject(new Error("Publish deadline")),
+                  options.publishTimeoutMs,
+                );
+              }),
+            ]);
+          } catch {
+            await options.outbox.failed(claim.eventId, claim.attempt);
+            report("worker.outbox_retry", claim.event);
+            return;
+          } finally {
+            clearTimeout(timer);
+          }
+          // A failed/uncertain mark is not treated as a failed publication. Lease recovery redelivers.
+          if (await options.outbox.published(claim.eventId, claim.attempt))
+            report("worker.outbox_published", claim.event);
+        }),
+      ),
     );
     if (results.some((result) => result.status === "rejected")) report("worker.outbox_unavailable");
   }
@@ -110,7 +119,7 @@ export function createOutboxDispatcher(options: {
     runOnce(): Promise<void> {
       if (closed) return Promise.resolve();
       if (!active)
-        active = dispatch()
+        active = withCorrelation(createCorrelation(), () => dispatch())
           .catch(() => {
             report("worker.outbox_unavailable");
           })
@@ -189,18 +198,31 @@ export async function createBullMqDomainPublisher(options: {
 export function domainEventProcessor(
   type: MatchDomainEvent["type"],
   consume: (event: DeliveryEvent) => Promise<"APPLIED" | "DUPLICATE">,
+  telemetry: Telemetry = createTelemetryLogger(),
 ) {
   return async (job: { name: string; data: unknown }) => {
     const parsed = matchDomainEventSchema.safeParse(job.data);
     if (!parsed.success || job.name !== type || parsed.data.type !== type)
       throw new UnrecoverableError("Invalid domain job");
-    try {
-      const status = await consume(parsed.data);
-      if (status !== "APPLIED" && status !== "DUPLICATE") throw new Error();
-      return { schemaVersion: 1, status };
-    } catch {
-      throw new Error("Domain consumer failed");
-    }
+    return withCorrelation(createCorrelation(parsed.data.correlation), async () => {
+      const started = performance.now();
+      try {
+        const status = await consume(parsed.data);
+        if (status !== "APPLIED" && status !== "DUPLICATE") throw new Error();
+        reportTelemetry(telemetry, "worker.domain_completed", {
+          matchId: parsed.data.aggregateId,
+          durationMs: performance.now() - started,
+        });
+        return { schemaVersion: 1, status };
+      } catch {
+        reportTelemetry(telemetry, "worker.domain_failed", {
+          matchId: parsed.data.aggregateId,
+          durationMs: performance.now() - started,
+          errorCode: "INTERNAL_ERROR",
+        });
+        throw new Error("Domain consumer failed");
+      }
+    });
   };
 }
 export function startOutboxLoop(

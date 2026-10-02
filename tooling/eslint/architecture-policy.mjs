@@ -29,11 +29,12 @@ const workspaceDependencies = {
   validation: ["shared", "contracts"],
   config: ["shared"],
   database: ["shared", "config"],
+  observability: ["shared"],
   "game-core": common,
-  api: [...common, "config", "database", "game-core"],
+  api: [...common, "config", "database", "game-core", "observability"],
   web: common,
-  bot: [...common, "config", "api"],
-  worker: [...common, "config", "database", "api"],
+  bot: [...common, "config", "api", "observability"],
+  worker: [...common, "config", "database", "api", "observability"],
 };
 export const posix = (path) => path.replaceAll("\\", "/");
 export const packageName = (specifier) =>
@@ -81,6 +82,7 @@ export function workspaceEdgeAllowed(from, to) {
 
 export function externalAllowed(workspace, dependency) {
   if (workspace.directory.startsWith("tooling/")) return true;
+  if (dependency === "pino") return workspace.id === "observability";
   if (isPure(workspace))
     return ["game-core"].includes(workspace.id) || isEngine(workspace)
       ? dependency === "zod"

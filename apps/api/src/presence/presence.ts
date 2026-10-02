@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { randomUUID } from "node:crypto";
 import type {
   MatchReconnectPort,
@@ -26,7 +27,7 @@ export function createPresencePort(deps: {
       });
       async function touch(matchId: string): Promise<MatchSnapshot> {
         if (closed) throw new Error("Presence closed");
-        const context = { requestId: randomUUID() };
+        const context = currentCorrelation() ?? createCorrelation();
         const snapshot = await deps.resync.snapshot(identity.userId, { schemaVersion: 1, matchId });
         if (!snapshot.ok) throw new Error("Presence projection unavailable");
         if (snapshot.value.status === "ACTIVE" && snapshot.value.role === "PLAYER") {
@@ -86,7 +87,7 @@ export function createPresencePort(deps: {
                     playerId: identity.userId,
                     connectionId,
                   },
-                  { requestId: randomUUID() },
+                  currentCorrelation() ?? createCorrelation(),
                 );
                 if (!result.ok && result.error.code !== "NOT_FOUND")
                   throw new Error("Presence close unavailable");

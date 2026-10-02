@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
+import { currentCorrelation } from "@hambazi/observability";
 import { request } from "node:http";
 import { SecretValue } from "@hambazi/config";
 import { createHttpApplication } from "../../src/composition/http.js";
@@ -45,6 +46,48 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   return { ...f, ...http, output, ip, identity, issue, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it("isolates server-owned correlation across concurrent requests and ignores public trace headers", async () => {
+    const f = await setup();
+    const observed: { requestId: string; traceparent: string }[] = [];
+    f.ip.mockImplementation(async () => {
+      const before = currentCorrelation();
+      expect(before).toBeDefined();
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(currentCorrelation()).toEqual(before);
+      observed.push(before!);
+      return { allowed: true };
+    });
+    const untrusted = "00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01";
+    const responses = await Promise.all(
+      Array.from({ length: 8 }, () =>
+        f.server.inject({
+          method: "POST",
+          url: authPaths.issue,
+          headers: { traceparent: untrusted, "x-request-id": "PRIVATE_REQUEST" },
+          payload: f.payload,
+        }),
+      ),
+    );
+    expect(responses.every((r) => r.statusCode === 200)).toBe(true);
+    expect(new Set(observed.map((c) => c.requestId)).size).toBe(8);
+    expect(new Set(observed.map((c) => c.traceparent.slice(3, 35))).size).toBe(8);
+    for (const c of observed) {
+      expect(c.traceparent.slice(3, 35)).not.toBe("a".repeat(32));
+      const line = f.output.map((v) => JSON.parse(v)).find((v) => v.requestId === c.requestId);
+      expect(line).toMatchObject({
+        event: "http.completed",
+        traceId: c.traceparent.slice(3, 35),
+        spanId: c.traceparent.slice(36, 52),
+      });
+    }
+    expect(new Set(responses.map((r) => r.headers["x-request-id"]))).toEqual(
+      new Set(observed.map((c) => c.requestId)),
+    );
+    expect(f.output.join("")).not.toMatch(
+      /PRIVATE_REQUEST|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa|traceparent/,
+    );
+    expect(currentCorrelation()).toBeUndefined();
+  });
   it("does not register privileged Bot operations on the public listener", async () => {
     const f = await setup();
     for (const name of ["admit", "updates", "acknowledgements"]) {
@@ -303,7 +346,14 @@ describe("Nest/Fastify authentication boundary", () => {
     await f.post();
     for (const line of f.output) {
       const event = JSON.parse(line);
-      expect(Object.keys(event).sort()).toEqual(["durationMs", "event", "level", "requestId"]);
+      expect(Object.keys(event).sort()).toEqual([
+        "durationMs",
+        "event",
+        "level",
+        "requestId",
+        "spanId",
+        "traceId",
+      ]);
       expect(event.event).toBe("http.completed");
     }
   });

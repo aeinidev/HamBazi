@@ -10,6 +10,7 @@ export function architecture(root, workspaces) {
     languageOptions: { parser: tseslint.parser },
     plugins: { hambazi: architecturePlugin(policy) },
     rules: {
+      "no-console": "error",
       "hambazi/boundaries": "error",
       "hambazi/engine-determinism": "error",
       "hambazi/database-ownership": "error",

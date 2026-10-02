@@ -823,6 +823,39 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** functional services through Phase 15B; final SLO alert thresholds remain gated by `OD-007`.
 - **Acceptance criteria:** critical path carries correlation IDs through outbox/worker; prohibited fields never enter telemetry; readiness/shutdown behavior is tested.
 - **Required tests and validations:** log/trace redaction tests, health dependency tests, shutdown/drain integration tests, runbook review/drill evidence where environment permits, lint/typecheck/build.
+- **Status:** In Progress
+
+- **Authorization / assessment (2026-10-02):** owner authorized Phase 16 only. Started on clean `main` at `26b53a9` (Phase 15B). Read all four required sources in full using the canonical architecture resolution and full comparison with the named original in `/home/mehdi/Downloads`; current repository amendments are the previously approved ADR-019 and ADR-030 decisions plus asset paths. Verified only the relevant durable Match/outbox correlation schema, real Worker consumers, current Pino adapters and service lifecycle. No missing/defective earlier-phase prerequisite was found or repaired. Phase 7C remains the documented live-activation gate.
+- **Implementation split:** per the execution protocol's small, independently testable phase rule, deliver 16A (shared telemetry safety and critical-path correlation), 16B (dependency health and admission/drain lifecycle), then 16C (metrics, Sentry-safe reporting, dashboard/alert definitions and incident runbooks). Complete only 16A in this interaction; parent Phase 16 cannot be marked complete before the remaining subphases. No final SLO/alert thresholds, telemetry retention/provider, hosting, backup/PITR policy or production activation is selected.
+
+### Phase 16A — Shared telemetry safety and critical-path correlation
+
+- **Objective:** ensure application logs have one deny-by-default boundary and causal context survives asynchronous and durable handoffs.
+- **Scope:** infrastructure-only Observability workspace, Pino projection, server-owned request IDs/trace context, Socket/Match/Chat/Presence propagation, durable outbox and Worker consumer correlation, compatible old jobs and adversarial telemetry tests.
+- **Expected deliverables:** public observability package, service logger adapters and trace plumbing, boundary enforcement, ADR and documentation.
+- **Dependencies:** completed functional services through 15B and existing nullable request/trace outbox columns; no earlier product phase repair or activation.
+- **Acceptance criteria:** unknown fields/raw objects/errors/content cannot reach Pino; concurrent work cannot mix context; valid context continues through transaction/outbox/queue/consumer; old empty correlation remains supported; observation failure cannot alter durable outcomes.
+- **Required tests and validations:** projection/redaction/adversarial tests, concurrent HTTP/Socket context tests, durable outbox/real BullMQ propagation and retry/privacy tests, compatibility checks, frozen install, lint/boundaries/typecheck/build and diff review.
+- **Status:** Completed (implementation and available local verification)
+- **Delivered (2026-10-02):** added the infrastructure-only `@hambazi/observability` workspace with a fixed-event Pino projection and immutable AsyncLocalStorage correlation scopes. API/Bot/Worker delegate logging to the same allowlist; direct Pino ownership and product-source console restrictions are enforced by the existing architecture/lint tooling. Raw objects/errors/content, unknown fields/events and invalid identifiers never enter the logger; observer failure is best effort. HTTP and queued Socket intents create independent server roots, authenticated private Bot HTTPS may continue a valid parent, and Match/Chat/Presence/matchmaking/automation paths supply correlation. Existing atomic owner writes persist the unchanged v1 metadata; outbox dispatch, real BullMQ consumers and remote fanout bind child scopes. Explicit empty legacy metadata and old queued jobs remain compatible, and idempotent retries preserve the original committed context. Existing clock/random/rules, job identities, delivery semantics and capability gates are unchanged.
+- **Documentation / decisions:** ADR-031 records reversible package ownership, projection and trusted-parent rules; `docs/architecture/observability.md` documents fields, propagation, compatibility, validation and rollback limits. Updated workspace/boundary documentation. Reused already-pinned dependencies; lockfile changes register only workspace edges/importers. Trace identifiers are propagated without installing/exporting OpenTelemetry spans. No collector, sampling/export policy, retention/provider, final SLO/alert threshold or operational authority was selected.
+- **Validation:** frozen-lockfile installation; scoped Observability/API/Worker/Bot tests and typechecks; root lint, formatting and architecture audit (14 workspaces / 196 product source files); root typecheck (14 scripts, 21 tasks including prerequisite builds), build (12 tasks), all seven API contract checks and diff review pass. `pnpm exec turbo run test --concurrency=1 -- --testTimeout=15000` passes 1,517 workspace tests; `pnpm test:infra` passes seven more (1,524 total). Bot's declared TLS integration suite passes 38 tests. With the documented cached PostgreSQL binary/share/library paths, `pnpm test:auth-http:local` passes 213 disposable-service integration tests (17 Database, 173 API, 23 Worker), including durable correlation/idempotent retry, real outbox-to-BullMQ-to-consumer propagation, migration/upgrade/drift/restart and existing lease/privacy/drain regressions. Harness services were cleaned up; no application service or live data was changed.
+- **Corrections / remaining limits / mandatory gate:** intermediate checks exposed a readonly test-fixture mutation, a malformed uppercase-trace fixture, earlier assertions expecting empty metadata, two exact HTTP field assertions and a plaintext statistics-CLI assertion. Corrected those fixtures/expectations and reran the relevant suites successfully; no earlier-phase implementation repair was needed. The inherited Coup model test still needs the explicit 15-second runner override; the unmodified default `pnpm check` is not claimed green. No frontend behavior/contract changed, so browser E2E was not rerun; controlled public HTTPS/Telegram staging is unavailable. No health/readiness/drain implementation, metrics/export/Sentry, dashboard/alert or incident drill was performed in 16A. Capacity, backup/restore, retention/access, OD-007 thresholds and live activation remain their existing gates. Parent Phase 16 remains In Progress, 16B/16C remain Pending, and this interaction stops before 16B. No commit, push, deployment or production migration.
+
+### Phase 16B — Dependency health and safe service draining
+
+- **Objective:** make service readiness and shutdown reflect dependency/admission state.
+- **Scope / deliverables:** liveness/readiness module and validated operational configuration, API/Bot/Worker dependency probes, fail/degrade behavior, idempotent admission stop and bounded HTTP/Socket/job drains, lifecycle documentation.
+- **Dependencies:** 16A; health exposure/access and dependency readiness must preserve existing Redis-outage session/logout behavior and opt-in capability gates. Any material public/operational policy selection follows the protocol's decision gate.
+- **Acceptance / required validation:** liveness independent of downstream outages; readiness false before new admission stops; accepted work drains before resource closure; dependency failure/recovery and actual in-flight shutdown integration tests, lint/typecheck/build.
+- **Status:** Pending
+
+### Phase 16C — Metrics, safe reporting and operational runbooks
+
+- **Objective:** expose actionable diagnostic measurements and reviewed incident recovery procedures.
+- **Scope / deliverables:** bounded metrics/config and safe Sentry reporting, dashboard and owner/severity/runbook/cooldown alert definitions, exploit/maintenance, DB/Redis loss, stuck Match, rollback and restore runbooks.
+- **Dependencies:** 16A/16B; final thresholds remain OD-007, provider/region OD-002 and backup/PITR/retention OD-006; operator actions must respect deferred 7C and separate admin authorization.
+- **Acceptance / required validation:** prohibited payloads absent from every export, bounded dimensions, meaningful dependency/drain diagnostics, runbook review and disposable local drills where available, lint/typecheck/build; unavailable staging/provider drills explicitly reported.
 - **Status:** Pending
 
 ### Phase 17A — Security hardening
@@ -893,8 +926,11 @@ owner-authorized preview follow-ups recorded above. Phase 15A — Text chat — 
 Phase 15B — Match results, user statistics, and leaderboard — are complete with
 their owner-approved temporary baselines and local validation evidence recorded
 above. Phase 15B implements ADR-030 without repairing an earlier-phase prerequisite
-or expanding live activation. Stop at the mandatory gate: Phase 16 remains Pending
-and unauthorized.
+or expanding live activation. Phase 16 is authorized and In Progress, split into
+16A–16C. Phase 16A is complete with safe shared logging and locally verified causal
+correlation; this interaction stops at its mandatory gate. Phase 16B — Dependency
+health and safe service draining — and 16C remain Pending. Do not start 16B without
+the owner's explicit continuation authorization.
 The default five-second Coup model-test timeout and inherited dependency audit
 findings are recorded above; explicit 15-second runner verification passes.
 Phase 7C and complete gameplay readiness remain mandatory before live activation;

@@ -21,9 +21,9 @@
     "@hambazi/api": "workspace:*",
     "@hambazi/config": "workspace:*",
     "@hambazi/database": "workspace:*",
+    "@hambazi/observability": "workspace:*",
     "bullmq": "6.3.8",
     "ioredis": "6.0.0",
-    "pino": "10.3.1",
     "zod": "4.6.2"
   },
   "devDependencies": {

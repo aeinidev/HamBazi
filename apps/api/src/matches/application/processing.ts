@@ -1,3 +1,4 @@
+import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import type { AutomationGame, AutomationIntent } from "./automation.js";
 import { matchCorrelationSchema, type MatchCorrelation } from "./correlation.js";
 import { z } from "zod";
@@ -107,7 +108,11 @@ export function matchProcessingService(deps: {
   }
   return Object.freeze({
     // Identity is supplied by authenticated composition, never extracted from the intent.
-    command: (identity: unknown, input: unknown, context: unknown = {}) =>
+    command: (
+      identity: unknown,
+      input: unknown,
+      context: unknown = currentCorrelation() ?? createCorrelation(),
+    ) =>
       safe(async () => {
         const request = parse(matchCommandSchema, input);
         return deps.repository.process(
@@ -116,7 +121,11 @@ export function matchProcessingService(deps: {
           parse(matchCorrelationSchema, context),
         );
       }),
-    ready: (identity: unknown, input: unknown, context: unknown = {}) =>
+    ready: (
+      identity: unknown,
+      input: unknown,
+      context: unknown = currentCorrelation() ?? createCorrelation(),
+    ) =>
       safe(async () => {
         const request = parse(matchReadySchema, input);
         return deps.repository.process(
@@ -126,7 +135,7 @@ export function matchProcessingService(deps: {
         );
       }),
     // Trusted orchestration only. An operator route must add separate admin authorization.
-    lifecycle: (input: unknown, context: unknown = {}) =>
+    lifecycle: (input: unknown, context: unknown = currentCorrelation() ?? createCorrelation()) =>
       safe(() =>
         deps.repository.process(
           null,

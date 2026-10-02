@@ -9,23 +9,29 @@ Application entry points remain empty modules, not implemented product APIs or
 runnable app services. Phase 5B adds executable [architecture boundaries](boundaries.md).
 No game rules or application startup side effects are introduced.
 
+Phase 16A adds the Node-only [Observability boundary](observability.md) for
+shared safe Pino projection and causal context in API/Bot/Worker. The scaffold
+statements above and below describe the original foundation milestone; current
+application delivery status is recorded in the implementation plan.
+
 ## Workspace ownership
 
-| Workspace              | Directory                    | Responsibility / implementation gate                                                     |
-| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `@hambazi/api`         | `apps/api`                   | Nest/Fastify REST, Socket adapter, and application use cases; feature phases 6–13 onward |
-| `@hambazi/bot`         | `apps/bot`                   | grammY Telegram orchestration through application ports; Phase 6B                        |
-| `@hambazi/web`         | `apps/web`                   | React/Vite Mini App and game renderers; Phase 14                                         |
-| `@hambazi/worker`      | `apps/worker`                | Outbox/job adapters invoking application use cases; Phase 11B onward                     |
-| `@hambazi/contracts`   | `packages/contracts`         | Versioned public DTO/event contracts; Phase 5A                                           |
-| `@hambazi/validation`  | `packages/validation`        | Runtime validation for untrusted input; Phase 4A/5A                                      |
-| `@hambazi/database`    | `packages/database`          | Prisma client, migrations, infrastructure; Phase 4B                                      |
-| `@hambazi/game-core`   | `packages/game-core`         | Framework-free Game Module interfaces; Phase 10A                                         |
-| `@hambazi/coup-engine` | `packages/games/coup-engine` | Pure, deterministic Coup rules and safe views; Phase 10                                  |
-| `@hambazi/config`      | `packages/config`            | Validated runtime configuration; Phase 4A                                                |
-| `@hambazi/shared`      | `packages/shared`            | Shared primitives/stable errors only; Phase 5A                                           |
-| `@hambazi/typescript`  | `tooling/typescript`         | Shared compiler presets and compiler tests                                               |
-| `@hambazi/eslint`      | `tooling/eslint`             | Shared lint configuration and lint fixtures                                              |
+| Workspace                | Directory                    | Responsibility / implementation gate                                                     |
+| ------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `@hambazi/api`           | `apps/api`                   | Nest/Fastify REST, Socket adapter, and application use cases; feature phases 6–13 onward |
+| `@hambazi/bot`           | `apps/bot`                   | grammY Telegram orchestration through application ports; Phase 6B                        |
+| `@hambazi/web`           | `apps/web`                   | React/Vite Mini App and game renderers; Phase 14                                         |
+| `@hambazi/worker`        | `apps/worker`                | Outbox/job adapters invoking application use cases; Phase 11B onward                     |
+| `@hambazi/contracts`     | `packages/contracts`         | Versioned public DTO/event contracts; Phase 5A                                           |
+| `@hambazi/validation`    | `packages/validation`        | Runtime validation for untrusted input; Phase 4A/5A                                      |
+| `@hambazi/database`      | `packages/database`          | Prisma client, migrations, infrastructure; Phase 4B                                      |
+| `@hambazi/game-core`     | `packages/game-core`         | Framework-free Game Module interfaces; Phase 10A                                         |
+| `@hambazi/coup-engine`   | `packages/games/coup-engine` | Pure, deterministic Coup rules and safe views; Phase 10                                  |
+| `@hambazi/config`        | `packages/config`            | Validated runtime configuration; Phase 4A                                                |
+| `@hambazi/observability` | `packages/observability`     | Server telemetry allowlist and async/durable correlation; Phase 16A                      |
+| `@hambazi/shared`        | `packages/shared`            | Shared primitives/stable errors only; Phase 5A                                           |
+| `@hambazi/typescript`    | `tooling/typescript`         | Shared compiler presets and compiler tests                                               |
+| `@hambazi/eslint`        | `tooling/eslint`             | Shared lint configuration and lint fixtures                                              |
 
 ## Public surfaces
 

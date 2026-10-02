@@ -170,7 +170,10 @@ it("checks every selected participant before creating and pins only server descr
   const reservationId = randomUUID();
   expect((await f.service.commit({ schemaVersion: 1, reservationId })).ok).toBe(true);
   expect(f.users.findActiveById).toHaveBeenCalledTimes(2);
-  expect(f.repository.commit).toHaveBeenCalledWith(reservationId, descriptor, {});
+  expect(f.repository.commit).toHaveBeenCalledWith(reservationId, descriptor, {
+    requestId: expect.any(String),
+    traceparent: expect.stringMatching(/^00-[0-9a-f]{32}-[0-9a-f]{16}-00$/),
+  });
 });
 it("redacts dependency failures and marks uncertain outcomes retryable", async () => {
   const f = fixture();
