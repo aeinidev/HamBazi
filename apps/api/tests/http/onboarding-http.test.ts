@@ -126,6 +126,7 @@ describe("Mini App onboarding HTTP boundary", () => {
         "durationMs",
         "event",
         "level",
+        "operation",
         "requestId",
         "spanId",
         "traceId",

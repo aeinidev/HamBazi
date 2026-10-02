@@ -1,5 +1,5 @@
 import { createServer, type Server as HttpServer } from "node:http";
-import { createTelemetryLogger, currentCorrelation } from "@hambazi/observability";
+import { createTelemetryLogger, currentCorrelation, createMetrics } from "@hambazi/observability";
 import { once } from "node:events";
 import { io, type Socket as ClientSocket } from "socket.io-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -72,6 +72,25 @@ function ack(client: ClientSocket, name: string, payload: unknown): Promise<unkn
 }
 
 describe("versioned realtime gateway", () => {
+  it("counts sockets and distinct authenticated users locally and removes disconnected references", async () => {
+    const d = dependencies(),
+      metrics = createMetrics("api");
+    const url = await start({ ...d.ports, metrics });
+    const first = await connect(url);
+    await connected(first);
+    const second = await connect(url);
+    await connected(second);
+    expect(metrics.render()).toContain('hambazi_sockets{service="api"} 2');
+    expect(metrics.render()).toContain('hambazi_connected_users{service="api"} 1');
+    first.disconnect();
+    await vi.waitFor(() => expect(metrics.render()).toContain('hambazi_sockets{service="api"} 1'));
+    expect(metrics.render()).toContain('hambazi_connected_users{service="api"} 1');
+    second.disconnect();
+    await vi.waitFor(() =>
+      expect(metrics.render()).toContain('hambazi_connected_users{service="api"} 0'),
+    );
+    expect(metrics.render()).not.toContain(userId);
+  });
   it("stops new intents and handshakes while draining an already admitted command", async () => {
     const d = dependencies();
     let entered!: () => void;
@@ -185,7 +204,7 @@ describe("versioned realtime gateway", () => {
     expect(new Set(lines.map((v) => v.requestId)).size).toBe(2);
     expect(new Set(lines.map((v) => v.traceId)).size).toBe(2);
     expect(lines[0]).toMatchObject({ event: "socket.completed", matchId, actionId, userId });
-    expect(output.join("")).not.toMatch(/PRIVATE|command|cards|text|token|expectedVersion/);
+    expect(output.join("")).not.toMatch(/PRIVATE|"command":|cards|text|token|expectedVersion/);
     expect(currentCorrelation()).toBeUndefined();
   });
   it("attaches to the Nest/Fastify HTTP server and closes with the API", async () => {

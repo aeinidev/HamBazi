@@ -1,0 +1,15 @@
+export const metricOperations = Object.freeze([
+  "http",
+  "auth",
+  "webhook",
+  "room",
+  "matchmaking",
+  "subscribe",
+  "snapshot",
+  "catchup",
+  "ready",
+  "command",
+  "chat",
+  "presence",
+  "other",
+] as const);

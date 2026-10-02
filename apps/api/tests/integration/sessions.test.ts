@@ -587,6 +587,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           API_REDIS_URL: process.env.TEST_AUTH_REDIS_URL!,
           API_PORT: String(port),
           API_HEALTH_PORT: String(healthPort),
+          API_METRICS_ENABLED: "true",
           ALLOWED_ORIGINS: "https://mini.example",
           API_BIND_ADDRESS: "127.0.0.1",
           API_DB_POOL_MAX: "5",
@@ -625,6 +626,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           await (await fetch(`http://127.0.0.1:${healthPort}/v1/health/ready`)).json(),
         ).toEqual({ schemaVersion: 1, status: "READY" });
         expect((await fetch(`http://127.0.0.1:${port}/v1/health/ready`)).status).toBe(404);
+        const exported = await (await fetch(`http://127.0.0.1:${healthPort}/v1/metrics`)).text();
+        expect(exported).toContain('hambazi_db_pool_max{service="api"} 5');
+        expect(exported).toContain('collector="matches"} 1');
+        expect(exported).not.toMatch(
+          /RuntimeSyntheticCredential|stateJsonb|payloadJsonb|postgresql:/,
+        );
+        expect((await fetch(`http://127.0.0.1:${port}/v1/metrics`)).status).toBe(404);
         const user = JSON.stringify({ id: 42 });
         const key = createHmac("sha256", "WebAppData").update(botToken).digest();
         const hash = createHmac("sha256", key)

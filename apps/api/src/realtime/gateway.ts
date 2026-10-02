@@ -6,6 +6,7 @@ import {
   withCorrelation,
   withDeadline,
   type Telemetry,
+  type OperationalMetrics,
 } from "@hambazi/observability";
 import type { Server as HttpServer } from "node:http";
 import { Server, type Socket } from "socket.io";
@@ -41,6 +42,7 @@ export type RealtimeRate = (
 export interface RealtimeDependencies {
   drainTimeoutMs?: number;
   telemetry?: Telemetry;
+  metrics?: OperationalMetrics;
   chat?: { port: ChatPort; ackTimeoutMs: number };
   presence?: {
     port: PresencePort;
@@ -85,6 +87,13 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   if (!Number.isInteger(drainTimeoutMs) || drainTimeoutMs < 1 || drainTimeoutMs > 120000)
     throw new Error("Invalid realtime drain timeout");
   let draining = false;
+  const connectedUsers = new Map<string, number>();
+  let socketCount = 0;
+  const countSockets = () => {
+    deps.metrics?.gauge("sockets", socketCount);
+    deps.metrics?.gauge("connected_users", connectedUsers.size);
+  };
+  countSockets();
   const pending = new Set<Promise<void>>();
   const tails = new WeakMap<Socket, Promise<void>>();
   const cursors = new WeakMap<Socket, Map<string, number>>();
@@ -195,12 +204,20 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       return;
     }
     const { token, userId, sessionId } = identity;
+    socketCount++;
+    connectedUsers.set(userId, (connectedUsers.get(userId) ?? 0) + 1);
+    countSockets();
     const expiryMs = identity.expiresAt * 1000;
     const remaining = Math.max(0, expiryMs - deps.nowMs());
     const timer = setTimeout(() => socket.disconnect(true), Math.min(remaining, 2147483647));
     timer.unref();
     const presence = deps.presence?.port.open({ userId, sessionExpiresAt: expiryMs });
     socket.on("disconnect", () => {
+      socketCount--;
+      const count = (connectedUsers.get(userId) ?? 1) - 1;
+      if (count > 0) connectedUsers.set(userId, count);
+      else connectedUsers.delete(userId);
+      countSockets();
       clearTimeout(timer);
       void enqueue(socket, async () => {
         await presence?.close();
@@ -229,7 +246,18 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       if (typeof ack !== "function") return; // No unacknowledged mutation.
       const respond = ack as Ack;
       const started = performance.now();
-      const fields: Record<string, unknown> = { userId };
+      const operation = name.startsWith("room:")
+        ? "room"
+        : name.startsWith("matchmaking:")
+          ? "matchmaking"
+          : name.startsWith("chat:")
+            ? "chat"
+            : name === "game:command"
+              ? "command"
+              : name === "presence:ping"
+                ? "presence"
+                : name.slice(6);
+      const fields: Record<string, unknown> = { userId, operation };
       const complete = (value: unknown) => {
         if (
           typeof value === "object" &&

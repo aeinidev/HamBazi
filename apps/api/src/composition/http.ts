@@ -123,7 +123,12 @@ export async function createHttpApplication(options: {
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
   });
   server.addHook("onResponse", async (request, reply) => {
-    options.logger.completed(request.id, reply.elapsedTime, reply.statusCode);
+    options.logger.completed(
+      request.id,
+      reply.elapsedTime,
+      reply.statusCode,
+      Object.values(authPaths).some((path) => path === request.routeOptions.url) ? "auth" : "http",
+    );
   });
   @Module({
     imports: [
@@ -174,6 +179,7 @@ export async function createHttpApplication(options: {
   const realtime = options.realtime
     ? createRealtimeGateway(server.server, {
         ...options.realtime,
+        metrics: options.realtime.metrics ?? options.logger.metrics,
         telemetry: options.realtime.telemetry ?? options.logger.telemetry,
       })
     : undefined;

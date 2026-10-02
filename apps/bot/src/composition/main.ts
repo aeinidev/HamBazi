@@ -1,7 +1,10 @@
 import { startBot } from "./runtime.js";
+import { parseTelemetryConfig } from "@hambazi/config";
 import { createBotLogger } from "./logger.js";
-const logger = createBotLogger();
+let logger = createBotLogger();
 try {
+  const config = parseTelemetryConfig(process.env, "bot");
+  logger = createBotLogger(undefined, config.sentryDsn);
   const runtime = await startBot(process.env, logger);
   let stopping = false;
   const stop = () => {
@@ -10,7 +13,10 @@ try {
     const deadline = setTimeout(() => process.exit(1), runtime.drainTimeoutMs + 1000);
     deadline.unref();
     void runtime.close().then(
-      () => clearTimeout(deadline),
+      async () => {
+        clearTimeout(deadline);
+        await logger.close();
+      },
       () => {
         logger.lifecycle("bot.failed");
         process.exitCode = 1;
@@ -21,5 +27,6 @@ try {
   process.once("SIGINT", stop);
 } catch {
   logger.lifecycle("bot.failed");
+  await logger.close();
   process.exitCode = 1;
 }

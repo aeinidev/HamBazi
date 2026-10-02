@@ -109,6 +109,7 @@ export async function startCleanupQueue(options: {
     void worker.run().catch(() => options.event("worker.queue_unavailable"));
     let closing: Promise<void> | undefined;
     return {
+      counts: () => queue.getJobCounts("waiting", "active", "delayed", "failed"),
       stopAdmission,
       settled,
       probe: async () => !stopping && (await probeQueue(queue)) && (await probeQueue(worker)),

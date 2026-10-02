@@ -1,17 +1,24 @@
-import { createServiceHealth, healthPaths } from "@hambazi/observability";
+import {
+  createServiceHealth,
+  healthPaths,
+  metricsPath,
+  type OperationalMetrics,
+} from "@hambazi/observability";
 /** Public application surface; composition supplies probes, never module tables. */
 export function createApiHealth(options: {
   postgres(signal: AbortSignal): Promise<boolean>;
   redis(signal: AbortSignal): Promise<boolean>;
   timeoutMs: number;
+  metrics?: OperationalMetrics;
 }) {
   return createServiceHealth(
     [
-      { required: true, probe: options.postgres },
+      { name: "postgres", required: true, probe: options.postgres },
       // Durable session/logout access remains admitted during Redis loss.
-      { required: false, probe: options.redis },
+      { name: "redis", required: false, probe: options.redis },
     ],
     options.timeoutMs,
+    options.metrics,
   );
 }
 const content = (statuses: readonly string[]) => ({
@@ -47,6 +54,23 @@ export function healthOpenApiDocument() {
     "x-access-policy":
       "Optional loopback-only listener. Exact 127.0.0.1 Host; no browser/proxy headers. Never expose through ingress.",
     paths: {
+      [metricsPath]: {
+        get: {
+          description:
+            "Opt-in fixed-dimension process metrics on the separate loopback listener only. Never mount on product ingress.",
+          responses: {
+            "200": {
+              description: "Prometheus text with dependency and collection validity signals",
+              content: { "text/plain": { schema: { type: "string" } } },
+            },
+            "404": {
+              description: "Disabled, invalid method, route or local access shape",
+              content: content(["NOT_READY"]),
+            },
+            "503": { description: "Collection unavailable", content: content(["NOT_READY"]) },
+          },
+        },
+      },
       [healthPaths.live]: {
         get: {
           responses: {

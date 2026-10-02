@@ -220,6 +220,7 @@ export async function startMatchAutomation(
         await Promise.allSettled([running, ...active]);
       },
       probe: async () => !stopping && (await probeQueue(queue)) && (await probeQueue(worker)),
+      counts: () => queue.getJobCounts("waiting", "active", "delayed", "failed"),
       schedule,
       // Cancellation is an optimization only. An active/racing job is fenced in PostgreSQL.
       async cancel(job: MatchJob) {

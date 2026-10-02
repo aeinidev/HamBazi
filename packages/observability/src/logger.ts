@@ -1,6 +1,7 @@
 import { pino, type DestinationStream } from "pino";
 import { ERROR_CODES } from "@hambazi/shared";
 import { currentCorrelation, ownValue, safeId, safeTraceparent } from "./correlation.js";
+import { metricOperations } from "./vocabulary.js";
 
 export const telemetryEvents = Object.freeze([
   "api.started",
@@ -11,6 +12,7 @@ export const telemetryEvents = Object.freeze([
   "bot.failed",
   "bot.webhook_completed",
   "http.completed",
+  "database.completed",
   "socket.completed",
   "realtime.delivery_completed",
   "realtime.delivery_failed",
@@ -90,6 +92,8 @@ export function telemetryFields(input: unknown): Record<string, string | number>
   const code = ownValue(input, "errorCode");
   if (typeof code === "string" && ERROR_CODES.some((known) => known === code))
     result.errorCode = code;
+  const operation = ownValue(input, "operation");
+  if (metricOperations.some((known) => known === operation)) result.operation = operation as string;
   const traceparent = safeTraceparent(ownValue(input, "traceparent"));
   if (traceparent) {
     result.traceId = traceparent.slice(3, 35);
@@ -97,7 +101,10 @@ export function telemetryFields(input: unknown): Record<string, string | number>
   }
   return result;
 }
-export function createTelemetryLogger(destination?: DestinationStream): Telemetry {
+export function createTelemetryLogger(
+  destination?: DestinationStream,
+  observer?: Telemetry,
+): Telemetry {
   const logger = pino({ base: null, timestamp: false }, destination);
   return Object.freeze({
     emit(event: TelemetryEvent, fields?: unknown) {
@@ -109,6 +116,7 @@ export function createTelemetryLogger(destination?: DestinationStream): Telemetr
           ...telemetryFields(fields),
           event,
         };
+        reportTelemetry(observer ?? { emit() {} }, event, record);
         if (warnings.has(event)) logger.warn(record);
         else logger.info(record);
       } catch {

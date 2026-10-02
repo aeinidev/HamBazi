@@ -1,11 +1,14 @@
-import { createTelemetryLogger, type DestinationStream } from "@hambazi/observability";
-export function createSafeLogger(destination?: DestinationStream) {
-  const telemetry = createTelemetryLogger(destination);
+import { createOperationsTelemetry, type DestinationStream } from "@hambazi/observability";
+export function createSafeLogger(destination?: DestinationStream, dsn?: { reveal(): string }) {
+  const observation = createOperationsTelemetry("api", destination, dsn);
+  const { telemetry, metrics } = observation;
   let profileReadFailOpen = 0;
   let profileWriteFailClosed = 0;
   let catalogReadFailOpen = 0;
   return Object.freeze({
     telemetry,
+    metrics,
+    close: observation.close,
     catalogRateUnavailable(requestId: string) {
       catalogReadFailOpen++;
       telemetry.emit("catalog.rate_read_fail_open", { requestId, errorCode: "INTERNAL_ERROR" });
@@ -30,7 +33,12 @@ export function createSafeLogger(destination?: DestinationStream) {
         profile_rate_write_fail_closed_total: profileWriteFailClosed,
       });
     },
-    completed(requestId: string, durationMs: number, status: number) {
+    completed(
+      requestId: string,
+      durationMs: number,
+      status: number,
+      operation: "http" | "auth" = "http",
+    ) {
       const code =
         status === 401
           ? "UNAUTHENTICATED"
@@ -49,6 +57,7 @@ export function createSafeLogger(destination?: DestinationStream) {
                       : undefined;
       telemetry.emit("http.completed", {
         requestId,
+        operation,
         durationMs: Math.max(0, Math.round(durationMs)),
         ...(code ? { errorCode: code } : {}),
       });

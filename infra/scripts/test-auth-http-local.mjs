@@ -124,6 +124,7 @@ try {
       .filter(
         (line) =>
           line.startsWith("DATABASE_LOCAL_TEST_FAILED at ") ||
+          line.startsWith("RESTORE_DRILL_FAILED at ") ||
           line.startsWith("Integration failure location: ") ||
           /^ FAIL {2}tests\/integration\/[A-Za-z0-9_.-]+/.test(line),
       );

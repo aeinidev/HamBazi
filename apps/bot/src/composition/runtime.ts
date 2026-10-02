@@ -5,7 +5,7 @@ import { createTelegramSender } from "../telegram.js";
 import { createDeliveryHandler } from "../delivery.js";
 import { createBotHttp } from "./http.js";
 import type { BotLogger } from "./logger.js";
-import { parseOperationsConfig } from "@hambazi/config";
+import { parseOperationsConfig, parseTelemetryConfig } from "@hambazi/config";
 import { createServiceHealth, startHealthServer, withDeadline } from "@hambazi/observability";
 async function pem(path: string) {
   const info = await stat(path);
@@ -21,14 +21,22 @@ export async function startBot(
   let backend: ReturnType<typeof createBackend> | undefined;
   let http: ReturnType<typeof createBotHttp> | undefined;
   const operations = parseOperationsConfig(env, "bot");
+  const telemetryConfig = parseTelemetryConfig(env, "bot");
+  const metrics = logger.metrics;
   const health = createServiceHealth(
-    [{ required: true, probe: (signal) => backend!.probe(signal) }],
+    [{ name: "backend", required: true, probe: (signal) => backend!.probe(signal) }],
     operations.probeTimeoutMs,
+    metrics,
   );
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
     const config = parseBotRuntimeConfig(env);
-    if (operations.port) healthServer = await startHealthServer(health, operations.port);
+    if (operations.port)
+      healthServer = await startHealthServer(
+        health,
+        operations.port,
+        telemetryConfig.metricsEnabled ? { metrics } : undefined,
+      );
     const [key, cert, ca] = await Promise.all([
       pem(config.keyFile),
       pem(config.certFile),
@@ -65,10 +73,12 @@ export async function startBot(
     health.started();
     logger.lifecycle("bot.started");
     let closing: Promise<void> | undefined;
+    let drainStarted = 0;
     return {
       health,
       drainTimeoutMs: operations.drainTimeoutMs,
       close() {
+        if (!closing) drainStarted = performance.now();
         health.stopAdmission();
         http!.stopAdmission();
         return (closing ??= withDeadline(
@@ -80,6 +90,14 @@ export async function startBot(
             logger.lifecycle("bot.stopped");
           })(),
           operations.drainTimeoutMs,
+        ).then(
+          () => {
+            metrics.drain("completed", performance.now() - drainStarted);
+          },
+          () => {
+            metrics.drain("failed", performance.now() - drainStarted);
+            throw new Error("Bot drain failed");
+          },
         ));
       },
     };

@@ -1,15 +1,20 @@
-import { Worker } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import type { createMatchResultPort } from "@hambazi/api/matches";
 import type { createStatisticsProjection } from "@hambazi/api/leaderboard";
 import { domainEventProcessor, outboxQueueNames } from "./outbox-dispatcher.js";
 import { queueConnection, probeQueue, requeueForDrain } from "./queue-connection.js";
+import type { Telemetry } from "@hambazi/observability";
 type Matches = ReturnType<typeof createMatchResultPort>;
 type Statistics = ReturnType<typeof createStatisticsProjection>;
-export function finishProcessor(matches: Matches, statistics: Statistics) {
-  return domainEventProcessor("MATCH_FINISHED_V1", async (event) => {
-    const recorded = await matches.record(event);
-    return statistics.consume(recorded);
-  });
+export function finishProcessor(matches: Matches, statistics: Statistics, telemetry?: Telemetry) {
+  return domainEventProcessor(
+    "MATCH_FINISHED_V1",
+    async (event) => {
+      const recorded = await matches.record(event);
+      return statistics.consume(recorded);
+    },
+    telemetry,
+  );
 }
 export async function rebuildStatistics(matches: Matches, statistics: Statistics) {
   const id = await statistics.begin();
@@ -38,6 +43,8 @@ export async function startStatisticsConsumer(options: {
   concurrency: number;
   drainTimeoutMs: number;
   unavailable(): void;
+  telemetry?: Telemetry;
+  diagnostics?: boolean;
 }) {
   if (
     !/^[A-Za-z0-9_-]{1,64}$/.test(options.namespace) ||
@@ -49,10 +56,19 @@ export async function startStatisticsConsumer(options: {
     options.drainTimeoutMs > 60000
   )
     throw new Error("Invalid statistics consumer configuration");
-  const processing = finishProcessor(options.matches, options.statistics);
+  const processing = finishProcessor(options.matches, options.statistics, options.telemetry);
   const inflight = new Set<Promise<unknown>>();
   let stopping = false;
   let paused: Promise<void> | undefined;
+  const diagnosticQueue = options.diagnostics
+    ? new Queue(outboxQueueNames.MATCH_FINISHED_V1, {
+        connection: queueConnection(options.redisUrl, false),
+        prefix: `hambazi:jobs:${options.namespace}`,
+      })
+    : undefined;
+  diagnosticQueue?.on("error", () => {
+    /* Collection validity carries this failure; never report raw diagnostics. */
+  });
   const worker = new Worker(
     outboxQueueNames.MATCH_FINISHED_V1,
     (job, token) => {
@@ -95,6 +111,7 @@ export async function startStatisticsConsumer(options: {
     await bounded(worker.waitUntilReady(), 5000);
   } catch {
     await worker.close(true).catch(() => {});
+    await diagnosticQueue?.close().catch(() => {});
     throw new Error("Statistics consumer unavailable");
   }
   let closing: Promise<void> | undefined;
@@ -107,6 +124,10 @@ export async function startStatisticsConsumer(options: {
     await Promise.allSettled([...inflight]);
   };
   return {
+    counts: async () => {
+      if (!diagnosticQueue) throw new Error("Statistics diagnostics disabled");
+      return diagnosticQueue.getJobCounts("waiting", "active", "delayed", "failed");
+    },
     stopAdmission,
     settled,
     probe: async () => !stopping && (await probeQueue(worker)),
@@ -122,6 +143,7 @@ export async function startStatisticsConsumer(options: {
           throw new Error("Statistics consumer drain failed");
         } finally {
           await worker.close(true);
+          await diagnosticQueue?.close();
         }
       })());
     },

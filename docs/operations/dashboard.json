@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "title": "HamBazi operations",
+  "status": "reviewed-local-definition",
+  "provider": null,
+  "panels": [
+    {
+      "id": "admission",
+      "title": "Admission and dependency health",
+      "query": "hambazi_admitting",
+      "interpretation": "Local lifecycle flag; show dependency_available alongside it."
+    },
+    {
+      "id": "dependencies",
+      "title": "Dependency availability",
+      "query": "hambazi_dependency_available",
+      "interpretation": "Last probe; use scraper up/freshness and probe count."
+    },
+    {
+      "id": "dependency_latency",
+      "title": "Dependency probe p95",
+      "query": "histogram_quantile(0.95, sum by (service, dependency, le) (rate(hambazi_dependency_probe_seconds_bucket[5m])))",
+      "interpretation": "Distribution resolution; no final SLO threshold."
+    },
+    {
+      "id": "command_latency",
+      "title": "Command latency p95",
+      "query": "histogram_quantile(0.95, sum by (le) (rate(hambazi_duration_seconds_bucket{event=\"socket.completed\",operation=\"command\"}[5m])))",
+      "interpretation": "Includes owning port work. No raw command label."
+    },
+    {
+      "id": "command_errors",
+      "title": "Command failures by stable code",
+      "query": "sum by (error_code) (rate(hambazi_events_total{event=\"socket.completed\",operation=\"command\",error_code!=\"NONE\"}[5m]))",
+      "interpretation": "Expected state/rule conflicts separate from INTERNAL_ERROR."
+    },
+    {
+      "id": "auth_failure_ratio",
+      "title": "Auth rejection ratio",
+      "query": "sum(rate(hambazi_events_total{event=\"http.completed\",operation=\"auth\",error_code!=\"NONE\"}[5m])) / clamp_min(sum(rate(hambazi_events_total{event=\"http.completed\",operation=\"auth\"}[5m])), 0.001)",
+      "interpretation": "Includes expected unauthenticated checks; investigate endpoint mix in safe logs."
+    },
+    {
+      "id": "sockets",
+      "title": "Active sockets",
+      "query": "sum(hambazi_sockets)",
+      "interpretation": "Process-local counters; aggregate socket count."
+    },
+    {
+      "id": "users",
+      "title": "Node-distinct connected accounts",
+      "query": "hambazi_connected_users",
+      "interpretation": "Show per instance; summing is not global CCU."
+    },
+    {
+      "id": "active_matches",
+      "title": "Active Matches",
+      "query": "max(hambazi_matches_active and on(service,instance,job) (hambazi_collection_success{collector=\"matches\"} == 1))",
+      "interpretation": "Shared DB snapshots; do not sum replicas."
+    },
+    {
+      "id": "lobbies",
+      "title": "Waiting/full Rooms",
+      "query": "max(hambazi_rooms_waiting{service=\"api\"} and on(service,instance,job) (hambazi_collection_success{collector=\"rooms\"} == 1)) + max(hambazi_rooms_full{service=\"api\"} and on(service,instance,job) (hambazi_collection_success{collector=\"rooms\"} == 1))",
+      "interpretation": "Stored states, after owning expiry transitions."
+    },
+    {
+      "id": "match_lifecycle",
+      "title": "Retained finished/terminated Matches",
+      "query": "(hambazi_matches_finished or hambazi_matches_terminated) and on(service,instance,job) (hambazi_collection_success{collector=\"matches\"} == 1)",
+      "interpretation": "Gate on matches validity; gauges reflect retained truth, not attempt counters."
+    },
+    {
+      "id": "matchmaking",
+      "title": "Durable matchmaking wait/backlog",
+      "query": "(hambazi_admissions_oldest_wait_seconds) and on(service,instance,job) (hambazi_collection_success{collector=\"admissions\"} == 1)",
+      "interpretation": "Gate on admissions validity; durable unexpired tickets and oldest waiting age."
+    },
+    {
+      "id": "reconnects",
+      "title": "Recorded reconnects/disconnects/Bot replacements",
+      "query": "(hambazi_reconnects_recorded or hambazi_disconnects_recorded or hambazi_bot_takeovers_recorded) and on(service,instance,job) (hambazi_collection_success{collector=\"matches\"} == 1)",
+      "interpretation": "Durable event count gauges; show per instance, do not sum replicas."
+    },
+    {
+      "id": "pool",
+      "title": "DB pool utilization",
+      "query": "((hambazi_db_pool_total - hambazi_db_pool_idle) / hambazi_db_pool_max) and on(service,instance,job) (hambazi_collection_success{collector=\"database\"} == 1)",
+      "interpretation": "Per-process saturation; gate on database validity and pair with pool_waiting."
+    },
+    {
+      "id": "db_latency",
+      "title": "DB operation p95",
+      "query": "histogram_quantile(0.95, sum by (service,le) (rate(hambazi_duration_seconds_bucket{event=\"database.completed\"}[5m])))",
+      "interpretation": "Includes acquisition/transaction callback settlement; not individual SQL duration."
+    },
+    {
+      "id": "outbox",
+      "title": "Oldest pending outbox age",
+      "query": "(hambazi_outbox_oldest_pending_seconds) and on(service,instance,job) (hambazi_collection_success{collector=\"outbox\"} == 1)",
+      "interpretation": "Gate on outbox validity; pending includes leases/backoff. Inspect failed count."
+    },
+    {
+      "id": "queues",
+      "title": "Queue waiting/delayed/failed",
+      "query": "(hambazi_queue_waiting or hambazi_queue_delayed or hambazi_queue_failed) and on(service,instance,job) (hambazi_collection_success{collector=\"queues\"} == 1)",
+      "interpretation": "Gate on queues validity; queue totals are shared snapshots, do not sum replicas."
+    },
+    {
+      "id": "drain",
+      "title": "Drain failures",
+      "query": "sum by (service) (increase(hambazi_drain_seconds_count{result=\"failed\"}[5m]))",
+      "interpretation": "Short-lived process series; retain lifecycle logs/supervisor exit status too."
+    },
+    {
+      "id": "export",
+      "title": "Reporter failures/drops",
+      "query": "sum by (service,result) (rate(hambazi_reports_total{result!=\"sent\"}[5m]))",
+      "interpretation": "Best effort; no spool/retry. Reports optional."
+    },
+    {
+      "id": "validity",
+      "title": "Collection health",
+      "query": "hambazi_collection_success",
+      "interpretation": "Never treat stale/failed samples as healthy zero."
+    }
+  ],
+  "sloBurn": {
+    "status": "awaiting-owner-decision",
+    "decision": "OD-007",
+    "objective": null,
+    "window": null,
+    "errorSignal": "command_errors",
+    "latencySignal": "command_latency"
+  },
+  "deploymentAnnotations": {
+    "status": "awaiting-deployment-ledger",
+    "phase": "18B",
+    "source": "approved release ledger",
+    "fields": ["deployedAt", "imageDigest", "rollbackOf"]
+  }
+}

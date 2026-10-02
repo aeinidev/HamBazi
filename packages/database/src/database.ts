@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import type { Prisma } from "./generated/prisma/client.js";
+import { Pool } from "pg";
 
 const ownership = {
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
@@ -135,6 +136,7 @@ export type DatabaseOptions = Readonly<{
   idleTimeoutMs: number;
   transactionMaxWaitMs: number;
   transactionTimeoutMs: number;
+  observe?(durationMs: number, success: boolean): void;
 }>;
 
 // Construct once per process in the composition root. Importing this module has no I/O.
@@ -149,13 +151,15 @@ export function createDatabase(options: DatabaseOptions) {
     if (!Number.isSafeInteger(value) || value <= 0)
       throw new DatabaseError("DATABASE_CONFIGURATION_INVALID");
   }
+  const pool = new Pool({
+    connectionString: options.databaseUrl.reveal(),
+    max: options.poolMax,
+    connectionTimeoutMillis: options.connectionTimeoutMs,
+    idleTimeoutMillis: options.idleTimeoutMs,
+  });
+  pool.on("error", () => {});
   const client = new PrismaClient({
-    adapter: new PrismaPg({
-      connectionString: options.databaseUrl.reveal(),
-      max: options.poolMax,
-      connectionTimeoutMillis: options.connectionTimeoutMs,
-      idleTimeoutMillis: options.idleTimeoutMs,
-    }),
+    adapter: new PrismaPg(pool, { disposeExternalPool: true }),
     log: [],
     errorFormat: "minimal",
     transactionOptions: {
@@ -167,13 +171,30 @@ export function createDatabase(options: DatabaseOptions) {
   let closing: Promise<void> | undefined;
   async function safe<T>(operation: () => Promise<T>): Promise<T> {
     if (closed) throw new DatabaseError("DATABASE_CLOSED");
+    const started = performance.now();
+    let success = false;
     try {
-      return await operation();
+      const result = await operation();
+      success = true;
+      return result;
     } catch (error) {
       throw failure(error);
+    } finally {
+      try {
+        options.observe?.(performance.now() - started, success);
+      } catch {
+        /* observation cannot change a write */
+      }
     }
   }
   return Object.freeze({
+    poolSnapshot: () =>
+      Object.freeze({
+        max: options.poolMax,
+        total: pool.totalCount,
+        idle: pool.idleCount,
+        waiting: pool.waitingCount,
+      }),
     connect: () => safe(() => client.$connect()),
     // Infrastructure-only, no table access or arbitrary SQL surface.
     probe: () =>

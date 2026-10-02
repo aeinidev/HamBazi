@@ -28,8 +28,14 @@ import {
 import { createHttpApplication } from "./http.js";
 import type { SafeLogger } from "./safe-logger.js";
 import { startBotInternalTransport } from "./bot-internal-runtime.js";
-import { parseOperationsConfig } from "@hambazi/config";
-import { startHealthServer, withDeadline } from "@hambazi/observability";
+import { parseOperationsConfig, parseTelemetryConfig } from "@hambazi/config";
+import { startHealthServer, withDeadline, createMetricCollection } from "@hambazi/observability";
+import {
+  createMatchDiagnostics,
+  createOutboxDiagnostics,
+  createAdmissionDiagnostics,
+} from "../matches/index.js";
+import { createRoomDiagnostics } from "../rooms/index.js";
 import { createApiHealth } from "../health/index.js";
 
 export async function startApi(
@@ -44,6 +50,8 @@ export async function startApi(
   const roomsConfig = parseRoomsConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "api");
   const operations = parseOperationsConfig(environment, "api");
+  const telemetryConfig = parseTelemetryConfig(environment, "api");
+  const metrics = logger.metrics;
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: auth.poolMax,
@@ -51,6 +59,11 @@ export async function startApi(
     idleTimeoutMs: 10000,
     transactionMaxWaitMs: 2000,
     transactionTimeoutMs: 5000,
+    observe: (durationMs, success) =>
+      logger.telemetry.emit("database.completed", {
+        durationMs,
+        ...(success ? {} : { errorCode: "INTERNAL_ERROR" }),
+      }),
   });
   const rate = createRedisAuthRateLimiter({
     url: runtime.redisUrl,
@@ -93,10 +106,38 @@ export async function startApi(
         ])
       ).every(Boolean),
     timeoutMs: operations.probeTimeoutMs,
+    metrics,
   });
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
-    if (operations.port) healthServer = await startHealthServer(health, operations.port);
+    const collect = createMetricCollection(
+      metrics,
+      [
+        {
+          name: "database",
+          read: async () => {
+            const p = database.poolSnapshot();
+            return {
+              db_pool_max: p.max,
+              db_pool_total: p.total,
+              db_pool_idle: p.idle,
+              db_pool_waiting: p.waiting,
+            };
+          },
+        },
+        { name: "matches", read: createMatchDiagnostics(database) },
+        { name: "admissions", read: createAdmissionDiagnostics(database) },
+        { name: "outbox", read: createOutboxDiagnostics(database) },
+        ...(roomsConfig ? [{ name: "rooms" as const, read: createRoomDiagnostics(database) }] : []),
+      ],
+      operations.probeTimeoutMs,
+    );
+    if (operations.port)
+      healthServer = await startHealthServer(
+        health,
+        operations.port,
+        telemetryConfig.metricsEnabled ? { metrics, collect } : undefined,
+      );
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
     const clock = { nowMs: () => Date.now() };
     const onboarding = createMiniAppOnboarding({
@@ -207,10 +248,12 @@ export async function startApi(
     health.started();
     logger.lifecycle("api.started");
     let closing: Promise<void> | undefined;
+    let drainStarted = 0;
     return {
       health,
       drainTimeoutMs: operations.drainTimeoutMs,
       close() {
+        if (!closing) drainStarted = performance.now();
         health.stopAdmission();
         http!.stopAdmission();
         internal?.stopAdmission();
@@ -236,6 +279,14 @@ export async function startApi(
             logger.lifecycle("api.stopped");
           })(),
           operations.drainTimeoutMs,
+        ).then(
+          () => {
+            metrics.drain("completed", performance.now() - drainStarted);
+          },
+          () => {
+            metrics.drain("failed", performance.now() - drainStarted);
+            throw new Error("API drain failed");
+          },
         ));
       },
     };

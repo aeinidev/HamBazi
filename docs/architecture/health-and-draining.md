@@ -1,7 +1,8 @@
 # Health and draining
 
 Phase 16B implements private health and service draining under ADR-032. This is not
-deployment approval, a public uptime monitor, metrics export or an incident runbook.
+deployment approval or a public uptime monitor. Phase 16C adds private metrics and
+linked incident procedures in [operational observability](operational-observability.md).
 
 ## Operational configuration
 

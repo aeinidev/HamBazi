@@ -39,6 +39,7 @@ export interface OutboxObservation {
 export type OutboxReporter = (event: OutboxEventName, fields?: OutboxObservation) => void;
 export interface DomainPublisher {
   probe?(): Promise<boolean>;
+  counts?(): Promise<Record<string, number>>;
   publish(event: DeliveryEvent): Promise<void>;
   close(): Promise<void>;
 }
@@ -176,6 +177,17 @@ export async function createBullMqDomainPublisher(options: {
   return {
     probe: async () =>
       !closing && (await Promise.all(Object.values(queues).map(probeQueue))).every(Boolean),
+    async counts() {
+      const rows = await Promise.all(
+        Object.values(queues).map((q) => q.getJobCounts("waiting", "active", "delayed", "failed")),
+      );
+      return Object.fromEntries(
+        ["waiting", "active", "delayed", "failed"].map((key) => [
+          key,
+          rows.reduce((n, row) => n + (row[key] ?? 0), 0),
+        ]),
+      );
+    },
     async publish(input) {
       if (closing) throw new Error("Outbox publisher closed");
       const event = decodeDelivery(input);

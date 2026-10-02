@@ -8,3 +8,10 @@ Do not place business rules or committed credentials here.
 
 See [workspace ownership](../../docs/architecture/workspaces.md) and the
 [implementation plan](../../docs/implementation-plan.md).
+
+Phase 16C adds [operational runbooks](../../docs/operations/runbooks/README.md),
+[metrics/reporting documentation](../../docs/architecture/operational-observability.md)
+and provider-independent dashboard/alert definitions. `TEST_RESTORE_DRILL=isolated`
+on the existing `pnpm test:auth-http:local` harness invokes the database-owned logical
+backup/restore rehearsal, using only its disposable services. It never restores or
+redirects a live service. See the [restore runbook](../../docs/operations/runbooks/restore.md).

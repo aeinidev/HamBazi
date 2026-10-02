@@ -7,3 +7,10 @@ export function createRoomsPort(
 ) {
   return roomsService({ ...ports, repository: createRoomsRepository(database, options) });
 }
+
+import { createRoomDiagnosticsRepository } from "./infrastructure/repositories/diagnostics.js";
+export function createRoomDiagnostics(
+  database: Parameters<typeof createRoomDiagnosticsRepository>[0],
+) {
+  return createRoomDiagnosticsRepository(database);
+}

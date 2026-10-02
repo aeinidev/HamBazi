@@ -149,8 +149,15 @@ it("consumes real BullMQ finish jobs, redelivery and drain using Worker-only gra
       concurrency: 2,
       drainTimeoutMs: 5000,
       unavailable: () => {},
+      diagnostics: true,
     });
     await publisher.publish(event);
+    expect(await consumer.counts()).toMatchObject({
+      waiting: expect.any(Number),
+      active: expect.any(Number),
+      delayed: expect.any(Number),
+      failed: expect.any(Number),
+    });
     await expect
       .poll(
         () =>

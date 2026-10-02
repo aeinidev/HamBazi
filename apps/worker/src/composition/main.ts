@@ -1,8 +1,19 @@
-import { createTelemetryLogger } from "@hambazi/observability";
+import { parseTelemetryConfig } from "@hambazi/config";
+import { createOperationsTelemetry } from "@hambazi/observability";
 import { startWorker } from "./runtime.js";
-const logger = createTelemetryLogger();
+let observation = createOperationsTelemetry("worker");
+let logger = observation.telemetry;
 try {
-  const worker = await startWorker(process.env, (event, fields) => logger.emit(event, fields));
+  const config = parseTelemetryConfig(process.env, "worker");
+  observation = createOperationsTelemetry("worker", undefined, config.sentryDsn);
+  logger = observation.telemetry;
+  const worker = await startWorker(
+    process.env,
+    (event, fields) => logger.emit(event, fields),
+    undefined,
+    observation.metrics,
+    logger,
+  );
   logger.emit("worker.started");
   let stopping = false;
   const shutdown = () => {
@@ -11,8 +22,9 @@ try {
     const deadline = setTimeout(() => process.exit(1), worker.drainTimeoutMs + 1000);
     deadline.unref();
     void worker.close().then(
-      () => {
+      async () => {
         clearTimeout(deadline);
+        await observation.close();
         logger.emit("worker.stopped");
       },
       () => {
@@ -25,5 +37,6 @@ try {
   process.once("SIGINT", shutdown);
 } catch {
   logger.emit("worker.failed");
+  await observation.close();
   process.exitCode = 1;
 }

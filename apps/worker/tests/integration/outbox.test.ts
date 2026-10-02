@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { createServer } from "node:net";
 import { beforeAll, beforeEach, afterAll, expect, it } from "vitest";
 import { Queue, Worker } from "bullmq";
-import { currentCorrelation, createTelemetryLogger } from "@hambazi/observability";
+import { currentCorrelation, createTelemetryLogger, createMetrics } from "@hambazi/observability";
 import { createDatabase } from "@hambazi/database";
 import { createMatchOutboxPort, type MatchDomainEvent } from "@hambazi/api/matches";
 import {
@@ -367,6 +368,11 @@ it("starts configured polling in the Worker runtime and drains before closing da
   const { startWorker } = await import("../../src/composition/runtime.js");
   const id = await seed();
   const events: string[] = [];
+  const metrics = createMetrics("worker");
+  const reservation = createServer();
+  await new Promise<void>((r) => reservation.listen(0, "127.0.0.1", r));
+  const port = (reservation.address() as { port: number }).port;
+  await new Promise<void>((r) => reservation.close(() => r()));
   const runtime = await startWorker(
     {
       NODE_ENV: "test",
@@ -378,6 +384,8 @@ it("starts configured polling in the Worker runtime and drains before closing da
       BOT_CLEANUP_ATTEMPTS: "2",
       BOT_CLEANUP_BACKOFF_MS: "100",
       WORKER_DB_POOL_MAX: "4",
+      WORKER_HEALTH_PORT: String(port),
+      WORKER_METRICS_ENABLED: "true",
       MATCH_OUTBOX_ENABLED: "true",
       MATCH_OUTBOX_INTERVAL_MS: "100",
       MATCH_OUTBOX_BATCH_SIZE: "3",
@@ -388,10 +396,18 @@ it("starts configured polling in the Worker runtime and drains before closing da
       MATCH_OUTBOX_PUBLISH_TIMEOUT_MS: "1000",
     },
     (event) => events.push(event),
+    undefined,
+    metrics,
   );
   try {
     const deadline = Date.now() + 5000;
     expect((await runtime.health.ready()).status).toBe("READY");
+    const exported = await (await fetch(`http://127.0.0.1:${port}/v1/metrics`)).text();
+    expect(exported).toContain('collector="matches"} 1');
+    expect(exported).toContain('collector="outbox"} 1');
+    expect(exported).toContain('collector="queues"} 1');
+    expect(exported).toContain('hambazi_db_pool_max{service="worker"} 4');
+    expect(exported).not.toMatch(/payload|stateJsonb|postgresql:|redis:/);
     while ((await read(id)).status !== "PUBLISHED") {
       if (Date.now() >= deadline) throw new Error("Outbox runtime did not publish fixture");
       await new Promise((r) => setTimeout(r, 20));
@@ -400,6 +416,7 @@ it("starts configured polling in the Worker runtime and drains before closing da
   } finally {
     await runtime.close();
     await runtime.close();
+    expect(metrics.render()).toContain('result="completed"} 1');
   }
 });
 

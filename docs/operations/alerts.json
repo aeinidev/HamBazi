@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "status": "reviewed-local-definition",
+  "alerts": [
+    {
+      "id": "ServiceUnavailable",
+      "owner": "Backend on-call",
+      "severity": "SEV1",
+      "signal": "up{job=~\"hambazi-(api|bot|worker)\"} == 0",
+      "runbook": "runbooks/maintenance.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "DurableDependencyUnavailable",
+      "owner": "Database on-call",
+      "severity": "SEV1",
+      "signal": "hambazi_dependency_available{dependency=\"postgres\"} == 0",
+      "runbook": "runbooks/database-degradation.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "RedisUnavailable",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_dependency_available{dependency=\"redis\"} == 0",
+      "runbook": "runbooks/redis-loss.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "BackendUnavailable",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_dependency_available{service=\"bot\",dependency=\"backend\"} == 0",
+      "runbook": "runbooks/database-degradation.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "TelemetryCollectionUnavailable",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_collection_success == 0",
+      "runbook": "runbooks/maintenance.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "DrainFailure",
+      "owner": "Release on-call",
+      "severity": "SEV2",
+      "signal": "sum by (service) (increase(hambazi_drain_seconds_count{result=\"failed\"}[5m])) > 0",
+      "runbook": "runbooks/rollback.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": null,
+      "threshold": null,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "OutboxQuarantined",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_outbox_failed and on(service,instance,job) (hambazi_collection_success{collector=\"outbox\"} == 1)",
+      "runbook": "runbooks/redis-loss.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": 0,
+      "thresholdDecision": null,
+      "persistenceSeconds": null
+    },
+    {
+      "id": "AuthFailureRatio",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "sum(rate(hambazi_events_total{event=\"http.completed\",operation=\"auth\",error_code!=\"NONE\"}[5m])) / clamp_min(sum(rate(hambazi_events_total{event=\"http.completed\",operation=\"auth\"}[5m])), 0.001)",
+      "runbook": "runbooks/maintenance.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "CommandLatency",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "histogram_quantile(0.95, sum by (le) (rate(hambazi_duration_seconds_bucket{event=\"socket.completed\",operation=\"command\"}[5m])))",
+      "runbook": "runbooks/stuck-match.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "CommandUnexpectedErrorRatio",
+      "owner": "Backend on-call",
+      "severity": "SEV1",
+      "signal": "sum(rate(hambazi_events_total{event=\"socket.completed\",operation=\"command\",error_code=\"INTERNAL_ERROR\"}[5m])) / clamp_min(sum(rate(hambazi_events_total{event=\"socket.completed\",operation=\"command\"}[5m])), 0.001)",
+      "runbook": "runbooks/stuck-match.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "MatchmakingWait",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_admissions_oldest_wait_seconds and on(service,instance,job) (hambazi_collection_success{collector=\"admissions\"} == 1)",
+      "runbook": "runbooks/redis-loss.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "ReconnectFailures",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "sum(rate(hambazi_events_total{event=\"socket.completed\",operation=~\"subscribe|snapshot|catchup\",error_code=\"INTERNAL_ERROR\"}[5m]))",
+      "runbook": "runbooks/stuck-match.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "OutboxLag",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "hambazi_outbox_oldest_pending_seconds and on(service,instance,job) (hambazi_collection_success{collector=\"outbox\"} == 1)",
+      "runbook": "runbooks/redis-loss.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "TerminationGrowth",
+      "owner": "Backend on-call",
+      "severity": "SEV2",
+      "signal": "max(clamp_min(delta(hambazi_matches_terminated[5m]), 0) and on(service,instance,job) (hambazi_collection_success{collector=\"matches\"} == 1))",
+      "runbook": "runbooks/stuck-match.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    },
+    {
+      "id": "PoolSaturation",
+      "owner": "Database on-call",
+      "severity": "SEV2",
+      "signal": "(hambazi_db_pool_total - hambazi_db_pool_idle) / hambazi_db_pool_max",
+      "runbook": "runbooks/database-degradation.md",
+      "cooldownSeconds": 600,
+      "routingEnabled": false,
+      "activationRequires": [
+        "named on-call assignment",
+        "staging signal and notification drill",
+        "approved persistence window"
+      ],
+      "comparison": ">",
+      "threshold": null,
+      "thresholdDecision": "OD-007",
+      "persistenceSeconds": null
+    }
+  ]
+}

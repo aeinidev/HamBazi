@@ -4,3 +4,4 @@ export { roomCommandSchema, joinRoomSchema } from "./application/rooms.js";
 export { createRoomsHttpModule, type RoomsHttpDependencies } from "./infrastructure/rooms-http.js";
 export { createRoomsRate } from "./infrastructure/rooms-rate.js";
 export { roomsOpenApiDocument } from "./infrastructure/rooms-contract.js";
+export { createRoomDiagnostics } from "./module.js";

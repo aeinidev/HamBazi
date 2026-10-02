@@ -1,10 +1,14 @@
-import { createTelemetryLogger, type DestinationStream } from "@hambazi/observability";
-export function createBotLogger(destination?: DestinationStream) {
-  const telemetry = createTelemetryLogger(destination);
+import { createOperationsTelemetry, type DestinationStream } from "@hambazi/observability";
+export function createBotLogger(destination?: DestinationStream, dsn?: { reveal(): string }) {
+  const observation = createOperationsTelemetry("bot", destination, dsn);
+  const { telemetry, metrics } = observation;
   return {
+    metrics,
+    close: observation.close,
     completed(requestId: string, durationMs: number, status: number) {
       telemetry.emit("bot.webhook_completed", {
         requestId,
+        operation: "webhook",
         durationMs: Math.max(0, Math.round(durationMs)),
         ...(status >= 400
           ? {

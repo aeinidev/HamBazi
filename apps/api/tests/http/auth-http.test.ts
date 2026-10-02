@@ -407,6 +407,7 @@ describe("Nest/Fastify authentication boundary", () => {
         "durationMs",
         "event",
         "level",
+        "operation",
         "requestId",
         "spanId",
         "traceId",

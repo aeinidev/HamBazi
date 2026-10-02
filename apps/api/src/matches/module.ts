@@ -67,3 +67,25 @@ import { createMatchResultRepository } from "./infrastructure/repositories/resul
 export function createMatchResultPort(database: Parameters<typeof createMatchResultRepository>[0]) {
   return createMatchResultRepository(database);
 }
+
+import {
+  createAdmissionDiagnosticsRepository,
+  createMatchDiagnosticsRepository,
+  createOutboxDiagnosticsRepository,
+} from "./infrastructure/repositories/diagnostics.js";
+export function createMatchDiagnostics(
+  database: Parameters<typeof createMatchDiagnosticsRepository>[0],
+) {
+  return createMatchDiagnosticsRepository(database);
+}
+export function createOutboxDiagnostics(
+  database: Parameters<typeof createOutboxDiagnosticsRepository>[0],
+) {
+  return createOutboxDiagnosticsRepository(database);
+}
+
+export function createAdmissionDiagnostics(
+  database: Parameters<typeof createAdmissionDiagnosticsRepository>[0],
+) {
+  return createAdmissionDiagnosticsRepository(database);
+}

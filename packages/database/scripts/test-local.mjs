@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import { promisify, parseEnv } from "node:util";
 import pg from "pg";
 import { createLocalEnvironment } from "../../../infra/scripts/create-local-env.mjs";
+import { restoreDrill, RestoreDrillError } from "./restore-drill.mjs";
 
 const run = promisify(execFile);
 const bin = process.env.TEST_POSTGRES_BIN;
@@ -352,6 +353,7 @@ if (!bin) {
         "realtime.test.ts",
         "chat.test.ts",
         "statistics.test.ts",
+        "diagnostics.test.ts",
       ]) {
         const result = await run(
           process.execPath,
@@ -525,7 +527,15 @@ if (!bin) {
         }
       }
     }
+    if (process.env.TEST_RESTORE_DRILL === "isolated") {
+      stage = "disposable backup restore drill";
+      const result = await restoreDrill({ bin, path, env: childEnv });
+      console.info(
+        `Disposable logical backup/restore reconciled ${result.tables} tables, constraints, triggers and grants; source preserved.`,
+      );
+    }
   } catch (error) {
+    if (error instanceof RestoreDrillError) console.error(`RESTORE_DRILL_FAILED at ${error.stage}`);
     // Only sanitized test output is reportable; never emit child command/env/error.
     let output =
       error && typeof error === "object" && "stdout" in error ? String(error.stdout) : "";

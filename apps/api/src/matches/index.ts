@@ -71,3 +71,8 @@ export { matchCorrelationSchema } from "./application/correlation.js";
 
 export { createMatchResultPort } from "./module.js";
 export type { FinishedResult } from "./application/result-input.js";
+export {
+  createMatchDiagnostics,
+  createAdmissionDiagnostics,
+  createOutboxDiagnostics,
+} from "./module.js";

@@ -6,6 +6,67 @@
   },
   "x-access-policy": "Optional loopback-only listener. Exact 127.0.0.1 Host; no browser/proxy headers. Never expose through ingress.",
   "paths": {
+    "/v1/metrics": {
+      "get": {
+        "description": "Opt-in fixed-dimension process metrics on the separate loopback listener only. Never mount on product ingress.",
+        "responses": {
+          "200": {
+            "description": "Prometheus text with dependency and collection validity signals",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Disabled, invalid method, route or local access shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Collection unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/health/live": {
       "get": {
         "responses": {

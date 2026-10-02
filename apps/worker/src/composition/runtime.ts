@@ -10,7 +10,11 @@ import {
   type ReconnectPolicy,
 } from "@hambazi/api/matches";
 import { parseOutboxWorkerConfig } from "@hambazi/config";
-import { createMatchOutboxPort } from "@hambazi/api/matches";
+import {
+  createMatchOutboxPort,
+  createMatchDiagnostics,
+  createOutboxDiagnostics,
+} from "@hambazi/api/matches";
 import {
   createOutboxDispatcher,
   decodeDelivery,
@@ -23,8 +27,16 @@ import { createDatabase } from "@hambazi/database";
 import { createBotOnboardingCleanup } from "@hambazi/api/auth";
 import { createProfileCleanup } from "@hambazi/api/users";
 import { startCleanupQueue } from "../onboarding-cleanup.js";
-import { parseOperationsConfig } from "@hambazi/config";
-import { createServiceHealth, startHealthServer, withDeadline } from "@hambazi/observability";
+import { parseOperationsConfig, parseTelemetryConfig } from "@hambazi/config";
+import {
+  createServiceHealth,
+  startHealthServer,
+  withDeadline,
+  createMetricCollection,
+  type OperationalMetrics,
+  createMetrics,
+  type Telemetry,
+} from "@hambazi/observability";
 export async function startWorker(
   environment: Readonly<Record<string, string | undefined>>,
   event: (
@@ -42,12 +54,15 @@ export async function startWorker(
     backoffMs: number;
     drainTimeoutMs: number;
   },
+  metrics: OperationalMetrics = createMetrics("worker"),
+  telemetry?: Telemetry,
 ) {
   const runtime = parseRuntimeConfig(environment, "worker");
   const config = parseOnboardingWorkerConfig(environment);
   const outboxConfig = parseOutboxWorkerConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "worker");
   const operations = parseOperationsConfig(environment, "worker");
+  const telemetryConfig = parseTelemetryConfig(environment, "worker");
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: config.poolMax,
@@ -55,6 +70,11 @@ export async function startWorker(
     idleTimeoutMs: 10000,
     transactionMaxWaitMs: 2000,
     transactionTimeoutMs: 5000,
+    observe: (durationMs, success) =>
+      metrics?.emit("database.completed", {
+        durationMs,
+        ...(success ? {} : { errorCode: "INTERNAL_ERROR" }),
+      }),
   });
   let statistics: Awaited<ReturnType<typeof startStatisticsConsumer>> | undefined;
   let automation: Awaited<ReturnType<typeof startMatchAutomation>> | undefined;
@@ -64,8 +84,9 @@ export async function startWorker(
   let outboxLoop: ReturnType<typeof startOutboxLoop> | undefined;
   const health = createServiceHealth(
     [
-      { required: true, probe: () => database.probe() },
+      { name: "postgres", required: true, probe: () => database.probe() },
       {
+        name: "redis",
         required: true,
         probe: async () => {
           const results = await Promise.all([
@@ -80,10 +101,60 @@ export async function startWorker(
       },
     ],
     operations.probeTimeoutMs,
+    metrics,
   );
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
-    if (operations.port) healthServer = await startHealthServer(health, operations.port);
+    const collect = metrics
+      ? createMetricCollection(
+          metrics,
+          [
+            {
+              name: "database",
+              read: async () => {
+                const p = database.poolSnapshot();
+                return {
+                  db_pool_max: p.max,
+                  db_pool_total: p.total,
+                  db_pool_idle: p.idle,
+                  db_pool_waiting: p.waiting,
+                };
+              },
+            },
+            { name: "matches", read: createMatchDiagnostics(database) },
+            { name: "outbox", read: createOutboxDiagnostics(database) },
+            {
+              name: "queues",
+              read: async () => {
+                const counts = await Promise.all([
+                  queue!.counts(),
+                  profileQueue!.counts(),
+                  ...(publisher ? [publisher.counts!()] : []),
+                  ...(automation ? [automation.counts()] : []),
+                  ...(!publisher && statistics ? [statistics.counts()] : []),
+                ]);
+                const sum = (key: "waiting" | "active" | "delayed" | "failed") =>
+                  counts.reduce((n, c) => n + (c[key] ?? 0), 0);
+                return {
+                  queue_waiting: sum("waiting"),
+                  queue_active: sum("active"),
+                  queue_delayed: sum("delayed"),
+                  queue_failed: sum("failed"),
+                };
+              },
+            },
+          ],
+          operations.probeTimeoutMs,
+        )
+      : undefined;
+    if (operations.port)
+      healthServer = await startHealthServer(
+        health,
+        operations.port,
+        telemetryConfig.metricsEnabled && metrics
+          ? { metrics, ...(collect ? { collect } : {}) }
+          : undefined,
+      );
     await database.connect();
     queue = await startCleanupQueue({
       ...config,
@@ -146,13 +217,17 @@ export async function startWorker(
         concurrency: statsConfig.concurrency,
         drainTimeoutMs: statsConfig.drainTimeoutMs,
         unavailable: () => event("worker.outbox_unavailable"),
+        ...(telemetry ? { telemetry } : {}),
+        diagnostics: telemetryConfig.metricsEnabled && !outboxConfig,
       });
     let closing: Promise<void> | undefined;
+    let drainStarted = 0;
     health.started();
     return {
       health,
       drainTimeoutMs: operations.drainTimeoutMs,
       close() {
+        if (!closing) drainStarted = performance.now();
         health.stopAdmission();
         return (closing ??= withDeadline(
           (async () => {
@@ -178,6 +253,14 @@ export async function startWorker(
               throw new Error("Worker drain failed");
           })(),
           operations.drainTimeoutMs,
+        ).then(
+          () => {
+            metrics?.drain("completed", performance.now() - drainStarted);
+          },
+          () => {
+            metrics?.drain("failed", performance.now() - drainStarted);
+            throw new Error("Worker drain failed");
+          },
         ));
       },
     };

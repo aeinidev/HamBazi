@@ -1,9 +1,10 @@
 # Observability boundary
 
-Phase 16A implements shared safe logging and causal metadata. Parent Phase 16
-remains In Progress: dependency health/draining is documented in [16B](health-and-draining.md); metrics, safe reporting,
-dashboard/alert definitions and incident runbooks are 16C. This document does not
-authorize activation, administrative mutations or external telemetry export.
+Phase 16A implements shared safe logging and causal metadata. Parent Phase 16 is
+complete with its available local evidence: dependency health/draining is documented
+in [16B](health-and-draining.md), and metrics/reporting/dashboard/alert/runbooks in
+[16C](operational-observability.md). These documents do not authorize live activation,
+administrative mutations or a real external telemetry target.
 
 ## Ownership and safe fields
 
@@ -59,8 +60,8 @@ baggage/tracestate/user-provided attributes are propagated.
 These are compatible trace identifiers and async scopes, without a span exporter.
 Initial roots use the unsampled flag; no production export/sampling percentage is
 chosen. Pino's existing no-base/no-timestamp setup is preserved in this subphase;
-collector timestamps, deployment annotations, metrics and reporting configuration
-belong to the remaining operational milestone. HTTP status-based completion code
+collector timestamps remain collector-owned. [16C](operational-observability.md) adds
+metrics/reporting configuration; deployed annotations remain a release-ledger gate. HTTP status-based completion code
 mapping remains the existing adapter mapping; it is not a replacement for an
 owning use case's exact error code or a metrics taxonomy.
 
@@ -96,3 +97,10 @@ to account/Match/request IDs under the future approved telemetry retention and
 access policy. Rollback to the preceding application remains possible because
 nullable columns, v1 envelopes and old job shapes are unchanged. New jobs carrying
 valid request/trace metadata are already understood by the preceding version.
+
+Phase 16C's [metrics and safe reporting](operational-observability.md) adds one fixed
+`operation` enum to the telemetry allowlist (server-selected auth/http/webhook or
+Socket dispatch class), database completion measurements and private aggregate
+exports. This is never a command/action payload or arbitrary route/name. Manual
+Sentry events project away identifiers/context before export. See ADR-033 and the
+linked runbooks for deployment/retention/alert limitations.
