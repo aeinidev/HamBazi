@@ -12,7 +12,7 @@ import {
   type MatchDomainEvent,
   type MatchOutboxPort,
 } from "@hambazi/api/matches";
-import { queueConnection } from "./queue-connection.js";
+import { queueConnection, probeQueue } from "./queue-connection.js";
 export type DeliveryEvent = MatchDomainEvent | ChatDelivery;
 export function decodeDelivery(input: unknown): DeliveryEvent | null {
   const match = matchDomainEventSchema.safeParse(input);
@@ -38,6 +38,7 @@ export interface OutboxObservation {
 }
 export type OutboxReporter = (event: OutboxEventName, fields?: OutboxObservation) => void;
 export interface DomainPublisher {
+  probe?(): Promise<boolean>;
   publish(event: DeliveryEvent): Promise<void>;
   close(): Promise<void>;
 }
@@ -173,6 +174,8 @@ export async function createBullMqDomainPublisher(options: {
   ) as Record<DeliveryEvent["type"], Queue>;
   let closing: Promise<void> | undefined;
   return {
+    probe: async () =>
+      !closing && (await Promise.all(Object.values(queues).map(probeQueue))).every(Boolean),
     async publish(input) {
       if (closing) throw new Error("Outbox publisher closed");
       const event = decodeDelivery(input);

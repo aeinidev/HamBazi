@@ -1,4 +1,4 @@
-import { queueConnection } from "./queue-connection.js";
+import { queueConnection, probeQueue, requeueForDrain } from "./queue-connection.js";
 import { Queue, Worker, UnrecoverableError } from "bullmq";
 import { z } from "zod";
 export const cleanupJobSchema = z.strictObject({
@@ -42,23 +42,48 @@ export async function startCleanupQueue(options: {
 }) {
   const prefix = `hambazi:jobs:${options.namespace}`;
   const name = options.name ?? "bot-onboarding-cleanup-v1";
+  let stopping = false;
+  const active = new Set<Promise<unknown>>();
+  const processing = cleanupProcessor(options.cleanup, name);
   const queue = new Queue(name, {
     connection: queueConnection(options.redisUrl, false),
     prefix,
   });
-  const worker = new Worker(name, cleanupProcessor(options.cleanup, name), {
-    connection: queueConnection(options.redisUrl, true),
-    prefix,
-    concurrency: 1,
-    autorun: false,
-    lockDuration: 30000,
-    maxStalledCount: 1,
-  });
+  const worker = new Worker(
+    name,
+    async (job, token) => {
+      if (stopping) return requeueForDrain(job, token!);
+      const work = processing(job);
+      active.add(work);
+      try {
+        return await work;
+      } finally {
+        active.delete(work);
+      }
+    },
+    {
+      connection: queueConnection(options.redisUrl, true),
+      prefix,
+      concurrency: 1,
+      autorun: false,
+      lockDuration: 30000,
+      maxStalledCount: 1,
+    },
+  );
   queue.on("error", () => options.event("worker.queue_unavailable"));
   worker.on("error", () => options.event("worker.queue_unavailable"));
   worker.on("failed", () => options.event("worker.job_failed"));
   worker.on("completed", () => options.event("worker.job_completed"));
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let paused: Promise<void> | undefined;
+  const stopAdmission = () => {
+    stopping = true;
+    return (paused ??= worker.pause(true));
+  };
+  const settled = async () => {
+    await paused?.catch(() => {});
+    await Promise.allSettled([...active]);
+  };
   try {
     await Promise.race([
       Promise.all([queue.waitUntilReady(), worker.waitUntilReady()]),
@@ -84,9 +109,16 @@ export async function startCleanupQueue(options: {
     void worker.run().catch(() => options.event("worker.queue_unavailable"));
     let closing: Promise<void> | undefined;
     return {
+      stopAdmission,
+      settled,
+      probe: async () => !stopping && (await probeQueue(queue)) && (await probeQueue(worker)),
       close() {
+        const pause = stopAdmission();
         return (closing ??= (async () => {
+          await pause;
+          await settled();
           await worker.close();
+          await queue.disconnect();
           await queue.close();
         })());
       },

@@ -1,5 +1,5 @@
 import { beforeAll, afterEach, describe, expect, it, vi } from "vitest";
-import { createCorrelation, currentCorrelation } from "@hambazi/observability";
+import { createCorrelation, currentCorrelation, createServiceHealth } from "@hambazi/observability";
 import { readFileSync } from "node:fs";
 import { request as plainRequest } from "node:http";
 import {
@@ -208,6 +208,8 @@ describe("internal HTTPS boundary", () => {
         redisUrl: { reveal },
         onboarding,
         logger: createSafeLogger({ write: () => {} }),
+        health: createServiceHealth([], 1000),
+        probeTimeoutMs: 1000,
       }),
     ).toBeUndefined();
     expect(onboarding).not.toHaveBeenCalled();

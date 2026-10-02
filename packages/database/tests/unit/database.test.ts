@@ -13,6 +13,14 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
+  it("sanitizes an unavailable read-only probe without exposing connection data", async () => {
+    const database = createDatabase(options);
+    try {
+      await expect(database.probe()).rejects.toBeInstanceOf(DatabaseError);
+    } finally {
+      await database.disconnect();
+    }
+  });
   it("expands onboarding storage without modifying or dropping existing data", async () => {
     const sql = await readFile(
       new URL("../../prisma/migrations/202609210001_bot_onboarding/migration.sql", import.meta.url),
@@ -75,6 +83,7 @@ describe("database infrastructure boundary", () => {
     await database.disconnect();
     await database.disconnect();
     await expect(database.connect()).rejects.toMatchObject({ code: "DATABASE_CLOSED" });
+    await expect(database.probe()).rejects.toMatchObject({ code: "DATABASE_CLOSED" });
   });
   it("returns only owned top-level delegates, no raw SQL/client", async () => {
     const database = createDatabase(options);

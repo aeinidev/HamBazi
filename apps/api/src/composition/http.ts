@@ -18,6 +18,7 @@ import { createCatalogHttpModule, type CatalogHttpDependencies } from "../games/
 
 import { createRoomsHttpModule, type RoomsHttpDependencies } from "../rooms/index.js";
 import { createRealtimeGateway, type RealtimeDependencies } from "../realtime/index.js";
+import { trackHttpWork } from "./http-drain.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
@@ -44,6 +45,8 @@ export async function createHttpApplication(options: {
     http: { maxHeaderSize: 16384 },
   });
   const server = adapter.getInstance();
+  const settled = trackHttpWork(server);
+  let draining = false;
   server.server.headersTimeout = 10000;
   server.addHook("onRequest", (request, _reply, done) => {
     withCorrelation(createCorrelation({ requestId: request.id }), done);
@@ -60,6 +63,8 @@ export async function createHttpApplication(options: {
       )
       .header("Referrer-Policy", "no-referrer")
       .header("X-Request-Id", request.id);
+    if (draining)
+      return reply.header("Retry-After", "1").code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     if (options.production) {
       reply.header("Strict-Transport-Security", "max-age=31536000");
       if (request.protocol !== "https")
@@ -172,5 +177,14 @@ export async function createHttpApplication(options: {
         telemetry: options.realtime.telemetry ?? options.logger.telemetry,
       })
     : undefined;
-  return { app, server, realtime };
+  return {
+    app,
+    server,
+    realtime,
+    settled,
+    stopAdmission() {
+      draining = true;
+      realtime?.stopAdmission();
+    },
+  };
 }

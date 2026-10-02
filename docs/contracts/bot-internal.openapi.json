@@ -1594,6 +1594,148 @@
           }
         }
       }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "security": [
+          {
+            "botService": []
+          }
+        ],
+        "description": "Read-only dependency readiness on the authenticated private TLS listener; does not consume product admission counters.",
+        "responses": {
+          "200": {
+            "description": "Accepting onboarding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["READY"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Service authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "INVALID_INPUT",
+                            "UNAUTHENTICATED",
+                            "FORBIDDEN",
+                            "NOT_FOUND",
+                            "RATE_LIMITED",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Direct private TLS peer required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "INVALID_INPUT",
+                            "UNAUTHENTICATED",
+                            "FORBIDDEN",
+                            "NOT_FOUND",
+                            "RATE_LIMITED",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependency unavailable or draining",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

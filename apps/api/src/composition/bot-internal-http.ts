@@ -3,6 +3,8 @@ import {
   currentCorrelation,
   safeTraceparent,
   withCorrelation,
+  healthPaths,
+  type ServiceHealth,
 } from "@hambazi/observability";
 import "reflect-metadata";
 import { randomUUID } from "node:crypto";
@@ -22,6 +24,7 @@ import {
   type AuthRateLimiter,
 } from "../auth/index.js";
 import type { SafeLogger } from "./safe-logger.js";
+import { trackHttpWork } from "./http-drain.js";
 
 /** Dedicated TLS listener; never attach these routes to the public API or a public proxy. */
 export async function createBotInternalHttpApplication(options: {
@@ -30,6 +33,7 @@ export async function createBotInternalHttpApplication(options: {
   limiter: AuthRateLimiter;
   tls: { key: { reveal(): string }; cert: string };
   logger: SafeLogger;
+  health?: ServiceHealth;
 }) {
   const adapter = new FastifyAdapter({
     logger: false,
@@ -49,8 +53,10 @@ export async function createBotInternalHttpApplication(options: {
     },
   });
   const server = adapter.getInstance();
+  const settled = trackHttpWork(server);
   server.server.headersTimeout = 10000;
   const contexts = new WeakMap<FastifyRequest, BotServiceContext>();
+  let draining = false;
   server.addHook("onRequest", (request, _reply, done) => {
     withCorrelation(createCorrelation({ requestId: request.id }), done);
   });
@@ -76,6 +82,17 @@ export async function createBotInternalHttpApplication(options: {
     });
     if (!context) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
     contexts.set(request, context);
+    if (draining)
+      return reply
+        .header("Retry-After", "1")
+        .code(503)
+        .send(
+          options.health && request.method === "GET" && request.url === healthPaths.ready
+            ? { schemaVersion: 1, status: "NOT_READY" }
+            : createErrorEnvelope("INTERNAL_ERROR"),
+        );
+    // Authenticated read-only probe does not spend product admission counters.
+    if (options.health && request.method === "GET" && request.url === healthPaths.ready) return;
     if (sendRateDecision(reply, await options.limiter.consumeIp(`bot:${context.botId}`)))
       return reply;
     if (request.url.includes("?"))
@@ -95,6 +112,13 @@ export async function createBotInternalHttpApplication(options: {
   server.addHook("onResponse", async (request, reply) =>
     options.logger.completed(request.id, reply.elapsedTime, reply.statusCode),
   );
+  if (options.health)
+    server.get(healthPaths.ready, async (_request, reply) => {
+      const body = await options.health!.ready();
+      return reply
+        .code(body.status === "READY" ? 200 : 503)
+        .send({ schemaVersion: 1, status: body.status === "READY" ? "READY" : "NOT_READY" });
+    });
   const app = await NestFactory.create<NestFastifyApplication>(
     createBotInternalHttpModule({
       onboarding: options.onboarding,
@@ -128,7 +152,14 @@ export async function createBotInternalHttpApplication(options: {
   try {
     await app.init();
     await server.ready();
-    return { app, server };
+    return {
+      app,
+      server,
+      settled,
+      stopAdmission() {
+        draining = true;
+      },
+    };
   } catch {
     await app.close().catch(() => {});
     throw new Error("Bot internal transport initialization failed");

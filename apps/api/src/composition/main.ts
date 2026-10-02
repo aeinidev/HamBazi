@@ -7,7 +7,7 @@ try {
   const shutdown = () => {
     if (stopping) return;
     stopping = true;
-    const deadline = setTimeout(() => process.exit(1), 15000);
+    const deadline = setTimeout(() => process.exit(1), api.drainTimeoutMs + 1000);
     deadline.unref();
     void api.close().then(
       () => clearTimeout(deadline),

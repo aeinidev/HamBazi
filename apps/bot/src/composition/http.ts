@@ -39,6 +39,7 @@ export function createBotHttp(options: {
     { controller: AbortController; timer: ReturnType<typeof setTimeout> }
   >();
   let draining = false;
+  const active = new Set<Promise<void>>();
   server.addHook("onRequest", (request, _reply, done) => {
     withCorrelation(createCorrelation({ requestId: request.id }), done);
   });
@@ -110,16 +111,28 @@ export function createBotHttp(options: {
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
     const state = inflight.get(req.id);
     if (!state) throw new RetryDelivery();
-    await options.handle(req.body, state.controller.signal);
+    const work = options.handle(req.body, state.controller.signal);
+    active.add(work);
+    try {
+      await work;
+    } finally {
+      active.delete(work);
+    }
     state.controller.signal.throwIfAborted();
     return reply.code(200).send({ ok: true });
   });
   let closing: Promise<void> | undefined;
   return {
     server,
+    stopAdmission() {
+      draining = true;
+    },
     close() {
       draining = true;
-      return (closing ??= server.close());
+      return (closing ??= (async () => {
+        await server.close();
+        await Promise.allSettled([...active]);
+      })());
     },
   };
 }

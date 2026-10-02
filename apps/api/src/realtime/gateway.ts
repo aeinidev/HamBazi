@@ -4,6 +4,7 @@ import {
   createCorrelation,
   currentCorrelation,
   withCorrelation,
+  withDeadline,
   type Telemetry,
 } from "@hambazi/observability";
 import type { Server as HttpServer } from "node:http";
@@ -38,6 +39,7 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  drainTimeoutMs?: number;
   telemetry?: Telemetry;
   chat?: { port: ChatPort; ackTimeoutMs: number };
   presence?: {
@@ -79,6 +81,9 @@ function safeAck(ack: Ack, value: unknown) {
 
 /** Adapter only: every mutation and membership decision goes through a public port. */
 export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDependencies) {
+  const drainTimeoutMs = deps.drainTimeoutMs ?? 15000;
+  if (!Number.isInteger(drainTimeoutMs) || drainTimeoutMs < 1 || drainTimeoutMs > 120000)
+    throw new Error("Invalid realtime drain timeout");
   let draining = false;
   const pending = new Set<Promise<void>>();
   const tails = new WeakMap<Socket, Promise<void>>();
@@ -240,7 +245,8 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         safeAck(respond, value);
       };
       try {
-        if (!available()) return complete(failure("INTERNAL_ERROR"));
+        // Enqueued intents were admitted before draining; preserve their owning-port outcome.
+        if (!(deps.delivery?.redis?.ready() ?? true)) return complete(failure("INTERNAL_ERROR"));
         const current = await deps.sessions.authenticate(token);
         if (
           !current.ok ||
@@ -375,6 +381,10 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     }
     for (const name of Object.keys(incomingEvents) as IncomingEvent[])
       socket.on(name, (payload: unknown, ack: unknown) => {
+        if (!available()) {
+          if (typeof ack === "function") safeAck(ack as Ack, failure("INTERNAL_ERROR"));
+          return;
+        }
         withCorrelation(createCorrelation(), () => {
           void enqueue(socket, () => dispatch(name, payload, ack)).catch(() => {});
         });
@@ -514,6 +524,9 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   });
   let closing: Promise<void> | undefined;
   return Object.freeze({
+    stopAdmission() {
+      draining = true;
+    },
     ready: available,
     async publishChat(input: unknown) {
       const event = chatDeliverySchema.safeParse(input);
@@ -583,13 +596,16 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       }
     },
     close: () =>
-      (closing ??= (async () => {
-        draining = true;
-        stopObserving?.();
-        await Promise.allSettled([...pending]);
-        for (const socket of namespace.sockets.values()) socket.conn.close();
-        await new Promise<void>((resolve) => io.close(() => resolve()));
-        await Promise.allSettled([...pending]);
-      })()),
+      (closing ??= withDeadline(
+        (async () => {
+          draining = true;
+          stopObserving?.();
+          await Promise.allSettled([...pending]);
+          for (const socket of namespace.sockets.values()) socket.conn.close();
+          await new Promise<void>((resolve) => io.close(() => resolve()));
+          await Promise.allSettled([...pending]);
+        })(),
+        drainTimeoutMs,
+      )),
   });
 }

@@ -175,6 +175,17 @@ export function createDatabase(options: DatabaseOptions) {
   }
   return Object.freeze({
     connect: () => safe(() => client.$connect()),
+    // Infrastructure-only, no table access or arbitrary SQL surface.
+    probe: () =>
+      safe(async () => {
+        await client.$transaction(
+          async (tx) => {
+            await tx.$queryRaw`SELECT 1`;
+          },
+          { maxWait: options.transactionMaxWaitMs, timeout: options.transactionTimeoutMs },
+        );
+        return true;
+      }),
     disconnect: () => {
       closed = true;
       closing ??= client.$disconnect().catch((error) => {

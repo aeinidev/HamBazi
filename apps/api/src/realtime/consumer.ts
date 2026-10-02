@@ -4,9 +4,10 @@ import {
   withCorrelation,
   createTelemetryLogger,
   reportTelemetry,
+  withDeadline,
   type Telemetry,
 } from "@hambazi/observability";
-import { Worker, UnrecoverableError } from "bullmq";
+import { Worker, UnrecoverableError, WaitingError } from "bullmq";
 import { matchDomainEventSchema } from "../matches/index.js";
 /** One explicit Match or Chat delivery queue; results and matchmaking retain their owners. */
 export function realtimeJobProcessor(
@@ -47,7 +48,11 @@ export function createRealtimeConsumer(options: {
   namespace: string;
   publish(event: unknown): Promise<void>;
   unavailable(): void;
+  drainTimeoutMs?: number;
 }) {
+  const drainTimeoutMs = options.drainTimeoutMs ?? 15000;
+  if (!Number.isInteger(drainTimeoutMs) || drainTimeoutMs < 1 || drainTimeoutMs > 120000)
+    throw new Error("Invalid realtime consumer drain timeout");
   const url = new URL(options.redisUrl.reveal());
   if (
     !/^[A-Za-z0-9_-]{1,64}$/.test(options.namespace) ||
@@ -59,9 +64,24 @@ export function createRealtimeConsumer(options: {
   const db = Number(url.pathname.slice(1) || 0);
   if (!Number.isInteger(db) || db < 0 || db > 15)
     throw new Error("Invalid realtime queue configuration");
+  const active = new Set<Promise<unknown>>();
+  let stopping = false;
+  const processing = realtimeJobProcessor(options.publish, options.kind);
   const worker = new Worker(
     options.kind === "CHAT_MESSAGE_V1" ? "chat-message-v1" : "match-changed-v1",
-    realtimeJobProcessor(options.publish, options.kind),
+    async (job, token) => {
+      if (stopping) {
+        await job.moveToWait(token);
+        throw new WaitingError();
+      }
+      const work = processing(job);
+      active.add(work);
+      try {
+        return await work;
+      } finally {
+        active.delete(work);
+      }
+    },
     {
       prefix: `hambazi:jobs:${options.namespace}`,
       connection: {
@@ -84,8 +104,19 @@ export function createRealtimeConsumer(options: {
       /* best effort */
     }
   });
+  let closing: Promise<void> | undefined;
   return Object.freeze({
     ready: () => worker.waitUntilReady().then(() => {}),
-    close: () => worker.close(),
+    close: () => {
+      stopping = true;
+      return (closing ??= withDeadline(
+        (async () => {
+          await worker.pause(true);
+          await Promise.allSettled([...active]);
+          await worker.close();
+        })(),
+        drainTimeoutMs,
+      ));
+    },
   });
 }

@@ -64,6 +64,14 @@ export function createCatalogRate(options: {
   };
   return {
     consume,
+    async probe(signal: AbortSignal) {
+      if (!client.isReady) return false;
+      try {
+        return (await client.withAbortSignal(signal).ping()) === "PONG";
+      } catch {
+        return false;
+      }
+    },
     async connect() {
       let timer: ReturnType<typeof setTimeout> | undefined;
       try {

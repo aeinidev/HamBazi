@@ -8,6 +8,7 @@ import {
 } from "../auth/index.js";
 import { createBotInternalHttpApplication } from "./bot-internal-http.js";
 import type { SafeLogger } from "./safe-logger.js";
+import { createServiceHealth, type ServiceHealth } from "@hambazi/observability";
 
 async function pem(path: string): Promise<string> {
   const info = await stat(path);
@@ -21,6 +22,8 @@ export async function startBotInternalTransport(options: {
   redisUrl: { reveal(): string };
   onboarding: (leaseMs: number) => ReturnType<typeof createBotOnboarding>;
   logger: SafeLogger;
+  health: ServiceHealth;
+  probeTimeoutMs: number;
 }) {
   const config = parseBotInternalConfig(options.environment);
   if (!config) return undefined;
@@ -32,6 +35,13 @@ export async function startBotInternalTransport(options: {
     identityLimit: config.identityLimit,
   });
   let http: Awaited<ReturnType<typeof createBotInternalHttpApplication>> | undefined;
+  const health = createServiceHealth(
+    [
+      { required: true, probe: async () => (await options.health.ready()).status !== "NOT_READY" },
+      { required: true, probe: rate.probe },
+    ],
+    options.probeTimeoutMs,
+  );
   try {
     const [key, cert] = await Promise.all([pem(config.keyFile), pem(config.certFile)]);
     // Startup fails closed for the privileged listener if distributed admission is unavailable.
@@ -42,16 +52,26 @@ export async function startBotInternalTransport(options: {
       limiter: rate.limiter,
       tls: { key: new SecretValue(key), cert },
       logger: options.logger,
+      health,
     });
     await http.app.listen(config.port, config.bindAddress);
+    health.started();
     let closing: Promise<void> | undefined;
     return {
+      stopAdmission() {
+        health.stopAdmission();
+        http!.stopAdmission();
+      },
       close() {
+        health.stopAdmission();
+        http!.stopAdmission();
         return (closing ??= (async () => {
           try {
             await http!.app.close();
+            await http!.settled();
           } finally {
             rate.close();
+            health.stopped();
           }
         })());
       },

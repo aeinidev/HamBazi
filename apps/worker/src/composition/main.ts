@@ -8,7 +8,7 @@ try {
   const shutdown = () => {
     if (stopping) return;
     stopping = true;
-    const deadline = setTimeout(() => process.exit(1), 15000);
+    const deadline = setTimeout(() => process.exit(1), worker.drainTimeoutMs + 1000);
     deadline.unref();
     void worker.close().then(
       () => {

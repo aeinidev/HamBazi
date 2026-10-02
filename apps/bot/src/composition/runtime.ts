@@ -5,6 +5,8 @@ import { createTelegramSender } from "../telegram.js";
 import { createDeliveryHandler } from "../delivery.js";
 import { createBotHttp } from "./http.js";
 import type { BotLogger } from "./logger.js";
+import { parseOperationsConfig } from "@hambazi/config";
+import { createServiceHealth, startHealthServer, withDeadline } from "@hambazi/observability";
 async function pem(path: string) {
   const info = await stat(path);
   if (!info.isFile() || info.size < 1 || info.size > 65536) throw new Error();
@@ -18,8 +20,15 @@ export async function startBot(
 ) {
   let backend: ReturnType<typeof createBackend> | undefined;
   let http: ReturnType<typeof createBotHttp> | undefined;
+  const operations = parseOperationsConfig(env, "bot");
+  const health = createServiceHealth(
+    [{ required: true, probe: (signal) => backend!.probe(signal) }],
+    operations.probeTimeoutMs,
+  );
+  let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
     const config = parseBotRuntimeConfig(env);
+    if (operations.port) healthServer = await startHealthServer(health, operations.port);
     const [key, cert, ca] = await Promise.all([
       pem(config.keyFile),
       pem(config.certFile),
@@ -53,23 +62,32 @@ export async function startBot(
       logger,
     });
     await http.server.listen({ host: config.bindAddress, port: config.port });
+    health.started();
     logger.lifecycle("bot.started");
     let closing: Promise<void> | undefined;
     return {
+      health,
+      drainTimeoutMs: operations.drainTimeoutMs,
       close() {
-        return (closing ??= (async () => {
-          try {
+        health.stopAdmission();
+        http!.stopAdmission();
+        return (closing ??= withDeadline(
+          (async () => {
             await http!.close();
-          } finally {
             backend!.close();
-          }
-          logger.lifecycle("bot.stopped");
-        })());
+            health.stopped();
+            await healthServer?.close();
+            logger.lifecycle("bot.stopped");
+          })(),
+          operations.drainTimeoutMs,
+        ));
       },
     };
   } catch {
     await http?.close().catch(() => {});
     backend?.close();
+    health.stopped();
+    await healthServer?.close().catch(() => {});
     throw new Error("Bot startup failed");
   }
 }

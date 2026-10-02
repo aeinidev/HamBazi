@@ -28,6 +28,9 @@ import {
 import { createHttpApplication } from "./http.js";
 import type { SafeLogger } from "./safe-logger.js";
 import { startBotInternalTransport } from "./bot-internal-runtime.js";
+import { parseOperationsConfig } from "@hambazi/config";
+import { startHealthServer, withDeadline } from "@hambazi/observability";
+import { createApiHealth } from "../health/index.js";
 
 export async function startApi(
   environment: Readonly<Record<string, string | undefined>>,
@@ -40,6 +43,7 @@ export async function startApi(
   const catalogConfig = parseCatalogConfig(environment);
   const roomsConfig = parseRoomsConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "api");
+  const operations = parseOperationsConfig(environment, "api");
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: auth.poolMax,
@@ -76,7 +80,23 @@ export async function startApi(
     ? createRoomsRate({ url: runtime.redisUrl, namespace: auth.signing.issuer, ...roomsConfig })
     : undefined;
   let internal: Awaited<ReturnType<typeof startBotInternalTransport>>;
+  const health = createApiHealth({
+    postgres: () => database.probe(),
+    redis: async (signal) =>
+      (
+        await Promise.all([
+          rate.probe(signal),
+          profileRate.probe(signal),
+          catalogRate.probe(signal),
+          ...(roomsRate ? [roomsRate.probe(signal)] : []),
+          ...(statisticsRate ? [statisticsRate.probe(signal)] : []),
+        ])
+      ).every(Boolean),
+    timeoutMs: operations.probeTimeoutMs,
+  });
+  let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
+    if (operations.port) healthServer = await startHealthServer(health, operations.port);
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
     const clock = { nowMs: () => Date.now() };
     const onboarding = createMiniAppOnboarding({
@@ -180,26 +200,47 @@ export async function startApi(
           clock,
           leaseMs,
         }),
+      health,
+      probeTimeoutMs: operations.probeTimeoutMs,
     });
     await http.app.listen(runtime.port, auth.bindAddress);
+    health.started();
     logger.lifecycle("api.started");
+    let closing: Promise<void> | undefined;
     return {
-      async close() {
-        try {
-          await http?.realtime?.close();
-          await Promise.all([http?.app.close(), internal?.close()]);
-        } finally {
-          rate.close();
-          profileRate.close();
-          catalogRate.close();
-          roomsRate?.close();
-          statisticsRate?.close();
-          await database.disconnect();
-        }
-        logger.lifecycle("api.stopped");
+      health,
+      drainTimeoutMs: operations.drainTimeoutMs,
+      close() {
+        health.stopAdmission();
+        http!.stopAdmission();
+        internal?.stopAdmission();
+        return (closing ??= withDeadline(
+          (async () => {
+            const drains = await Promise.allSettled([
+              http?.realtime?.close(),
+              (async () => {
+                await http!.app.close();
+                await http!.settled();
+              })(),
+              internal?.close(),
+            ]);
+            if (drains.some((d) => d.status === "rejected")) throw new Error("API drain failed");
+            rate.close();
+            profileRate.close();
+            catalogRate.close();
+            roomsRate?.close();
+            statisticsRate?.close();
+            await database.disconnect();
+            health.stopped();
+            await healthServer?.close();
+            logger.lifecycle("api.stopped");
+          })(),
+          operations.drainTimeoutMs,
+        ));
       },
     };
   } catch {
+    health.stopAdmission();
     await internal?.close().catch(() => {});
     await http?.realtime?.close().catch(() => {});
     await http?.app.close().catch(() => {});
@@ -209,6 +250,8 @@ export async function startApi(
     roomsRate?.close();
     statisticsRate?.close();
     await database.disconnect().catch(() => {});
+    health.stopped();
+    await healthServer?.close().catch(() => {});
     throw new Error("API startup failed");
   }
 }

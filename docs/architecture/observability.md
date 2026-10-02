@@ -1,7 +1,7 @@
 # Observability boundary
 
 Phase 16A implements shared safe logging and causal metadata. Parent Phase 16
-remains In Progress: dependency health/draining is 16B; metrics, safe reporting,
+remains In Progress: dependency health/draining is documented in [16B](health-and-draining.md); metrics, safe reporting,
 dashboard/alert definitions and incident runbooks are 16C. This document does not
 authorize activation, administrative mutations or external telemetry export.
 

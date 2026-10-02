@@ -391,6 +391,7 @@ it("starts configured polling in the Worker runtime and drains before closing da
   );
   try {
     const deadline = Date.now() + 5000;
+    expect((await runtime.health.ready()).status).toBe("READY");
     while ((await read(id)).status !== "PUBLISHED") {
       if (Date.now() >= deadline) throw new Error("Outbox runtime did not publish fixture");
       await new Promise((r) => setTimeout(r, 20));

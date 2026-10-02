@@ -16,7 +16,7 @@ import {
   type MatchAutomationPort,
   type MatchReconnectPort,
 } from "@hambazi/api/matches";
-import { queueConnection } from "./queue-connection.js";
+import { queueConnection, probeQueue, requeueForDrain } from "./queue-connection.js";
 
 export const matchJobSchema = z.discriminatedUnion("kind", [
   z.strictObject({
@@ -117,8 +117,8 @@ export async function startMatchAutomation(
   const process = matchJobProcessor(options);
   const worker = new Worker(
     name,
-    async (job) => {
-      if (stopping) throw new Error("Match automation closed");
+    async (job, token) => {
+      if (stopping) return requeueForDrain(job, token!);
       const operation = process(job);
       active.add(operation);
       try {
@@ -207,7 +207,19 @@ export async function startMatchAutomation(
     void worker.run().catch(() => options.event("worker.queue_unavailable"));
     tick();
     let closing: Promise<void> | undefined;
+    let paused: Promise<void> | undefined;
+    const stopAdmission = () => {
+      stopping = true;
+      clearTimeout(timer);
+      return (paused ??= worker.pause(true));
+    };
     return Object.freeze({
+      stopAdmission,
+      settled: async () => {
+        await paused?.catch(() => {});
+        await Promise.allSettled([running, ...active]);
+      },
+      probe: async () => !stopping && (await probeQueue(queue)) && (await probeQueue(worker)),
       schedule,
       // Cancellation is an optimization only. An active/racing job is fenced in PostgreSQL.
       async cancel(job: MatchJob) {
@@ -218,10 +230,11 @@ export async function startMatchAutomation(
         }
       },
       close() {
+        const pause = stopAdmission();
         return (closing ??= (async () => {
           stopping = true;
           clearTimeout(timer);
-          await worker.pause(true);
+          await pause;
           let deadline: ReturnType<typeof setTimeout> | undefined;
           try {
             await Promise.race([

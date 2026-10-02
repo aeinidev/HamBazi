@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import type { createMatchResultPort } from "@hambazi/api/matches";
 import type { createStatisticsProjection } from "@hambazi/api/leaderboard";
 import { domainEventProcessor, outboxQueueNames } from "./outbox-dispatcher.js";
-import { queueConnection } from "./queue-connection.js";
+import { queueConnection, probeQueue, requeueForDrain } from "./queue-connection.js";
 type Matches = ReturnType<typeof createMatchResultPort>;
 type Statistics = ReturnType<typeof createStatisticsProjection>;
 export function finishProcessor(matches: Matches, statistics: Statistics) {
@@ -51,9 +51,12 @@ export async function startStatisticsConsumer(options: {
     throw new Error("Invalid statistics consumer configuration");
   const processing = finishProcessor(options.matches, options.statistics);
   const inflight = new Set<Promise<unknown>>();
+  let stopping = false;
+  let paused: Promise<void> | undefined;
   const worker = new Worker(
     outboxQueueNames.MATCH_FINISHED_V1,
-    (job) => {
+    (job, token) => {
+      if (stopping) return requeueForDrain(job, token!);
       const work = processing(job);
       inflight.add(work);
       void work.then(
@@ -95,12 +98,24 @@ export async function startStatisticsConsumer(options: {
     throw new Error("Statistics consumer unavailable");
   }
   let closing: Promise<void> | undefined;
+  const stopAdmission = () => {
+    stopping = true;
+    return (paused ??= worker.pause(true));
+  };
+  const settled = async () => {
+    await paused?.catch(() => {});
+    await Promise.allSettled([...inflight]);
+  };
   return {
+    stopAdmission,
+    settled,
+    probe: async () => !stopping && (await probeQueue(worker)),
     close() {
+      const pause = stopAdmission();
       return (closing ??= (async () => {
         try {
           await bounded(
-            worker.pause(true).then(() => Promise.allSettled([...inflight])),
+            pause.then(() => Promise.allSettled([...inflight])),
             options.drainTimeoutMs,
           );
         } catch {

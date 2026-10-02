@@ -114,20 +114,22 @@ capacity work and must preserve durable logout during Redis outages.
 Database pool acquisition/connection waits are bounded at two seconds and session
 transactions at five seconds. This is not a PostgreSQL statement-timeout or
 network-partition guarantee for every read. Graceful shutdown closes HTTP before
-Redis/database clients, with a 15-second process deadline. No migration runs at
-API startup; operators use the existing migration workflow first.
+Redis/database clients. [ADR-032 health/draining](health-and-draining.md) now provides
+an optional private health listener, handler settlement tracking and a configurable
+drain budget (existing default 15 seconds), followed by a one-second hard-exit margin.
+No migration runs at API startup; operators use the existing migration workflow first.
 
 ## Telemetry
 
-Nest/Fastify default loggers are disabled. Pino emits only constructed
-`event`, server-generated `requestId`, `durationMs`, and optional stable `errorCode`
-(plus Pino's level). API lifecycle events have fixed names. URLs, caller request
+Nest/Fastify default loggers are disabled. Pino uses the constructed fields in the
+[shared telemetry allowlist](observability.md), including server-generated request
+and trace identifiers. API lifecycle events have fixed names. URLs, caller request
 IDs, IPs, headers, bodies, tokens, exception messages/stacks and arbitrary objects
 never enter this logger. Requests cannot select their correlation identifier.
 Responses carry no-store, restrictive API-only CSP, nosniff, frame denial and
 referrer policy; production adds HSTS. Known-origin CORS permits only the needed
-methods/headers and never enables credentialed cookies. Broader tracing/Sentry
-and health endpoints remain their own phase.
+methods/headers and never enables credentialed cookies. Sentry/export remain
+Phase 16C; private health is documented in Phase 16B above.
 
 ## Commands and verification
 

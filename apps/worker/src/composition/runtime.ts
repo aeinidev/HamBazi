@@ -23,6 +23,8 @@ import { createDatabase } from "@hambazi/database";
 import { createBotOnboardingCleanup } from "@hambazi/api/auth";
 import { createProfileCleanup } from "@hambazi/api/users";
 import { startCleanupQueue } from "../onboarding-cleanup.js";
+import { parseOperationsConfig } from "@hambazi/config";
+import { createServiceHealth, startHealthServer, withDeadline } from "@hambazi/observability";
 export async function startWorker(
   environment: Readonly<Record<string, string | undefined>>,
   event: (
@@ -45,6 +47,7 @@ export async function startWorker(
   const config = parseOnboardingWorkerConfig(environment);
   const outboxConfig = parseOutboxWorkerConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "worker");
+  const operations = parseOperationsConfig(environment, "worker");
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: config.poolMax,
@@ -59,7 +62,28 @@ export async function startWorker(
   let profileQueue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
   let publisher: Awaited<ReturnType<typeof createBullMqDomainPublisher>> | undefined;
   let outboxLoop: ReturnType<typeof startOutboxLoop> | undefined;
+  const health = createServiceHealth(
+    [
+      { required: true, probe: () => database.probe() },
+      {
+        required: true,
+        probe: async () => {
+          const results = await Promise.all([
+            queue?.probe(),
+            profileQueue?.probe(),
+            ...(outboxConfig ? [publisher?.probe?.()] : []),
+            ...(resilience ? [automation?.probe()] : []),
+            ...(statsConfig ? [statistics?.probe()] : []),
+          ]);
+          return results.every((v) => v === true);
+        },
+      },
+    ],
+    operations.probeTimeoutMs,
+  );
+  let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
+    if (operations.port) healthServer = await startHealthServer(health, operations.port);
     await database.connect();
     queue = await startCleanupQueue({
       ...config,
@@ -124,10 +148,14 @@ export async function startWorker(
         unavailable: () => event("worker.outbox_unavailable"),
       });
     let closing: Promise<void> | undefined;
+    health.started();
     return {
+      health,
+      drainTimeoutMs: operations.drainTimeoutMs,
       close() {
-        return (closing ??= (async () => {
-          try {
+        health.stopAdmission();
+        return (closing ??= withDeadline(
+          (async () => {
             const drains = await Promise.allSettled([
               queue!.close(),
               profileQueue!.close(),
@@ -135,16 +163,26 @@ export async function startWorker(
               automation?.close(),
               statistics?.close(),
             ]);
+            // Feature-specific deadlines can fail before an application transaction settles.
+            await Promise.all([
+              queue!.settled(),
+              profileQueue!.settled(),
+              automation?.settled(),
+              statistics?.settled(),
+            ]);
             await publisher?.close();
+            await database.disconnect();
+            health.stopped();
+            await healthServer?.close();
             if (drains.some((result) => result.status === "rejected"))
               throw new Error("Worker drain failed");
-          } finally {
-            await database.disconnect();
-          }
-        })());
+          })(),
+          operations.drainTimeoutMs,
+        ));
       },
     };
   } catch {
+    health.stopAdmission();
     await statistics?.close().catch(() => {});
     await automation?.close().catch(() => {});
     await outboxLoop?.close().catch(() => {});
@@ -152,6 +190,8 @@ export async function startWorker(
     await queue?.close().catch(() => {});
     await profileQueue?.close().catch(() => {});
     await database.disconnect().catch(() => {});
+    health.stopped();
+    await healthServer?.close().catch(() => {});
     throw new Error("Worker startup failed");
   }
 }

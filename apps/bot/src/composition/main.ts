@@ -7,7 +7,7 @@ try {
   const stop = () => {
     if (stopping) return;
     stopping = true;
-    const deadline = setTimeout(() => process.exit(1), 30000);
+    const deadline = setTimeout(() => process.exit(1), runtime.drainTimeoutMs + 1000);
     deadline.unref();
     void runtime.close().then(
       () => clearTimeout(deadline),

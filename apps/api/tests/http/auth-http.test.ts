@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { currentCorrelation } from "@hambazi/observability";
 import { request } from "node:http";
+import { withDeadline } from "@hambazi/observability";
+import { createErrorEnvelope } from "@hambazi/contracts";
 import { SecretValue } from "@hambazi/config";
 import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
@@ -46,6 +48,61 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   return { ...f, ...http, output, ip, identity, issue, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it.each([false, true])(
+    "drains accepted application work even when client abort=%s",
+    async (abort) => {
+      const f = await setup();
+      let entered!: () => void;
+      let release!: () => void;
+      const started = new Promise<void>((r) => (entered = r));
+      const gate = new Promise<void>((r) => (release = r));
+      f.issue.mockImplementation(async () => {
+        entered();
+        await gate;
+        return createErrorEnvelope("INVALID_INPUT");
+      });
+      await f.app.listen(0, "127.0.0.1");
+      const address = f.server.server.address();
+      if (!address || typeof address === "string") throw new Error("Test address");
+      let client!: ReturnType<typeof request>;
+      const response = new Promise<number>((resolve) => {
+        client = request(
+          {
+            host: "127.0.0.1",
+            port: address.port,
+            path: authPaths.issue,
+            method: "POST",
+            agent: false,
+            headers: { "content-type": "application/json" },
+          },
+          (res) => {
+            res.resume();
+            res.on("end", () => resolve(res.statusCode!));
+          },
+        );
+        client.on("error", () => resolve(0));
+        client.end(JSON.stringify(f.payload));
+      });
+      await started;
+      try {
+        f.stopAdmission();
+        expect((await f.post()).statusCode).toBe(503);
+        expect(f.issue).toHaveBeenCalledTimes(1);
+        if (abort) {
+          client.destroy();
+          await response;
+        }
+        const drain = f.app.close().then(() => f.settled());
+        await expect(withDeadline(drain, 20)).rejects.toThrow("Operation deadline exceeded");
+        release();
+        await drain;
+        expect(await response).toBe(abort ? 0 : 400);
+      } finally {
+        release();
+        await f.settled();
+      }
+    },
+  );
   it("isolates server-owned correlation across concurrent requests and ignores public trace headers", async () => {
     const f = await setup();
     const observed: { requestId: string; traceparent: string }[] = [];

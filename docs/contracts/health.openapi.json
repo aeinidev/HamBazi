@@ -1,0 +1,154 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HamBazi local operations health",
+    "version": "1.0.0"
+  },
+  "x-access-policy": "Optional loopback-only listener. Exact 127.0.0.1 Host; no browser/proxy headers. Never expose through ingress.",
+  "paths": {
+    "/v1/health/live": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Process responding; downstream independent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["LIVE"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid method, route or local access shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Probe unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Ready, or API durable services admitted with ephemeral dependencies degraded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["READY", "DEGRADED"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid method, route or local access shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Starting, draining or required dependency unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "status"],
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["NOT_READY"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

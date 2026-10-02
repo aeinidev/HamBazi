@@ -144,13 +144,15 @@ Redis failure denies admission through API; DB failure cannot produce successful
 workflow completion. Invalid service credentials or backend contracts also keep
 webhooks unsuccessful until configuration is corrected. Alert on fixed failure
 events, never raw SDK errors (which can contain credentials/payloads). Bot logs
-only event, requestId, durationMs and errorCode. There is no dedicated Bot health
-HTTP route yet; startup probe, process supervision and webhook error monitoring
-must not be mistaken for continuous dependency readiness.
+through the [shared telemetry allowlist](observability.md). Phase 16B adds optional
+[loopback health](health-and-draining.md), including a read-only authenticated
+private API readiness probe that does not spend onboarding admission counters.
+Health is separate from the webhook listener; it requires no Telegram API call.
 
 SIGTERM/SIGINT stop admission, drain active requests, then close the backend
-agent; a 30-second process deadline bounds shutdown. Existing receipt leases
-recover interrupted work. Stop traffic before rollback and preserve metadata and
+agent. The configurable drain budget preserves the existing 30-second default;
+supervision adds a one-second hard-exit margin and reports deadline failure.
+Existing receipt leases recover interrupted work. Stop traffic before rollback and preserve metadata and
 queued Telegram updates. Do not flush Redis, delete accounts or drop receipt
 tables. Keep Bot/API lease and service-key configuration aligned on every replica.
 

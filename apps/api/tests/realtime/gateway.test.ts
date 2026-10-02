@@ -72,6 +72,66 @@ function ack(client: ClientSocket, name: string, payload: unknown): Promise<unkn
 }
 
 describe("versioned realtime gateway", () => {
+  it("stops new intents and handshakes while draining an already admitted command", async () => {
+    const d = dependencies();
+    let entered!: () => void;
+    let release!: () => void;
+    const started = new Promise<void>((r) => (entered = r));
+    const gate = new Promise<void>((r) => (release = r));
+    const ports: RealtimeDependencies = {
+      ...d.ports,
+      matches: {
+        ...d.ports.matches,
+        command: async () => {
+          entered();
+          await gate;
+          return {
+            ok: true,
+            value: {
+              schemaVersion: 1,
+              matchId,
+              actionId,
+              stateVersion: 2,
+              lastEventSeq: 3,
+              status: "ACTIVE",
+            },
+          };
+        },
+      },
+    };
+    const url = await start(ports);
+    const client = await connect(url);
+    await connected(client);
+    const command = {
+      schemaVersion: 1,
+      matchId,
+      actionId,
+      expectedVersion: 1,
+      command: { type: "income" },
+    };
+    const accepted = ack(client, "game:command", command);
+    await started;
+    try {
+      gateway!.stopAdmission();
+      expect(gateway!.ready()).toBe(false);
+      expect(await ack(client, "game:command", command)).toMatchObject({
+        ok: false,
+        error: { code: "INTERNAL_ERROR" },
+      });
+      const denied = await connect(url);
+      expect((await connectError(denied)).message).toBeTruthy();
+      let drained = false;
+      const closing = gateway!.close().then(() => {
+        drained = true;
+      });
+      expect(drained).toBe(false);
+      release();
+      expect(await accepted).toMatchObject({ ok: true });
+      await closing;
+    } finally {
+      release();
+    }
+  });
   it("gives queued commands separate server traces and logs only validated metadata", async () => {
     const d = dependencies();
     const output: string[] = [];

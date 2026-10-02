@@ -1,4 +1,25 @@
 import type { ConnectionOptions } from "bullmq";
+import { WaitingError } from "bullmq";
+/** A fetch racing local pause is returned without consuming a failure attempt. */
+export async function requeueForDrain(
+  job: { moveToWait(token?: string): Promise<number> },
+  token: string,
+): Promise<never> {
+  await job.moveToWait(token);
+  throw new WaitingError();
+}
+export async function probeQueue(transport: {
+  getBackend(): { readonly client: Promise<{ readonly status: string; info(): Promise<string> }> };
+}) {
+  try {
+    const client = await transport.getBackend().client;
+    // BullMQ 6 exposes INFO, not PING, on its public Redis client contract.
+    // Discard all server details; no queue mutation or application key read.
+    return client.status === "ready" && typeof (await client.info()) === "string";
+  } catch {
+    return false;
+  }
+}
 export function queueConnection(
   secret: { reveal(): string },
   worker: boolean,

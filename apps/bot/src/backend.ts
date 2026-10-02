@@ -1,6 +1,7 @@
 import { request, Agent } from "node:https";
 import { currentCorrelation } from "@hambazi/observability";
-import type { z } from "zod";
+import { z } from "zod";
+import { healthPaths } from "@hambazi/observability";
 import {
   botInternalPaths,
   botAdmissionResultSchema,
@@ -57,6 +58,7 @@ export function createBackend(options: {
     body: unknown,
     schema: z.ZodType<T>,
     signal: AbortSignal,
+    method: "POST" | "GET" = "POST",
   ): Promise<T> {
     const bounded = AbortSignal.any([signal, AbortSignal.timeout(options.timeoutMs)]);
     try {
@@ -65,14 +67,18 @@ export function createBackend(options: {
         const req = request(
           new URL(path, origin),
           {
-            method: "POST",
+            method,
             agent,
             signal: bounded,
             headers: {
               ...(currentCorrelation() ? { traceparent: currentCorrelation()!.traceparent } : {}),
               authorization: options.bearer.reveal(),
-              "content-type": "application/json",
-              "content-length": Buffer.byteLength(encoded),
+              ...(method === "POST"
+                ? {
+                    "content-type": "application/json",
+                    "content-length": Buffer.byteLength(encoded),
+                  }
+                : {}),
             },
             maxHeaderSize: 8192,
           },
@@ -114,7 +120,7 @@ export function createBackend(options: {
           },
         );
         req.on("error", () => reject(new RetryDelivery()));
-        req.end(encoded);
+        req.end(method === "POST" ? encoded : undefined);
       });
     } catch (error) {
       throw error instanceof RetryDelivery ? error : new RetryDelivery();
@@ -135,5 +141,25 @@ export function createBackend(options: {
       await call(botInternalPaths.acknowledge, parsed.data, botAcknowledgedSchema, signal);
     },
   };
-  return { backend, close: () => agent.destroy() };
+  return {
+    backend,
+    close: () => agent.destroy(),
+    async probe(signal: AbortSignal) {
+      try {
+        const body = await call(
+          healthPaths.ready,
+          undefined,
+          z.strictObject({
+            schemaVersion: z.literal(1),
+            status: z.literal("READY"),
+          }),
+          signal,
+          "GET",
+        );
+        return body.status === "READY";
+      } catch {
+        return false;
+      }
+    },
+  };
 }

@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./health": {
+      "types": "./dist/health/index.d.ts",
+      "import": "./dist/health/index.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

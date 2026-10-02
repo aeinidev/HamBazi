@@ -8,7 +8,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
 import { createBotHttp, webhookPath } from "../../src/composition/http.js";
 import { createBotLogger } from "../../src/composition/logger.js";
-import { createCorrelation, withCorrelation } from "@hambazi/observability";
+import { createCorrelation, withCorrelation, healthPaths } from "@hambazi/observability";
 import { createBackend, RetryDelivery } from "../../src/backend.js";
 import { createDeliveryHandler } from "../../src/delivery.js";
 import { fixture, raw, delivery } from "../unit/fixtures.js";
@@ -333,10 +333,16 @@ describe("private backend HTTPS client", () => {
   it("starts configured TLS runtime, probes only admission, and closes cleanly", async () => {
     await withCertificate(async (cert, files) => {
       const requests: string[] = [];
+      let dependencyReady = true;
       const backend = createServer({ key: cert.key.reveal(), cert: cert.cert }, (req, res) => {
         requests.push(req.url!);
         res.setHeader("content-type", "application/json");
-        res.end(JSON.stringify({ schemaVersion: 1, ok: true }));
+        if (req.url === healthPaths.ready) {
+          res.statusCode = dependencyReady ? 200 : 503;
+          res.end(
+            JSON.stringify({ schemaVersion: 1, status: dependencyReady ? "READY" : "NOT_READY" }),
+          );
+        } else res.end(JSON.stringify({ schemaVersion: 1, ok: true }));
       });
       await new Promise<void>((resolve) => backend.listen(0, "127.0.0.1", resolve));
       const reservation = netServer();
@@ -380,9 +386,16 @@ describe("private backend HTTPS client", () => {
             ).status,
           ).toBe(200);
           expect(requests.every((p) => p === "/v1/internal/bot/admit")).toBe(true);
+          expect((await running.health.ready()).status).toBe("READY");
+          dependencyReady = false;
+          expect((await running.health.ready()).status).toBe("NOT_READY");
+          expect(running.health.live().status).toBe("LIVE");
+          dependencyReady = true;
+          expect((await running.health.ready()).status).toBe("READY");
         } finally {
           await running.close();
           await running.close();
+          expect((await running.health.ready()).status).toBe("NOT_READY");
         }
       } finally {
         await new Promise<void>((resolve) => {

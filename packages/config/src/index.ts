@@ -20,3 +20,4 @@ export { parseOutboxWorkerConfig } from "./outbox-worker.js";
 export { parseChatConfig } from "./chat.js";
 
 export { parseStatisticsConfig } from "./statistics.js";
+export { parseOperationsConfig, OperationsConfigurationError } from "./operations.js";

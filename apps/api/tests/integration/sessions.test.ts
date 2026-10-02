@@ -24,6 +24,7 @@ import {
 import { accountIntegrationCases } from "./account-cases.js";
 import { botOnboardingIntegrationCases } from "./bot-onboarding-cases.js";
 import { botInternalIntegrationCases } from "./bot-internal-cases.js";
+import { createApiHealth } from "../../src/health/index.js";
 import {
   commandId,
   initData,
@@ -571,6 +572,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         reservation.close((error) => (error ? reject(error) : resolve())),
       );
       const botToken = "123456789:RuntimeSyntheticCredential";
+      const healthReservation = createServer();
+      await new Promise<void>((r) => healthReservation.listen(0, "127.0.0.1", r));
+      const healthAddress = healthReservation.address();
+      if (!healthAddress || typeof healthAddress === "string")
+        throw new Error("Test health address");
+      const healthPort = healthAddress.port;
+      await new Promise<void>((r) => healthReservation.close(() => r()));
       const logs: string[] = [];
       const runtime = await startApi(
         {
@@ -578,6 +586,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           API_DATABASE_URL: process.env.API_DATABASE_URL!,
           API_REDIS_URL: process.env.TEST_AUTH_REDIS_URL!,
           API_PORT: String(port),
+          API_HEALTH_PORT: String(healthPort),
           ALLOWED_ORIGINS: "https://mini.example",
           API_BIND_ADDRESS: "127.0.0.1",
           API_DB_POOL_MAX: "5",
@@ -612,6 +621,10 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       );
       try {
         const date = Math.floor(Date.now() / 1000);
+        expect(
+          await (await fetch(`http://127.0.0.1:${healthPort}/v1/health/ready`)).json(),
+        ).toEqual({ schemaVersion: 1, status: "READY" });
+        expect((await fetch(`http://127.0.0.1:${port}/v1/health/ready`)).status).toBe(404);
         const user = JSON.stringify({ id: 42 });
         const key = createHmac("sha256", "WebAppData").update(botToken).digest();
         const hash = createHmac("sha256", key)
@@ -714,6 +727,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         await runtime.close();
       }
       expect(logs.some((line) => JSON.parse(line).event === "api.started")).toBe(true);
+      expect((await runtime.health.ready()).status).toBe("NOT_READY");
       expect(logs.some((line) => JSON.parse(line).event === "api.stopped")).toBe(true);
     });
     it("recovers from an actual Redis restart without losing durable sessions or onboarding accounts", async () => {
@@ -721,6 +735,13 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       if (!name || !/^hambazi-auth-http-[a-f0-9-]{36}$/.test(name))
         throw new Error("Expected harness-owned disposable Redis container");
       const a = await transport(`integration:${randomUUID()}`);
+      const health = createApiHealth({
+        postgres: () => second.probe(),
+        redis: a.rate.probe,
+        timeoutMs: 1000,
+      });
+      health.started();
+      expect((await health.ready()).status).toBe("READY");
       try {
         const account = await a.server.inject({
           method: "POST",
@@ -735,6 +756,8 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         });
         expect(issued.statusCode).toBe(200);
         await promisify(execFile)("docker", ["stop", "--time", "1", name]);
+        expect((await health.ready()).status).toBe("DEGRADED");
+        expect(health.live().status).toBe("LIVE");
         expect(
           (
             await a.server.inject({
@@ -783,6 +806,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           await new Promise((resolve) => setTimeout(resolve, 200));
         }
         expect(recovered).toBe(true);
+        expect((await health.ready()).status).toBe("READY");
         let profileRecovered = false;
         for (let i = 0; i < 40; i++) {
           if ((await a.profileRate.consume("read", userId)).allowed) {

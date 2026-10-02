@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
-import { Queue } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import { createDatabase } from "@hambazi/database";
 import { createBotOnboardingCleanup } from "@hambazi/api/auth";
 import { startCleanupQueue } from "../../src/onboarding-cleanup.js";
 import { startWorker } from "../../src/composition/runtime.js";
+import { createServiceHealth, withDeadline } from "@hambazi/observability";
+import { probeQueue, queueConnection, requeueForDrain } from "../../src/queue-connection.js";
 if (
   process.env.TEST_DATABASE_CONFIRM !== "isolated-hambazi-test" ||
   process.env.TEST_AUTH_DATABASE_READY !== "foundation-completed" ||
@@ -114,6 +116,102 @@ function inspectQueue(namespace: string) {
   });
 }
 describe("cleanup with Worker PostgreSQL grants and Redis ACL", () => {
+  it("returns a fetch racing local pause to waiting without spending its only failure attempt", async () => {
+    const namespace = randomUUID();
+    const queue = inspectQueue(namespace);
+    const worker = new Worker(
+      "bot-onboarding-cleanup-v1",
+      (job, token) => requeueForDrain(job, token!),
+      {
+        connection: queueConnection(redisUrl, true),
+        prefix: `hambazi:jobs:${namespace}`,
+        autorun: false,
+      },
+    );
+    worker.on("error", () => {});
+    worker.on("active", () => {
+      void worker.pause(true);
+    });
+    let recovery: Worker | undefined;
+    try {
+      await worker.waitUntilReady();
+      const job = await queue.add("drain-race", { schemaVersion: 1 }, { attempts: 1 });
+      void worker.run();
+      await until(async () => worker.isPaused() && (await job.getState()) === "waiting");
+      expect((await queue.getJob(job.id!))?.attemptsMade).toBe(0);
+      await worker.close();
+      recovery = new Worker("bot-onboarding-cleanup-v1", async () => ({ schemaVersion: 1 }), {
+        connection: queueConnection(redisUrl, true),
+        prefix: `hambazi:jobs:${namespace}`,
+      });
+      recovery.on("error", () => {});
+      await until(async () => (await job.getState()) === "completed");
+      expect((await queue.getJob(job.id!))?.attemptsMade).toBe(1);
+    } finally {
+      await worker.close();
+      await recovery?.close();
+      await queue.disconnect();
+      await queue.close();
+    }
+  });
+  it("fails required queue readiness on a real connection loss and recovers on a fresh connection", async () => {
+    const namespace = randomUUID();
+    let queue = inspectQueue(namespace);
+    const health = createServiceHealth([{ required: true, probe: () => probeQueue(queue) }], 1000);
+    health.started();
+    try {
+      await queue.waitUntilReady();
+      expect((await health.ready()).status).toBe("READY");
+      await queue.disconnect();
+      expect((await health.ready()).status).toBe("NOT_READY");
+      await queue.close();
+      queue = inspectQueue(namespace);
+      await queue.waitUntilReady();
+      expect((await health.ready()).status).toBe("READY");
+    } finally {
+      await queue.disconnect();
+      await queue.close();
+    }
+  });
+  it("stops claims and keeps an in-flight PostgreSQL transaction usable after a drain deadline", async () => {
+    let entered!: () => void;
+    let release!: () => void;
+    let ran = 0;
+    const started = new Promise<void>((r) => (entered = r));
+    const gate = new Promise<void>((r) => (release = r));
+    const options = queueOptions();
+    const runtime = await startCleanupQueue({
+      ...options,
+      cleanup: async () => {
+        ran++;
+        return workerDb.forModule("auth").transaction(async (db) => {
+          await db.botUpdateReceipt.count();
+          entered();
+          await gate;
+          await db.botUpdateReceipt.count();
+          return { ok: true, receipts: 0, flows: 0 };
+        });
+      },
+    });
+    const health = createServiceHealth([{ required: true, probe: () => runtime.probe() }], 200);
+    health.started();
+    try {
+      await started;
+      expect((await health.ready()).status).toBe("READY");
+      health.stopAdmission();
+      const closing = runtime.close();
+      expect((await health.ready()).status).toBe("NOT_READY");
+      await expect(withDeadline(closing, 20)).rejects.toThrow("Operation deadline exceeded");
+      expect(ran).toBe(1);
+      release();
+      await closing;
+      await runtime.settled();
+      expect(await workerDb.probe()).toBe(true);
+    } finally {
+      release();
+      await runtime.close();
+    }
+  });
   it("uses only expiry/ID reads, bounded deletes, and preserves live metadata", async () => {
     const rows = await Promise.all(Array.from({ length: 4 }, () => seed()));
     const live = await seed(false);
@@ -272,6 +370,7 @@ describe("cleanup with Worker PostgreSQL grants and Redis ACL", () => {
     } finally {
       await runtime.close();
       await runtime.close();
+      expect((await runtime.health.ready()).status).toBe("NOT_READY");
     }
   });
   it("fails startup boundedly without leaking Redis credentials", async () => {
