@@ -107,6 +107,8 @@ async function fixture(game: MatchGame = createCoupMatchGame(rules)) {
         orderBy: { createdAt: "asc" },
       }),
       outbox: await db.outboxEvent.findMany({ where: { aggregateId: matchId } }),
+      result: await db.matchResult.findUnique({ where: { matchId } }),
+      resultSeats: await db.gameResult.findMany({ where: { matchId }, orderBy: { userId: "asc" } }),
     }));
   }
   return { ids, matchId, first, second, config, users, request, active, stored };
@@ -385,6 +387,12 @@ it("finishes a complete game and exactly replays persisted initialization/events
   expect(saved.outbox).toHaveLength(saved.match.stateVersion + 1);
   const finishes = saved.outbox.filter((event) => event.type === "MATCH_FINISHED_V1");
   expect(finishes).toHaveLength(1);
+  expect(saved.result).toMatchObject({
+    eventId: finishes[0]!.id,
+    payloadJsonb: finishes[0]!.payloadJsonb,
+  });
+  expect(saved.resultSeats).toHaveLength(2);
+  expect(saved.resultSeats.filter((r) => r.winner)).toHaveLength(1);
   expect(finishes[0]).toMatchObject(correlation);
   expect((finishes[0]!.payloadJsonb as { result: unknown }).result).toEqual(
     coupEngine.getResult(replay),

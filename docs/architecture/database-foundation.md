@@ -227,3 +227,11 @@ outbox access. Worker cannot read Chat content. The isolated suite preserves the
 populated preceding schema and checks committed messages/streams across a real
 PostgreSQL restart. See [Match chat](match-chat.md) for legacy-row visibility,
 authorization, transaction boundaries and rollback.
+
+Phase 15B extends this foundation additively with Matches-owned match_results
+and Leaderboard-owned stats_heads/stats_generations/stats_applications/stats_values.
+The old user_game_stats key and consumer callback remain intact for release overlap.
+[ADR-030](../adr/030-temporary-statistics-baseline.md) and [Statistics](statistics.md)
+record immutable result guards, exact-count projections, Worker-only mutations
+and trusted generation rebuilds. The isolated harness verifies the twelfth
+migration, schema drift, old-release inserts and result/projection restart persistence.

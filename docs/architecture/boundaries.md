@@ -50,20 +50,20 @@ cannot import its application layer. Public indexes must not directly expose
 repository implementations. A module-owned assembly factory may encapsulate its
 repository construction and be exported through the public index.
 
-| Source module | Allowed synchronous module ports                                |
-| ------------- | --------------------------------------------------------------- |
-| auth          | users                                                           |
-| users         | none                                                            |
-| games         | none (configuration uses its package/port)                      |
-| rooms         | users, games                                                    |
-| matchmaking   | users, games, matches                                           |
-| matches       | users, rooms, games                                             |
-| realtime      | auth, users, games, rooms, matchmaking, matches, presence, chat |
-| presence      | matches                                                         |
-| chat          | matches                                                         |
-| leaderboard   | none; consumes versioned result events/contracts                |
-| admin         | users, games, rooms, matches                                    |
-| health        | none; injected infrastructure health ports                      |
+| Source module | Allowed synchronous module ports                                 |
+| ------------- | ---------------------------------------------------------------- |
+| auth          | users                                                            |
+| users         | none                                                             |
+| games         | none (configuration uses its package/port)                       |
+| rooms         | users, games                                                     |
+| matchmaking   | users, games, matches                                            |
+| matches       | users, rooms, games                                              |
+| realtime      | auth, users, games, rooms, matchmaking, matches, presence, chat  |
+| presence      | matches                                                          |
+| chat          | matches                                                          |
+| leaderboard   | users (eligibility and public names); consumes versioned results |
+| admin         | users, games, rooms, matches                                     |
+| health        | none; injected infrastructure health ports                       |
 
 This matrix is an import ceiling, not authorization or evidence those ports exist.
 The mapping of eligibility/presence/admin wiring is recorded in ADR-013. Register
@@ -161,3 +161,13 @@ owned repository scope. Runtime scoping and ESLint fixtures deny outbox reads,
 claims/updates and Match delegates. The common scanner accepts an injected owner
 decoder, so Matches does not import Chat. Worker composition uses the explicit
 `@hambazi/api/chat` public export. See [Match chat](match-chat.md) and ADR-029.
+
+Phase 15B's owner-approved [ADR-030](../adr/030-temporary-statistics-baseline.md) adds
+only Users eligibility/public-name ports to Leaderboard's synchronous ceiling.
+Matches retains game_results and match_results; Leaderboard owns stats_heads,
+stats_generations, stats_applications and stats_values. Worker uses explicit
+`@hambazi/api/leaderboard` and Matches exports. A trusted composition joins result
+recovery/read and projection ports; no Leaderboard Match table access or Match
+mutation edge is introduced. Positive and negative fitness fixtures cover this
+extension. The old user_game_stats/consumeOnce callback shape remains available
+for release overlap; new generation projections use stats_values.

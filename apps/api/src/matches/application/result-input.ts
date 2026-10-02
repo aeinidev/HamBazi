@@ -28,3 +28,5 @@ export const matchFinishedInputSchema = z.strictObject({
   rulesetVersion: z.string().min(1).max(64),
   result: standardResultInputSchema,
 });
+
+export type FinishedResult = z.infer<typeof matchFinishedInputSchema>;

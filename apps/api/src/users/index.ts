@@ -8,3 +8,6 @@ export { createProfileHttpModule } from "./infrastructure/profile-http.js";
 export type { ProfileHttpDependencies } from "./infrastructure/profile-http.js";
 export { createProfileRate } from "./infrastructure/profile-rate.js";
 export { profileOpenApiDocument } from "./infrastructure/profile-contract.js";
+
+export { createPublicNamesPort } from "./module.js";
+export type { PublicNamesPort } from "./application/public-names.js";

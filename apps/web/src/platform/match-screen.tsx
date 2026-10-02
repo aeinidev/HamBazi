@@ -23,6 +23,10 @@ export function MatchScreen({ id }: { id: string }) {
         );
   }, [id, runtime, connection]);
   const current = snapshot?.matchId === id ? snapshot : null;
+  useEffect(() => {
+    if (current?.status === "FINISHED")
+      void runtime.query.invalidateQueries({ queryKey: ["statistics"] });
+  }, [runtime, id, current?.status]);
   return (
     <>
       <p className="eyebrow">YOUR TABLE</p>
@@ -73,6 +77,12 @@ export function MatchScreen({ id }: { id: string }) {
             <CoupMatch snapshot={current} />
           ) : (
             <p className="quiet">Match status is synchronized with the server.</p>
+          )}
+          {current.status === "FINISHED" && (
+            <p>
+              <a href="#/profile">View your statistics</a> ·{" "}
+              <a href="#/leaderboard/coup">Coup leaderboard</a>
+            </p>
           )}
           {task.notice}
         </Panel>

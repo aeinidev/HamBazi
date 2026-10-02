@@ -1,3 +1,4 @@
+import { LeaderboardScreen } from "./features/leaderboard/index.js";
 import { useEffect, useState } from "react";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import type { Runtime } from "./platform/runtime.js";
@@ -56,7 +57,9 @@ function Shell({
   }, [route, session, telegram]);
   let screen = <CatalogScreen />;
   const path = route.split("/");
-  if (route === "/profile") screen = <ProfileScreen />;
+  if (path[1] === "leaderboard" && path[2])
+    screen = <LeaderboardScreen key={path[2]} gameId={path[2]} />;
+  else if (route === "/profile") screen = <ProfileScreen />;
   else if (route === "/invite") screen = <InviteScreen />;
   else if (route === "/search") screen = <MatchmakingScreen />;
   else if (path[1] === "games" && path[2]) screen = <LobbyScreen slug={path[2]} />;
@@ -125,6 +128,12 @@ function Shell({
               Your search
             </a>
           )}
+          <a
+            aria-current={route.startsWith("/leaderboard/") ? "page" : undefined}
+            href="#/leaderboard/coup"
+          >
+            Leaderboard
+          </a>
           <a aria-current={route === "/profile" ? "page" : undefined} href="#/profile">
             Profile
           </a>

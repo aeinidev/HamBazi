@@ -134,3 +134,10 @@ fields remain IDs/counters only. Deploy the decoder before enabling producers;
 retain compatible handlers through rollback/drain. A separate explicit realtime
 consumer invokes Chat fanout, while the existing queues keep their owners. See
 [Match chat](match-chat.md) and ADR-029.
+
+Phase 15B now supplies the real opt-in match-finished-v1 statistics consumer,
+Match-owned immutable result persistence and generation rebuilds. The Phase 11B
+input/queue versions and old callback shapes above remain compatible.
+[Statistics](statistics.md) describes activation, duplicate delivery, trusted
+maintenance, rollback and legacy-input recovery; no missing pre-11B historical
+outcome is fabricated.

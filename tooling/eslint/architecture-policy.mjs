@@ -17,7 +17,7 @@ export const apiDependencies = {
   realtime: ["auth", "users", "games", "rooms", "matchmaking", "matches", "presence", "chat"],
   presence: ["matches"],
   chat: ["matches"],
-  leaderboard: [],
+  leaderboard: ["users"],
   admin: ["users", "games", "rooms", "matches"],
   health: [],
 };

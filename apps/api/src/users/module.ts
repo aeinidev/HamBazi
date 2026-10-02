@@ -42,3 +42,9 @@ export function createAccountCreationPort(
     newHandleSuffix: () => randomInt(10000, 100000),
   });
 }
+
+import { publicNamesService } from "./application/public-names.js";
+import { createPublicNamesRepository } from "./infrastructure/repositories/public-names.js";
+export function createPublicNamesPort(database: Parameters<typeof createPublicNamesRepository>[0]) {
+  return publicNamesService(createPublicNamesRepository(database));
+}

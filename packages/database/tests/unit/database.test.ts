@@ -260,3 +260,29 @@ it("gives Chat an independent stream and insert-only outbox without Match state"
   expect(sql).not.toMatch(/DELETE FROM|DROP COLUMN|DROP TABLE|UPDATE chat_messages/);
   expect(sql).toContain("command_id IS NULL AND seq IS NULL");
 });
+
+it("keeps results Matches-owned and generation aggregates Leaderboard-owned with additive migration", async () => {
+  const database = createDatabase(options);
+  try {
+    await database.forModule("matches").execute(async (db) => {
+      expect("matchResult" in db).toBe(true);
+      expect("statsValue" in db).toBe(false);
+    });
+    await database.forModule("leaderboard").execute(async (db) => {
+      expect("statsValue" in db).toBe(true);
+      expect("statsHead" in db).toBe(true);
+      expect("matchResult" in db).toBe(false);
+      expect("gameResult" in db).toBe(false);
+      await expect(db.lockStatistics()).rejects.toMatchObject({ code: "DATABASE_LOCK_INVALID" });
+    });
+  } finally {
+    await database.disconnect();
+  }
+  const sql = await readFile(
+    new URL("../../prisma/migrations/202610020001_statistics/migration.sql", import.meta.url),
+    "utf8",
+  );
+  expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|ALTER TABLE user_game_stats/);
+  expect(sql).toContain("match_results_immutable");
+  expect(sql).toContain("game_results_no_truncate");
+});

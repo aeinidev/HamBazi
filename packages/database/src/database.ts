@@ -16,10 +16,18 @@ const ownership = {
     "gameEvent",
     "processedCommand",
     "gameResult",
+    "matchResult",
     "outboxEvent",
   ],
   chat: ["chatMessage", "chatStream", "outboxEvent"],
-  leaderboard: ["userGameStats", "consumerReceipt"],
+  leaderboard: [
+    "userGameStats",
+    "consumerReceipt",
+    "statsHead",
+    "statsGeneration",
+    "statsApplication",
+    "statsValue",
+  ],
   outbox: ["outboxEvent"],
 } as const;
 export type DatabaseOwner = keyof typeof ownership;
@@ -33,6 +41,7 @@ type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
     }
   : OwnedClient<O>) &
   (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object) &
+  (O extends "leaderboard" ? { lockStatistics(): Promise<void> } : object) &
   (O extends "outbox"
     ? { lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> }
     : object);
@@ -76,6 +85,14 @@ function scope<O extends DatabaseOwner>(
           : client[key],
       ]),
     ),
+    ...(owner === "leaderboard"
+      ? {
+          async lockStatistics(): Promise<void> {
+            if (!inTransaction) throw new DatabaseError("DATABASE_LOCK_INVALID");
+            await client.$queryRaw`SELECT id FROM stats_heads WHERE id = 'statistics-v1' FOR UPDATE`;
+          },
+        }
+      : {}),
     ...(owner === "outbox"
       ? {
           async lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> {

@@ -62,3 +62,8 @@ export function createMatchAutomationPort(
 ) {
   return createMatchAutomationRepository(database, options);
 }
+
+import { createMatchResultRepository } from "./infrastructure/repositories/results.js";
+export function createMatchResultPort(database: Parameters<typeof createMatchResultRepository>[0]) {
+  return createMatchResultRepository(database);
+}

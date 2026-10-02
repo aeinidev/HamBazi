@@ -14,7 +14,8 @@
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
     "test": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "start": "node dist/composition/main.js"
+    "start": "node dist/composition/main.js",
+    "stats:rebuild": "node dist/composition/rebuild-statistics.js"
   },
   "dependencies": {
     "@hambazi/api": "workspace:*",

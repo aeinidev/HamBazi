@@ -35,4 +35,12 @@ GRANT SELECT ON match_connection_leases TO hambazi_worker;
 -- Chat owns its independent stream; Worker never reads user content.
 GRANT SELECT, INSERT ON chat_streams TO hambazi_api;
 GRANT UPDATE (last_seq) ON chat_streams TO hambazi_api;
+GRANT SELECT, INSERT ON match_results TO hambazi_api, hambazi_worker;
+GRANT USAGE ON SEQUENCE match_results_ordinal_seq TO hambazi_api, hambazi_worker;
+GRANT SELECT ON stats_heads, stats_generations, stats_values TO hambazi_api;
+GRANT SELECT, INSERT ON stats_generations, stats_applications, stats_values TO hambazi_worker;
+GRANT SELECT ON stats_heads TO hambazi_worker;
+GRANT UPDATE (active_id, building_id) ON stats_heads TO hambazi_worker;
+GRANT UPDATE (status) ON stats_generations TO hambazi_worker;
+GRANT UPDATE (value) ON stats_values TO hambazi_worker;
 COMMIT;

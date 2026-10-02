@@ -1,3 +1,4 @@
+import { OwnStatistics } from "../leaderboard/index.js";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { profileAckSchema, profileSchema, type Profile } from "../../platform/contracts.js";
@@ -102,6 +103,7 @@ export function ProfileScreen() {
           Reload profile
         </button>
       </Panel>
+      <OwnStatistics />
       <button
         className="secondary"
         onClick={() => task.run(() => runtime.logout())}

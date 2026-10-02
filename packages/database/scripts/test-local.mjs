@@ -324,7 +324,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 11) throw new Error();
+      if (result.rows[0].count !== 12) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -351,6 +351,7 @@ if (!bin) {
         "match-reconnect.test.ts",
         "realtime.test.ts",
         "chat.test.ts",
+        "statistics.test.ts",
       ]) {
         const result = await run(
           process.execPath,
@@ -424,6 +425,26 @@ if (!bin) {
             !reservations.rows.some((r) => r.match_id)
           )
             throw new Error();
+          const matchResults = await client.query("SELECT * FROM match_results ORDER BY match_id");
+          const resultSeats = await client.query(
+            "SELECT * FROM game_results ORDER BY match_id, user_id",
+          );
+          const statsHeads = await client.query("SELECT * FROM stats_heads ORDER BY id");
+          const statsGenerations = await client.query(
+            "SELECT * FROM stats_generations ORDER BY id",
+          );
+          const statsApplications = await client.query(
+            "SELECT * FROM stats_applications ORDER BY generation_id, match_id",
+          );
+          const statsValues = await client.query(
+            "SELECT * FROM stats_values ORDER BY generation_id, user_id, game_id, metric, period",
+          );
+          if (
+            !matchResults.rows.length ||
+            !statsApplications.rows.length ||
+            !statsValues.rows.length
+          )
+            throw new Error();
           const settings = await client.query("SELECT * FROM user_settings ORDER BY user_id");
           const catalog = await client.query("SELECT * FROM games WHERE id='coup'");
           if (catalog.rows.length !== 1 || catalog.rows[0].status !== "DISABLED") throw new Error();
@@ -441,6 +462,12 @@ if (!bin) {
             chatStreams: chatStreams.rows,
             matchEvents: matchEvents.rows,
             matchCommands: matchCommands.rows,
+            matchResults: matchResults.rows,
+            resultSeats: resultSeats.rows,
+            statsHeads: statsHeads.rows,
+            statsGenerations: statsGenerations.rows,
+            statsApplications: statsApplications.rows,
+            statsValues: statsValues.rows,
             consumerReceipts: consumerReceipts.rows,
             sessions: result.rows,
             accounts: accounts.rows,
@@ -470,17 +497,32 @@ if (!bin) {
       ]);
       if (before !== (await snapshot())) throw new Error();
       console.info(
-        "API session/account/onboarding integration and account/session/receipt/flow restart persistence passed.",
+        "API session/account/onboarding integration and account/session/receipt/flow/result/statistics restart persistence passed.",
       );
       if (childEnv.TEST_WORKER_REDIS_URL) {
         stage = "Worker cleanup integration";
-        const workerTests = await run("pnpm", ["test:integration"], {
-          cwd: new URL("../../../apps/worker/", import.meta.url),
-          env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
-          timeout: 60000,
-          maxBuffer: 4 * 1024 * 1024,
-        });
-        console.info(workerTests.stdout);
+        // Rebuild reads real finish truth. Run before the outbox quarantine suite
+        // deliberately inserts malformed finish-shaped records into this same DB.
+        for (const suites of [
+          ["tests/integration/statistics.test.ts"],
+          [
+            "tests/integration/cleanup.test.ts",
+            "tests/integration/outbox.test.ts",
+            "tests/integration/match-automation.test.ts",
+          ],
+        ]) {
+          const workerTests = await run(
+            process.execPath,
+            [join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"), "run", ...suites],
+            {
+              cwd: new URL("../../../apps/worker/", import.meta.url),
+              env: { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" },
+              timeout: 60000,
+              maxBuffer: 4 * 1024 * 1024,
+            },
+          );
+          console.info(workerTests.stdout);
+        }
       }
     }
   } catch (error) {

@@ -1,3 +1,4 @@
+import { persistMatchResult } from "./results.js";
 import {
   matchFinishedInputSchema,
   standardResultInputSchema,
@@ -325,9 +326,11 @@ export function createMatchProcessingRepository(
         rulesetVersion: row.rulesetVersion,
         result: resultInput,
       });
+      const resultEventId = randomUUID();
+      await persistMatchResult(db, resultEventId, payload);
       await db.outboxEvent.create({
         data: {
-          id: randomUUID(),
+          id: resultEventId,
           aggregateId: row.id,
           type: "MATCH_FINISHED_V1",
           schemaVersion: 1,

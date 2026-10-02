@@ -1,3 +1,7 @@
+import {
+  createStatisticsHttpModule,
+  type StatisticsHttpDependencies,
+} from "../leaderboard/index.js";
 import "reflect-metadata";
 import { randomUUID } from "node:crypto";
 import { NestFactory } from "@nestjs/core";
@@ -17,6 +21,7 @@ import { createRealtimeGateway, type RealtimeDependencies } from "../realtime/in
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
   profile?: ProfileHttpDependencies;
+  statistics?: StatisticsHttpDependencies;
   catalog?: CatalogHttpDependencies;
   rooms?: RoomsHttpDependencies;
   realtime?: RealtimeDependencies;
@@ -97,7 +102,15 @@ export async function createHttpApplication(options: {
       sendRateDecision(reply, await options.auth.limiter.consumeIp(request.ip))
     )
       return reply;
-    if (request.url.includes("?"))
+    if (
+      request.url.includes("?") &&
+      !(
+        options.statistics &&
+        request.method === "GET" &&
+        (request.routeOptions.url === "/v1/me/stats" ||
+          request.routeOptions.url === "/v1/leaderboards/:game")
+      )
+    )
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
   });
   server.addHook("onResponse", async (request, reply) => {
@@ -106,6 +119,7 @@ export async function createHttpApplication(options: {
   @Module({
     imports: [
       createAuthHttpModule(options.auth),
+      ...(options.statistics ? [createStatisticsHttpModule(options.statistics)] : []),
       ...(options.rooms ? [createRoomsHttpModule(options.rooms)] : []),
       ...(options.profile ? [createProfileHttpModule(options.profile)] : []),
       ...(options.catalog ? [createCatalogHttpModule(options.catalog)] : []),

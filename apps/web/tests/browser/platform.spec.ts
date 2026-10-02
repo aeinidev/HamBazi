@@ -1,5 +1,17 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+async function accessibility(page: Page) {
+  // Check settled rendered colors, rather than a partially transparent entrance frame.
+  await page.evaluate(async () => {
+    await Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.playState === "running")
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+  return new AxeBuilder({ page }).analyze();
+}
 const fixture = "http://127.0.0.1:4174";
 const roomId = "22222222-2222-4222-8222-222222222222";
 const matchId = "33333333-3333-4333-8333-333333333333";
@@ -56,7 +68,7 @@ test("Telegram-only entry is accessible and keeps a narrow viewport", async ({ p
   await expect(
     page.getByText("Local preview · synthetic Telegram identity and server data"),
   ).toHaveCount(0);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("entry-mobile.png"), fullPage: true });
 });
@@ -183,9 +195,10 @@ test("platform views pass accessibility and responsive checks", async ({ page },
       true,
     );
   }
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.getByRole("link", { name: /Coup/ }).click();
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await expect(page.getByRole("heading", { name: "Coup", exact: true })).toBeVisible();
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await page.getByLabel("Appearance").selectOption("dark");
   await page.getByRole("button", { name: "Save changes" }).click();
@@ -195,7 +208,7 @@ test("platform views pass accessibility and responsive checks", async ({ page },
     document.documentElement.style.fontSize = "32px";
   });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("profile-dark-200.png"), fullPage: true });
 });
 
@@ -220,7 +233,7 @@ test("Coup controls follow server legal commands through action, proof, exchange
   await expect(
     page.getByRole("region", { name: "Available actions" }).getByRole("button"),
   ).toHaveCount(10);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("coup-action-mobile.png"), fullPage: true });
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "PROOF" } });
   await page.getByRole("button", { name: "declare tax" }).click();
@@ -228,7 +241,7 @@ test("Coup controls follow server legal commands through action, proof, exchange
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "EXCHANGE" } });
   await page.getByRole("button", { name: /prove claim/ }).click();
   await expect(page.getByRole("group", { name: "Choose cards to keep" })).toBeVisible();
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("coup-exchange-mobile.png"), fullPage: true });
   await page.getByRole("checkbox", { name: "Card 1: DUKE" }).check();
   await page.getByRole("checkbox", { name: "Card 2: CAPTAIN" }).check();
@@ -260,7 +273,7 @@ test("Coup controls follow server legal commands through action, proof, exchange
     document.documentElement.style.fontSize = "32px";
   });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("coup-finish-mobile.png"), fullPage: true });
 });
 
@@ -345,7 +358,7 @@ test("Chat escapes markup, retries one committed send, supports history and clea
     refreshed.commands.filter((entry: { event: string }) => entry.event === "chat:list"),
   ).toHaveLength(reads);
   expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect((await accessibility(page)).violations).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("chat-mobile.png"), fullPage: true });
   await page.getByRole("link", { name: "Profile", exact: true }).click();
@@ -379,4 +392,51 @@ test("Chat reconnect restores bounded history and Bot-replaced members remain re
   await page.getByRole("button", { name: "Earlier messages" }).click();
   await expect(page.getByRole("list", { name: "Chat messages" }).locator("li")).toHaveCount(60);
   await expect(page.getByText("History 1", { exact: true })).toBeVisible();
+});
+
+test("finished match leads to statistics and paginated plain-text leaderboard", async ({
+  page,
+  request,
+}, info) => {
+  await request.post(`${fixture}/__test/state`, { data: { coupPhase: "GAME_OVER" } });
+  await enterMatch(page);
+  await page.getByRole("link", { name: "View your statistics" }).click();
+  await expect(page.getByText("Played: 3 · Wins: 2 · Losses: 1")).toBeVisible();
+  await page.getByLabel("Statistics period").selectOption("weekly");
+  await expect(page.getByText(/Week starting 2026-09-28/)).toBeVisible();
+  await page.getByRole("link", { name: "Coup leaderboard", exact: true }).click();
+  await expect(
+    page.getByRole("cell", { name: "<img src=x onerror=alert(1)> plain name" }),
+  ).toBeVisible();
+  expect(await page.locator("table img").count()).toBe(0);
+  await page.getByRole("button", { name: "Next page" }).click();
+  await expect(page.getByRole("cell", { name: "Next player" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next page" })).toBeDisabled();
+  await page.getByLabel("Leaderboard period").selectOption("weekly");
+  await expect(
+    page.getByRole("cell", { name: "<img src=x onerror=alert(1)> plain name" }),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 640 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect((await accessibility(page)).violations).toEqual([]);
+  await page.screenshot({ path: info.outputPath("leaderboard-mobile.png"), fullPage: true });
+});
+
+test("statistics empty/error states refresh safely and disappear on logout", async ({
+  page,
+  request,
+}) => {
+  await signIn(page);
+  await request.post(`${fixture}/__test/state`, { data: { statsFailure: true } });
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByText("private server diagnostics")).toHaveCount(0);
+  await request.post(`${fixture}/__test/state`, {
+    data: { statsFailure: false, statsEmpty: true },
+  });
+  await page.getByRole("button", { name: "Refresh statistics" }).click();
+  await expect(page.getByText("No completed games in this period.")).toBeVisible();
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page.getByRole("heading", { name: "Your statistics" })).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
 });

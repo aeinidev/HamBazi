@@ -112,3 +112,9 @@ and outbox. Earlier admission and database integration suites remain regressions
 Use the repository `test:auth-http:local` harness with documented native PostgreSQL
 paths; never point it at application data. Staging gameplay E2E remains unavailable
 until transport/UI and a staging environment exist.
+
+Phase 15B adds immutable Match-owned standard result and per-seat result writes
+inside this same finish transaction, alongside the unchanged v1 finish outbox
+input. Atomic rollback/idempotency coverage includes these rows. The owning
+public recovery/read port and consumer/rebuild behavior are documented in
+[Statistics](statistics.md) and [ADR-030](../adr/030-temporary-statistics-baseline.md).

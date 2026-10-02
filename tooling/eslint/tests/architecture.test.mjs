@@ -479,3 +479,34 @@ it("allows Chat's stream/intent insertion but rejects outbox reads and foreign M
   ])
     expect((await messages(query, file)).length).toBeGreaterThan(0);
 });
+
+it("allows statistics public Users ports and owned aggregates while denying Match truth queries", async () => {
+  expect(
+    await messages(
+      'import { createPublicNamesPort } from "../../users/index.js"; export { createPublicNamesPort };',
+      api("leaderboard"),
+    ),
+  ).toEqual([]);
+  expect(
+    await messages(
+      'import { createDatabase } from "@hambazi/database"; export function read(db) { return db.forModule("leaderboard").execute((client) => client.statsValue.findMany({ where: { gameId: "coup" }, select: { value: true } })); }',
+      repository("leaderboard"),
+    ),
+  ).toEqual([]);
+  expect(
+    (
+      await messages(
+        'import { createDatabase } from "@hambazi/database"; export function read(db) { return db.forModule("leaderboard").execute((client) => client.matchResult.findMany({})); }',
+        repository("leaderboard"),
+      )
+    ).length,
+  ).toBeGreaterThan(0);
+  expect(
+    (
+      await messages(
+        'import { createDatabase } from "@hambazi/database"; export function read(db) { return db.forModule("matches").execute((client) => client.statsValue.findMany({})); }',
+        repository("matches"),
+      )
+    ).length,
+  ).toBeGreaterThan(0);
+});

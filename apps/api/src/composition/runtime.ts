@@ -1,3 +1,7 @@
+import { hash } from "node:crypto";
+import { createStatisticsPort } from "../leaderboard/index.js";
+import { createPublicNamesPort } from "../users/index.js";
+import { parseStatisticsConfig } from "@hambazi/config";
 import {
   parseRuntimeConfig,
   parseAuthRuntimeConfig,
@@ -35,6 +39,7 @@ export async function startApi(
   const profileConfig = parseProfileConfig(environment);
   const catalogConfig = parseCatalogConfig(environment);
   const roomsConfig = parseRoomsConfig(environment);
+  const statsConfig = parseStatisticsConfig(environment, "api");
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: auth.poolMax,
@@ -60,6 +65,13 @@ export async function startApi(
     namespace: auth.signing.issuer,
     ...catalogConfig,
   });
+  const statisticsRate = statsConfig
+    ? createCatalogRate({
+        url: runtime.redisUrl,
+        namespace: "statistics:" + hash("sha256", auth.signing.issuer),
+        ...catalogConfig,
+      })
+    : undefined;
   const roomsRate = roomsConfig
     ? createRoomsRate({ url: runtime.redisUrl, namespace: auth.signing.issuer, ...roomsConfig })
     : undefined;
@@ -87,6 +99,7 @@ export async function startApi(
     await profileRate.connect().catch(() => {});
     await catalogRate.connect().catch(() => {});
     await roomsRate?.connect().catch(() => {});
+    await statisticsRate?.connect().catch(() => {});
     http = await createHttpApplication({
       ...(roomsConfig && roomsRate
         ? {
@@ -112,6 +125,22 @@ export async function startApi(
                 return result.ok ? { ok: true as const, userId: result.session.userId } : result;
               },
               rate: roomsRate.consume,
+            },
+          }
+        : {}),
+      ...(statsConfig && statisticsRate
+        ? {
+            statistics: {
+              statistics: createStatisticsPort(database, {
+                clock,
+                users: createUserIdentityPort(database),
+                names: createPublicNamesPort(database),
+              }),
+              authenticate: async (token: string) => {
+                const result = await sessions.authenticate(token);
+                return result.ok ? { ok: true as const, userId: result.session.userId } : result;
+              },
+              rate: statisticsRate.consume,
             },
           }
         : {}),
@@ -164,6 +193,7 @@ export async function startApi(
           profileRate.close();
           catalogRate.close();
           roomsRate?.close();
+          statisticsRate?.close();
           await database.disconnect();
         }
         logger.lifecycle("api.stopped");
@@ -177,6 +207,7 @@ export async function startApi(
     profileRate.close();
     catalogRate.close();
     roomsRate?.close();
+    statisticsRate?.close();
     await database.disconnect().catch(() => {});
     throw new Error("API startup failed");
   }

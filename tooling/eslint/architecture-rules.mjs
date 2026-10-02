@@ -22,10 +22,18 @@ const delegates = {
     "gameEvent",
     "processedCommand",
     "gameResult",
+    "matchResult",
     "outboxEvent",
   ],
   chat: ["chatMessage", "chatStream", "outboxEvent"],
-  leaderboard: ["userGameStats", "consumerReceipt"],
+  leaderboard: [
+    "userGameStats",
+    "consumerReceipt",
+    "statsHead",
+    "statsGeneration",
+    "statsApplication",
+    "statsValue",
+  ],
 };
 const operations = new Set([
   "findUnique",

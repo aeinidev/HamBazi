@@ -926,6 +926,8 @@ created_at</th>
 | در زمان create pin می‌شوند و همراه snapshot باقی می‌مانند         | engine_version / state_schema_version / ruleset_version |
 | projection قابل rebuild؛ Source of Truth نتیجه Match است        | user_game_stats / leaderboard cache                     |
 
+تصمیم تأییدشدهٔ مالک در [ADR-030](adr/030-temporary-statistics-baseline.md) (2026-10-02): نتیجهٔ استاندارد و pinها در `match_results` متعلق به Matches، همراه `game_results` و پایان Match در یک transaction ثبت می‌شوند. projection نسل‌دار در `stats_values` و metadata متعلق به Leaderboard است؛ `user_game_stats` و قرارداد قبلی برای release overlap حفظ می‌شوند. بازسازی فقط از public result port ماژول Matches استفاده می‌کند. Leaderboard برای eligibility و نام عمومی فقط مجاز به public Users port است؛ query جدول‌های ماژول دیگر ممنوع می‌ماند.
+
 ## 14.6 طبقه‌بندی داده و Retention
 
 | **سیاست baseline**                                         | **طبقه**         | **داده**                                    |
@@ -1112,6 +1114,8 @@ leaderboard:coup:wins:season_1</th>
 </table>
 
 وقتی Redis leaderboard فعال شد، PostgreSQL همچنان source of truth نتیجه Match است؛ Redis projection سریع برای ranking است و در صورت از دست رفتن قابل rebuild است.
+
+سیاست موقت تأییدشدهٔ [ADR-030](adr/030-temporary-statistics-baseline.md): credit به حساب صندلی اصلی حتی پس از Bot takeover تعلق دارد؛ TERMINATED امتیاز ندارد. all-time و هفتهٔ UTC با شروع دوشنبه 00:00 بر پایهٔ finishedAt پشتیبانی می‌شوند. برد برابر رتبهٔ competition برابر دارد (1، 1، 3) و user ID opaque فقط ترتیب tie را مشخص می‌کند. leaderboard با session معتبر و حساب ACTIVE قابل خواندن است و فقط نام عمومی، شناسهٔ opaque، رتبه و تعداد برد را نمایش می‌دهد. تقویم season، rating، retention/erasure نهایی و activation عمومی همچنان gate جدا دارند.
 
 # 18. Background Jobs
 

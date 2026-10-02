@@ -22,6 +22,8 @@ function reset() {
     playable: true,
     modes: [{ id: "server-choice", title: "Server choice" }],
     profileVersion: 0,
+    statsFailure: false,
+    statsEmpty: false,
     displayName: "Test player",
     settings: { locale: "auto", theme: "system" },
     roomVersion: 1,
@@ -197,6 +199,41 @@ const http = createServer(async (req, res) => {
       },
     });
   if (req.url === "/v1/auth/logout") return send({ schemaVersion: 1, ok: true });
+  if (req.url?.startsWith("/v1/me/stats") || req.url?.startsWith("/v1/leaderboards/")) {
+    if (state.statsFailure) {
+      res.statusCode = 503;
+      return send({
+        ok: false,
+        error: { code: "INTERNAL_ERROR", message: "private server diagnostics", retryable: true },
+      });
+    }
+    const url = new URL(req.url, "http://127.0.0.1:4174");
+    const period = url.searchParams.get("period") === "weekly" ? "week:2026-09-28" : "all_time";
+    if (url.pathname === "/v1/me/stats")
+      return send({
+        schemaVersion: 1,
+        period,
+        games: state.statsEmpty ? [] : [{ gameId: "coup", completed: "3", wins: "2", losses: "1" }],
+      });
+    const offset = Number(url.searchParams.get("offset") ?? 0);
+    return send({
+      schemaVersion: 1,
+      gameId: "coup",
+      metric: "wins",
+      period,
+      entries: state.statsEmpty
+        ? []
+        : [
+            {
+              userId: offset ? "55555555-5555-4555-8555-555555555555" : userId(),
+              displayName: offset ? "Next player" : "<img src=x onerror=alert(1)> plain name",
+              rank: offset ? "51" : "1",
+              wins: offset ? "0" : "2",
+            },
+          ],
+      nextOffset: !state.statsEmpty && offset === 0 ? 50 : null,
+    });
+  }
   if (req.url === "/v1/me") {
     if (req.method === "PATCH") {
       if (state.conflict) {

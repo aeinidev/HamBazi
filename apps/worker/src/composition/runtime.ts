@@ -1,3 +1,7 @@
+import { startStatisticsConsumer } from "../statistics.js";
+import { createStatisticsProjection } from "@hambazi/api/leaderboard";
+import { createMatchResultPort } from "@hambazi/api/matches";
+import { parseStatisticsConfig } from "@hambazi/config";
 import { startMatchAutomation } from "../match-automation.js";
 import {
   createMatchAutomationPort,
@@ -40,6 +44,7 @@ export async function startWorker(
   const runtime = parseRuntimeConfig(environment, "worker");
   const config = parseOnboardingWorkerConfig(environment);
   const outboxConfig = parseOutboxWorkerConfig(environment);
+  const statsConfig = parseStatisticsConfig(environment, "worker");
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
     poolMax: config.poolMax,
@@ -48,6 +53,7 @@ export async function startWorker(
     transactionMaxWaitMs: 2000,
     transactionTimeoutMs: 5000,
   });
+  let statistics: Awaited<ReturnType<typeof startStatisticsConsumer>> | undefined;
   let automation: Awaited<ReturnType<typeof startMatchAutomation>> | undefined;
   let queue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
   let profileQueue: Awaited<ReturnType<typeof startCleanupQueue>> | undefined;
@@ -107,6 +113,16 @@ export async function startWorker(
         reconnect: createMatchReconnectPort(database, { clock, policy: resilience.policy }),
       });
     }
+    if (statsConfig && "concurrency" in statsConfig)
+      statistics = await startStatisticsConsumer({
+        matches: createMatchResultPort(database),
+        statistics: createStatisticsProjection(database, { nowMs: () => Date.now() }),
+        redisUrl: runtime.redisUrl,
+        namespace: config.namespace,
+        concurrency: statsConfig.concurrency,
+        drainTimeoutMs: statsConfig.drainTimeoutMs,
+        unavailable: () => event("worker.outbox_unavailable"),
+      });
     let closing: Promise<void> | undefined;
     return {
       close() {
@@ -117,6 +133,7 @@ export async function startWorker(
               profileQueue!.close(),
               outboxLoop?.close(),
               automation?.close(),
+              statistics?.close(),
             ]);
             await publisher?.close();
             if (drains.some((result) => result.status === "rejected"))
@@ -128,6 +145,7 @@ export async function startWorker(
       },
     };
   } catch {
+    await statistics?.close().catch(() => {});
     await automation?.close().catch(() => {});
     await outboxLoop?.close().catch(() => {});
     await publisher?.close().catch(() => {});

@@ -68,3 +68,6 @@ export type { AutomationIntent } from "./application/automation.js";
 export type MatchAutomationPort = ReturnType<typeof createMatchAutomationPort>;
 
 export { matchCorrelationSchema } from "./application/correlation.js";
+
+export { createMatchResultPort } from "./module.js";
+export type { FinishedResult } from "./application/result-input.js";

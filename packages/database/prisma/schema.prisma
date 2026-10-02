@@ -206,6 +206,7 @@ model Match {
   events               GameEvent[]
   commands             ProcessedCommand[]
   results              GameResult[]
+  result               MatchResult?
   chatStream           ChatStream?
   messages             ChatMessage[]
 
@@ -428,4 +429,62 @@ model MatchConnectionLease {
   @@id([matchId, connectionId])
   @@index([matchId, userId, leaseUntil])
   @@map("match_connection_leases")
+}
+
+// Matches owns immutable public result truth; engine state never enters this table.
+model MatchResult {
+  matchId      String @id @map("match_id") @db.Uuid
+  eventId      String @unique @map("event_id") @db.Uuid
+  ordinal      BigInt @unique @default(autoincrement())
+  payloadJsonb Json   @map("payload_jsonb") @db.JsonB
+  match        Match  @relation(fields: [matchId], references: [id], onDelete: Restrict)
+
+  @@map("match_results")
+}
+
+// New projection tables leave the Phase 11B callback and its old composite key intact.
+model StatsHead {
+  id         String           @id
+  activeId   String           @map("active_id") @db.Uuid
+  buildingId String?          @map("building_id") @db.Uuid
+  active     StatsGeneration  @relation("ActiveStats", fields: [activeId], references: [id], onDelete: Restrict)
+  building   StatsGeneration? @relation("BuildingStats", fields: [buildingId], references: [id], onDelete: Restrict)
+
+  @@map("stats_heads")
+}
+
+model StatsGeneration {
+  id            String             @id @db.Uuid
+  status        String
+  createdAt     DateTime           @map("created_at") @db.Timestamptz(3)
+  activeHeads   StatsHead[]        @relation("ActiveStats")
+  buildingHeads StatsHead[]        @relation("BuildingStats")
+  applications  StatsApplication[]
+  values        StatsValue[]
+
+  @@map("stats_generations")
+}
+
+model StatsApplication {
+  generationId String          @map("generation_id") @db.Uuid
+  matchId      String          @map("match_id") @db.Uuid
+  digest       String          @db.Char(64)
+  generation   StatsGeneration @relation(fields: [generationId], references: [id], onDelete: Restrict)
+
+  @@id([generationId, matchId])
+  @@map("stats_applications")
+}
+
+model StatsValue {
+  generationId String          @map("generation_id") @db.Uuid
+  userId       String          @map("user_id") @db.Uuid
+  gameId       String          @map("game_id")
+  metric       String
+  period       String
+  value        BigInt
+  generation   StatsGeneration @relation(fields: [generationId], references: [id], onDelete: Restrict)
+
+  @@id([generationId, userId, gameId, metric, period])
+  @@index([generationId, gameId, metric, period, value, userId])
+  @@map("stats_values")
 }
