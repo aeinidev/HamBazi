@@ -2,8 +2,10 @@
 
 `createMatchProcessingPort(database, {clock, games}, users)` is the Matches public
 application factory. It operates on durable CREATED Matches/seats already owned
-by Matches; Phase 9 admission remains the creation path. The configured HTTP
-runtime does not automatically wire or expose this factory. Production catalog
+by Matches; Phase 9 admission creates matchmaking records, and the owner-approved
+[private Match workflow](private-room-matches.md) creates private-room records.
+The configured HTTP runtime does not automatically wire or expose this factory.
+Production catalog
 and Phase 7C activation gates remain unchanged.
 
 [ADR-023](../adr/023-match-atomic-processing.md) records implementation semantics.
@@ -38,6 +40,8 @@ an already-ready seat again. The roster must have at least two contiguous unique
 seats; initialization applies game-specific capacity checks. There is no roster
 mutation, disconnect/epoch update, ready reversal, automatic start scheduler or
 new readiness timeout in this phase.
+The opt-in private-room workflow now advances its own READY Matches through trusted
+START/ACTIVATE after explicit player readiness, retaining this writer's guards.
 
 Success is `{ok:true,value:{schemaVersion:1,matchId,actionId,stateVersion,
 lastEventSeq,status}}`. Retry returns the exact original acknowledgement.

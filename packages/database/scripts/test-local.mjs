@@ -336,7 +336,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 12) throw new Error();
+      if (result.rows[0].count !== 13) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -360,12 +360,14 @@ if (!bin) {
         "match-admission.test.ts",
         "matchmaking.test.ts",
         "match-processing.test.ts",
+        "private-room-match.test.ts",
         "match-reconnect.test.ts",
         "realtime.test.ts",
         "transport-admission.test.ts",
         "chat.test.ts",
         "statistics.test.ts",
         "diagnostics.test.ts",
+        "release-contract.test.mjs",
       ]) {
         const result = await run(
           process.execPath,
@@ -540,6 +542,60 @@ if (!bin) {
           console.info(workerTests.stdout);
         }
       }
+      if (process.env.TEST_RELEASE_BROWSER === "isolated") {
+        stage = "release database isolation";
+        // Browser actors/results must not share prior fault/quarantine fixtures.
+        // Both databases belong to this newly created cluster, never a supplied endpoint.
+        const browserEnv = { ...childEnv, TEST_AUTH_DATABASE_READY: "foundation-completed" };
+        const create = new pg.Client({ connectionString: adminUrl });
+        await create.connect();
+        try {
+          await create.query("CREATE DATABASE hambazi_release");
+          await create.query("REVOKE ALL ON DATABASE hambazi_release FROM PUBLIC");
+          await create.query(
+            "GRANT CONNECT ON DATABASE hambazi_release TO hambazi_api, hambazi_worker, hambazi_migrator",
+          );
+        } finally {
+          await create.end();
+        }
+        for (const key of [
+          "API_DATABASE_URL",
+          "WORKER_DATABASE_URL",
+          "MIGRATION_DATABASE_URL",
+          "TEST_DATABASE_URL",
+        ]) {
+          const url = new URL(browserEnv[key]);
+          url.pathname = "/hambazi_release";
+          browserEnv[key] = url.toString();
+        }
+        const grants = new pg.Client({ connectionString: browserEnv.TEST_DATABASE_URL });
+        await grants.connect();
+        try {
+          await grants.query("REVOKE ALL ON SCHEMA public FROM PUBLIC");
+          await grants.query("GRANT USAGE ON SCHEMA public TO hambazi_api, hambazi_worker");
+          await grants.query("GRANT USAGE, CREATE ON SCHEMA public TO hambazi_migrator");
+        } finally {
+          await grants.end();
+        }
+        await run(process.execPath, [new URL("migrate.mjs", import.meta.url).pathname], {
+          cwd,
+          env: browserEnv,
+          timeout: 120000,
+          maxBuffer: 4 * 1024 * 1024,
+        });
+        stage = "release browser integration";
+        const browser = await run(
+          "pnpm",
+          ["--filter", "@hambazi/web", "test:browser", "--config", "release.playwright.config.ts"],
+          {
+            cwd: new URL("../../../", import.meta.url),
+            env: browserEnv,
+            timeout: 360000,
+            maxBuffer: 4 * 1024 * 1024,
+          },
+        );
+        console.info(browser.stdout);
+      }
     }
     if (process.env.TEST_RESTORE_DRILL === "isolated") {
       stage = "disposable backup restore drill";
@@ -549,6 +605,28 @@ if (!bin) {
       );
     }
   } catch (error) {
+    if (stage === "release browser integration" && error && typeof error === "object") {
+      const diagnostic = `${"stdout" in error ? String(error.stdout) : ""}\n${"stderr" in error ? String(error.stderr) : ""}`;
+      const locations = new Set(diagnostic.match(/tests\/release\/mvp\.spec\.ts:\d+:\d+/g) ?? []);
+      for (const location of locations)
+        console.error(`Release browser failure location: ${location}`);
+    }
+    if (
+      stage === "release browser integration" &&
+      error &&
+      typeof error === "object" &&
+      "stderr" in error
+    ) {
+      for (const line of String(error.stderr).split("\n")) {
+        const failure = line.match(/RELEASE_FIXTURE_FAILED at [A-Za-z ]+/);
+        if (failure) console.error(failure[0]);
+        if (
+          line.startsWith("Error: Process from config.webServer") ||
+          line.startsWith("Error: Timed out waiting")
+        )
+          console.error(line);
+      }
+    }
     if (error instanceof RestoreDrillError) console.error(`RESTORE_DRILL_FAILED at ${error.stage}`);
     // Only sanitized test output is reportable; never emit child command/env/error.
     let output =

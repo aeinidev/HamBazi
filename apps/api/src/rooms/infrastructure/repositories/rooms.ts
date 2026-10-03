@@ -231,6 +231,24 @@ export function createRoomsRepository(
     return value;
   }
   return {
+    listStartWork: (afterRoomId, limit) =>
+      scope.execute(async (db) => {
+        const rows =
+          afterRoomId === undefined
+            ? await db.room.findMany({
+                where: { status: { in: ["STARTING", "STARTED"] } },
+                select: { id: true },
+                orderBy: { id: "asc" },
+                take: limit,
+              })
+            : await db.room.findMany({
+                where: { status: { in: ["STARTING", "STARTED"] }, id: { gt: afterRoomId } },
+                select: { id: true },
+                orderBy: { id: "asc" },
+                take: limit,
+              });
+        return rows.map((row) => row.id);
+      }),
     receipt: (actor, kind, input) => transaction((db) => receipt(db, actor, kind, input)),
     create: (actor, input) =>
       transaction(async (db) => {

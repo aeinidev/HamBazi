@@ -29,12 +29,15 @@ conflict. Old successful join retries after leave return the old acknowledgement
 without rejoining. Join additionally requires a canonical inviteCode, verified inside its transaction; there is deliberately no REST join-by-ID endpoint. Phase
 12A will bind authorized intents to Socket and define its versioned event catalog.
 
-Only the full room host can request STARTING. No Match is created here. Future
-Match orchestration must durably create a Match, call confirmStarted with the
-STARTING revision and committed Match ID, and recover failed/ambiguous workflows.
+Only the full room host can request STARTING. Rooms creates no Match itself.
+The owner-approved [private Match workflow](private-room-matches.md) now durably
+creates the frozen roster's Match through Matches, calls confirmStarted with the
+STARTING revision and committed Match ID, and recovers failed/ambiguous workflows.
 The trusted callback and match-bound close/expiry ports are not client endpoints.
 A STARTING roster cannot be modified by ordinary join/leave. No timer, ruleset or
 executable engine version is invented by Rooms.
+The new trusted start projection/recovery page has no player endpoint; host start
+reserves the two revisions needed for Match confirmation and terminal closure.
 
 ## Operations and compatibility
 

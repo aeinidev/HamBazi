@@ -24,3 +24,9 @@ and provider-independent dashboard/alert definitions. `TEST_RESTORE_DRILL=isolat
 on the existing `pnpm test:auth-http:local` harness invokes the database-owned logical
 backup/restore rehearsal, using only its disposable services. It never restores or
 redirects a live service. See the [restore runbook](../../docs/operations/runbooks/restore.md).
+
+Phase 17B adds `TEST_RELEASE_BROWSER=isolated` to the same disposable HTTP
+integration harness. It runs real-service Chromium MVP/failure paths after
+database/API/Worker suites without adding a script or accepting live endpoints.
+See [release suites](../../docs/testing/release-suites.md) for commands,
+prerequisites, privacy boundaries and the retained concurrency/fault matrix.

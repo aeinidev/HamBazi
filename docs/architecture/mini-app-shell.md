@@ -46,9 +46,17 @@ browser output.
 The repository's configured API can provide auth/profile/catalog/optional room
 REST. Socket and matchmaking composition remain opt-in. The production catalog
 remains non-playable, so an ordinary runtime correctly displays disabled lobby
-actions. Private-room-to-Match orchestration, production matcher scheduling and
-Phase 7C activation are still backend integration/activation gates. The shell
+actions. The opt-in [private-room Match workflow](private-room-matches.md) now
+connects the committed room to explicit Match readiness and activation. Production
+matcher scheduling and Phase 7C activation are still backend integration/activation
+gates. The shell
 does not pretend STARTING means a committed Match exists.
+
+The separate [17B release suite](../testing/release-suites.md) exercises Find and
+Invite through real PostgreSQL/Redis/BullMQ ports, Coup gameplay and Worker
+statistics. Its eligible test catalog leaves the stored production entry
+disabled. The existing preview/synthetic fixture retains its UI purpose;
+public HTTPS and Telegram WebView acceptance remain gated.
 
 ## Ownership and security
 

@@ -106,7 +106,7 @@ try {
       TEST_AUTH_REDIS_CONTAINER: name,
       TEST_WORKER_REDIS_URL: `redis://worker:${env.REDIS_WORKER_PASSWORD}@127.0.0.1:${port}/0`,
     },
-    timeout: 180000,
+    timeout: process.env.TEST_RELEASE_BROWSER === "isolated" ? 600000 : 240000,
     maxBuffer: 4 * 1024 * 1024,
   });
   console.info(result.stdout);
@@ -126,6 +126,10 @@ try {
           line.startsWith("DATABASE_LOCAL_TEST_FAILED at ") ||
           line.startsWith("RESTORE_DRILL_FAILED at ") ||
           line.startsWith("Integration failure location: ") ||
+          line.startsWith("Release browser failure location: ") ||
+          line.startsWith("RELEASE_FIXTURE_FAILED at ") ||
+          line.startsWith("Error: Process from config.webServer") ||
+          line.startsWith("Error: Timed out waiting") ||
           /^ FAIL {2}tests\/integration\/[A-Za-z0-9_.-]+/.test(line),
       );
     if (safe.length) console.error(safe.join("\n"));

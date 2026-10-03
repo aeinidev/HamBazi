@@ -403,7 +403,7 @@ describe("bots, frontend and compatibility boundaries", () => {
     expect([...phases].sort()).toEqual(
       ["WAITING_FOR_ACTION", "CHALLENGE", "BLOCK", "PROOF", "LOSS", "EXCHANGE"].sort(),
     );
-  });
+  }, 15000); // Preserve the full model sweep; its measured runtime exceeds Vitest's five-second default.
 });
 
 describe("boundary regressions", () => {

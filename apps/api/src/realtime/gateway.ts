@@ -18,6 +18,7 @@ import {
   type MatchResyncPort,
   type MatchMembershipPort,
   type MatchProcessingPort,
+  type PrivateRoomMatchPort,
 } from "../matches/index.js";
 import type { createMatchmaking } from "../matchmaking/index.js";
 import {
@@ -42,6 +43,7 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  privateRooms?: Pick<PrivateRoomMatchPort, "start" | "ready" | "command">;
   admission: {
     policy: TransportAdmissionPolicy;
     ip: IpAdmission;
@@ -511,7 +513,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
             break;
           }
           case "room:start":
-            outcome = await deps.rooms.start(userId, parsed.data);
+            outcome = await (deps.privateRooms ?? deps.rooms).start(userId, parsed.data);
             break;
           case "matchmaking:search":
             outcome = await deps.matchmaking.search(token, parsed.data);
@@ -572,10 +574,18 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
               : failure("INTERNAL_ERROR");
             break;
           case "match:ready":
-            outcome = await deps.matches.ready(userId, parsed.data, currentCorrelation());
+            outcome = await (deps.privateRooms ?? deps.matches).ready(
+              userId,
+              parsed.data,
+              currentCorrelation(),
+            );
             break;
           case "game:command":
-            outcome = await deps.matches.command(userId, parsed.data, currentCorrelation());
+            outcome = await (deps.privateRooms ?? deps.matches).command(
+              userId,
+              parsed.data,
+              currentCorrelation(),
+            );
             break;
           case "chat:send":
             outcome = deps.chat

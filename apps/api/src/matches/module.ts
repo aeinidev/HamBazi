@@ -1,4 +1,16 @@
 import type { OutboxEvent, MatchDomainEvent } from "./application/outbox.js";
+import { privateRoomMatchService } from "./application/private-room.js";
+import { createPrivateRoomMatchRepository } from "./infrastructure/repositories/private-room.js";
+export function createPrivateRoomMatchPort(
+  database: Parameters<typeof createPrivateRoomMatchRepository>[0],
+  options: Parameters<typeof createPrivateRoomMatchRepository>[1],
+  ports: Omit<Parameters<typeof privateRoomMatchService>[0], "repository">,
+) {
+  return privateRoomMatchService({
+    ...ports,
+    repository: createPrivateRoomMatchRepository(database, options),
+  });
+}
 import { admissionService } from "./application/admission.js";
 import { createAdmissionRepository } from "./infrastructure/repositories/admission.js";
 export function createMatchAdmissionPort(

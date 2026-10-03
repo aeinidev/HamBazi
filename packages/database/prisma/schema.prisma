@@ -187,6 +187,7 @@ model Match {
   id                   String             @id @db.Uuid
   gameId               String             @map("game_id")
   roomId               String?            @unique @map("room_id") @db.Uuid
+  roomStartVersion     Int?               @map("room_start_version")
   matchType            String             @map("match_type")
   status               String
   engineVersion        String             @map("engine_version")

@@ -5,3 +5,5 @@ export { createRoomsHttpModule, type RoomsHttpDependencies } from "./infrastruct
 export { createRoomsRate } from "./infrastructure/rooms-rate.js";
 export { roomsOpenApiDocument } from "./infrastructure/rooms-contract.js";
 export { createRoomDiagnostics } from "./module.js";
+export { roomStartSnapshotSchema, roomStartPageSchema } from "./application/start.js";
+export type { RoomStartSnapshot } from "./application/start.js";

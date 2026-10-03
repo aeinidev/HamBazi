@@ -9,6 +9,7 @@ import {
 import type { UserIdentityPort } from "../../users/index.js";
 import type { CatalogPort } from "../../games/index.js";
 import { RoomFault, type Room, type RoomCode } from "../domain/room.js";
+import { roomStartSnapshotSchema, roomStartPageSchema } from "./start.js";
 const uuid = z.uuid().transform((v) => v.toLowerCase());
 const version = z.number().int().min(0).max(2147483646);
 export const createRoomSchema = z.strictObject({
@@ -55,6 +56,7 @@ export interface RoomsRepository {
   confirmStarted(roomId: string, expectedVersion: number, matchId: string): Promise<void>;
   closeStarted(roomId: string, matchId: string): Promise<void>;
   expire(roomId: string): Promise<void>;
+  listStartWork(afterRoomId: string | undefined, limit: number): Promise<string[]>;
 }
 export function roomsService(deps: {
   repository: RoomsRepository;
@@ -179,6 +181,44 @@ export function roomsService(deps: {
     join: (identity: unknown, input: unknown) => command(identity, "join", input),
     leave: (identity: unknown, input: unknown) => command(identity, "leave", input),
     start: (identity: unknown, input: unknown) => command(identity, "start", input),
+    // Trusted Matches orchestration only. No REST/Socket route exposes these ports.
+    startSnapshot(roomId: unknown) {
+      return safe(async () => {
+        const room = await deps.repository.read(parse(uuid, roomId));
+        if (
+          !room ||
+          !["STARTING", "STARTED", "CLOSED"].includes(room.status) ||
+          (room.status === "CLOSED" && room.startedMatchId === null)
+        )
+          throw new RoomFault("NOT_FOUND");
+        const snapshot = roomStartSnapshotSchema.parse({
+          schemaVersion: 1,
+          roomId: room.id,
+          gameId: room.gameId,
+          capacity: room.capacity,
+          startVersion:
+            room.version - (room.status === "STARTED" ? 1 : room.status === "CLOSED" ? 2 : 0),
+          status: room.status,
+          startedMatchId: room.startedMatchId,
+          players: [...room.members]
+            .sort((a, b) => a.seat - b.seat)
+            .map(({ userId, seat }) => ({ userId, seat })),
+        });
+        return { ok: true as const, snapshot };
+      });
+    },
+    listStartWork(input: unknown) {
+      return safe(async () => {
+        const page = parse(roomStartPageSchema, input);
+        const ids = await deps.repository.listStartWork(page.afterRoomId, page.limit + 1);
+        const roomIds = ids.slice(0, page.limit);
+        return {
+          ok: true as const,
+          roomIds,
+          nextRoomId: ids.length > page.limit ? roomIds.at(-1)! : null,
+        };
+      });
+    },
     confirmStarted(roomId: unknown, expectedVersion: unknown, matchId: unknown) {
       return safe(async () => {
         await deps.repository.confirmStarted(

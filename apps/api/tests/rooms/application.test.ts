@@ -25,6 +25,7 @@ function setup() {
     members: [{ userId: actor, seat: 0, joinedAt: 0, joinedVersion: 0 }],
   };
   const repository: RoomsRepository = {
+    listStartWork: vi.fn(async () => []),
     invitation: vi.fn(async () => ({ room, inviteCode: "A".repeat(43) })),
     receipt: vi.fn(async () => null),
     create: vi.fn(async () => ack),
@@ -97,6 +98,57 @@ it("normalizes UUIDs, uses verified actor and keeps create retries stable during
   vi.mocked(f.repository.receipt).mockResolvedValue(f.ack);
   f.games.find.mockRejectedValue(new Error("secret"));
   expect(await f.service.create(f.actor, f.input)).toEqual(f.ack);
+});
+it("projects only frozen start provenance through the trusted port, never an invitation capability", async () => {
+  const f = setup();
+  expect(await f.service.startSnapshot(f.room.id)).toMatchObject({ error: { code: "NOT_FOUND" } });
+  f.room.status = "STARTING";
+  f.room.capacity = 2;
+  f.room.version = 2;
+  f.room.members.push({ userId: randomUUID(), seat: 1, joinedAt: 1, joinedVersion: 1 });
+  const result = await f.service.startSnapshot(f.room.id);
+  expect(result).toMatchObject({
+    ok: true,
+    snapshot: { startVersion: 2, status: "STARTING", startedMatchId: null },
+  });
+  expect(JSON.stringify(result)).not.toMatch(/invite|hostUserId|expiresAt|joinedAt/);
+  f.room.status = "STARTED";
+  f.room.version = 3;
+  f.room.startedMatchId = randomUUID();
+  expect(await f.service.startSnapshot(f.room.id)).toMatchObject({
+    ok: true,
+    snapshot: { startVersion: 2 },
+  });
+  f.room.status = "CLOSED";
+  f.room.version = 4;
+  expect(await f.service.startSnapshot(f.room.id)).toMatchObject({
+    ok: true,
+    snapshot: { startVersion: 2 },
+  });
+  f.room.members[1]!.seat = 0;
+  expect(await f.service.startSnapshot(f.room.id)).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+});
+it("validates trusted recovery pages and supplies a stable bounded continuation", async () => {
+  const f = setup();
+  const ids = [randomUUID(), randomUUID(), randomUUID()].sort();
+  vi.mocked(f.repository.listStartWork).mockResolvedValue(ids);
+  expect(await f.service.listStartWork({ schemaVersion: 1, limit: 2 })).toEqual({
+    ok: true,
+    roomIds: ids.slice(0, 2),
+    nextRoomId: ids[1],
+  });
+  expect(f.repository.listStartWork).toHaveBeenCalledWith(undefined, 3);
+  for (const input of [
+    { schemaVersion: 1, limit: 0 },
+    { schemaVersion: 1, limit: 51 },
+    { schemaVersion: 1, limit: 1, afterRoomId: "malformed" },
+    { schemaVersion: 1, limit: 1, actor: f.actor },
+  ])
+    expect(await f.service.listStartWork(input)).toMatchObject({
+      error: { code: "INVALID_INPUT" },
+    });
 });
 it("denies current inactive users, nonmember reads and invalid identifiers", async () => {
   const f = setup();

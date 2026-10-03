@@ -22,6 +22,15 @@ export function initial(capacity = 3): Room {
   };
 }
 describe("room state machine", () => {
+  it("reserves two further revisions for start confirmation and terminal closure", () => {
+    const full = transition(initial(2), uid(2), "join", 0, 10);
+    expect(() =>
+      transition({ ...full, version: 2147483645 }, uid(1), "start", 2147483645, 20),
+    ).toThrow("ROOM_CONFLICT");
+    const starting = transition({ ...full, version: 2147483644 }, uid(1), "start", 2147483644, 20);
+    const started = confirmStarted(starting, 2147483645, uid(11));
+    expect(closeStarted(started, uid(11)).version).toBe(2147483647);
+  });
   it("creates a full room, transfers host to oldest member despite seat reuse and clock regression", () => {
     const source = initial();
     const two = transition(source, uid(2), "join", 0, 20);

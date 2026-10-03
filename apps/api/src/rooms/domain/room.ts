@@ -60,6 +60,8 @@ export function transition(
   if (kind === "start") {
     if (room.status !== "FULL" || room.members.length !== room.capacity)
       throw new RoomFault("ROOM_CONFLICT");
+    // Reserve the revisions needed for durable Match confirmation and closure.
+    if (room.version > 2147483644) throw new RoomFault("ROOM_CONFLICT");
     return { ...room, version, status: "STARTING" };
   }
   if (kind === "join") {

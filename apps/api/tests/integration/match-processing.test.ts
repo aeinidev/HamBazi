@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { createDatabase } from "@hambazi/database";
+import { createDatabase, DatabaseError } from "@hambazi/database";
 import { coupEngine, migrateCoupState, upcastCoupEvent } from "@hambazi/coup-engine";
 import {
   createMatchProcessingPort,
@@ -191,6 +191,80 @@ it("deduplicates eight competing commands across two clients, preserving cached 
   expect(await f.first.command(f.ids[0], { ...input, expectedVersion: 7 })).toMatchObject({
     error: { code: "GAME_STATE_CONFLICT" },
   });
+});
+it("repeats unknown commit and duplicate retry races without a second engine effect", async () => {
+  for (let round = 0; round < 6; round++) {
+    const f = await fixture();
+    await f.active();
+    const input = { ...f.request(5), command: { type: "DECLARE_INCOME" } };
+    const scope = a.forModule("matches");
+    let lost = false;
+    const interrupted = {
+      ...a,
+      forModule: (owner: Parameters<typeof a.forModule>[0]) =>
+        owner !== "matches"
+          ? a.forModule(owner)
+          : {
+              ...scope,
+              transaction: async (
+                operation: Parameters<typeof scope.transaction>[0],
+                isolation?: Parameters<typeof scope.transaction>[1],
+              ) => {
+                const result = await scope.transaction(operation, isolation);
+                if (!lost) {
+                  lost = true;
+                  throw new DatabaseError("DATABASE_OPERATION_FAILED");
+                }
+                return result;
+              },
+            },
+    } as typeof a;
+    const port = createMatchProcessingPort(interrupted, f.config, f.users);
+    expect(await port.command(f.ids[0], input)).toMatchObject({
+      error: { code: "INTERNAL_ERROR" },
+    });
+    expect(lost).toBe(true);
+    const reconstructed = createMatchProcessingPort(b, f.config, f.users);
+    const retries = await Promise.all(
+      Array.from({ length: 8 }, (_, i) =>
+        (i % 2 ? reconstructed : f.first).command(f.ids[0], input),
+      ),
+    );
+    for (const result of retries) expect(result).toEqual(retries[0]);
+    expect(retries[0]).toMatchObject({ ok: true, value: { stateVersion: 6 } });
+    const saved = await f.stored();
+    expect(saved.commands.filter((row) => row.actionId === input.actionId)).toHaveLength(1);
+    expect(saved.commands).toHaveLength(6);
+    expect(saved.outbox).toHaveLength(6);
+    expect(saved.match.stateVersion).toBe(6);
+    expect(saved.events.map((row) => row.seq)).toEqual(
+      Array.from({ length: saved.match.lastEventSeq }, (_, i) => i + 1),
+    );
+    expect(migrateCoupState(saved.match.stateJsonb, 4).players[0]!.coins).toBe(3);
+  }
+});
+it("keeps durable truth unchanged during database adapter loss and resumes the original intent", async () => {
+  const f = await fixture();
+  await f.active();
+  const input = { ...f.request(5), command: { type: "DECLARE_INCOME" } };
+  const before = JSON.stringify(await f.stored());
+  const closed = createDatabase({
+    ...options,
+    databaseUrl: { reveal: () => process.env.API_DATABASE_URL! },
+  });
+  await closed.disconnect();
+  const unavailable = createMatchProcessingPort(closed, f.config, f.users);
+  expect(await unavailable.command(f.ids[0], input)).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+  expect(JSON.stringify(await f.stored()) === before).toBe(true);
+  const restored = createMatchProcessingPort(b, f.config, f.users);
+  const ack = await restored.command(f.ids[0], input);
+  expect(ack).toMatchObject({ ok: true, value: { stateVersion: 6 } });
+  expect(await f.first.command(f.ids[0], input)).toEqual(ack);
+  expect((await f.stored()).commands.filter((row) => row.actionId === input.actionId)).toHaveLength(
+    1,
+  );
 });
 it("serializes distinct commands for one version and rejects stale/invalid requests without writes", async () => {
   const f = await fixture();
