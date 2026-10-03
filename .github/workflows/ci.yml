@@ -1,0 +1,77 @@
+name: HamBazi CI
+
+on:
+  pull_request:
+  push:
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Required quality and supply-chain gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      TEST_POSTGRES_BIN: /usr/lib/postgresql/18/bin
+      TEST_POSTGRES_SHARE: /usr/share/postgresql/18
+      TURBO_FORCE: "true"
+      TURBO_CACHE: "local:rw"
+      TURBO_CONCURRENCY: "1"
+      PLAYWRIGHT_NO_COPY_PROMPT: "1"
+    steps:
+      - name: Full history checkout without retained credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Pinned Node without shared caches
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.20.0"
+          package-manager-cache: false
+      - name: Pinned package manager
+        run: |
+          npm install --global --ignore-scripts corepack@0.35.0
+          corepack enable
+      - name: Frozen lockfile installation
+        run: pnpm install --frozen-lockfile
+      - name: Private runner tool paths
+        run: |
+          printf 'SECURITY_SCANNER_DIR=%s/hambazi-ci-tools\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'TELEGRAM_SDK_FIXTURE_PATH=%s/hambazi-ci-tools/telegram-web-app.js\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Verify and provision scanner, workflow-linter and SDK bytes
+        run: node infra/ci/provision-tools.mjs
+      - name: Compatible Docker and containerd image store
+        uses: docker/setup-docker-action@2bf61fb9464cc67f0cbdeabed6aa0380accd1c70 # v5.5.0
+        with:
+          version: "v29.8.1"
+          daemon-config: |
+            { "features": { "containerd-snapshotter": true } }
+      - name: PostgreSQL 18 tools from signed official packages
+        run: bash infra/ci/provision-postgres.sh
+      - name: Lockfile-selected Chromium and system libraries
+        run: pnpm --filter @hambazi/web exec playwright install --with-deps chromium
+      - name: Run all required gates with private failure diagnostics
+        run: node infra/ci/verify.mjs
+      - name: Preserve successful main evidence only
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.event_name != 'merge_group'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ci-evidence-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/hambazi-ci-evidence/manifest.json
+          if-no-files-found: error
+          include-hidden-files: false
+          overwrite: false
+          retention-days: 14

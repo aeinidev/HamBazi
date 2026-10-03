@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "nodeVersion": "24.20.0",
+  "corepackVersion": "0.35.0",
+  "dockerVersion": "29.8.1",
+  "telegramSdk": {
+    "url": "https://telegram.org/js/telegram-web-app.js",
+    "integrity": "sha384-UIU2aXwkvBIU//NSd8KQvPQc3/EvwMoKj+m2qYgtQAtF1u3Vvhf5+pjstVoLvU3i"
+  },
+  "actions": {
+    "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "actions/setup-node": "820762786026740c76f36085b0efc47a31fe5020",
+    "docker/setup-docker-action": "2bf61fb9464cc67f0cbdeabed6aa0380accd1c70",
+    "actions/upload-artifact": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+  },
+  "actionlint": {
+    "version": "1.7.12",
+    "archiveUrl": "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz",
+    "archiveSha256": "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8",
+    "binarySha256": "c872d6db8c6bf83a8eaa704fc93999f027d55dffbc63b8a6abdccb47df5f4cd4"
+  }
+}

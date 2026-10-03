@@ -9,6 +9,7 @@
 - **Scope rule:** work is limited to the MVP loop `Account -> Find/Invite -> Play Coup -> Finish -> Stats`.
 - **Decision rule:** open decisions `OD-001` through `OD-008` remain unresolved until an owner decision and, where required, an ADR exist.
 - **Verification rule:** commands are taken only from manifests that exist at the time of the phase. Missing scripts or unavailable environments are reported as validation gaps.
+- **Owner-approved sequencing (2026-10-03):** Phase 17C is deferred as **Pending**, not completed or waived. Proceed with Phase 18 starting at 18A. Capacity, reconnect-storm and at least two-hour soak evidence must still be completed on production-like staging before final release readiness; CI completion or packaging cannot substitute for that gate.
 
 ## Repository baseline (2026-09-10)
 
@@ -1003,16 +1004,23 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Acceptance criteria:** tested limits and environment are recorded; zero lost accepted commands/duplicate side effects/hidden leaks; agreed latency and resilience gates pass or the phase is Blocked.
 - **Required tests and validations:** load, reconnect-storm, soak, resource saturation, failure/recovery, and result reconciliation checks.
 - **Status:** Pending
+- **Owner deferral (2026-10-03):** leave this phase Pending while implementing Phase 18. Its production-like staging workload, 2x approved peak, reconnect storm, at least two-hour soak and reconciliation remain mandatory before Phase 19 can recommend final release readiness. OD-001/002/007 are not resolved by the sequencing change.
 
 ### Phase 18A — CI quality and supply-chain pipeline
 
 - **Objective:** enforce all reproducible quality gates on every change and release.
 - **Scope:** frozen install, lint, typecheck, unit/integration/contract/build, staged E2E, generated-spec diff, migration compatibility, dependency/secret/container scans, and cache/artifact policy.
 - **Expected deliverables:** CI workflows, protected release checks documentation, and immutable artifact metadata.
-- **Dependencies:** Phase 17C.
+- **Dependencies:** completed Phase 17B release suites and Phase 17A scanner policies. The owner explicitly permits implementation before deferred 17C; 17C remains a pre-release dependency, not a prerequisite to installing CI.
 - **Acceptance criteria:** clean CI passes; representative lint/contract/test/scan failures block; secrets and production credentials are not present in workflows.
 - **Required tests and validations:** local workflow validation where available, clean CI run evidence, deliberate failure checks, lockfile integrity.
-- **Status:** Pending
+- **Status:** Completed (implementation and clean local job-equivalent verification; hosted activation remains unverified)
+- **Completion date:** 2026-10-04 (Tehran); execution began under the 2026-10-03 authorization.
+- **Authorization / assessment (2026-10-03):** owner explicitly authorized Phase 18 starting with 18A and deferred 17C as Pending until production-like staging is available. Started from clean `main` at `427a6ec` (committed Phase 17B). Read the named reviewed architecture in full from `/home/mehdi/Downloads`, AGENTS, the complete current plan and protocol; maintained architecture differences remain only reviewed asset paths and ADR-019/030 amendments. Inspected actual scripts/task graph, existing release fixtures, migration/restart/grant checks, pinned scanners/local image build and GitHub remote. No workflow exists yet; completed product phases are preserved. Implement CI quality/supply-chain gates and evidence metadata only. Public HTTPS/staging, Phase 17C, application Docker packaging/deployment under 18B and Phase 7C activation remain separate gates.
+- **Delivered:** one sequential read-only GitHub Actions job for push/PR/merge-group/manual/weekly checks, full-history credential-free checkout, full-SHA official action pins, frozen install, verified tool/SDK provisioning and ephemeral runner PostgreSQL/Docker/browser setup. Existing declared scripts provide formatting/lint/boundaries/typecheck/unit/integration/contract/build, check-before-generate/format/diff, locked real local-service scans, all migration/upgrade/redeploy/restart/grant/restore checks and built real-service/browser gates. No shared cache or deployment path. Turbo is forced with one task at a time; product/test deadlines remain unchanged. Main-only successful artifacts contain public hashes, validated advisory identities/counts and scalar test evidence; dirty source, SHA mismatch, invalid count, loopback Web policy, symlinks and overwrites are rejected. Release approval is always false and 7C/17C/18B/19 remain recorded Pending. [ADR-041](adr/041-ci-trust-and-evidence.md), the [CI guide](operations/ci.md) and updated scanner/release-suite guides document trust, privacy, actual required-check configuration and future staged E2E.
+- **Clean local CI evidence:** a separate full-history candidate repository received a fresh `pnpm install --frozen-lockfile`, without the developer `.env` or shared Turbo cache. The actual `infra/ci/verify.mjs` passed all 18 gates in 638 seconds using Node 24.20.0, pnpm 12.4.1, Docker 29.8.1/containerd, verified Gitleaks/Trivy/actionlint/official SDK and existing PostgreSQL 18 clients. Root `pnpm check` passed **1,650 domain/unit + 47 infrastructure tests** (including **26 new CI tests** and actual Gitleaks credential canaries), type/boundary/lint/format/build/contract checks; **38 Bot + 262 database/API/Worker integration tests**, **5 built real-service release + 26 ordinary + 33 built SDK/privacy/policy + 2 preview browser cases** passed. Generated contracts left a clean diff. The isolated Compose harness verified the exact local image/bootstrap and restored its owned durable data; final normal Web policy was production. Corepack 0.35.0 independently provisioned pnpm 12.4.1 in a fresh owned cache. Actionlint, Bash syntax and scoped ESLint passed. Secret history/current candidate and complete dependency audit reported zero findings; both current image digests had zero findings at every severity with schema-2 DB UpdatedAt `2026-10-03T19:02:38.737369755Z` and DownloadedAt `2026-10-03T20:06:39.655097+00:00`.
+- **Metadata / negative evidence:** the content-free local manifest hashes 544 compiled/public-contract files and binds disposable candidate commit `12bf30054dc7b7cb6a4b121dec26495903fd0518`, tree `1e7112096da6e872b30b3a104f69f8ddbea3864f`; manifest SHA-256 is `586936c4155e3a9178589fb5ff5f5f0832ac84c9feb01647d0a8667eff4b1b8a`. These are fixture identities, not a project commit or published release. CI tests reject weakened permissions/events/action pins/cache/concurrency/credential/artifact controls, substituted tools and leaked child diagnostics; actual failing ESLint/Vitest/scanner CLIs cannot execute the subsequent evidence stage. The retained 26 actual contract-CLI probes reject stale output and breaking baselines in the isolated integration suite. Public lower-advisory projection is tested without leaking unknown diagnostic fields. Failed gates do not generate success evidence.
+- **Corrections / limits / mandatory stop:** real actionlint rejected job-level `runner.temp`; private path initialization now uses the trusted runner environment in a shell step. Local slow registry retrieval failed closed; digest-verified official GHCR schema-2 DB bytes were supplied to the owned private cache and passed unchanged freshness checks before fresh image scanning. Cold parallel root runs hit the existing TypeScript compiler-probe timeout; serial CI scheduling resolved it without changing earlier tests, compiler settings or product code. No hosted GitHub run, privileged Ubuntu runner provisioning, artifact upload or enabled repository ruleset is claimed: publication/settings were not authorized. The administrator must record hosted evidence and enable the documented observed required check after publication. No staging/HTTPS/mobile WebView/production image/deployment/rollback smoke or 17C load/soak was run; those require the approved 18B environment and retained 17C gate. No app/package source, dependency/lockfile, contract baseline, migration/grant, production quota, root `.env`, live Telegram setting, project commit, push or deployment changed. **18A is Completed locally; stop here. 18B and 19 remain Pending. 17C remains Pending and mandatory before final release readiness.**
 
 ### Phase 18B — Docker packaging, migrations, staging, and production readiness
 
@@ -1067,14 +1075,19 @@ separate MFA/RBAC/private access/append-only-audit design without operator mutat
 Fresh dependency and reachable-history/current-candidate secret checks pass with
 zero findings. **Parent 17A is Completed locally. The separately approved Phase
 17BP private-room-to-Match prerequisite and resumed Phase 17B are Completed locally.
-Phase 17C remains Pending** at the mandatory gate. Opt-in public ports now connect authorized private
+Phase 17C remains Pending** as an owner-deferred required pre-release staging gate.
+The owner authorized **Phase 18A**, now **Completed locally**, before 17C; this changes
+implementation order without waiving capacity/soak or final release acceptance.
+Opt-in public ports now connect authorized private
 rosters to durable pinned Matches, explicit readiness, Coup gameplay/results and
 recoverable terminal room closure. Its focused unit and disposable PostgreSQL/Redis/
 Socket evidence is recorded above. The earlier 17B blocker assessment is historical;
 17B now adds executable contract rejection, command fault/retry reconciliation and
 five built real-service browser release gates. Full root, disposable integration,
 ordinary/production-SDK/preview browser and diagnostics privacy evidence is recorded
-above. No later-phase work has begun.
+above. Phase 18A provides a verified local CI entry point and reviewed read-only
+workflow, with hosted execution/settings still unverified until authorized publication.
+**Stop at the 18A phase gate; 18B packaging/deployment and Phase 19 final review remain Pending.**
 Actual deployment origins/headers,
 HTTPS/mobile WebViews, provider/operator identity/roles and final retention/rights
 remain external gates. The complete fifty-game Coup model test now has a scoped

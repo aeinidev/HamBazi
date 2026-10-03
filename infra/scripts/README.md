@@ -30,3 +30,10 @@ integration harness. It runs real-service Chromium MVP/failure paths after
 database/API/Worker suites without adding a script or accepting live endpoints.
 See [release suites](../../docs/testing/release-suites.md) for commands,
 prerequisites, privacy boundaries and the retained concurrency/fault matrix.
+
+Phase 18A adds the standalone `infra/ci` tool provisioning, workflow policy,
+sequential verification and content-free evidence entry points. The
+[CI guide](../../docs/operations/ci.md) documents actual gates, clean-checkout
+requirements and protected-release settings. No root script, production
+credential or deployment command is added. Phase 17C stays Pending and required
+on production-like staging before final release readiness.

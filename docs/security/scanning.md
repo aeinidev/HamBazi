@@ -71,9 +71,12 @@ real generated credential canaries in disposable Git/history and directory
 fixtures, including detection after the candidate credential is removed. This
 uses fixture commits only; it never commits the project worktree.
 
-Phase 18A must provision the pinned tools and run frozen install and all three
-uncached checks on a full checkout, without production credentials. A fresh scan
-is required after candidate dependency/image changes and before release. Phase
+Phase 18A's [CI workflow](../../.github/workflows/ci.yml) provisions the pinned
+tools and runs frozen install and all three uncached checks on a full checkout,
+without production credentials. [ADR-041](../adr/041-ci-trust-and-evidence.md)
+and the [CI guide](../operations/ci.md) define provisioning, trust, privacy and
+protected-release requirements. A fresh scan is required after candidate
+dependency/image changes and before release. Phase
 18B must extend the reviewed image target inventory to actual application images;
 no application Dockerfiles exist yet. The local service derivative is not an
 application deployment image. Record any exception with owner, exact
@@ -89,9 +92,9 @@ substitute an unreviewed image if the build or scanner fails.
 
 The checks do not scan ignored runtime `.env` files, remote un-fetched Git history,
 unreachable objects, every encoded/binary payload, deployed infrastructure, or
-production application images. The root `pnpm check` does not yet run these
-external scanners; CI wiring remains 18A. Secret scanning does not prove that
-credentials have never leaked outside Git. Tool hash verification does not prove
+production application images. The root `pnpm check` does not run these
+external scanners; 18A CI invokes them separately without caching. Secret scanning
+does not prove that credentials have never leaked outside Git. Tool hash verification does not prove
 upstream provenance; verified TLS/release metadata remains its trust boundary.
 
 Official references: [Gitleaks](https://github.com/gitleaks/gitleaks),

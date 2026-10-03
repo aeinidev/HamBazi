@@ -4,6 +4,12 @@ Phase 17B exercises public application ports, real PostgreSQL transactions, Redi
 coordination, BullMQ delivery and Chromium. Production activation, HTTPS/Telegram
 WebView acceptance and Phase 17C capacity/soak measurements remain separate.
 
+Phase 18A's [CI runner](../operations/ci.md) invokes these suites sequentially
+with pinned real local service images and an isolated restore drill. It captures
+only scalar results and restores the normal Web policy before evidence. The
+owner deferred **17C as Pending** until production-like staging is available;
+that phase remains required before final release readiness.
+
 ## Commands and isolation
 
 Use the declared scripts with Node/pnpm versions pinned in the root manifest:
