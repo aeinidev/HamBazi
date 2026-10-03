@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import type { RealtimeDependencies } from "../../src/realtime/index.js";
+import { admissionPolicy } from "./admission.js";
 const userId = "11111111-1111-4111-8111-111111111111";
 const otherId = "22222222-2222-4222-8222-222222222222";
 const roomId = "33333333-3333-4333-8333-333333333333";
@@ -80,6 +81,12 @@ export function realtimeDependencies() {
   const admit = vi.fn(async () => ({ ok: true as const, value: { schemaVersion: 1, matchId } }));
   const rate = vi.fn<RealtimeDependencies["rate"]>(async () => ({ allowed: true }));
   const ports = {
+    admission: {
+      policy: admissionPolicy,
+      ip: vi.fn(async () => ({ allowed: true })),
+      trustedProxies: [],
+      production: false,
+    },
     sessions: { authenticate },
     rooms: { read: readRoom, join, leave, start },
     matches: { command, ready },

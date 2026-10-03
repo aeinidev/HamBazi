@@ -17,6 +17,7 @@ async function setup(production = false) {
   const identity = vi.fn(async (_id: string): Promise<RateDecision> => ({ allowed: true }));
   const create = vi.spyOn(f.onboarding, "create");
   const http = await createHttpApplication({
+    admission: { policy: admissionPolicy, ip: async () => ({ allowed: true }) },
     auth: {
       sessions: f.service,
       onboarding: f.onboarding,
@@ -250,3 +251,4 @@ describe("Mini App onboarding HTTP boundary", () => {
     expect(f.logs.join("")).not.toContain("SENSITIVE");
   });
 });
+import { admissionPolicy } from "../fixtures/admission.js";

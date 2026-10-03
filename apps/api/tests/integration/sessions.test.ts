@@ -24,6 +24,8 @@ import {
 import { accountIntegrationCases } from "./account-cases.js";
 import { botOnboardingIntegrationCases } from "./bot-onboarding-cases.js";
 import { botInternalIntegrationCases } from "./bot-internal-cases.js";
+import { createRedisTransportAdmission } from "../../src/realtime/index.js";
+import { admissionPolicy } from "../fixtures/admission.js";
 import { createApiHealth } from "../../src/health/index.js";
 import {
   commandId,
@@ -60,6 +62,12 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
   "HTTP with real PostgreSQL and ACL-protected Redis",
   () => {
     async function transport(namespace: string, database = second) {
+      const admission = createRedisTransportAdmission({
+        url: { reveal: () => process.env.TEST_AUTH_REDIS_URL! },
+        namespace,
+        policy: admissionPolicy,
+      });
+      await admission.connect();
       const rate = createRedisAuthRateLimiter({
         url: { reveal: () => process.env.TEST_AUTH_REDIS_URL! },
         namespace,
@@ -90,6 +98,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       });
       const logs: string[] = [];
       const http = await createHttpApplication({
+        admission: { policy: admissionPolicy, ip: admission.ip },
         auth: {
           sessions,
           telegram,
@@ -135,12 +144,14 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       });
       return {
         ...http,
+        admission,
         rate: {
           ...rate,
           close() {
             rate.close();
             profileRate.close();
             catalogRate.close();
+            admission.close();
           },
         },
         profileRate,
@@ -583,6 +594,16 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       const runtime = await startApi(
         {
           NODE_ENV: "test",
+          ADMISSION_HTTP_PER_MINUTE: "10000",
+          ADMISSION_ENGINE_PER_MINUTE: "10000",
+          ADMISSION_CONNECT_PER_MINUTE: "10000",
+          ADMISSION_EVENT_PER_MINUTE: "10000",
+          ADMISSION_HTTP_IN_FLIGHT: "100",
+          ADMISSION_ENGINE_IN_FLIGHT: "100",
+          ADMISSION_CONNECTIONS: "100",
+          ADMISSION_PENDING_PER_SOCKET: "100",
+          ADMISSION_PENDING_TOTAL: "1000",
+          ADMISSION_SUBSCRIPTIONS: "10",
           API_DATABASE_URL: process.env.API_DATABASE_URL!,
           API_REDIS_URL: process.env.TEST_AUTH_REDIS_URL!,
           API_PORT: String(port),

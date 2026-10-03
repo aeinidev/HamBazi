@@ -1,0 +1,1140 @@
+{
+  "schemaVersion": 1,
+  "kind": "images",
+  "status": "passed",
+  "tool": {
+    "name": "trivy",
+    "version": "0.74.0",
+    "sha256": "d89bcc6510a267f11b773398cbf1be5520ce39f9e8b6633178c4487f05b7d791"
+  },
+  "database": {
+    "updatedAt": "2026-10-02T06:55:51.690179759Z",
+    "downloadedAt": "2026-10-02T12:42:26.487219Z"
+  },
+  "images": [
+    {
+      "ok": true,
+      "image": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "ok": true,
+      "image": "redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    }
+  ],
+  "ok": true,
+  "review": {
+    "date": "2026-10-02",
+    "scope": "Current local Compose image digests only; no application or production images",
+    "decision": "ADR-035; owner-approved remediation, no risk exception",
+    "validation": "218 existing DB/API/Worker integration cases, 29-table restore drill, 17 legacy foundation cases plus cross-base reconciliation of 29 public tables; repeated digest reproduction on the documented Linux amd64 builder"
+  },
+  "previousReview": {
+    "schemaVersion": 1,
+    "reviewDate": "2026-10-02",
+    "source": "Compose candidate; verified local Docker images and pinned Trivy database",
+    "kind": "images",
+    "status": "blocked",
+    "tool": {
+      "name": "trivy",
+      "version": "0.74.0",
+      "sha256": "d89bcc6510a267f11b773398cbf1be5520ce39f9e8b6633178c4487f05b7d791"
+    },
+    "database": {
+      "updatedAt": "2026-10-02T06:55:51.690179759Z",
+      "downloadedAt": "2026-10-02T12:42:26.487219Z"
+    },
+    "images": [
+      {
+        "ok": false,
+        "image": "postgres:18.6-bookworm@sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650",
+        "counts": {
+          "info": 0,
+          "low": 163,
+          "moderate": 210,
+          "high": 102,
+          "critical": 16,
+          "unknown": 6
+        },
+        "findings": [
+          {
+            "id": "CVE-2026-53613",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-41992",
+            "package": "gzip",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-54369",
+            "package": "libacl1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2023-2953",
+            "package": "libldap-2.5-0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "libncursesw6",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-103111",
+            "package": "libpcre2-8-0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-13221",
+            "package": "libperl5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42496",
+            "package": "libperl5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-8376",
+            "package": "libperl5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42497",
+            "package": "libperl5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-48962",
+            "package": "libperl5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57432",
+            "package": "libperl5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57433",
+            "package": "libperl5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-9538",
+            "package": "libperl5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-82560",
+            "package": "libperl5.36",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-7458",
+            "package": "libsqlite3-0",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-11822",
+            "package": "libsqlite3-0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-11824",
+            "package": "libsqlite3-0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-84782",
+            "package": "libssl3",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-16742",
+            "package": "libsystemd0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "libtinfo6",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-16742",
+            "package": "libudev1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-6653",
+            "package": "libxml2",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-74860",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86138",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86139",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86140",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86142",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86143",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-86144",
+            "package": "libxml2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "ncurses-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "ncurses-bin",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-84782",
+            "package": "openssl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-13221",
+            "package": "perl",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42496",
+            "package": "perl",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-8376",
+            "package": "perl",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42497",
+            "package": "perl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-48962",
+            "package": "perl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57432",
+            "package": "perl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57433",
+            "package": "perl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-9538",
+            "package": "perl",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-82560",
+            "package": "perl",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-13221",
+            "package": "perl-base",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42496",
+            "package": "perl-base",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-8376",
+            "package": "perl-base",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42497",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-48962",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57432",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57433",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-9538",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-82560",
+            "package": "perl-base",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-13221",
+            "package": "perl-modules-5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42496",
+            "package": "perl-modules-5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-8376",
+            "package": "perl-modules-5.36",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-42497",
+            "package": "perl-modules-5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-48962",
+            "package": "perl-modules-5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57432",
+            "package": "perl-modules-5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-57433",
+            "package": "perl-modules-5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-9538",
+            "package": "perl-modules-5.36",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-82560",
+            "package": "perl-modules-5.36",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "DLA-4792-1",
+            "package": "tzdata",
+            "severity": "unknown",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-53613",
+            "package": "util-linux-extra",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "util-linux-extra",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "util-linux-extra",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "util-linux-extra",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "util-linux-extra",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2023-45853",
+            "package": "zlib1g",
+            "severity": "critical",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-39824",
+            "package": "golang.org/x/sys",
+            "severity": "unknown",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2025-68121",
+            "package": "stdlib",
+            "severity": "critical",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2025-61726",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2025-61729",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-25679",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-27145",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-32280",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-32281",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-32283",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-33811",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-33814",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-33818",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-39820",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-39821",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-39822",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-39836",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-42499",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-42504",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-56853",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-56858",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-56859",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-56860",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-56862",
+            "package": "stdlib",
+            "severity": "high",
+            "fixAvailable": true
+          }
+        ]
+      },
+      {
+        "ok": false,
+        "image": "redis:8.10.1-trixie@sha256:8a1efc5f479551822b47424ccae982026b633f28818eab0387348120a61e10e2",
+        "counts": {
+          "info": 0,
+          "low": 63,
+          "moderate": 75,
+          "high": 48,
+          "critical": 0,
+          "unknown": 2
+        },
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "bsdutils",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-54369",
+            "package": "libacl1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libblkid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "liblastlog2-2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "liblastlog2-2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "liblastlog2-2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "liblastlog2-2",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "TEMP-1147318-639065",
+            "package": "liblzma5",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libmount1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-103111",
+            "package": "libpcre2-8-0",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libsmartcols1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-75804",
+            "package": "libssl3t64",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-84782",
+            "package": "libssl3t64",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-16742",
+            "package": "libsystemd0",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "libtinfo6",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-16742",
+            "package": "libudev1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "login",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "login",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "login",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "login",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "mount",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "ncurses-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2025-69720",
+            "package": "ncurses-bin",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-75804",
+            "package": "openssl-provider-legacy",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-84782",
+            "package": "openssl-provider-legacy",
+            "severity": "high",
+            "fixAvailable": true
+          },
+          {
+            "id": "CVE-2026-9538",
+            "package": "perl-base",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-82560",
+            "package": "perl-base",
+            "severity": "unknown",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-76642",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "util-linux",
+            "severity": "high",
+            "fixAvailable": false
+          }
+        ]
+      }
+    ],
+    "ok": false
+  }
+}

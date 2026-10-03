@@ -45,6 +45,12 @@ commands must be selected and rehearsed in 18B. This phase executes only disposa
 local tests/drills and records those external limits. Do not infer deployment or
 mutation approval from these documents.
 
+Phase 17A3 supplies the [administrative security design](../../security/admin-security-design.md)
+and ADR-039 for separate MFA/RBAC/private access and durable append-only audit.
+It is a design, not operator composition or authorization. 7C must implement and
+verify it before activation; no direct SQL, player/Bot credential or incident
+authentication bypass is added by these runbooks.
+
 Return to normal only after the commander accepts durable consistency, dependency
 recovery, backlog reconciliation and the relevant staging verification. Reopening
 admission cannot authorize 7C activation or finalize OD-002/005/006/007.

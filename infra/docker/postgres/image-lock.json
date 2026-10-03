@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux/amd64",
+  "baseImage": "postgres:18.6-alpine3.24@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
+  "tag": "hambazi-local/postgres:18.6-alpine3.24-v1",
+  "image": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a",
+  "sourceDateEpoch": 1790899200,
+  "dockerfileSha256": "8388243c921f93b5cbfaa9db978201cb13f136b27765eb835c72f0580e48db7f",
+  "helper": {
+    "package": "su-exec",
+    "version": "0.3-r0",
+    "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/su-exec-0.3-r0.apk",
+    "archiveSha256": "4003163f58cd4a75df79973171d25e4912df4284d8bac9850ac267b58b969be5"
+  },
+  "http2": {
+    "package": "nghttp2-libs",
+    "version": "1.70.0-r0",
+    "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/nghttp2-libs-1.70.0-r0.apk",
+    "archiveSha256": "f0c4014eb2f10308dcdfd84cd49c121673c7b78cb8182b6e7a1388d8ae112a3b"
+  }
+}

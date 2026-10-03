@@ -30,6 +30,23 @@ process.once("message", async (input) => {
     const fail = async () => ({ ok: false, error: { code: "FORBIDDEN", message: "Forbidden" } });
     const server = createServer();
     const gateway = createRealtimeGateway(server, {
+      admission: {
+        policy: {
+          httpRequestsPerMinute: 10000,
+          engineRequestsPerMinute: 10000,
+          socketConnectionsPerMinute: 10000,
+          socketEventsPerMinute: 10000,
+          maxHttpInFlight: 100,
+          maxEngineInFlight: 100,
+          maxConnections: 100,
+          maxPendingPerSocket: 100,
+          maxPendingTotal: 1000,
+          maxSubscriptions: 10,
+        },
+        ip: async () => ({ allowed: true }),
+        trustedProxies: [],
+        production: false,
+      },
       presence: {
         port: createPresencePort({ reconnect, resync }),
         heartbeatIntervalMs: 50,

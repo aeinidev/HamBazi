@@ -6,6 +6,17 @@
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": ["dist/**"]
     },
+    "@hambazi/web#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"],
+      "env": [
+        "VITE_API_ORIGIN",
+        "HAMBAZI_WEB_ORIGIN",
+        "HAMBAZI_WEB_FRAME_ANCESTORS",
+        "HAMBAZI_WEB_POLICY_PROFILE"
+      ]
+    },
     "typecheck": {
       "dependsOn": ["^build", "^typecheck"],
       "inputs": ["$TURBO_DEFAULT$"],

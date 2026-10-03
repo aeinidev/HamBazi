@@ -10,6 +10,11 @@ the [Phase 4B database foundation](database-foundation.md).
 Use the repository's pinned Node/pnpm toolchain and install dependencies with
 `pnpm install --frozen-lockfile`. Install Docker Engine and a compatible Docker
 Compose plugin through the platform's approved setup process before service use.
+Build the locked local PostgreSQL image and pull the selected Redis image through
+[the image setup runbook](../security/local-image-transition.md) before startup.
+Legacy populated volumes require its guarded logical transition; changing the
+image or initdb settings does not migrate existing data. The verified local build
+target is Linux amd64 with the documented Docker/BuildKit versions.
 Run the declared scripts from the repository root:
 
 1. `pnpm infra:env` creates an ignored, mode-0600 `.env` with independent random
@@ -21,6 +26,11 @@ Run the declared scripts from the repository root:
 4. `pnpm infra:status` shows container status and health.
 5. `pnpm infra:down` stops/removes containers and the network, preserving the
    PostgreSQL named volume. There is deliberately no volume-wipe script.
+
+`POSTGRES_DATA_VOLUME` optionally selects a different fresh volume for an
+authorized local logical transfer. Its unset default preserves the existing
+Compose project volume name. Never use this option to overwrite or delete the
+source volume, or forge the new image-policy marker on legacy data.
 
 Only `127.0.0.1:5432` and `127.0.0.1:6379` are published by default. These are local
 developer defaults, not production capacity or endpoint decisions. If ports are
@@ -82,11 +92,16 @@ secret delivery remains a later deployment responsibility.
   outages may degrade coordination but must not erase committed database state.
 - Before adopting this setup for Phase 4B, verify both healthy containers,
   authenticated role access, negative privilege/ACL checks, Redis restart loss,
-  and PostgreSQL persistence across `infra:down`/`infra:up`. These checks have not
-  been run against Docker because Docker is unavailable. Phase 4B additionally
-  verifies the actual PostgreSQL role bootstrap, permissions, and restart data
-  persistence in an isolated native PostgreSQL cluster; that does not verify
-  Compose networking, named-volume mounts, or Redis behavior.
+  and PostgreSQL persistence across `infra:down`/`infra:up`. Phase 4B originally
+  used an isolated native PostgreSQL cluster because Docker was unavailable.
+  Phase 17A1 now verifies the selected PostgreSQL/Redis images, bootstrap/ACLs,
+  named mounts, restart behavior and 218 DB/API/Worker cases through disposable
+  Docker fixtures, plus logical restore and cross-base transfer drills. These
+  fixtures use separate loopback-published bridges. On the tested Docker host,
+  internal networks suppressed host port publication; the repository Compose
+  network remains internal, so full Compose host connectivity is not claimed.
+  Verify that separately before relying on host-run clients; do not infer it
+  from image compatibility or silently weaken network isolation.
 
 Production restore/PITR, RPO/retention, hosting/region, capacity, and final SLOs
 remain unresolved architectural decisions. This local runbook does not settle

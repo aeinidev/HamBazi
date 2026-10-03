@@ -11,12 +11,22 @@ import { authOpenApiDocument, authPaths } from "../../src/auth/index.js";
 import type { AuthRateLimiter, RateDecision } from "../../src/auth/index.js";
 import { initData, userId } from "../auth/session-fixtures.js";
 import { onboardingFixture } from "../auth/onboarding-fixtures.js";
+import { admissionPolicy } from "../fixtures/admission.js";
+import type { IpAdmission } from "../../src/realtime/index.js";
+import type { TransportAdmissionPolicy } from "@hambazi/config";
 
 const active: Awaited<ReturnType<typeof createHttpApplication>>[] = [];
 afterEach(async () => {
   await Promise.all(active.splice(0).map((h) => h.app.close()));
 });
-async function setup(options: { production?: boolean; trustedProxies?: string[] } = {}) {
+async function setup(
+  options: {
+    production?: boolean;
+    trustedProxies?: string[];
+    admissionIp?: IpAdmission;
+    policy?: TransportAdmissionPolicy;
+  } = {},
+) {
   const f = onboardingFixture();
   const output: string[] = [];
   const ip = vi.fn(async (_value: string): Promise<RateDecision> => ({ allowed: true }));
@@ -24,7 +34,10 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   const limiter: AuthRateLimiter = { consumeIp: ip, consumeIdentity: identity };
   const sessions = { ...f.service };
   const issue = vi.spyOn(sessions, "issue");
+  const authenticate = vi.spyOn(sessions, "authenticate");
+  const admissionIp = vi.fn<IpAdmission>(options.admissionIp ?? (async () => ({ allowed: true })));
   const http = await createHttpApplication({
+    admission: { policy: options.policy ?? admissionPolicy, ip: admissionIp },
     auth: {
       sessions,
       telegram: f.telegram,
@@ -45,9 +58,154 @@ async function setup(options: { production?: boolean; trustedProxies?: string[] 
   const payload = { schemaVersion: 1, commandId: randomUUID(), initData: initData() };
   const post = (body: unknown = payload) =>
     http.server.inject({ method: "POST", url: authPaths.issue, payload: body as object });
-  return { ...f, ...http, output, ip, identity, issue, payload, post };
+  return { ...f, ...http, output, ip, identity, issue, authenticate, admissionIp, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it("does not expose operator mutations to unauthenticated, player or service-shaped credentials", async () => {
+    const f = await setup();
+    const token = (await f.post()).json().accessToken as string;
+    for (const credential of [undefined, `Bearer ${token}`, "Bearer SYNTHETIC_OPERATOR_SERVICE"])
+      for (const url of [
+        "/v1/admin/games/coup",
+        "/v1/admin/matches/terminate",
+        "/internal/admin/games/coup",
+        "/v1/admin/statistics/rebuild",
+      ]) {
+        const response = await f.server.inject({
+          method: "POST",
+          url,
+          headers: credential ? { authorization: credential } : {},
+          payload: { schemaVersion: 1 },
+        });
+        expect(response.statusCode).toBe(404);
+        expect(response.headers["cache-control"]).toBe("no-store");
+        expect(response.json()).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+      }
+    expect(f.authenticate).not.toHaveBeenCalled();
+    expect(f.output.join("")).not.toContain(token);
+    expect(f.output.join("")).not.toContain("SYNTHETIC_OPERATOR_SERVICE");
+  });
+  it("admits unknown routes, malformed bodies and bad bearer attempts before expensive work", async () => {
+    const f = await setup({
+      admissionIp: async () => ({ allowed: false, reason: "limited", retryAfterSeconds: 7 }),
+    });
+    for (const request of [
+      { method: "GET" as const, url: "/v1/unknown" },
+      {
+        method: "GET" as const,
+        url: authPaths.inspect,
+        headers: { authorization: "Bearer forged" },
+      },
+      {
+        method: "POST" as const,
+        url: authPaths.issue,
+        headers: { "content-type": "application/json" },
+        payload: "private-malformed-json",
+      },
+    ]) {
+      const response = await f.server.inject(request);
+      expect(response.statusCode).toBe(429);
+      expect(response.headers["retry-after"]).toBe("7");
+      expect(response.headers["cache-control"]).toBe("no-store");
+      expect(response.json()).toMatchObject({ ok: false, error: { code: "RATE_LIMITED" } });
+    }
+    expect(f.authenticate).not.toHaveBeenCalled();
+    expect(f.issue).not.toHaveBeenCalled();
+    expect(f.ip).not.toHaveBeenCalled();
+    expect(f.output.join("")).not.toContain("private-malformed-json");
+  });
+  it("preserves durable inspection/logout when shared admission is unavailable", async () => {
+    const f = await setup();
+    const token = (await f.post()).json().accessToken;
+    f.admissionIp.mockResolvedValue({ allowed: false, reason: "unavailable" });
+    expect((await f.post()).statusCode).toBe(503);
+    const headers = { authorization: `Bearer ${token}` };
+    expect((await f.server.inject({ url: authPaths.inspect, headers })).statusCode).toBe(200);
+    expect(
+      (
+        await f.server.inject({
+          method: "POST",
+          url: authPaths.logout,
+          headers,
+          payload: { schemaVersion: 1 },
+        })
+      ).statusCode,
+    ).toBe(200);
+    expect((await f.server.inject({ url: authPaths.inspect, headers })).statusCode).toBe(401);
+  });
+  it("bounds admission concurrency and releases after work settles", async () => {
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const f = await setup({
+      policy: { ...admissionPolicy, maxHttpInFlight: 1 },
+      admissionIp: async () => {
+        await blocked;
+        return { allowed: true };
+      },
+    });
+    const first = f.post();
+    try {
+      await vi.waitFor(() => expect(f.admissionIp).toHaveBeenCalledTimes(1));
+      expect((await f.post()).statusCode).toBe(429);
+      expect(f.issue).not.toHaveBeenCalled();
+      release();
+      expect((await first).statusCode).toBe(200);
+      expect((await f.server.inject({ url: authPaths.inspect })).statusCode).toBe(401);
+    } finally {
+      release();
+      await first;
+    }
+  });
+  it("does not trust forwarded identity from an untrusted peer", async () => {
+    const f = await setup({ trustedProxies: ["192.0.2.1"] });
+    await f.server.inject({
+      url: authPaths.inspect,
+      remoteAddress: "198.51.100.1",
+      headers: { "x-forwarded-for": "203.0.113.1" },
+    });
+    expect(f.admissionIp).toHaveBeenCalledWith("198.51.100.1", "http");
+  });
+  it("retains the HTTP work slot when an aborted client's write is still running", async () => {
+    const f = await setup({ policy: { ...admissionPolicy, maxHttpInFlight: 1 } });
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    f.issue.mockImplementation(async () => {
+      await gate;
+      return createErrorEnvelope("INVALID_INPUT");
+    });
+    await f.app.listen(0, "127.0.0.1");
+    const address = f.server.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing isolated address");
+    const client = request({
+      host: "127.0.0.1",
+      port: address.port,
+      path: authPaths.issue,
+      method: "POST",
+      agent: false,
+      headers: { "content-type": "application/json" },
+    });
+    client.on("error", () => {});
+    client.end(JSON.stringify(f.payload));
+    try {
+      await vi.waitFor(() => expect(f.issue).toHaveBeenCalledTimes(1));
+      client.destroy();
+      expect((await f.post()).statusCode).toBe(429);
+      expect(f.issue).toHaveBeenCalledTimes(1);
+      release();
+      await f.settled();
+      await vi.waitFor(async () =>
+        expect((await f.server.inject({ url: authPaths.inspect })).statusCode).toBe(401),
+      );
+    } finally {
+      client.destroy();
+      release();
+      await f.settled();
+    }
+  });
   it.each([false, true])(
     "drains accepted application work even when client abort=%s",
     async (abort) => {

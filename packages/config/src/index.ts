@@ -22,3 +22,8 @@ export { parseChatConfig } from "./chat.js";
 export { parseStatisticsConfig } from "./statistics.js";
 export { parseOperationsConfig, OperationsConfigurationError } from "./operations.js";
 export { parseTelemetryConfig } from "./telemetry.js";
+export {
+  parseTransportAdmissionConfig,
+  transportAdmissionPolicySchema,
+} from "./transport-admission.js";
+export type { TransportAdmissionPolicy } from "./transport-admission.js";

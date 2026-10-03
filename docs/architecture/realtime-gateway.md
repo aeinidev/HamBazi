@@ -101,3 +101,17 @@ its own sequence/catch-up and acknowledgements (`messageId`), independent of gam
 versions. The new Chat baseline is checked alongside the unchanged earlier
 baselines. Production composition remains opt-in and disabled in `startApi`.
 See [Match chat](match-chat.md) for policy, composition and recovery.
+
+# Phase 17A2 transport admission
+
+[ADR-036](../adr/036-transport-admission-and-bounded-work.md) requires an explicit
+validated profile and public Redis IP/user admission adapter for opt-in Gateway
+composition. Engine.IO middleware covers polling/preflight/upgrades; namespace
+authentication and all incoming events are admitted before expensive work.
+Canonical IP/CIDR trust and production HTTPS checks apply independently of
+Fastify. Socket work/connection/subscription bounds, coalesced heartbeats and
+reserved disconnect cleanup preserve accepted outcomes and safe drain. Private
+reads and Chat projection revalidate durable identity/expiry before delivery.
+See [policy and authorization matrix](../security/transport-admission.md) for
+configuration, failure semantics, evidence and production gates. No wire schema,
+business authority or production activation changes.

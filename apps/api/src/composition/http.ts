@@ -19,6 +19,7 @@ import { createCatalogHttpModule, type CatalogHttpDependencies } from "../games/
 import { createRoomsHttpModule, type RoomsHttpDependencies } from "../rooms/index.js";
 import { createRealtimeGateway, type RealtimeDependencies } from "../realtime/index.js";
 import { trackHttpWork } from "./http-drain.js";
+import { installHttpAdmission, type HttpAdmission } from "./http-admission.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
@@ -27,11 +28,14 @@ export async function createHttpApplication(options: {
   catalog?: CatalogHttpDependencies;
   rooms?: RoomsHttpDependencies;
   realtime?: RealtimeDependencies;
+  admission?: HttpAdmission;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
   production: boolean;
   logger: SafeLogger;
 }) {
+  if (options.production && !options.admission)
+    throw new Error("Production HTTP admission configuration is required");
   const adapter = new FastifyAdapter({
     logger: false,
     bodyLimit: 32768,
@@ -45,6 +49,7 @@ export async function createHttpApplication(options: {
     http: { maxHeaderSize: 16384 },
   });
   const server = adapter.getInstance();
+  if (options.admission) server.server.maxConnections = options.admission.policy.maxConnections;
   const settled = trackHttpWork(server);
   let draining = false;
   server.server.headersTimeout = 10000;
@@ -78,6 +83,10 @@ export async function createHttpApplication(options: {
       reply.header("Access-Control-Allow-Origin", origin);
       reply.header("Access-Control-Expose-Headers", "X-Request-Id, Retry-After");
     }
+  });
+  if (options.admission) installHttpAdmission(server, options.admission);
+  server.addHook("onRequest", async (request, reply) => {
+    const origin = request.headers.origin;
     if (request.method === "OPTIONS") {
       if (
         !origin ||
@@ -179,6 +188,11 @@ export async function createHttpApplication(options: {
   const realtime = options.realtime
     ? createRealtimeGateway(server.server, {
         ...options.realtime,
+        admission: {
+          ...options.realtime.admission,
+          trustedProxies: options.trustedProxies,
+          production: options.production,
+        },
         metrics: options.realtime.metrics ?? options.logger.metrics,
         telemetry: options.realtime.telemetry ?? options.logger.telemetry,
       })

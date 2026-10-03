@@ -8,6 +8,9 @@ allowBuilds:
   msgpackr-extract: false
   prisma: true
 overrides:
-  "@nestjs/platform-fastify>fastify": 5.12.4
+  "@nestjs/platform-fastify>fastify": 5.12.5
   "@prisma/config>deepmerge-ts": 8.0.2
   "prisma>mysql2": 3.24.4
+  "brace-expansion@5": 5.0.12
+  "fast-uri@3": 3.1.8
+  "fast-uri@4": 4.1.5

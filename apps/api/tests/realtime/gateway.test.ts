@@ -278,6 +278,280 @@ describe("versioned realtime gateway", () => {
     expect(d.join).not.toHaveBeenCalled();
   });
 
+  it("rejects Engine.IO polling/upgrade admission before authenticating and ignores spoofed proxy headers", async () => {
+    const d = dependencies();
+    const ip = vi.fn<RealtimeDependencies["admission"]["ip"]>(async () => ({
+      allowed: false,
+      reason: "limited",
+      retryAfterSeconds: 9,
+    }));
+    d.ports.admission.ip = ip;
+    const url = await start(d.ports);
+    const response = await fetch(`${url}/socket.io/?EIO=4&transport=polling`, {
+      headers: { "x-forwarded-for": "203.0.113.9", Origin: "https://mini.example" },
+    });
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("9");
+    expect(await response.json()).toMatchObject({ error: { code: "RATE_LIMITED" } });
+    const forgedSid = await fetch(`${url}/socket.io/?EIO=4&transport=polling&sid=forged`);
+    expect(forgedSid.status).toBe(429);
+    const preflight = await fetch(`${url}/socket.io/?EIO=4&transport=polling`, {
+      method: "OPTIONS",
+      headers: { Origin: origin, "access-control-request-method": "GET" },
+    });
+    expect(preflight.status).toBe(429);
+    const denied = await connect(url);
+    await connectError(denied);
+    expect(ip).toHaveBeenCalledWith("127.0.0.1", "engine");
+    expect(d.authenticate).not.toHaveBeenCalled();
+    gateway!.stopAdmission();
+    expect((await fetch(`${url}/socket.io/?EIO=4&transport=polling`)).status).toBe(503);
+  });
+
+  it("counts malformed/unknown/unacknowledged events before durable session work", async () => {
+    const d = dependencies();
+    const client = await connect(await start(d.ports));
+    await connected(client);
+    d.authenticate.mockClear();
+    d.rate.mockClear();
+    d.rate.mockResolvedValue({ allowed: false, reason: "limited", retryAfterSeconds: 3 });
+    expect(await ack(client, "presence:ping", { schemaVersion: 1 })).toMatchObject({
+      error: { code: "RATE_LIMITED" },
+    });
+    expect(await ack(client, "unknown:event", { chat: "private-text" })).toMatchObject({
+      error: { code: "RATE_LIMITED" },
+    });
+    client.emit("room:leave", { schemaVersion: 1 });
+    await ack(client, "presence:ping", { schemaVersion: 1 });
+    expect(d.rate).toHaveBeenCalledTimes(4);
+    expect(d.authenticate).not.toHaveBeenCalled();
+    expect(d.leave).not.toHaveBeenCalled();
+  });
+
+  it("bounds unauthenticated transport connections and rejects insecure production upgrades", async () => {
+    const d = dependencies();
+    d.ports.admission.policy = { ...d.ports.admission.policy, maxConnections: 1 };
+    const url = await start(d.ports);
+    const first = await connect(url);
+    await connected(first);
+    const second = await connect(url);
+    await connectError(second);
+    expect(d.authenticate).toHaveBeenCalledTimes(1);
+    expect((await fetch(`${url}/socket.io/?EIO=4&transport=polling&sid=`)).status).toBe(429);
+    d.ports.admission.production = true;
+    const response = await fetch(`${url}/socket.io/?EIO=4&transport=polling`, {
+      headers: { "x-forwarded-proto": "https" },
+    });
+    expect(response.status).toBe(403);
+    expect(d.authenticate).toHaveBeenCalledTimes(1);
+  });
+  it("bounds namespace authentication and drains an accepted lookup before teardown", async () => {
+    const d = dependencies();
+    d.ports.admission.policy = { ...d.ports.admission.policy, maxEngineInFlight: 1 };
+    const authenticated = await d.authenticate("valid");
+    d.authenticate.mockClear();
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    d.authenticate.mockImplementation(async () => {
+      await gate;
+      return authenticated;
+    });
+    const url = await start(d.ports);
+    const first = await connect(url);
+    try {
+      await vi.waitFor(() => expect(d.authenticate).toHaveBeenCalledTimes(1));
+      const second = await connect(url);
+      expect(((await connectError(second)) as Error & { data?: { code: string } }).data?.code).toBe(
+        "RATE_LIMITED",
+      );
+      expect(d.authenticate).toHaveBeenCalledTimes(1);
+      const drain = gateway!.close();
+      release();
+      await drain;
+      expect(first.connected).toBe(false);
+      expect(d.join).not.toHaveBeenCalled();
+    } finally {
+      release();
+    }
+  });
+  it("rejects concurrent namespace attempts on the same transport before a second session lookup", async () => {
+    const d = dependencies();
+    const authenticated = await d.authenticate("valid");
+    d.authenticate.mockClear();
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    d.authenticate.mockImplementation(async () => {
+      await gate;
+      return authenticated;
+    });
+    const client = await connect(await start(d.ports));
+    try {
+      await vi.waitFor(() => expect(d.authenticate).toHaveBeenCalledTimes(1));
+      const error = connectError(client);
+      client.io.engine.write('0/v1,{"schemaVersion":1,"accessToken":"valid"}');
+      expect(((await error) as Error & { data?: { code: string } }).data?.code).toBe(
+        "RATE_LIMITED",
+      );
+      expect(d.authenticate).toHaveBeenCalledTimes(1);
+    } finally {
+      release();
+    }
+  });
+
+  it("bounds socket work, keeps admitted outcomes and drains reserved disconnect cleanup", async () => {
+    const d = dependencies();
+    d.ports.admission.policy = {
+      ...d.ports.admission.policy,
+      maxPendingPerSocket: 1,
+      maxPendingTotal: 1,
+    };
+    const close = vi.fn(async () => {});
+    d.ports.delivery = { ackTimeoutMs: 100, resync: { snapshot: vi.fn(), catchup: vi.fn() } };
+    d.ports.presence = {
+      port: { open: () => ({ close, heartbeat: vi.fn(), subscribe: vi.fn() }) },
+      heartbeatIntervalMs: 1000,
+      heartbeatTimeoutMs: 1000,
+      leaseMs: 5000,
+    };
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const original = await d.command();
+    d.command.mockClear();
+    d.command.mockImplementation(async () => {
+      await gate;
+      return original;
+    });
+    const url = await start(d.ports);
+    const client = await connect(url);
+    await connected(client);
+    const first = ack(client, "game:command", {
+      schemaVersion: 1,
+      actionId,
+      matchId,
+      expectedVersion: 1,
+      command: { type: "DECLARE_INCOME" },
+    });
+    try {
+      await vi.waitFor(() => expect(d.command).toHaveBeenCalledTimes(1));
+      expect(
+        await ack(client, "room:leave", {
+          schemaVersion: 1,
+          commandId: actionId,
+          roomId,
+          expectedVersion: 1,
+        }),
+      ).toMatchObject({ error: { code: "RATE_LIMITED" } });
+      const other = await connect(url);
+      await connected(other);
+      expect(await ack(other, "presence:ping", { schemaVersion: 1 })).toMatchObject({
+        error: { code: "RATE_LIMITED" },
+      });
+      expect(d.leave).not.toHaveBeenCalled();
+      const drain = gateway!.close();
+      release();
+      expect(await first).toMatchObject({ ok: true });
+      await drain;
+      expect(close).toHaveBeenCalledTimes(2);
+    } finally {
+      release();
+      await first;
+    }
+  });
+
+  it("bounds subscription cardinality while allowing idempotent subscriptions", async () => {
+    const d = dependencies();
+    d.ports.admission.policy = { ...d.ports.admission.policy, maxSubscriptions: 1 };
+    const client = await connect(await start(d.ports));
+    await connected(client);
+    for (let i = 0; i < 2; i++)
+      expect(await ack(client, "room:subscribe", { schemaVersion: 1, roomId })).toMatchObject({
+        ok: true,
+      });
+    expect(await ack(client, "match:subscribe", { schemaVersion: 1, matchId })).toMatchObject({
+      error: { code: "RATE_LIMITED" },
+    });
+    expect(d.authorize).not.toHaveBeenCalled();
+    await ack(client, "room:leave", {
+      schemaVersion: 1,
+      commandId: actionId,
+      roomId,
+      expectedVersion: 1,
+    });
+    expect(await ack(client, "match:subscribe", { schemaVersion: 1, matchId })).toMatchObject({
+      ok: true,
+    });
+  });
+
+  it("retains transport capacity while disconnect cleanup is pending", async () => {
+    const d = dependencies();
+    d.ports.admission.policy = { ...d.ports.admission.policy, maxConnections: 1 };
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    const close = vi.fn(async () => {
+      await gate;
+    });
+    d.ports.delivery = { ackTimeoutMs: 100, resync: { snapshot: vi.fn(), catchup: vi.fn() } };
+    d.ports.presence = {
+      port: { open: () => ({ close, subscribe: vi.fn(), heartbeat: vi.fn() }) },
+      heartbeatIntervalMs: 1000,
+      heartbeatTimeoutMs: 1000,
+      leaseMs: 5000,
+    };
+    const url = await start(d.ports);
+    const first = await connect(url);
+    await connected(first);
+    first.disconnect();
+    try {
+      await vi.waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+      const denied = await connect(url);
+      await connectError(denied);
+      expect(d.authenticate).toHaveBeenCalledTimes(1);
+      release();
+      const next = await connect(url);
+      await connected(next);
+    } finally {
+      release();
+    }
+  });
+
+  it.each([
+    ["room:start", "start", { schemaVersion: 1, commandId: actionId, roomId, expectedVersion: 1 }],
+    ["match:ready", "ready", { schemaVersion: 1, actionId, matchId, expectedVersion: 1 }],
+    [
+      "game:command",
+      "command",
+      {
+        schemaVersion: 1,
+        actionId,
+        matchId,
+        expectedVersion: 1,
+        command: { type: "DECLARE_INCOME" },
+      },
+    ],
+  ] as const)(
+    "preserves module-owned role/state/turn denial for %s",
+    async (event, port, payload) => {
+      const d = dependencies();
+      d[port].mockResolvedValue(createErrorEnvelope("FORBIDDEN") as never);
+      const client = await connect(await start(d.ports));
+      await connected(client);
+      expect(await ack(client, event, payload)).toMatchObject({ error: { code: "FORBIDDEN" } });
+      expect(d[port]).toHaveBeenCalledWith(
+        userId,
+        expect.objectContaining({ expectedVersion: 1 }),
+        ...(port === "start" ? [] : [expect.anything()]),
+      );
+    },
+  );
+
   it("binds every intent to the authenticated user and rejects invalid payloads before application work", async () => {
     const d = dependencies();
     const client = await connect(await start(d.ports));
@@ -472,6 +746,127 @@ it("fails delivery closed on session revocation", async () => {
   await gateway!.publish(wakeup());
   expect(f.catchup).not.toHaveBeenCalled();
   expect(received).not.toHaveBeenCalled();
+});
+
+it("withholds a snapshot acknowledgement after revocation during projection", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  let release!: () => void;
+  const gate = new Promise<void>((r) => {
+    release = r;
+  });
+  const projection = vi.fn(async () => {
+    await gate;
+    return { ok: true as const, value: { ...f.snapshot, view: { private: "recipient-card" } } };
+  });
+  d.ports.delivery!.resync = { ...d.ports.delivery!.resync, snapshot: projection };
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  const result = ack(client, "match:snapshot", { schemaVersion: 1, matchId });
+  try {
+    await vi.waitFor(() => expect(projection).toHaveBeenCalled());
+    d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED"));
+    release();
+    const response = await result;
+    expect(response).toMatchObject({ error: { code: "UNAUTHENTICATED" } });
+    expect(JSON.stringify(response)).not.toContain("recipient-card");
+  } finally {
+    release();
+    await result;
+  }
+});
+
+it("closes orphaned Presence subscriptions after Match membership loss", async () => {
+  const d = dependencies();
+  const f = delivery(d);
+  const close = vi.fn(async () => {});
+  const subscribe = vi.fn(async () => f.snapshot);
+  d.ports.presence = {
+    port: { open: () => ({ close, subscribe, heartbeat: vi.fn() }) },
+    heartbeatIntervalMs: 1000,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+  };
+  const client = await connect(await start(d.ports));
+  client.on("match:snapshot", (snapshot: typeof f.snapshot, respond: (seq: number) => void) =>
+    respond(snapshot.lastEventSeq),
+  );
+  await connected(client);
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  d.ports.delivery!.resync = {
+    ...d.ports.delivery!.resync,
+    catchup: async () => createErrorEnvelope("NOT_FOUND"),
+  };
+  await gateway!.publish(wakeup());
+  await vi.waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+  await gateway!.close();
+  expect(close).toHaveBeenCalledTimes(1);
+  expect(subscribe).toHaveBeenCalledTimes(1);
+});
+
+it("withholds Chat content after revocation during a recipient projection", async () => {
+  const d = dependencies();
+  let release!: () => void;
+  const gate = new Promise<void>((r) => {
+    release = r;
+  });
+  const message = {
+    schemaVersion: 1 as const,
+    matchId,
+    messageId: actionId,
+    userId,
+    seq: 1,
+    text: "private-chat-content",
+    createdAt: 1000,
+  };
+  const projection = vi.fn(async () => {
+    await gate;
+    return { ok: true as const, value: message };
+  });
+  d.ports.chat = {
+    ackTimeoutMs: 100,
+    port: {
+      send: vi.fn(),
+      delivery: projection,
+      list: async () => ({
+        ok: true as const,
+        value: {
+          schemaVersion: 1 as const,
+          matchId,
+          role: "PLAYER" as const,
+          canSend: true,
+          messageLimit: 500,
+          messages: [],
+          lastSeq: 1,
+          hasMore: false,
+        },
+      }),
+    },
+  };
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  await ack(client, "chat:list", { schemaVersion: 1, matchId });
+  const received = vi.fn();
+  client.on("chat:message", received);
+  const publication = gateway!.publishChat({
+    schemaVersion: 1,
+    eventId: ticketId,
+    aggregateId: matchId,
+    occurredAt: 1000,
+    type: "CHAT_MESSAGE_V1",
+    correlation: {},
+    payload: { schemaVersion: 1, matchId, messageId: actionId, seq: 1 },
+  });
+  try {
+    await vi.waitFor(() => expect(projection).toHaveBeenCalled());
+    d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED"));
+    release();
+    await publication;
+    expect(received).not.toHaveBeenCalled();
+  } finally {
+    release();
+    await publication;
+  }
 });
 it("retries publication after missing snapshot acknowledgement and rejects raw internal events", async () => {
   const d = dependencies();

@@ -8,6 +8,7 @@ import {
   parseProfileConfig,
   parseCatalogConfig,
   parseRoomsConfig,
+  parseTransportAdmissionConfig,
 } from "@hambazi/config";
 import { createRoomsPort, createRoomsRate } from "../rooms/index.js";
 import { createCatalogPort, createCatalogRate } from "../games/index.js";
@@ -37,6 +38,7 @@ import {
 } from "../matches/index.js";
 import { createRoomDiagnostics } from "../rooms/index.js";
 import { createApiHealth } from "../health/index.js";
+import { createRedisTransportAdmission } from "../realtime/index.js";
 
 export async function startApi(
   environment: Readonly<Record<string, string | undefined>>,
@@ -51,6 +53,14 @@ export async function startApi(
   const statsConfig = parseStatisticsConfig(environment, "api");
   const operations = parseOperationsConfig(environment, "api");
   const telemetryConfig = parseTelemetryConfig(environment, "api");
+  const admissionPolicy = parseTransportAdmissionConfig(environment);
+  const admission = admissionPolicy
+    ? createRedisTransportAdmission({
+        url: runtime.redisUrl,
+        namespace: auth.signing.issuer,
+        policy: admissionPolicy,
+      })
+    : undefined;
   const metrics = logger.metrics;
   const database = createDatabase({
     databaseUrl: runtime.databaseUrl,
@@ -103,6 +113,7 @@ export async function startApi(
           catalogRate.probe(signal),
           ...(roomsRate ? [roomsRate.probe(signal)] : []),
           ...(statisticsRate ? [statisticsRate.probe(signal)] : []),
+          ...(admission ? [admission.probe(signal)] : []),
         ])
       ).every(Boolean),
     timeoutMs: operations.probeTimeoutMs,
@@ -161,7 +172,11 @@ export async function startApi(
     await catalogRate.connect().catch(() => {});
     await roomsRate?.connect().catch(() => {});
     await statisticsRate?.connect().catch(() => {});
+    await admission?.connect().catch(() => {});
     http = await createHttpApplication({
+      ...(admission && admissionPolicy
+        ? { admission: { policy: admissionPolicy, ip: admission.ip } }
+        : {}),
       ...(roomsConfig && roomsRate
         ? {
             rooms: {
@@ -273,6 +288,7 @@ export async function startApi(
             catalogRate.close();
             roomsRate?.close();
             statisticsRate?.close();
+            admission?.close();
             await database.disconnect();
             health.stopped();
             await healthServer?.close();
@@ -300,6 +316,7 @@ export async function startApi(
     catalogRate.close();
     roomsRate?.close();
     statisticsRate?.close();
+    admission?.close();
     await database.disconnect().catch(() => {});
     health.stopped();
     await healthServer?.close().catch(() => {});

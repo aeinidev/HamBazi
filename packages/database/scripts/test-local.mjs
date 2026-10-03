@@ -9,6 +9,7 @@ import { promisify, parseEnv } from "node:util";
 import pg from "pg";
 import { createLocalEnvironment } from "../../../infra/scripts/create-local-env.mjs";
 import { restoreDrill, RestoreDrillError } from "./restore-drill.mjs";
+import { startIsolatedPostgres } from "../../../infra/scripts/isolated-postgres.mjs";
 
 const run = promisify(execFile);
 const bin = process.env.TEST_POSTGRES_BIN;
@@ -20,6 +21,7 @@ if (!bin) {
 } else {
   const path = await mkdtemp(join(tmpdir(), "hambazi-db-test-"));
   let started = false;
+  let container;
   let stage = "environment";
   let env = {};
   try {
@@ -51,27 +53,33 @@ if (!bin) {
       "--no-instructions",
     ];
     if (process.env.TEST_POSTGRES_SHARE) args.push("-L", process.env.TEST_POSTGRES_SHARE);
-    stage = "initdb";
-    await run(join(bin, "initdb"), args);
-    stage = "start";
-    // A failed/timeout start can still leave a process: always attempt shutdown.
-    started = true;
-    await run(join(bin, "pg_ctl"), [
-      "-D",
-      join(path, "data"),
-      "-l",
-      join(path, "server.log"),
-      "-o",
-      `-h 127.0.0.1 -p ${port} -k ${path} -c log_statement=none -c log_min_error_statement=panic -c log_error_verbosity=terse -c log_parameter_max_length_on_error=0`,
-      "-w",
-      "start",
-    ]);
+    if (process.env.TEST_POSTGRES_MODE === "compose") {
+      stage = "isolated Compose PostgreSQL image";
+      container = await startIsolatedPostgres({ directory: path, port, credentials: env });
+      started = true;
+    } else {
+      stage = "initdb";
+      await run(join(bin, "initdb"), args);
+      stage = "start";
+      // A failed/timeout start can still leave a process: always attempt shutdown.
+      started = true;
+      await run(join(bin, "pg_ctl"), [
+        "-D",
+        join(path, "data"),
+        "-l",
+        join(path, "server.log"),
+        "-o",
+        `-h 127.0.0.1 -p ${port} -k ${path} -c log_statement=none -c log_min_error_statement=panic -c log_error_verbosity=terse -c log_parameter_max_length_on_error=0`,
+        "-w",
+        "start",
+      ]);
+    }
     const adminUrl = `postgresql://hambazi_local_admin:${env.POSTGRES_PASSWORD}@127.0.0.1:${port}/postgres`;
     stage = "create database";
     const admin = new pg.Client({ connectionString: adminUrl });
     await admin.connect();
     try {
-      await admin.query("CREATE DATABASE hambazi");
+      if (!container) await admin.query("CREATE DATABASE hambazi");
     } finally {
       await admin.end();
     }
@@ -87,11 +95,12 @@ if (!bin) {
     };
     // Exercise the actual local role bootstrap, not a test reimplementation.
     stage = "role bootstrap";
-    await run(
-      "sh",
-      [new URL("../../../infra/docker/postgres/10-roles.sh", import.meta.url).pathname],
-      { env: childEnv },
-    );
+    if (!container)
+      await run(
+        "sh",
+        [new URL("../../../infra/docker/postgres/10-roles.sh", import.meta.url).pathname],
+        { env: childEnv },
+      );
     for (const key of ["API_DATABASE_URL", "WORKER_DATABASE_URL", "MIGRATION_DATABASE_URL"]) {
       const url = new URL(env[key]);
       url.hostname = "127.0.0.1";
@@ -309,16 +318,18 @@ if (!bin) {
     console.info(result.stdout);
     stage = "restart";
     // Prove committed schema survives a real process restart.
-    await run(join(bin, "pg_ctl"), [
-      "-D",
-      join(path, "data"),
-      "-m",
-      "fast",
-      "-w",
-      "restart",
-      "-l",
-      join(path, "server.log"),
-    ]);
+    if (container) await container.restart();
+    else
+      await run(join(bin, "pg_ctl"), [
+        "-D",
+        join(path, "data"),
+        "-m",
+        "fast",
+        "-w",
+        "restart",
+        "-l",
+        join(path, "server.log"),
+      ]);
     const restored = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
     await restored.connect();
     try {
@@ -351,6 +362,7 @@ if (!bin) {
         "match-processing.test.ts",
         "match-reconnect.test.ts",
         "realtime.test.ts",
+        "transport-admission.test.ts",
         "chat.test.ts",
         "statistics.test.ts",
         "diagnostics.test.ts",
@@ -487,16 +499,18 @@ if (!bin) {
         }
       };
       const before = await snapshot();
-      await run(join(bin, "pg_ctl"), [
-        "-D",
-        join(path, "data"),
-        "-m",
-        "fast",
-        "-w",
-        "restart",
-        "-l",
-        join(path, "server.log"),
-      ]);
+      if (container) await container.restart();
+      else
+        await run(join(bin, "pg_ctl"), [
+          "-D",
+          join(path, "data"),
+          "-m",
+          "fast",
+          "-w",
+          "restart",
+          "-l",
+          join(path, "server.log"),
+        ]);
       if (before !== (await snapshot())) throw new Error();
       console.info(
         "API session/account/onboarding integration and account/session/receipt/flow/result/statistics restart persistence passed.",
@@ -568,7 +582,8 @@ if (!bin) {
     let stopped = !started;
     if (started) {
       try {
-        await run(join(bin, "pg_ctl"), ["-D", join(path, "data"), "-m", "fast", "-w", "stop"]);
+        if (container) await container.stop();
+        else await run(join(bin, "pg_ctl"), ["-D", join(path, "data"), "-m", "fast", "-w", "stop"]);
         stopped = true;
       } catch {
         console.error(

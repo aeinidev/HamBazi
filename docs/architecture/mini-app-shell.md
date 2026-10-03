@@ -39,8 +39,9 @@ signature verification. Real API authentication still requires valid Telegram
 `initData`; the preview command forces requests to its separate loopback
 fixture. Preview mode disables the fixture's test-control endpoints and requires
 its synthetic credential for mock protected routes and sockets. The production
-build checks that the official bridge remains and preview markers are absent
-from its browser output.
+build checks that the guarded, integrity-pinned official bridge remains, no
+parser-loaded SDK bypasses the guard, and preview markers are absent from its
+browser output.
 
 The repository's configured API can provide auth/profile/catalog/optional room
 REST. Socket and matchmaking composition remain opt-in. The production catalog
@@ -57,7 +58,15 @@ error mapping. TanStack Query owns fetched server state; a non-persisted Zustand
 store owns session metadata, connection status, invitation routing, search ticket
 and the latest server-projected Match snapshot. No engine is imported by Web.
 
-The official Telegram bridge supplies raw initData. ready/expand, BackButton,
+The official Telegram bridge supplies raw initData. Under
+[ADR-037](../adr/037-telegram-bootstrap-privacy.md), HamBazi first removes accessible
+legacy `__telegram__initParams` caches and protects that exact key against SDK
+reads/writes before loading the official HTTPS script. The script has a reviewed
+SHA-384 integrity pin, anonymous CORS, no referrer and a ten-second loading
+deadline. Failed cleanup/protection/loading/integrity grants no launch credential;
+bootstrap cannot fall back to a rejected global bridge. Changes to official SDK
+bytes require storage review, a pin update and passing real-SDK browser gates.
+ready/expand, BackButton,
 viewport/theme and safe-area changes follow the [Telegram Mini Apps API](https://core.telegram.org/bots/webapps).
 SDK launch parameters are removed from URL/history after bootstrap. Unverified
 start_param is only an opaque routing hint and never identity or membership.
@@ -65,8 +74,10 @@ Account creation is explicit; its server-returned routing hint survives login.
 Backend verification, identity and authorization remain authoritative.
 
 Access tokens live in a private runtime closure; initData and admission credentials
-stay in memory. No localStorage/sessionStorage, persistence middleware, analytics,
-query devtools, service worker, raw error logging or full-state rendering is added.
+stay in memory. Credentials never enter localStorage/sessionStorage; the official
+SDK may store non-sensitive theme settings under its unrelated key. No credential
+persistence middleware, analytics, query devtools, service worker, raw error
+logging or full-state rendering is added.
 HTTP uses bearer headers, omitted cookies, no-store, redirect rejection, response
 bounds and deadlines. Receiver schemas accept additive fields and strip unknowns.
 Errors display fixed text keyed by stable codes, never server/debug messages.
@@ -76,7 +87,11 @@ HTTP and Socket results are fenced. A fresh Telegram launch is required after
 expiry; no refresh mechanism or seat reclaim is introduced. Logout always drops
 local credentials; if its request fails, server revocation is not guaranteed and
 the short-lived server session still expires normally. Full page reload drops
-in-memory ticket/room navigation context; no backend active-ticket discovery API
+in-memory credentials and ticket/room navigation context; SDK launch-cache
+restoration is blocked and accessible legacy copies are physically deleted.
+The SDK may retain its initData getter in document memory until page closure;
+HamBazi drops its own credential reference on logout/disposal.
+No backend active-ticket discovery API
 is invented. Hash routes retain room/match IDs, never invitation capabilities or
 authentication credentials. Reloaded users re-authenticate before those routes.
 
@@ -124,10 +139,29 @@ mock bridge never enter the production bundle.
 This is component/contract-client browser evidence, not live Telegram or durable
 PostgreSQL gameplay E2E. Screenshots are generated under ignored test-results.
 
-Production static hosting must supply restrictive CSP with the configured API/WS
-origin and official Telegram bridge, known-origin CORS, HTTPS/WSS, HSTS and security
-headers under the later hosting/security phases. Telegram client compatibility,
-live HTTPS smoke, actual mobile WebViews and production admission remain unverified.
+The ordinary browser suite includes unmodified, hash-verified official SDK tests
+with synthetic launch credentials. A bare-SDK negative control detects the original
+storage defect; native writer probes and original storage reads verify prevention,
+legacy deletion, reload, successful/failed logout and safe bootstrap failure.
+`pnpm --filter @hambazi/web test:browser --config telegram-production.playwright.config.ts`
+runs the same privacy cases against a built production bundle and disposable fixture.
+These tests fetch the public SDK or accept `TELEGRAM_SDK_FIXTURE_PATH` pointing to
+reviewed offline bytes; either path must match the production integrity pin.
+No SDK fixture is vendored into the app. The production browser configuration
+sets a synthetic loopback API destination during its build; run the normal Web
+`build` afterward to restore output for the configured ordinary destination.
+
+Phase 17A3 now generates and verifies `dist/client/security-headers.json` and
+enforces its restrictive CSP/security headers in ordinary built-output preview;
+see [browser policy](../security/browser-policy.md) and ADR-038. Browser validation
+uses Zod interpreted mode before schema imports, so inline/eval scripts stay
+denied. Explicit approved HTTPS/WSS/frame origins remain deployment inputs; the
+default artifact selects no production domain and denies framing. The production
+browser suite also checks real SDK compatibility, HTTP/WS transport and actual
+browser resource/framing denials under this policy. Static hosting must apply
+the generated response headers with known-origin API CORS and HTTPS/WSS at the
+approved edge. Telegram client compatibility, live HTTPS smoke, actual mobile
+WebViews and production admission remain unverified.
 
 Phase 15A adds [Match chat](match-chat.md) through the Chat feature's public index.
 It uses separate memory/cursors from game synchronization, bounded plain-text

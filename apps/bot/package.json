@@ -21,7 +21,7 @@
     "@hambazi/config": "workspace:*",
     "@hambazi/contracts": "workspace:*",
     "@hambazi/observability": "workspace:*",
-    "fastify": "5.12.4",
+    "fastify": "5.12.5",
     "grammy": "1.46.0",
     "zod": "4.6.2"
   },

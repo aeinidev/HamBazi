@@ -1,0 +1,13 @@
+title = "HamBazi: default rules, no credential exceptions"
+
+[extend]
+useDefault = true
+
+# Reviewed false positive in historical architecture decision prose, not a key.
+# Match BOTH the exact file and the exact extracted timestamp label.
+[[allowlists]]
+description = "Normative issuance/expiry timestamp label in the implementation plan"
+condition = "AND"
+paths = ['''(^|/)docs/implementation-plan\.md$''']
+regexTarget = "secret"
+regexes = ['''^issuance/expiry$''']

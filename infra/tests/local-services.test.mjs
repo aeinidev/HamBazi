@@ -97,13 +97,60 @@ describe("local service definition", () => {
     expect(compose.services.redis.user).toBe("redis");
   });
 
-  it.each(["postgres/10-roles.sh", "redis/start.sh"])(
-    "has valid POSIX shell syntax: %s",
-    (file) => {
-      const path = fileURLToPath(new URL(`../docker/${file}`, import.meta.url));
-      expect(spawnSync("sh", ["-n", path], { encoding: "utf8" }).status).toBe(0);
+  it.each([
+    "postgres/10-roles.sh",
+    "postgres/start.sh",
+    "postgres/99-image-policy.sh",
+    "redis/start.sh",
+  ])("has valid POSIX shell syntax: %s", (file) => {
+    const path = fileURLToPath(new URL(`../docker/${file}`, import.meta.url));
+    expect(spawnSync("sh", ["-n", path], { encoding: "utf8" }).status).toBe(0);
+  });
+
+  it.each(["legacy", "wrong-major", "symlink-policy"])(
+    "refuses an incompatible data directory without changing it: %s",
+    async (kind) => {
+      const path = await directory();
+      await writeFile(join(path, "PG_VERSION"), kind === "wrong-major" ? "17\n" : "18\n");
+      await writeFile(join(path, "preserve"), "synthetic persisted data");
+      if (kind === "wrong-major")
+        await writeFile(join(path, ".hambazi-image-policy"), "postgres18-builtin-C.UTF-8-v1\n");
+      if (kind === "symlink-policy")
+        await symlink(join(path, "preserve"), join(path, ".hambazi-image-policy"));
+      const script = fileURLToPath(new URL("../docker/postgres/start.sh", import.meta.url));
+      const result = spawnSync("sh", [script, "postgres"], {
+        env: { PATH: process.env.PATH, PGDATA: path },
+        encoding: "utf8",
+      });
+      expect(result.status).toBe(78);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("POSTGRES_IMAGE_MIGRATION_REQUIRED");
+      expect(result.stderr).not.toContain(path);
+      expect(await readFile(join(path, "preserve"), "utf8")).toBe("synthetic persisted data");
+      expect(await readFile(join(path, "PG_VERSION"), "utf8")).toBe(
+        kind === "wrong-major" ? "17\n" : "18\n",
+      );
     },
   );
+
+  it("rejects a substituted helper archive before building, without printing its content", async () => {
+    const path = await directory();
+    const archive = join(path, "helper.apk");
+    await writeFile(archive, "substituted-private-payload");
+    const script = fileURLToPath(new URL("../scripts/build-local-postgres.mjs", import.meta.url));
+    const result = spawnSync(process.execPath, [script], {
+      env: {
+        PATH: process.env.PATH,
+        HOME: process.env.HOME,
+        HAMBAZI_POSTGRES_HELPER_ARCHIVE: archive,
+      },
+      encoding: "utf8",
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("LOCAL_POSTGRES_BUILD_FAILED at helper-integrity");
+    expect(result.stdout + result.stderr).not.toContain("substituted-private-payload");
+    expect(result.stdout + result.stderr).not.toContain(archive);
+  });
 
   it("does not grant DDL to runtime roles or Redis admin/unscoped access", async () => {
     const postgres = await readFile(

@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwind from "@tailwindcss/vite";
 
-const telegramScript = '<script src="https://telegram.org/js/telegram-web-app.js"></script>';
 const previewIdentity = new URLSearchParams({
   preview: "synthetic",
   user: JSON.stringify({ id: 777000123, first_name: "Preview", username: "hambazi_preview" }),
@@ -17,22 +16,33 @@ export default defineConfig(({ command, mode }) => {
       tailwind(),
       {
         name: "local-preview-telegram-bridge",
-        transformIndexHtml(html) {
-          if (!html.includes(telegramScript)) throw new Error("Telegram bridge tag is missing");
-          return html.replace(
-            telegramScript,
-            `<meta name="hambazi-local-preview" content="synthetic" />
-<meta name="hambazi-coup-preview-match" content="33333333-3333-4333-8333-333333333333" />
-<script>
-window.Telegram = { WebApp: {
+        transformIndexHtml() {
+          return [
+            {
+              tag: "meta",
+              attrs: { name: "hambazi-local-preview", content: "synthetic" },
+              injectTo: "head-prepend",
+            },
+            {
+              tag: "meta",
+              attrs: {
+                name: "hambazi-coup-preview-match",
+                content: "33333333-3333-4333-8333-333333333333",
+              },
+              injectTo: "head-prepend",
+            },
+            {
+              tag: "script",
+              injectTo: "head-prepend",
+              children: `window.Telegram = { WebApp: {
   initData: ${JSON.stringify(previewIdentity)},
   colorScheme: "light",
   viewportStableHeight: window.innerHeight,
   ready() {}, expand() {}, onEvent() {}, offEvent() {},
   BackButton: { show() {}, hide() {}, onClick() {}, offClick() {} }
-} };
-</script>`,
-          );
+} };`,
+            },
+          ];
         },
         configureServer(server) {
           if (server.config.server.host !== "127.0.0.1")

@@ -20,7 +20,7 @@ declare global {
     Telegram?: { WebApp?: TelegramApp };
   }
 }
-export function bootstrapTelegram(app = window.Telegram?.WebApp) {
+export function bootstrapTelegram(app: TelegramApp | undefined) {
   // SDK has consumed launch parameters; keep credentials out of browser history/referrers.
   const url = new URL(window.location.href);
   for (const key of [...url.searchParams.keys()])
