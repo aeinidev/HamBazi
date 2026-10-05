@@ -20,6 +20,7 @@ packages/database/src/generated/
 # Logs and local process state
 *.log
 *.pid
+.laptop-server/
 
 # Editors and operating systems
 .idea/

@@ -25,7 +25,10 @@
     "infra:config": "docker compose --env-file .env --file infra/docker/compose.yaml config --quiet",
     "infra:up": "docker compose --env-file .env --file infra/docker/compose.yaml up --detach --wait --wait-timeout 90",
     "infra:down": "docker compose --env-file .env --file infra/docker/compose.yaml down",
-    "infra:status": "docker compose --env-file .env --file infra/docker/compose.yaml ps"
+    "infra:status": "docker compose --env-file .env --file infra/docker/compose.yaml ps",
+    "laptop:start": "node infra/scripts/laptop-server.mjs start",
+    "laptop:status": "node infra/scripts/laptop-server.mjs status",
+    "laptop:stop": "node infra/scripts/laptop-server.mjs stop"
   },
   "devDependencies": {
     "@hambazi/eslint": "workspace:*",

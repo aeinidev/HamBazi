@@ -1,0 +1,12 @@
+# Host-run applications need a normal bridge for loopback port publication.
+# Both database ports remain bound to 127.0.0.1 by the base definition.
+services:
+  postgres:
+    # Compose clears the image CMD when the base entrypoint is overridden.
+    command: [postgres]
+networks:
+  private:
+    internal: false
+volumes:
+  postgres-data:
+    name: hambazi-laptop_postgres-data

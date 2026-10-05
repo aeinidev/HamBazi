@@ -18,6 +18,11 @@ Neither tool accepts an existing database/volume or migrates live data.
 See [workspace ownership](../../docs/architecture/workspaces.md) and the
 [implementation plan](../../docs/implementation-plan.md).
 
+`laptop-server.mjs` implements the owner-requested temporary laptop server via
+the declared `laptop:start`, `laptop:status` and `laptop:stop` scripts. See the
+[laptop server runbook](../../docs/operations/laptop-server.md) for real-service
+scope, private data ports, temporary HTTPS and the retained gameplay/17C gates.
+
 Phase 16C adds [operational runbooks](../../docs/operations/runbooks/README.md),
 [metrics/reporting documentation](../../docs/architecture/operational-observability.md)
 and provider-independent dashboard/alert definitions. `TEST_RESTORE_DRILL=isolated`

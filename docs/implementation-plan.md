@@ -1079,6 +1079,20 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Owner-authorized documentation preparation (2026-10-04):** prepared the [18B3 operating-decision worksheet](operations/staging-operating-decisions.md), linked from the portable deployment guide. It records unanswered hosting/region, domain/access, runtime/release, backup/PITR/RPO/RTO/retention and final SLO questions, individual decision approval records, separate execution authorization and an unverified staging evidence checklist. This is documentation-only preparation, not the start or completion of 18B3; no accepted operating ADR or policy value is supplied. OD-002/006/007 remain open; staging provisioning/deployment/activation remain fully deferred. Preserved existing 18B1/18B2 work; no app, infrastructure, dependency, contract or live environment changes. Documentation formatting, relative-reference and diff/preservation checks are the relevant validation; product/runtime suites and staging drills are not rerun for this worksheet. Parent 18B remains In Progress; 7C/17C/19 gates remain intact.
 - **Worksheet validation (2026-10-04):** root `pnpm format:check` and `git diff --check` pass; all 65 local Markdown references across the three affected documents resolve. File hashes confirm 629 existing candidate files are unchanged; the only additions/edits in this task are the worksheet, its deployment-guide link and this plan record/current-gate clarification. Existing uncommitted portable preparation is preserved. No product tests, image builds/scans, database/service startup or staging operations were needed or executed for this documentation-only task.
 
+### Temporary laptop environment — owner follow-up
+
+**Temporary environment follow-up (2026-10-05):** the owner requested free
+temporary hosting, then selected their own laptop as the server. The limited
+development setup is recorded in [ADR-044](adr/044-temporary-laptop-server.md)
+and the [laptop-server runbook](operations/laptop-server.md). Real API, cleanup
+Worker, built Web and isolated durable PostgreSQL/Redis are supervised locally,
+with a free HTTPS tunnel, existing Telegram auth, private data/health ports and
+declared start/status/stop commands. This is an explicit exception to the prior
+execution deferral for temporary laptop development only. It neither completes
+18B3 nor enables gameplay; 7C, approved capacity/SLO decisions and 17C evidence
+remain Pending. No production provider/region, backup policy or final SLO is
+selected, and no Telegram webhook/menu or BotFather setting is changed.
+
 ### Phase 19 — Final Definition of Done and release-readiness review
 
 - **Objective:** determine factually whether the HamBazi MVP is ready for public production release.
