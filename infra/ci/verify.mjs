@@ -89,6 +89,25 @@ try {
     ]),
     gate("redis-image-pull", "docker", ["pull", compose.services.redis.image]),
     gate("images", "node", ["infra/scripts/security-scan.mjs", "images"]),
+    gate(
+      "application-image-build",
+      "node",
+      [
+        "--use-env-proxy",
+        "infra/release/build.mjs",
+        join(process.env.RUNNER_TEMP, "hambazi-packaging"),
+      ],
+      {},
+      900000,
+    ),
+    gate("application-images", "node", [
+      "infra/release/scan.mjs",
+      join(process.env.RUNNER_TEMP, "hambazi-packaging/images.json"),
+    ]),
+    gate("application-image-smoke", "node", [
+      "infra/release/test-local.mjs",
+      join(process.env.RUNNER_TEMP, "hambazi-packaging/images.json"),
+    ]),
     gate("migration-fault-release", "pnpm", ["test:auth-http:local"], {
       TEST_POSTGRES_MODE: "compose",
       TEST_RESTORE_DRILL: "isolated",

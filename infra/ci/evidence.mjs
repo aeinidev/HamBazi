@@ -86,6 +86,12 @@ export async function writeEvidence(root, directory, gates, environment = proces
     gates.some((gate) => gate.passed !== true || !/^[a-z][a-z0-9-]{0,60}$/.test(gate.stage))
   )
     invalid();
+  for (const gate of gates)
+    if (
+      gate.stage === "application-images" &&
+      (gate.scan?.sourceCommit !== commit || gate.scan?.sourceDirty !== false)
+    )
+      invalid();
   const manifest = {
     schemaVersion: 1,
     purpose: "ci-quality-evidence",
@@ -113,6 +119,7 @@ export async function writeEvidence(root, directory, gates, environment = proces
         durationMs: scalar("durationMs"),
         tests: scalar("tests"),
         browserCases: scalar("browserCases"),
+        ...(gate.runtimeChecks !== undefined ? { runtimeChecks: scalar("runtimeChecks") } : {}),
       };
     }),
     files,

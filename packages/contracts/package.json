@@ -19,5 +19,8 @@
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
     "typescript": "6.0.3"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

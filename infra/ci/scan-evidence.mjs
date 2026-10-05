@@ -1,7 +1,7 @@
 import { assessAudit, assessImage, assertFreshDatabase } from "../scripts/security-scan.mjs";
 import { isDeepStrictEqual } from "node:util";
 
-export const scannerStages = new Set(["secrets", "dependencies", "images"]);
+export const scannerStages = new Set(["secrets", "dependencies", "images", "application-images"]);
 const invalid = () => {
   throw new Error("CI_SCAN_EVIDENCE_INVALID");
 };
@@ -51,13 +51,28 @@ export function projectScan(report, kind) {
     if (!result.ok) invalid();
     return { ...header, counts: result.counts, findings: result.findings };
   }
-  if (!Array.isArray(report.images) || report.images.length !== 2) invalid();
+  const applications = kind === "application-images";
+  if (!Array.isArray(report.images) || report.images.length !== (applications ? 4 : 2)) invalid();
+  if (
+    applications &&
+    (!/^[a-f0-9]{40}$/.test(report.sourceCommit ?? "") ||
+      !/^[a-f0-9]{64}$/.test(report.sourceSnapshotSha256 ?? "") ||
+      !/^[a-f0-9]{64}$/.test(report.buildInputSha256 ?? "") ||
+      typeof report.sourceDirty !== "boolean")
+  )
+    invalid();
   const database = assertFreshDatabase({
     Version: 2,
     UpdatedAt: report.database?.updatedAt,
     DownloadedAt: report.database?.downloadedAt,
   });
-  const images = report.images.map((image) => {
+  const images = report.images.map((image, index) => {
+    const role = applications ? ["api", "bot", "worker", "web"][index] : undefined;
+    if (
+      applications &&
+      (image.role !== role || !image.image?.startsWith(`hambazi-candidate/${role}:`))
+    )
+      invalid();
     if (
       !Array.isArray(image.findings) ||
       image.findings.length > 10000 ||
@@ -84,7 +99,19 @@ export function projectScan(report, kind) {
       image.image,
     );
     if (!result.ok || !isDeepStrictEqual(result.counts, image.counts)) invalid();
-    return result;
+    return { ...(applications ? { role } : {}), ...result };
   });
-  return { ...header, database, images };
+  return {
+    ...header,
+    ...(applications
+      ? {
+          sourceCommit: report.sourceCommit,
+          sourceDirty: report.sourceDirty,
+          sourceSnapshotSha256: report.sourceSnapshotSha256,
+          buildInputSha256: report.buildInputSha256,
+        }
+      : {}),
+    database,
+    images,
+  };
 }

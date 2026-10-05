@@ -30,7 +30,9 @@ const invalid = () => {
 const count = (n) => Number.isSafeInteger(n) && n >= 0;
 const blocked = (severity) => policy.blockingSeverities.includes(severity);
 const pinnedImage = (image) =>
-  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+)@sha256:[a-f0-9]{64}$/.test(image);
+  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+|hambazi-candidate\/(api|bot|worker|web):[a-f0-9]{40}-[a-f0-9]{16})@sha256:[a-f0-9]{64}$/.test(
+    image,
+  );
 
 /** Only fixed counts and validated advisory identifiers leave scanner reports. */
 export function assessAudit(report, exitCode) {

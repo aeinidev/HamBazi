@@ -77,8 +77,13 @@ without production credentials. [ADR-041](../adr/041-ci-trust-and-evidence.md)
 and the [CI guide](../operations/ci.md) define provisioning, trust, privacy and
 protected-release requirements. A fresh scan is required after candidate
 dependency/image changes and before release. Phase
-18B must extend the reviewed image target inventory to actual application images;
-no application Dockerfiles exist yet. The local service derivative is not an
+18B1 extends the reviewed target inventory to four exact local application image
+candidates through `infra/release/scan.mjs`; see [packaging operations](../operations/packaging.md).
+It verifies source/build labels and actual digests using the same pinned scanner,
+fresh schema-2 database and blocking policy. No application image is published or
+approved for production. Later 18B acceptance must bind the approved deployment
+inventory to that reviewed source and repeat fresh scans.
+The local service derivative is not an
 application deployment image. Record any exception with owner, exact
 advisory/image, evidence, expiry and remediation before accepting a known
 Critical/High vulnerability. No such exception exists in this phase. After

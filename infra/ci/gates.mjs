@@ -27,6 +27,25 @@ export async function runSequence(gates) {
     // Retain only counts; assertions, private browser views and SQL errors are discarded.
     const text = stripVTControlCharacters(output);
     let scan;
+    let smoke;
+    if (gate.stage === "application-image-smoke") {
+      try {
+        const report = JSON.parse(output);
+        if (
+          report.schemaVersion !== 1 ||
+          report.purpose !== "disposable-packaging-smoke" ||
+          report.passed !== true ||
+          report.productionReady !== false ||
+          !Number.isSafeInteger(report.checks) ||
+          report.checks < 1 ||
+          report.browserCases !== 2
+        )
+          throw new Error();
+        smoke = { runtimeChecks: report.checks, browserCases: report.browserCases };
+      } catch {
+        throw new Error(`CI_GATE_FAILED:${gate.stage}`);
+      }
+    }
     if (scannerStages.has(gate.stage)) {
       try {
         scan = projectScan(JSON.parse(output), gate.stage);
@@ -48,6 +67,7 @@ export async function runSequence(gates) {
         (n, match) => n + Number(match[1]),
         0,
       ),
+      ...smoke,
     });
     console.info(`CI gate passed: ${gate.stage}`);
   }

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "inventory": null,
+  "roleEnvFiles": { "api": null, "bot": null, "worker": null, "web": null },
+  "tlsFiles": { "apiKey": null, "apiCert": null, "botKey": null, "botCert": null, "apiCa": null },
+  "privateNetwork": null,
+  "botEgressNetwork": null,
+  "privateAddresses": { "api": null, "bot": null, "worker": null, "web": null },
+  "stopGraceSeconds": { "api": null, "bot": null, "worker": null, "web": null }
+}

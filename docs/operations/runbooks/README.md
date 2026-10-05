@@ -12,6 +12,7 @@ incident record. Owner roles in [alerts](../alerts.json) must be assigned before
 | Redis / queue loss               | Backend on-call  | [Redis](redis-loss.md)              |
 | Stuck Match / reconnect failures | Backend on-call  | [Match recovery](stuck-match.md)    |
 | Bad release / failed drain       | Release on-call  | [Rollback](rollback.md)             |
+| Compatible release migrations    | Database on-call | [Migrations](migrations.md)         |
 | Data recovery                    | Database on-call | [Restore](restore.md)               |
 
 Common diagnosis: inspect safe Pino events/correlation, local exact-GET health and
@@ -44,6 +45,11 @@ composition; they are not client APIs. Exact provider/supervisor/migration/backu
 commands must be selected and rehearsed in 18B. This phase executes only disposable
 local tests/drills and records those external limits. Do not infer deployment or
 mutation approval from these documents.
+
+Phase 18B2 adds [portable deployment preparation](../deployment.md), a separate
+expand/backfill/contract procedure and owned definition/image rollback rehearsals.
+Provider-specific staging, traffic switching and backup/PITR acceptance remain
+18B3 and OD-002/006/007; local evidence does not authorize those operations.
 
 Phase 17A3 supplies the [administrative security design](../../security/admin-security-design.md)
 and ADR-039 for separate MFA/RBAC/private access and durable append-only audit.

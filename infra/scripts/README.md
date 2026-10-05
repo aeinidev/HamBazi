@@ -37,3 +37,15 @@ sequential verification and content-free evidence entry points. The
 requirements and protected-release settings. No root script, production
 credential or deployment command is added. Phase 17C stays Pending and required
 on production-like staging before final release readiness.
+
+Phase 18B1 adds `infra/release/build.mjs`, `scan.mjs` and `test-local.mjs` for
+portable local application image candidates. The existing read-only CI job runs
+those real gates; no image is uploaded/published and release approval stays false.
+See [packaging operations](../../docs/operations/packaging.md). Provider-specific
+staging, access, backup/PITR and final SLO decisions remain deferred/open.
+
+Phase 18B2 adds `infra/release/prepare.mjs` and `test-definition-local.mjs`, plus an
+explicit `--rollback-to` disposable mode in the existing image smoke entry point.
+See [deployment preparation](../../docs/operations/deployment.md) and its separate
+migration/rollback gates. Preparation validates only; it does not activate staging
+or run against existing data services.

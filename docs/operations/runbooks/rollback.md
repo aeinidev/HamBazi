@@ -13,9 +13,11 @@ corruption/exploit; SEV2 for release-linked errors, bad readiness or failed drai
    lifecycle and exit status. On deadline failure preserve the incident evidence and
    allow idempotent queue/transaction recovery. A forced exit does not prove drain.
 3. Roll back application images/configuration to reviewed compatible immutable
-   artifacts using the provider's approved release procedure. No deployment/image
-   rollback command is declared yet; packaging/supervisor evidence is Phase 18B.
-   Do not run a guessed Compose/service command against live infrastructure.
+   artifacts using the provider's approved release procedure. Phase 18B2 supplies
+   [portable application definitions and a disposable image rehearsal](../deployment.md),
+   with exact scanned digests and separate role files. It does not supply an
+   approved live supervisor/ingress procedure; those remain 18B3. Do not run the
+   local development Compose stack or an unapproved command against live systems.
 4. Keep additive database expansion, append-only history, claims/receipts, result
    generations and old handlers through release overlap. Do not run migrate reset,
    drop tables/columns or destructive down SQL alongside an app rollback. A schema
@@ -30,8 +32,13 @@ corruption/exploit; SEV2 for release-linked errors, bad readiness or failed drai
    Annotate the approved release ledger with rollback digest/time. Return traffic
    only after commander acceptance; keep unresolved launch/7C gates intact.
 
-Local evidence: unchanged frozen contract baselines, existing populated-schema
-expansion/redeploy/restart tests and accepted-work drain tests. No actual app image
-rollout/rollback, production migration or staging supervisor/ingress drill occurred.
-Provider-specific release commands, artifact scans and measured staging rollback
-remain Phase 18B prerequisites.
+Local preparation adds a real current/previous/current/previous image replacement
+drill on owned PostgreSQL/Redis, with original intent/session preservation and
+accepted HTTP drain (NOT_READY before settlement, then exit zero). Both artifacts
+have unchanged product code/schema/protocols; this is not arbitrary-version rollback
+compatibility. The generated production Web Compose definition is separately
+rehearsed. Existing populated expansion/redeploy/restart/grant and accepted-worker
+drain suites remain relevant. See [Migrations](migrations.md) for the separate
+expand/backfill/contract gate. No production migration, real staging rollout,
+supervisor/ingress switch or provider/PITR recovery occurred. Provider-specific
+commands, fresh release-pair scans and measured staging rollback remain 18B3 gates.

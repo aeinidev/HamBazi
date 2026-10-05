@@ -29,19 +29,20 @@ come from the existing lockfile-selected Playwright CLI.
 
 `node infra/ci/verify.mjs` runs these gates in order and stops at the first error:
 
-| Gate                         | Command / purpose                                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Workflow                     | Hash-verified actionlint and executable trust-policy checks                                                                     |
-| Secrets / dependencies       | Existing uncached `security-scan.mjs secrets` / `dependencies`; full reachable history and frozen candidate                     |
-| Public surfaces              | `pnpm build` before compiled public-port consumers                                                                              |
-| Root quality                 | `pnpm check`: formatting, ESLint, boundaries, typecheck, domain/unit/infra tests, build and contract check                      |
-| Contracts                    | API `contract:check`, then `contract:generate`, Prettier and `git diff --exit-code -- docs/contracts`                           |
-| Bot                          | Declared Bot `test:integration` with owned TLS fixtures                                                                         |
-| Images                       | Reproduce the locked PostgreSQL derivative, pull pinned Redis, scan both actual local digests with fresh Trivy data             |
-| Migration / faults / release | `pnpm test:auth-http:local` with `TEST_POSTGRES_MODE=compose`, `TEST_RESTORE_DRILL=isolated`, `TEST_RELEASE_BROWSER=isolated`   |
-| Browsers                     | Web `test:browser`, built SDK `test:browser --config telegram-production.playwright.config.ts`, and `test:preview` sequentially |
-| Normal policy                | Final Web `build` restores normal production policy                                                                             |
-| Evidence                     | Require clean Git/source identity; hash reviewed builds/contracts and record scalar results/release gates                       |
+| Gate                         | Command / purpose                                                                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Workflow                     | Hash-verified actionlint and executable trust-policy checks                                                                                                              |
+| Secrets / dependencies       | Existing uncached `security-scan.mjs secrets` / `dependencies`; full reachable history and frozen candidate                                                              |
+| Public surfaces              | `pnpm build` before compiled public-port consumers                                                                                                                       |
+| Root quality                 | `pnpm check`: formatting, ESLint, boundaries, typecheck, domain/unit/infra tests, build and contract check                                                               |
+| Contracts                    | API `contract:check`, then `contract:generate`, Prettier and `git diff --exit-code -- docs/contracts`                                                                    |
+| Bot                          | Declared Bot `test:integration` with owned TLS fixtures                                                                                                                  |
+| Images                       | Reproduce the locked PostgreSQL derivative, pull pinned Redis, scan both actual local digests with fresh Trivy data                                                      |
+| Application images           | `infra/release/build.mjs`, `scan.mjs` and `test-local.mjs`: build four non-root candidates, scan their exact digests and exercise hardened disposable runtimes/built Web |
+| Migration / faults / release | `pnpm test:auth-http:local` with `TEST_POSTGRES_MODE=compose`, `TEST_RESTORE_DRILL=isolated`, `TEST_RELEASE_BROWSER=isolated`                                            |
+| Browsers                     | Web `test:browser`, built SDK `test:browser --config telegram-production.playwright.config.ts`, and `test:preview` sequentially                                          |
+| Normal policy                | Final Web `build` restores normal production policy                                                                                                                      |
+| Evidence                     | Require clean Git/source identity; hash reviewed builds/contracts and record scalar results/release gates                                                                |
 
 The database harness owns all Docker networks, containers, volumes, credentials
 and disposable databases. It exercises all migrations, repeat deployment,
@@ -75,11 +76,14 @@ to user data or the unresolved production backup retention decision.
 
 The manifest contains source commit/tree, tool/runtime and lock/schema policy
 hashes, allowed compiled-file/public-contract path/size/hash triples, numeric
-gate counts, validated public scanner summaries and current release gates. It includes no file contents or raw test
+gate counts, validated public scanner summaries (including all four application
+image digests/source/build-input identity) and current release gates. It includes no file contents or raw test
 report. `productionReleaseApproved` is always false. A dirty source tree, checkout
 SHA mismatch, symlink, missing build or loopback production policy refuses it.
-No deployable archive, signature or provenance attestation is produced. Future
-18B deployment must bind its reviewed images to the verified source revision and
+No image/archive upload, signature or provenance attestation is produced.
+Application image evidence must match the clean current commit; dirty or
+different-source image candidates block export. Future 18B deployment must bind
+its reviewed images to the verified source revision and
 must never promote a fork/PR artifact merely because this workflow ran.
 
 ## Repository protection and release requirements
@@ -110,8 +114,10 @@ Resolve the applicable owner decisions, including peak/provider/SLO/backup polic
 17C is **Pending**, deferred by the owner, never waived by CI or packaging.
 Phase 19 must hold release if any of these gates lacks accepted evidence.
 
-There is no staging deployment/E2E workflow yet because 18B must first supply the
-approved provider, URLs, credentials and deployable inventory. The five built
+Phase 18B1 supplies only portable local image candidates and actual image
+build/scan/smoke gates; see [packaging](packaging.md). No staging deployment/E2E
+workflow exists because provider, URLs, access and operating decisions remain
+unapproved. The owner explicitly defers that provisioning/activation. The five built
 local release browser cases run in 18A; they do not certify TLS ingress, Telegram
 mobile WebViews or staging. Add an environment-protected staged E2E gate during
 authorized 18B work; do not add a passing placeholder now.

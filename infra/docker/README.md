@@ -4,7 +4,15 @@ This directory owns the local PostgreSQL/Redis Compose definition and its role/A
 bootstrap scripts. Use the declared root `infra:*` commands and follow the
 [local development runbook](../../docs/architecture/local-development.md).
 Ports bind only to loopback; normal shutdown preserves PostgreSQL data. Live
-validation requires Docker. Production packaging remains Phase 18B.
+validation requires Docker. `apps/` now owns Phase 18B1's four portable non-root
+application image targets and reviewed base/archive pins. See
+[packaging operations](../../docs/operations/packaging.md) for build, scan and
+disposable runtime entry points. These are local candidates; provider-specific
+deployment and staging activation remain deferred. `release/` owns the separate
+application-only portable Compose template and unresolved input schema; it neither
+creates data services/networks nor publishes ports. See
+[deployment preparation](../../docs/operations/deployment.md) for validation and
+owned definition/replacement/rollback rehearsals.
 
 Build the locked PostgreSQL derivative before startup and follow the
 [local image transition runbook](../../docs/security/local-image-transition.md).

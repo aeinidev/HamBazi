@@ -1,0 +1,88 @@
+# Application-only preparation. No ingress, data service, provisioning or activation.
+x-runtime: &runtime
+  platform: linux/amd64
+  user: "1000:1000"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: ["/tmp:rw,nosuid,noexec,size=16m,mode=1777"]
+  stop_signal: SIGTERM
+  restart: "no"
+  logging:
+    driver: none
+services:
+  api:
+    <<: *runtime
+    image: ${API_IMAGE:?exact candidate digest required}
+    env_file:
+      - path: ${API_ENV_FILE:?private role file required}
+        format: raw
+    stop_grace_period: ${API_STOP_GRACE_SECONDS:?reviewed grace required}s
+    networks:
+      private:
+        ipv4_address: ${API_PRIVATE_IP:?approved private address required}
+    volumes:
+      - type: bind
+        source: ${API_TLS_KEY_FILE:?private TLS key required}
+        target: /run/hambazi/tls/key.pem
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${API_TLS_CERT_FILE:?TLS certificate required}
+        target: /run/hambazi/tls/cert.pem
+        read_only: true
+        bind: { create_host_path: false }
+  bot:
+    <<: *runtime
+    image: ${BOT_IMAGE:?exact candidate digest required}
+    env_file:
+      - path: ${BOT_ENV_FILE:?private role file required}
+        format: raw
+    stop_grace_period: ${BOT_STOP_GRACE_SECONDS:?reviewed grace required}s
+    networks:
+      private:
+        ipv4_address: ${BOT_PRIVATE_IP:?approved private address required}
+      egress: {}
+    volumes:
+      - type: bind
+        source: ${BOT_TLS_KEY_FILE:?private TLS key required}
+        target: /run/hambazi/tls/key.pem
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${BOT_TLS_CERT_FILE:?TLS certificate required}
+        target: /run/hambazi/tls/cert.pem
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${BOT_API_CA_FILE:?API trust certificate required}
+        target: /run/hambazi/tls/api-ca.pem
+        read_only: true
+        bind: { create_host_path: false }
+  worker:
+    <<: *runtime
+    image: ${WORKER_IMAGE:?exact candidate digest required}
+    env_file:
+      - path: ${WORKER_ENV_FILE:?private role file required}
+        format: raw
+    stop_grace_period: ${WORKER_STOP_GRACE_SECONDS:?reviewed grace required}s
+    networks:
+      private:
+        ipv4_address: ${WORKER_PRIVATE_IP:?approved private address required}
+  web:
+    <<: *runtime
+    image: ${WEB_IMAGE:?exact candidate digest required}
+    env_file:
+      - path: ${WEB_ENV_FILE:?private role file required}
+        format: raw
+    stop_grace_period: ${WEB_STOP_GRACE_SECONDS:?reviewed grace required}s
+    networks:
+      private:
+        ipv4_address: ${WEB_PRIVATE_IP:?approved private address required}
+networks:
+  private:
+    external: true
+    name: ${PRIVATE_NETWORK:?existing internal network required}
+  egress:
+    external: true
+    name: ${BOT_EGRESS_NETWORK:?existing controlled egress network required}

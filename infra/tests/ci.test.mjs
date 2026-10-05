@@ -337,6 +337,18 @@ it("build evidence requires clean source and normal policy, projects scalars and
     expect(result.releaseGates.find((gate) => gate.phase === "17C").status).toBe("Pending");
     expect(result.files.every((file) => /^[a-f0-9]{64}$/.test(file.sha256))).toBe(true);
     expect(JSON.stringify(result).includes("private-report")).toBe(false);
+    for (const scan of [
+      { sourceCommit: "f".repeat(40), sourceDirty: false },
+      { sourceCommit: result.commit, sourceDirty: true },
+    ])
+      await expect(
+        writeEvidence(
+          repository,
+          join(directory, `unbound-image-${scan.sourceDirty}`),
+          [{ ...passed[0], stage: "application-images", scan }],
+          {},
+        ),
+      ).rejects.toThrow();
     await expect(
       writeEvidence(repository, join(directory, "wrong-ref"), passed, {
         GITHUB_SHA: "f".repeat(40),
