@@ -6,6 +6,9 @@ import { fileURLToPath } from "node:url";
 import { prepare } from "./prepare.mjs";
 import { deploymentFixture } from "../tests/fixtures/deployment.mjs";
 import { runGate } from "../ci/gates.mjs";
+import { inspectOperator } from "./operator.mjs";
+import { operatorProfile } from "./monitoring.mjs";
+import { stringify } from "yaml";
 
 const directory = await mkdtemp(join(tmpdir(), "hambazi-definition-rehearsal-"));
 const project = `hambazi-definition-${randomUUID()}`;
@@ -33,12 +36,18 @@ const assert = (condition) => {
   checks++;
 };
 try {
-  if (process.argv.length !== 3) throw new Error();
+  const operator = process.argv.length === 4 && process.argv[3] === "--operator-monitoring";
+  if (process.argv.length !== 3 && !operator) throw new Error();
   const { envs, inputs } = deploymentFixture();
   inputs.schemaVersion = 1;
   inputs.inventory = resolve(process.argv[2]);
   inputs.privateNetwork = `${project}-private`;
   inputs.botEgressNetwork = `${project}-egress`;
+  if (operator) {
+    inputs.operatorMonitoring = operatorProfile;
+    for (const role of ["api", "bot", "worker"])
+      envs[role][`${role.toUpperCase()}_METRICS_ENABLED`] = "true";
+  }
   stage = "networks";
   await run("docker", [
     "network",
@@ -130,7 +139,15 @@ try {
       Object.keys(inspected.NetworkSettings.Networks).length === 1,
   );
   assert(inspected.HostConfig.Tmpfs["/tmp"].includes("noexec"));
-  assert(inspected.HostConfig.LogConfig.Type === "none");
+  assert(inspected.HostConfig.LogConfig.Type === (operator ? "local" : "none"));
+  if (operator) {
+    assert(inspected.HostConfig.LogConfig.Config["max-size"] === "10m");
+    assert(inspected.HostConfig.LogConfig.Config["max-file"] === "3");
+    assert(
+      (await inspectOperator(join(directory, "prepared"), "web", "ready", project)).status ===
+        "READY",
+    );
+  }
   stage = "web-headers-health";
   const manifest = JSON.parse(await readFile(inputs.inventory, "utf8"));
   const probe = `const r=await fetch('http://127.0.0.1:8080'); const h=await fetch('http://127.0.0.1:8081/v1/health/ready'); const s=await h.json(); if(!r.ok||r.headers.get('cache-control')!=='no-store'||r.headers.get('content-security-policy')!==${JSON.stringify(manifest.browserPolicy.headers["Content-Security-Policy"])}||s.status!=='READY'||process.getuid()!==1000)process.exit(1);`;
@@ -160,6 +177,79 @@ try {
   assert(
     (await run("docker", ["inspect", "--format", "{{.State.ExitCode}}", container])).trim() === "0",
   );
+  if (operator) {
+    stage = "operator-private-api";
+    // Local synthetic operational listener only: never runs application composition, DB or Telegram.
+    const code = `import {createServiceHealth,startHealthServer,createMetrics,createTelemetryLogger} from '@hambazi/observability';
+      const metrics=createMetrics('api'); metrics.collection('database',false);
+      const health=createServiceHealth([{name:'postgres',required:true,probe:async()=>false}],100,metrics);
+      health.started(); const server=await startHealthServer(health,+process.env.API_HEALTH_PORT,{metrics});
+      createTelemetryLogger().emit('api.started',{token:'PRIVATE_OPERATOR_CANARY'});
+      console.log('PRIVATE_OPERATOR_CANARY');
+      process.once('SIGTERM',async()=>{await server.close();health.stopped();});`;
+    const override = join(directory, "operator-fixture.yaml");
+    await writeFile(
+      override,
+      stringify({ services: { api: { command: ["--input-type=module", "-e", code] } } }),
+      { mode: 0o600, flag: "wx" },
+    );
+    await run("docker", [
+      "compose",
+      "--env-file",
+      "/dev/null",
+      "--project-name",
+      project,
+      "--file",
+      composePath,
+      "--file",
+      override,
+      "up",
+      "--detach",
+      "--no-deps",
+      "--no-build",
+      "--pull",
+      "never",
+      "api",
+    ]);
+    const api = (await compose(["ps", "--quiet", "api"])).trim();
+    await run("docker", [
+      "exec",
+      api,
+      "node",
+      "--input-type=module",
+      "-e",
+      `let ok=false;for(let i=0;i<30;i++){try{const r=await fetch('http://127.0.0.1:8081/v1/health/live');if(r.ok){ok=true;break;}}catch{}await new Promise(r=>setTimeout(r,100));}if(!ok)process.exit(1);`,
+    ]);
+    const observation = join(directory, "prepared");
+    assert((await inspectOperator(observation, "api", "live", project)).status === "LIVE");
+    const readiness = await inspectOperator(observation, "api", "ready", project);
+    assert(readiness.httpStatus === 503 && readiness.status === "NOT_READY");
+    const scrape = await inspectOperator(observation, "api", "metrics", project);
+    assert(
+      scrape.metrics.includes(
+        'hambazi_dependency_available{service="api",dependency="postgres"} 0',
+      ),
+    );
+    assert(
+      scrape.metrics.includes('hambazi_collection_success{service="api",collector="database"} 0'),
+    );
+    const logs = await inspectOperator(observation, "api", "logs", project);
+    assert(logs.records.some((row) => row.event === "api.started") && logs.omitted >= 1);
+    assert(!JSON.stringify(logs).includes("PRIVATE_OPERATOR_CANARY"));
+    await run("docker", [
+      "exec",
+      api,
+      "node",
+      "--input-type=module",
+      "-e",
+      `try{await fetch('http://10.99.0.10:8081/v1/metrics',{signal:AbortSignal.timeout(1000)});process.exitCode=1;}catch{}`,
+    ]);
+    checks++;
+    await compose(["stop", "api"]);
+    assert(
+      (await run("docker", ["inspect", "--format", "{{.State.ExitCode}}", api])).trim() === "0",
+    );
+  }
   evidence = {
     schemaVersion: 1,
     purpose: "disposable-definition-rehearsal",
@@ -167,6 +257,9 @@ try {
     passed: true,
     productionReady: false,
     backendProductionTested: false,
+    ...(operator
+      ? { operatorMonitoringVerifiedLocally: true, stagingMonitoringAccepted: false }
+      : {}),
   };
 } catch {
   console.error(`DEFINITION_REHEARSAL_FAILED:${stage}`);

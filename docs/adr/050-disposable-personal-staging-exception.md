@@ -51,6 +51,9 @@ disposable data cannot be reported as successfully restored.
    monitoring acceptance. Preserve the activation gate until the actual path is
    reviewed. Existing latency/capacity targets remain unchanged; no automated-alert,
    production availability or error-budget acceptance is inferred.
+   The subsequent bounded repair in [ADR-051](051-private-manual-staging-preparation.md)
+   adds an explicit private profile and read-only operator path; actual staging
+   coverage remains unperformed while applications are inactive.
 5. Record the owner's BotFather “Enable Mini App” selection and approved URL
    `https://staging.hambazi.top` as the Main Mini App direction. Official Telegram
    documentation supports `https://t.me/Hambazidev_bot?startapp` without a short name.

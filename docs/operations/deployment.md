@@ -7,8 +7,9 @@ or SLO, and it does not activate staging. OD-002/006/007 remain open.
 
 The owner-confirmed temporary ParsPack Germany host and exact staging origins
 are recorded in [ADR-049](../adr/049-temporary-parspack-staging-preparation.md).
-Local remediation/preparation is authorized; this does not supply the remaining
-access/data/TLS/recovery/monitoring policies or bounded remote execution scope.
+Local remediation/preparation is authorized. [ADR-051](../adr/051-private-manual-staging-preparation.md)
+records the later bounded VPS runner/network/private-file/image-transfer and
+manual-observation preparation scope; it does not authorize activation or migrations.
 
 [ADR-050](../adr/050-disposable-personal-staging-exception.md) records the owner's
 sole-operator/tester/secrets/responder roles, disposable synthetic data, manual
@@ -23,14 +24,16 @@ by the portable input schema or Bot HTTPS Web-URL configuration.
 
 Read the actual manifests/workspace/task graph; install with the declared frozen
 lockfile command. Preparation imports the config package's compiled public
-surface, so run its declared build when that output is absent:
+surface and observation allowlists, so run their declared builds when output is absent:
 
 ```sh
 pnpm --filter @hambazi/config build
+pnpm --filter @hambazi/shared build
+pnpm --filter @hambazi/observability build
 node infra/release/prepare.mjs /absolute/private/inputs.json /absolute/new/private/prepared
 ```
 
-Use `infra/docker/release/inputs.example.json` as the exact input schema. Its null
+Use `infra/docker/release/inputs.example.json` as the base input schema. Its null
 values deliberately fail validation. Supply references only after the relevant
 operator decisions are approved; no values in test fixtures constitute decisions.
 Use new mode-0700 output and mode-0600 input/role/inventory/scan files outside the
@@ -44,7 +47,8 @@ The four raw role files use literal single-line `KEY=value`, including literal J
 for signing-key sets. There is no shell evaluation, dotenv expansion, quoted value
 syntax, shared role file or inherited `.env`. Unknown/cross-role fields, Node TLS
 or startup overrides, migration credentials, deferred gameplay/export settings,
-duplicate keys and non-production profiles are rejected. Use the required inputs
+duplicate keys and non-production profiles are rejected. The only optional Node
+trust input is the matched fixed-path data-CA reference described below. Use the required inputs
 from these existing owners; numeric bounds are validation, not approved policy:
 
 | Role   | Configuration owners and explicit prerequisites                                                                                                                                                                                        |
@@ -57,8 +61,25 @@ from these existing owners; numeric bounds are validation, not approved policy:
 All role ports must be distinct within the role and unprivileged. Backend health
 ports are explicit and remain loopback-only. Stop grace is explicit and must
 exceed existing drain + reporting + hard-exit budgets; it is not a final SLO.
-Gameplay/Room/statistics/outbox/export activation is excluded from this preparation
+Gameplay/Room/statistics/outbox/external-report activation is excluded from this preparation
 allowlist. Their reviewed composition and policies remain 7C/staging work.
+
+For the owner-authorized private manual profile, add
+`operatorMonitoring: "private-manual-v1"` to the input object and set the three
+existing API/Bot/Worker metrics flags to `true`. Preparation requires those flags
+for the profile; without it, enabled metrics still fail. The rendered definition
+uses Docker local rotation (`10m`, three files, compression) and no published
+health/metric ports or external sink. See the [private operator procedure](runbooks/private-operator.md).
+Its read-only CLI never starts an inactive application and does not persist scrapes.
+Manual monitoring coverage on the real target remains activation evidence.
+
+For the reviewed private data issuer, add `tlsFiles.dataCa` and the exact
+`NODE_EXTRA_CA_CERTS=/run/hambazi/tls/data-ca.pem` to both API/Worker files.
+Preparation requires all three references together, currently valid CA constraints
+and PostgreSQL `sslmode=verify-full`. It mounts that certificate read-only into
+those two roles; Bot trust remains separate. Node's normal hostname/certificate
+verification remains enabled. Static CA validation cannot prove endpoint TLS,
+private DNS, role grants or actual denial tests; those require later authorized services.
 
 Supply existing separately named private and controlled Bot-egress bridge networks.
 Preparation checks the private network is internal, addresses fit its actual IPv4

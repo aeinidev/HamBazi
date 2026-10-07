@@ -3,13 +3,14 @@ import { BlockList } from "node:net";
 import { lstat, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
+import { parse, stringify } from "yaml";
 import * as config from "../../packages/config/dist/index.js";
 import { roles, buildIdentity } from "./build.mjs";
 import { projectScan } from "../ci/scan-evidence.mjs";
 import { runGate } from "../ci/gates.mjs";
 import { verifyBrowserPolicyArtifact } from "../../apps/web/security/browser-policy.ts";
 import { telegramSdkIntegrity } from "../../apps/web/src/platform/telegram-sdk.ts";
+import { operatorProfile, operatorLogging } from "./monitoring.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const invalid = () => {
@@ -42,6 +43,7 @@ const exact = (value, keys) => {
 const groups = {
   operations: ["HEALTH_PORT", "HEALTH_PROBE_TIMEOUT_MS", "DRAIN_TIMEOUT_MS", "METRICS_ENABLED"],
   api: [
+    "NODE_EXTRA_CA_CERTS",
     "API_DATABASE_URL",
     "API_REDIS_URL",
     "API_PORT",
@@ -104,6 +106,7 @@ const groups = {
     "BOT_MAX_IN_FLIGHT",
   ],
   worker: [
+    "NODE_EXTRA_CA_CERTS",
     "WORKER_DATABASE_URL",
     "WORKER_REDIS_URL",
     "WORKER_QUEUE_NAMESPACE",
@@ -172,10 +175,26 @@ export function validateInventory(manifest, report) {
 /** Preparation restrictions deliberately exclude deferred gameplay/export activation. */
 export function validateEnvironments(envs, inputs) {
   try {
+    const operator = inputs.operatorMonitoring === operatorProfile;
+    if (inputs.operatorMonitoring !== undefined && !operator) invalid();
     const api = envs.api,
       bot = envs.bot,
       worker = envs.worker,
       web = envs.web;
+    if (
+      api.NODE_EXTRA_CA_CERTS !== undefined ||
+      worker.NODE_EXTRA_CA_CERTS !== undefined ||
+      inputs.tlsFiles?.dataCa !== undefined
+    ) {
+      if (
+        api.NODE_EXTRA_CA_CERTS !== "/run/hambazi/tls/data-ca.pem" ||
+        worker.NODE_EXTRA_CA_CERTS !== "/run/hambazi/tls/data-ca.pem" ||
+        !inputs.tlsFiles?.dataCa ||
+        new URL(api.API_DATABASE_URL).searchParams.get("sslmode") !== "verify-full" ||
+        new URL(worker.WORKER_DATABASE_URL).searchParams.get("sslmode") !== "verify-full"
+      )
+        invalid();
+    }
     config.parseRuntimeConfig(api, "api");
     config.parseRuntimeConfig(worker, "worker");
     config.parseAuthRuntimeConfig(api);
@@ -245,7 +264,11 @@ export function validateEnvironments(envs, inputs) {
       if (role !== "web") {
         budget = config.parseOperationsConfig(env, role).drainTimeoutMs;
         config.parseTelemetryConfig(env, role);
-        if (env[`${prefix}_METRICS_ENABLED`] && env[`${prefix}_METRICS_ENABLED`] !== "false")
+        if (
+          operator
+            ? env[`${prefix}_METRICS_ENABLED`] !== "true"
+            : env[`${prefix}_METRICS_ENABLED`] && env[`${prefix}_METRICS_ENABLED`] !== "false"
+        )
           invalid();
       }
       if (
@@ -323,10 +346,18 @@ export async function prepare(inputsPath, output) {
     "botEgressNetwork",
     "privateAddresses",
     "stopGraceSeconds",
+    ...(Object.hasOwn(inputs, "operatorMonitoring") ? ["operatorMonitoring"] : []),
   ]);
   for (const field of ["roleEnvFiles", "privateAddresses", "stopGraceSeconds"])
     exact(inputs[field], roles);
-  exact(inputs.tlsFiles, ["apiKey", "apiCert", "botKey", "botCert", "apiCa"]);
+  exact(inputs.tlsFiles, [
+    "apiKey",
+    "apiCert",
+    "botKey",
+    "botCert",
+    "apiCa",
+    ...(Object.hasOwn(inputs.tlsFiles, "dataCa") ? ["dataCa"] : []),
+  ]);
   if (
     inputs.schemaVersion !== 1 ||
     !isAbsolute(output ?? "") ||
@@ -405,6 +436,15 @@ export async function prepare(inputsPath, output) {
     Date.parse(ca.validFrom) > Date.now()
   )
     invalid();
+  if (tls.dataCa) {
+    const dataCa = new X509Certificate(tls.dataCa);
+    if (
+      !dataCa.ca ||
+      Date.parse(dataCa.validTo) <= Date.now() ||
+      Date.parse(dataCa.validFrom) > Date.now()
+    )
+      invalid();
+  }
   const substitutions = {
     PRIVATE_NETWORK: inputs.privateNetwork,
     BOT_EGRESS_NETWORK: inputs.botEgressNetwork,
@@ -426,8 +466,24 @@ export async function prepare(inputsPath, output) {
     JSON.stringify(substitutions[key] ?? invalid()),
   );
   // Numeric duration interpolation needs one YAML scalar, rather than a quoted prefix.
-  const compose = rendered.replace(/stop_grace_period: "(\d+)"s/g, 'stop_grace_period: "$1s"');
-  const definition = parse(compose);
+  let compose = rendered.replace(/stop_grace_period: "(\d+)"s/g, 'stop_grace_period: "$1s"');
+  const definition = parse(compose, { merge: true });
+  if (inputs.operatorMonitoring === operatorProfile || tls.dataCa) {
+    for (const role of roles) {
+      if (inputs.operatorMonitoring === operatorProfile)
+        definition.services[role].logging = structuredClone(operatorLogging);
+      if (tls.dataCa && ["api", "worker"].includes(role))
+        (definition.services[role].volumes ??= []).push({
+          type: "bind",
+          source: inputs.tlsFiles.dataCa,
+          target: "/run/hambazi/tls/data-ca.pem",
+          read_only: true,
+          bind: { create_host_path: false },
+        });
+    }
+    delete definition["x-runtime"];
+    compose = stringify(definition);
+  }
   if (Object.keys(definition.services).join() !== roles.join() || compose.includes("${")) invalid();
   await mkdir(output, { mode: 0o700 });
   let complete = false;
@@ -458,6 +514,18 @@ export async function prepare(inputsPath, output) {
       inventorySha256: hash(inventoryBytes),
       scanSha256: hash(scanBytes),
       composeSha256: hash(compose),
+      ...(inputs.operatorMonitoring === operatorProfile
+        ? {
+            operatorMonitoring: {
+              profile: operatorProfile,
+              logging: operatorLogging,
+              access: "SSH Docker exec; container loopback only",
+              publicPorts: false,
+              snapshotsPersisted: false,
+              activationVerified: false,
+            },
+          }
+        : {}),
       privateNetworkVerified: true,
       sourceCommit: manifest.sourceCommit,
       sourceDirty: manifest.sourceDirty,

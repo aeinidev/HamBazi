@@ -9,6 +9,11 @@ completes 17C for MVP with explicit performance exceptions. Production-like
 capacity/reconnect/soak validation remains deferred; no actual staging/recovery
 gate or operating decision in this ADR is waived.
 
+**Bounded personal preparation update (2026-10-08):** [ADR-051](051-private-manual-staging-preparation.md)
+adds explicit private manual observation and fixed data-CA mounts under the owner's
+preparation scope. Baseline logging/export remains disabled without its profile;
+application activation, migration and actual acceptance remain separate.
+
 ## Context
 
 ADR-042 provides reviewed local API/Bot/Worker/Web candidates. The owner approved

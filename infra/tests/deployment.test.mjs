@@ -14,6 +14,7 @@ import {
 } from "../release/prepare.mjs";
 import { runGate } from "../ci/gates.mjs";
 import { deploymentFixture } from "./fixtures/deployment.mjs";
+import { operatorProfile, operatorLogging } from "../release/monitoring.mjs";
 
 const directories = [],
   networks = [];
@@ -113,6 +114,27 @@ it("denies wrong private peers, service key, TLS mounts, port overlap, exporter 
     patch(envs, inputs);
     expect(() => validateEnvironments(envs, inputs)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
   }
+});
+it("requires explicit private monitoring and matched fixed-path data trust without allowing arbitrary Node options", () => {
+  const { envs, inputs } = deploymentFixture();
+  inputs.operatorMonitoring = operatorProfile;
+  for (const role of ["api", "bot", "worker"])
+    envs[role][`${role.toUpperCase()}_METRICS_ENABLED`] = "true";
+  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+  inputs.operatorMonitoring = "public";
+  expect(() => validateEnvironments(envs, inputs)).toThrow();
+  inputs.operatorMonitoring = operatorProfile;
+  envs.api.API_METRICS_ENABLED = "false";
+  expect(() => validateEnvironments(envs, inputs)).toThrow();
+  envs.api.API_METRICS_ENABLED = "true";
+  envs.api.NODE_EXTRA_CA_CERTS = "/run/hambazi/tls/data-ca.pem";
+  expect(() => validateEnvironments(envs, inputs)).toThrow();
+  inputs.tlsFiles = { dataCa: "/private/data-ca.pem" };
+  envs.worker.NODE_EXTRA_CA_CERTS = "/run/hambazi/tls/data-ca.pem";
+  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+  envs.worker.NODE_EXTRA_CA_CERTS = "/tmp/arbitrary.pem";
+  expect(() => validateEnvironments(envs, inputs)).toThrow();
+  expect(() => parseRoleFile(lines(envs.bot) + "NODE_EXTRA_CA_CERTS=/tmp/a.pem", "bot")).toThrow();
 });
 it("binds fresh four-role scans to the exact inventory and policy/source identity", () => {
   const { manifest, report } = deploymentFixture();
@@ -300,4 +322,35 @@ it("renders a private candidate and validates real Compose without starting serv
     i.roleEnvFiles.bot = i.roleEnvFiles.api;
   });
   await expect(readFile(join(directory, "denied-output/compose.yaml"))).rejects.toThrow();
+  inputs.operatorMonitoring = operatorProfile;
+  inputs.tlsFiles.dataCa = inputs.tlsFiles.apiCa;
+  for (const role of ["api", "bot", "worker"])
+    envs[role][`${role.toUpperCase()}_METRICS_ENABLED`] = "true";
+  for (const role of ["api", "worker"])
+    envs[role].NODE_EXTRA_CA_CERTS = "/run/hambazi/tls/data-ca.pem";
+  for (const role of Object.keys(envs))
+    await writeFile(inputs.roleEnvFiles[role], lines(envs[role]), { mode: 0o600 });
+  await writeFile(path, JSON.stringify(inputs), { mode: 0o600 });
+  const operatorOutput = join(directory, "operator-prepared");
+  const observed = await prepare(path, operatorOutput);
+  const operatorDefinition = parse(await readFile(join(operatorOutput, "compose.yaml"), "utf8"));
+  expect(observed.operatorMonitoring).toMatchObject({
+    profile: operatorProfile,
+    publicPorts: false,
+    snapshotsPersisted: false,
+    activationVerified: false,
+  });
+  for (const role of Object.keys(envs)) {
+    expect(operatorDefinition.services[role].logging).toEqual(operatorLogging);
+    expect(operatorDefinition.services[role].ports).toBeUndefined();
+    expect(operatorDefinition.services[role].read_only).toBe(true);
+  }
+  for (const role of ["api", "worker"])
+    expect(operatorDefinition.services[role].volumes).toContainEqual({
+      type: "bind",
+      source: inputs.tlsFiles.dataCa,
+      target: "/run/hambazi/tls/data-ca.pem",
+      read_only: true,
+      bind: { create_host_path: false },
+    });
 }, 15000);
