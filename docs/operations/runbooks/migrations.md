@@ -15,7 +15,11 @@ the later approved environment, recovery policy and operator scope.
    even when no column is dropped. Review locks/statement timeouts and interruption
    recovery in staging; do not guess production limits.
 3. Verify approved backup/recovery evidence and secure operator access before any
-   live schema operation. OD-006 remains unresolved; the disposable logical restore
+   live schema operation. For the explicitly disposable personal staging in
+   [ADR-050](../../adr/050-disposable-personal-staging-exception.md), record its scoped
+   omission instead of marking recovery passed; confirm that the target contains
+   only disposable synthetic data and obtain the applicable bounded migration scope.
+   OD-006 remains unresolved for production; the disposable logical restore
    test is not permission to migrate real data or proof of PITR/RPO/RTO.
 4. Through the existing database-owned deployment command and a separate restricted
    migrator environment, apply expansion then actual role grants:

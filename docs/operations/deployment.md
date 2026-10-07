@@ -10,6 +10,15 @@ are recorded in [ADR-049](../adr/049-temporary-parspack-staging-preparation.md).
 Local remediation/preparation is authorized; this does not supply the remaining
 access/data/TLS/recovery/monitoring policies or bounded remote execution scope.
 
+[ADR-050](../adr/050-disposable-personal-staging-exception.md) records the owner's
+sole-operator/tester/secrets/responder roles, disposable synthetic data, manual
+monitoring and explicit omission of backups/PITR/WAL archiving/offsite storage.
+For this personal target, recovery gates are excluded by that temporary exception,
+not passed. Production recovery requirements and all other release gates remain.
+The worksheet now distinguishes these supplied decisions from actual missing
+`prepare.mjs` values and private references. No Mini App short name is required
+by the portable input schema or Bot HTTPS Web-URL configuration.
+
 ## Inputs and validation
 
 Read the actual manifests/workspace/task graph; install with the declared frozen
@@ -93,7 +102,8 @@ mechanism and repeat preparation after a change. Do not reuse stale validation.
    Review every active engine/state/ruleset pin, API/event version and queued job/
    consumer version against both artifacts. Do not approve by tag or file hash alone.
 2. Follow [Migrations](runbooks/migrations.md). Establish approved recovery evidence
-   first. Apply only compatible expansion/grants through the separate migrator;
+   first, or record ADR-050's narrow disposable-target exception without claiming
+   recovery passed. Apply only compatible expansion/grants through the separate migrator;
    pause on failure, drift, missing grants or incompatible previous code. Preserve
    old consumers/state adapters and at least one release overlap. No contract or
    destructive operation runs alongside application deployment.
@@ -164,7 +174,9 @@ staging provisioning/deployment/activation fully deferred.
 
 - OD-002 provider/region and explicit domains/access/provisioning authorization.
 - OD-006 backup/PITR, RPO/RTO, retention, secure archive access and actual recovery
-  rehearsal; OD-007 final SLOs and monitoring/alert acceptance.
+  rehearsal for the normal release scope. ADR-050 excludes these for the personal
+  disposable staging only, with recovery unperformed. Manual monitoring ownership
+  is confirmed; actual signal availability and final production OD-007 remain separate.
 - Clean immutable release/registry provenance, fresh scans and hosted protected CI;
   actual current/previous active-pin/queue compatibility and migration/grant review.
 - Approved private DB/Redis/TLS credentials, Bot trust/peer policy, ingress/WSS/

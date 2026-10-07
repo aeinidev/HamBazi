@@ -5,6 +5,13 @@
 - Date: 2026-10-07
 - Related: ADR-038, ADR-039, ADR-041, ADR-042, ADR-043, ADR-045, ADR-046, ADR-048
 
+**Owner decision update (2026-10-08):** [ADR-050](050-disposable-personal-staging-exception.md)
+records the project owner as sole operator/tester/secrets owner/responder,
+disposable synthetic personal staging, no backup/PITR/WAL archiving/offsite
+storage, manual monitoring and Main Mini App direction. It supersedes the
+unresolved temporary ownership/recovery/monitoring statements below. Real private
+references, TLS, compatibility and activation evidence remain separate gates.
+
 ## Context
 
 Phase 18B3 requires real staging evidence and approved operating decisions.

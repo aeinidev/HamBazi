@@ -9,6 +9,13 @@ Archives contain permitted durable hidden state/chat/auth storage and need restr
 encrypted operator storage/access. Never attach an archive or raw restore error to
 telemetry/tickets. Preserve the source and its append-only audit evidence.
 
+[ADR-050](../../adr/050-disposable-personal-staging-exception.md) explicitly omits
+backup/PITR/WAL archiving/offsite storage and recovery drills for the owner's
+temporary personal staging with disposable synthetic data. Do not provision those
+services for that target or mark this runbook passed. Loss there may require a
+separately authorized empty rebuild; it is not restoration or a measured RPO/RTO.
+This exception does not alter the following normal recovery procedure or production gates.
+
 1. Contain writes/admission, drain accepted work and pause consumer cutover under
    the commander. Establish the approved recovery point and impact window. Inventory
    the compatible app/schema/engine/job versions, roles/grants, outbox and projection
