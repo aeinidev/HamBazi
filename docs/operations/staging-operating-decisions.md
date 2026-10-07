@@ -1,6 +1,6 @@
 # Phase 18B3 operating-decision worksheet
 
-**Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Bounded real-input VPS preparation validated; deployment/activation remain unperformed.
+**Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Bounded real-input VPS preparation validated; conditional execution plan prepared; deployment/activation remain unperformed.
 **Phase 18B3:** Blocked; staging provisioning, deployment and activation remain
 pending except bounded private preparation under ADR-051. Phase 17C is Completed for MVP with documented
 performance exceptions under [ADR-048](../adr/048-mvp-capacity-acceptance.md),
@@ -288,6 +288,43 @@ the remaining decision groups are:
 Release pair/pins/jobs/grants, secured 7C, protected CI and real smoke/monitoring/
 rollback are implementation/review/evidence prerequisites, not repeated requests
 for provider, staffing, backups or runtime values. They are not passed by preparation.
+
+## Concrete execution-plan preparation — 2026-10-08
+
+The [owner-only staging execution plan](staging-execution-plan.md) binds the exact
+`prepared-20261008-02` definition, preparation/inventory/scan hashes, source/build
+and four immutable image identities. At `2026-10-07T22:48:00Z`, read-only target
+verification passes the unchanged application scan freshness gate and all bound
+identities; zero containers run. Expiry remains **2026-10-08 11:08:55 Tehran**.
+Recheck immediately before execution and rescan after expiry; preparation cannot
+extend that deadline.
+
+Separate proposed data/TLS and hold/owner ingress assets are locally prepared;
+none is applied. Both Caddyfiles pass parser adaptation only. The pinned proposed
+Caddy 2.11.7 image is **Blocked** by Unknown `GO-2026-5932` in
+`golang.org/x/crypto` v0.57.0 with no fix reported; its strict scan assessment is
+not accepted. No scan threshold/freshness change, suppression, public certificate
+or service activation occurs. Data/ingress address/resource/bootstrap/ACME/firewall
+proposals are explicitly distinguished from ADR-051's accepted app profile.
+
+The actual owner-ID reference and server-side sole-owner admission do not exist
+in the current candidate. The plan specifies private original-sender verification,
+fail-closed Auth/Bot admission and a new tested/scanned/prepared candidate before
+public owner traffic. Current production composition also lacks the reviewed
+Room/realtime/game/consumer activation path. Main invitation schema/config remains
+named-only; no short name is invented. Native-only framing preserves the current
+immutable Web image and denies Telegram Web iframes; extending coverage needs
+approved exact ancestors and a new image/preparation. 7C remains a separate
+mandatory secured game-activation prerequisite, with authentication domains
+separate despite one human owner. A real compatible owner-gated rollback pair and
+multiplayer staging proof are still absent. No next phase starts.
+
+The plan supplies conditional startup/TLS/grant/migration/readiness/smoke/manual-
+monitoring/containment/rollback sequencing and the exact separately bounded
+execution scopes to request. Sole ownership, disposable-data/no-backup exception
+and private manual monitoring stay supplied decisions. Excluded recovery evidence
+is never passed. Implementation/security/evidence blockers are not owner-policy
+questions and are not waived by plan approval.
 
 ## Decision register
 

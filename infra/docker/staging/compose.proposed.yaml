@@ -1,0 +1,90 @@
+# REVIEW DRAFT. No application services; never merge this over the prepared definition.
+# The explicit profile is an additional guard, not an authorization mechanism.
+name: hambazi-staging-platform
+services:
+  postgres-staging:
+    profiles: [requires-owner-authorization]
+    image: hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a
+    platform: linux/amd64
+    pull_policy: never
+    restart: "no"
+    logging: { driver: none }
+    entrypoint: [/bin/sh, /usr/local/bin/hambazi-postgres.sh]
+    command: [postgres, -c, config_file=/run/hambazi/postgresql.conf]
+    env_file:
+      - path: /opt/hambazi-staging/private/execution-plan-20261008/postgres-bootstrap.env
+        format: raw
+    stop_grace_period: 45s
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ../postgres/start.sh:/usr/local/bin/hambazi-postgres.sh:ro
+      - ../postgres/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+      - ../postgres/99-image-policy.sh:/docker-entrypoint-initdb.d/99-image-policy.sh:ro
+      - ./postgresql.proposed.conf:/run/hambazi/postgresql.conf:ro
+      - ./pg_hba.proposed.conf:/run/hambazi/pg_hba.conf:ro
+      # Release-scoped copies with verified image UID readability; existing keys stay untouched.
+      - /opt/hambazi-staging/private/execution-plan-20261008/tls/postgres-key.pem:/run/hambazi/tls/postgres-key.pem:ro
+      - /opt/hambazi-staging/private/tls/postgres-cert.pem:/run/hambazi/tls/postgres-cert.pem:ro
+      - /opt/hambazi-staging/private/tls/data-ca.pem:/run/hambazi/tls/data-ca.pem:ro
+    networks:
+      private:
+        ipv4_address: 10.89.18.20
+        aliases: [postgres-staging]
+  redis-staging:
+    profiles: [requires-owner-authorization]
+    image: redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+    platform: linux/amd64
+    pull_policy: never
+    restart: "no"
+    logging: { driver: none }
+    user: redis
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    entrypoint: [/bin/sh, /usr/local/bin/hambazi-redis-tls.sh]
+    env_file:
+      - path: /opt/hambazi-staging/private/execution-plan-20261008/redis-bootstrap.env
+        format: raw
+    stop_grace_period: 45s
+    tmpfs: ["/tmp:rw,nosuid,noexec,size=16m,mode=1777", "/data:rw,nosuid,noexec,size=16m,mode=1777"]
+    volumes:
+      - ./start-redis-tls.sh:/usr/local/bin/hambazi-redis-tls.sh:ro
+      - ./redis.proposed.conf:/run/hambazi/redis.conf:ro
+      - /opt/hambazi-staging/private/execution-plan-20261008/tls/redis-key.pem:/run/hambazi/tls/redis-key.pem:ro
+      - /opt/hambazi-staging/private/tls/redis-cert.pem:/run/hambazi/tls/redis-cert.pem:ro
+      - /opt/hambazi-staging/private/tls/data-ca.pem:/run/hambazi/tls/data-ca.pem:ro
+    networks:
+      private:
+        ipv4_address: 10.89.18.21
+        aliases: [redis-staging]
+  ingress:
+    profiles: [requires-owner-authorization]
+    image: caddy:2.11.7-alpine@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229
+    platform: linux/amd64
+    pull_policy: never
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: "no"
+    logging: { driver: none }
+    stop_grace_period: 45s
+    command: [caddy, run, --config, /etc/caddy/Caddyfile, --adapter, caddyfile]
+    ports:
+      - { target: 8080, published: "80", host_ip: 185.110.191.104, protocol: tcp }
+      - { target: 8443, published: "443", host_ip: 185.110.191.104, protocol: tcp }
+    volumes:
+      # Starts only in maintenance after TLS authorization; never switches routes automatically.
+      - ./Caddyfile.hold.proposed:/etc/caddy/Caddyfile:ro
+      - /opt/hambazi-staging/private/execution-plan-20261008/acme-data:/data
+      - /opt/hambazi-staging/private/execution-plan-20261008/caddy-config:/config
+      - /opt/hambazi-staging/private/tls/api-ca.pem:/run/hambazi/tls/api-ca.pem:ro
+    tmpfs: ["/tmp:rw,nosuid,noexec,size=16m,mode=1777"]
+    networks:
+      private: { ipv4_address: 10.89.18.2 }
+      egress: { ipv4_address: 10.89.19.3, gw_priority: 1 }
+volumes:
+  postgres-data: { name: hambazi-staging-postgres-18-v1 }
+networks:
+  private: { external: true, name: hambazi-staging-private }
+  egress: { external: true, name: hambazi-staging-bot-egress }

@@ -188,6 +188,12 @@ proof. Backup/PITR restore against approved objectives remains deferred.
 
 ## Required staging acceptance
 
+For the actual temporary personal VPS, use the bound
+[owner-only staging execution plan](staging-execution-plan.md). It preserves
+`prepared-20261008-02`, distinguishes proposed infrastructure from accepted inputs
+and records owner-admission/ingress-scan/7C/Main-invitation/rollback prerequisites.
+Its draft assets are not a service-start or migration authorization.
+
 Use the [18B3 operating-decision worksheet](staging-operating-decisions.md) to
 record proposals, individual owner approvals, separate execution authorization
 and future evidence. Its preparation selects no operating values and keeps

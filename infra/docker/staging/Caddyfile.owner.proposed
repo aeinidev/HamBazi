@@ -1,0 +1,82 @@
+# REVIEW DRAFT: requires a NEW owner-gated candidate, fresh scans and bounded authorization.
+# The prepared 65ff180 images do not implement owner-only admission. Do not activate them.
+{
+	admin off
+	http_port 8080
+	https_port 8443
+	servers {
+		protocols h1 h2
+	}
+	log default {
+		output discard
+	}
+}
+
+(public_tls) {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+			disable_tlsalpn_challenge
+		}
+	}
+}
+
+staging.hambazi.top {
+	import public_tls
+	@static method GET HEAD
+	handle @static {
+		reverse_proxy 10.89.18.13:8080 {
+			header_up -Forwarded
+		}
+	}
+	handle {
+		respond "Not found" 404
+	}
+}
+
+api-staging.hambazi.top {
+	import public_tls
+	@private path /v1/health/* /metrics /v1/admin* /v1/internal* /v1/telegram/*
+	handle @private {
+		respond "Not found" 404
+	}
+	# Socket.IO remains unavailable until the separately reviewed 7C/gameplay composition.
+	@product path /v1/*
+	handle @product {
+		reverse_proxy 10.89.18.10:8080 {
+			header_up -Forwarded
+			header_up -X-Forwarded-*
+			header_up X-Forwarded-For {http.request.remote.host}
+			header_up X-Forwarded-Proto https
+			header_up X-Forwarded-Host api-staging.hambazi.top
+		}
+	}
+	handle {
+		respond "Not found" 404
+	}
+}
+
+bot-staging.hambazi.top {
+	import public_tls
+	@browser header Origin *
+	handle @browser {
+		respond "Forbidden" 403
+	}
+	@webhook {
+		method POST
+		path /v1/telegram/webhook
+	}
+	handle @webhook {
+		reverse_proxy https://10.89.18.11:9444 {
+			header_up -Forwarded
+			header_up -X-Forwarded-*
+			transport http {
+				tls_trust_pool file /run/hambazi/tls/api-ca.pem
+				tls_server_name 10.89.18.11
+			}
+		}
+	}
+	handle {
+		respond "Not found" 404
+	}
+}

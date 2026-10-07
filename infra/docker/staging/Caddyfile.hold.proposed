@@ -1,0 +1,31 @@
+# REVIEW DRAFT: starting this configuration would issue public certificates.
+# Do not run it before the separate bounded execution authorization.
+{
+	admin off
+	http_port 8080
+	https_port 8443
+	servers {
+		protocols h1 h2
+	}
+	# Request URLs/headers can contain Telegram launch data. No raw edge telemetry.
+	log default {
+		output discard
+	}
+}
+
+staging.hambazi.top, api-staging.hambazi.top, bot-staging.hambazi.top {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+			disable_tlsalpn_challenge
+		}
+	}
+	header {
+		Cache-Control no-store
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+		Strict-Transport-Security max-age=31536000
+	}
+	respond "Unavailable" 503
+}

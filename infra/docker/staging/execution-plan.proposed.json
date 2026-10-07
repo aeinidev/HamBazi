@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "purpose": "temporary-owner-only-staging-execution-review",
+  "status": "blocked-review-draft",
+  "executionAuthorized": false,
+  "servicesActivated": false,
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-02",
+  "target": {
+    "ipv4": "185.110.191.104",
+    "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
+    "platform": "linux/amd64"
+  },
+  "baseline": {
+    "checkedAt": "2026-10-07T22:48:00.496Z",
+    "hashes": {
+      "inventory": "6ce70141f8e4ae947cb195afb41046a29d6d8aee098d91ea54f6fe4a342a6be5",
+      "scan": "c65d96cc0443c8900a6f151a4703a34ce9b3c6933cb1cb9919230b16735c888b",
+      "compose": "fa51354d1c1e78a6fe919bd2d2c4840b4b7d9578e9ac4f242435c7c0712e4780",
+      "preparation": "87122983ef810f343247314d3a3d9f54a2af3fbfbb0ead9d26d9afdb9e69761b"
+    },
+    "sourceCommit": "65ff180168ddbdbead1d9921ce67fde5f768dd79",
+    "buildInputSha256": "1322facec551f16f84b67bb6c031e06fdba79fdd890dd89630c9f9fb55cdf73c",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:65ff180168ddbdbead1d9921ce67fde5f768dd79-1322facec551f16f@sha256:461332510191c0e72f52fa611cc78a0cce0b8eb1b35e98701083eb38d41fa934"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:65ff180168ddbdbead1d9921ce67fde5f768dd79-1322facec551f16f@sha256:8c5d7b72eba66a54da123060f48b064622889555dd1555ea3257304301a1c2df"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:65ff180168ddbdbead1d9921ce67fde5f768dd79-1322facec551f16f@sha256:9bc102a10877956b37e94f7839b36d6693daf69a86303d2a2a2701636d38360a"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:65ff180168ddbdbead1d9921ce67fde5f768dd79-1322facec551f16f@sha256:f12dffa01ac33da71c01ea53016b4e692b0cf5a2112ef8f2786900459517e374"
+      }
+    ],
+    "scanFreshnessRevalidated": true,
+    "database": {
+      "updatedAt": "2026-10-07T07:38:55.515026687Z",
+      "downloadedAt": "2026-10-07T15:55:34.599585+00:00"
+    },
+    "earliestScanExpiry": "2026-10-08T07:38:55.515Z",
+    "scanMaximumAgeHours": 24,
+    "expiryAsiaTehran": "2026-10-08 11:08:55"
+  },
+  "approvedDecisions": ["ADR-049", "ADR-050", "ADR-051"],
+  "unapprovedProposals": {
+    "postgresPrivateAddress": "10.89.18.20",
+    "redisPrivateAddress": "10.89.18.21",
+    "ingressEgressAddress": "10.89.19.3",
+    "postgresMaxConnections": 32,
+    "postgresSharedBuffers": "128MB",
+    "redisMaxMemory": "256mb",
+    "redisMaxMemoryPolicy": "noeviction",
+    "redisMaxClients": 64,
+    "postgresBootstrapRole": "hambazi_staging_bootstrap",
+    "postgresVolume": "hambazi-staging-postgres-18-v1",
+    "migratorLockTimeoutMs": 5000,
+    "migratorStatementTimeoutMs": 60000,
+    "publicTlsIssuer": "Lets Encrypt ACME HTTP-01",
+    "publicTcpPorts": [80, 443],
+    "preservedSshTcpPort": 22
+  },
+  "proposedIngress": {
+    "image": "caddy:2.11.7-alpine@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229",
+    "scanStatus": "blocked",
+    "executionAllowed": false,
+    "findings": [
+      {
+        "id": "CVE-2026-85091",
+        "package": "zlib",
+        "severity": "MEDIUM",
+        "fixAvailable": true
+      },
+      {
+        "id": "GO-2026-5932",
+        "package": "golang.org/x/crypto",
+        "severity": "UNKNOWN",
+        "fixAvailable": false
+      }
+    ],
+    "strictAssessmentAccepted": false
+  },
+  "phaseStatus": {
+    "18B3": "Blocked",
+    "7C": "Pending",
+    "19": "Hold"
+  },
+  "gates": {
+    "ownerIdentity": "missing-private-reference",
+    "ownerAdmission": "not-implemented-in-baseline",
+    "publicIngressScan": "blocked",
+    "liveDataTlsAndGrants": "unperformed",
+    "migrationCompatibilityApproval": "pending",
+    "secured7C": "pending-before-game-activation",
+    "roomMainInvitation": "implementation-gap",
+    "productionGameComposition": "implementation-gap",
+    "nativeTelegramSmoke": "unperformed",
+    "telegramWebFraming": "denied-by-current-policy",
+    "multiplayerStagingProof": "missing",
+    "compatibleOwnerGatedRollbackPair": "missing",
+    "hostedProtectedStagingCi": "unverified",
+    "recovery": "excluded-unperformed-not-passed-ADR-050"
+  },
+  "proposedAssetHashes": {
+    "infra/docker/staging/Caddyfile.hold.proposed": "1b14eebc9c4cc50698e8d6e22156d6a47c9dec5dd3bc664dd7e73ec122f6ddfa",
+    "infra/docker/staging/Caddyfile.owner.proposed": "084af06c30252eafc898c06afb67976f7b391ad4a2cf84ebe6627cfd261ec110",
+    "infra/docker/staging/compose.proposed.yaml": "06c6aaf9b62710cc7d675bed1626a0b1b81848d5079c8e0a560f7c3aa52da50d",
+    "infra/docker/staging/pg_hba.proposed.conf": "cb5cf09ee3a24200cd9e9d70762cd9b00c0f04479bf3e5011a7a645286fe0c4b",
+    "infra/docker/staging/postgresql.proposed.conf": "12bfbeb055e9cc32a308ca3fff68e74295220b00febea21bccd14f08bae7b1fd",
+    "infra/docker/staging/redis.proposed.conf": "d1d9dd79800c5442e294fbf7dff087dfaa3ef50f7f62f11cdfba73f652b9b06c",
+    "infra/docker/staging/start-redis-tls.sh": "3acb5285aacf1203615c6847e12ee407e60ad5843e80d6df75e3d4132555430c"
+  },
+  "documentation": "docs/operations/staging-execution-plan.md",
+  "excludedExecution": [
+    "service-activation",
+    "migrations",
+    "public-certificate-issuance",
+    "telegram-settings",
+    "production-actions",
+    "automatic-phase-transition"
+  ]
+}
