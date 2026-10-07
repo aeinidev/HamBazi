@@ -216,6 +216,9 @@ no output created). This is failed preparation evidence, not a deployment or rec
 pass. Actual scan identity/freshness passes on that runner. Supply the still-pending
 private Bot reference/public profile before generating role files and retrying; recheck
 freshness again at that time. The original candidate/inventory/scan remain preserved.
+The secret-free `remaining-public-values.json` in the laptop bounded-preparation
+evidence directory separates 44 remaining public role fields from supplied/established
+values and the specifically requested monitoring/data-trust implementation choices.
 
 ## Decision register
 
