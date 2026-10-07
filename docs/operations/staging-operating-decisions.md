@@ -66,9 +66,16 @@ the unchanged scanner still enforces schema 2, 24-hour freshness and all
 existing blocking severities without suppression or skip flags.
 
 Authorized remediation updates only the existing transitive lockfile resolutions
-to source-map-js 1.2.2. New exact-source candidates and verification are required;
-the original inventory is never rewritten. See the current 18B3 plan record for
-the dated result and restricted evidence references.
+to source-map-js 1.2.2. The clean local source `65ff180` now has a separate four-role
+candidate using the exact approved Web/API origins, successful fresh image/audit/
+secret scans, 1,831 quality tests and 26/33/2 Web browser cases. Its local definition
+and runtime rehearsals pass 13/43 checks plus two image-browser cases, with owned
+fixture cleanup verified. All six application/data image scans have zero
+High/Critical/Unknown and one Moderate zlib CVE-2026-85091 each. The final six-round
+Cloudflare/Google sample passed all 72 local/VPS A queries; earlier failures remain.
+The original inventory is never rewritten. See the current 18B3 plan record for
+dated hashes and restricted evidence references. No new release rollback pair,
+actual staging acceptance, recovery objective or external authorization is inferred.
 
 ## How to record a decision
 

@@ -37,6 +37,18 @@ owner approval, evidence, expiry and planned correction. Changing any pin
 requires new frozen-install/audit and compatibility evidence; do not regenerate
 wire baselines or relax install/scan policy to make a gate pass.
 
+## Current 18B3 scan refresh
+
+The 2026-10-07 clean remediation source `65ff180` reports zero full-lockfile audit
+findings and zero reachable-history/current-tree secret matches. Fresh digest-bound
+scans of its four application images and both locked local data-service images
+report zero High/Critical/Unknown, but **one Moderate zlib CVE-2026-85091 per image**,
+with a fix available. This later scan supersedes the earlier zero-finding claim
+for current acceptance; historical reports below are preserved. Tech retains
+remediation tracking and must rescan before any future release. Existing Moderate
+handling is unchanged; no ignore, severity waiver or production approval exists.
+Exact identities, timestamps and restricted evidence are in the 18B3 plan record.
+
 ## Local-image evidence and guarded transition
 
 A fresh schema-2 DB and verified Trivy 0.74.0 scanned both exact Compose images.
