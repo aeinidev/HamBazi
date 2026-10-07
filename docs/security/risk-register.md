@@ -25,6 +25,7 @@ safe. Review remaining items at each owning phase and before public release.
 
 ## Remediated npm advisories
 
+- source-map-js indexed source-map denial of service: [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q). A fresh 18B3 full-lockfile audit reopened the High gate for 1.2.1. Owner-authorized local remediation pins the existing Tailwind/PostCSS transitive resolutions to patched 1.2.2 through pnpm; no new direct dependency, override, exception or reachability waiver. Final fresh verification is recorded in the 18B3 plan. The original failed audit is retained outside Git.
 - Nest path-scoped middleware absolute-form bypass: [maintainer advisory GHSA-9c5c-9qcx-q35q](https://github.com/nestjs/nest/security/advisories/GHSA-9c5c-9qcx-q35q). Maintainer recommends 12.0.3; raw-TCP regression denies both request forms.
 - Fastify HTTP/2 trailer exception: [maintainer advisory GHSA-4mh8-r7rc-xpvc](https://github.com/fastify/fastify/security/advisories/GHSA-4mh8-r7rc-xpvc); patched 5.12.5.
 - fast-uri host case normalization and mailto field-name injection: [maintainer advisories](https://github.com/fastify/fast-uri/security/advisories); compatible patched major lines are independently pinned.

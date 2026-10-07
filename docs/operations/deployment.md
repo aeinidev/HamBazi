@@ -5,6 +5,11 @@ This prepares application assets and local evidence. It does not approve a
 provider, region, domain, access model, backup/PITR, recovery objective, retention
 or SLO, and it does not activate staging. OD-002/006/007 remain open.
 
+The owner-confirmed temporary ParsPack Germany host and exact staging origins
+are recorded in [ADR-049](../adr/049-temporary-parspack-staging-preparation.md).
+Local remediation/preparation is authorized; this does not supply the remaining
+access/data/TLS/recovery/monitoring policies or bounded remote execution scope.
+
 ## Inputs and validation
 
 Read the actual manifests/workspace/task graph; install with the declared frozen
@@ -72,7 +77,9 @@ record. It never starts services. Do not print resolved Compose config, Docker
 inspect environment, raw startup diagnostics or private input files. Preparation
 records hashes and checkout migration/contract/grant fingerprints, with explicit
 `compatibilityApproved`, `activePinsReviewed` and `retainedJobsReviewed` false.
-These are review inputs, not proof those checkout files belong to an arbitrary
+Preparation now records 17C MVP completion under ADR-048 separately from pending
+production capacity/SLO/fault/soak acceptance. Production release and 7C/18B3/19
+gates remain unapproved. These are review inputs, not proof those checkout files belong to an arbitrary
 image. Source matching and release-pair review are required before activation.
 Validation is point-in-time. External role/TLS references are private operator
 files, not immutable secret storage; rotate/version them through the approved

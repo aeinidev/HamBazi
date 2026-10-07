@@ -464,7 +464,14 @@ export async function prepare(inputsPath, output) {
       buildInputSha256: manifest.buildInputSha256,
       compatibility: await compatibilityInputs(),
       pendingDecisions: ["OD-002", "OD-006", "OD-007"],
-      releaseGates: { "7C": "Pending", "17C": "Pending", "18B3": "Pending", 19: "Pending" },
+      releaseGates: { "7C": "Pending", "17C": "Completed", "18B3": "Pending", 19: "Pending" },
+      capacityAcceptance: {
+        scope: "MVP",
+        reference: "ADR-048",
+        performanceExceptions: true,
+        productionPerformanceApproved: false,
+        productionLikeValidation: "Pending",
+      },
     };
     await writeFile(join(output, "preparation.json"), JSON.stringify(evidence, null, 2) + "\n", {
       mode: 0o600,
