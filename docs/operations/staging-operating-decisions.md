@@ -207,6 +207,16 @@ restricted under `/opt/hambazi-staging/private/evidence`; no secret contents are
 recorded here. Real role files and actual prepare success remain pending the two
 owner inputs above. Recovery remains excluded/unperformed, not passed.
 
+The clean runner `5ba416b` is installed privately on the VPS; frozen installation
+with lifecycle scripts suppressed and the declared config/shared/observability builds
+pass. Actual `inputs.json` now contains only approved/static real references plus
+the explicit operator profile. The real preparation CLI was attempted against
+`prepared-20261008-01` and safely rejected missing role files (exit 1, generic diagnostic,
+no output created). This is failed preparation evidence, not a deployment or recovery
+pass. Actual scan identity/freshness passes on that runner. Supply the still-pending
+private Bot reference/public profile before generating role files and retrying; recheck
+freshness again at that time. The original candidate/inventory/scan remain preserved.
+
 ## Decision register
 
 **OD-001 approved (2026-10-05):** **1,000 concurrent users, 200 active Matches and
