@@ -45,6 +45,17 @@ checkpoint, restricted audit event, processed-command checkpoint and state-free
 outbox wakeup atomically. Existing resync can map every new audit sequence to its
 stateVersion and returns only invalidations and recipient-safe snapshots.
 
+Phase 17CQ reads the six required presence policy/lifecycle fields in the same
+fixed SQL statement that takes the Match row lock, through the Matches-only
+`lockMatchPresence` transaction helper. The subsequent metadata SELECT is
+removed; private game state is not loaded by this repository. After a live, owned, open
+lease is checked and extended under the Match lock, renewal returns that guarded
+result directly and still pins an absent policy. That renewed lease proves
+liveness, so an additional live-lease query contributes no new guard. Expired,
+closed and foreign leases, expired sessions, terminal Matches and replaced seats
+retain their existing outcomes. Renewal remains monotonic and preserves gameplay
+versions, event sequences and connection authority.
+
 Grace begins at the final lease end (or activation for a never-connected seat).
 Reconciliation after a crash uses that original timestamp, even when the deadline
 is already overdue. Intervening gameplay invalidates expectedStateVersion, so
@@ -113,6 +124,16 @@ trigger periodic reauthentication and renewal. Revocation, expiry, failed lease
 renewal or missing snapshot acknowledgement closes the transport. Pending
 subscriptions are registered on the first healthy heartbeat after activation.
 
+Registered heartbeats renew through the existing locked reconnect port directly.
+That operation checks durable membership, role, terminal status, connection identity,
+lease expiry and session expiry. Heartbeats transmit no game view, so they no longer
+construct discarded snapshots. Registration after activation retains its initial
+fresh role/lifecycle/pinned-view guard and connect/reconciliation, but omits the
+unused post-commit projection. Initial subscription still constructs the fresh
+post-commit view it transmits; returning spectators and takeover races retain
+their safe views. Attempted registration is recorded before I/O so an uncertain
+lease commit is still cleaned up on disconnect.
+
 Per-socket work is serialized. Disconnect cleanup follows previously accepted
 work, including an uncertain connection commit. Shutdown stops admission, drains
 work, closes transports and waits for queued disconnect cleanup. A lost process
@@ -172,6 +193,14 @@ work up to the explicit drain deadline, then closes Redis connections even durin
 an outage. Unacknowledged jobs can be retried safely. A drain timeout is reported
 as a failure; the owning runtime still closes its database pool. Independent
 callers must also close their owned dependencies after a failed drain.
+The API package root exports `createCoupMatchGame(inputRules)` as a trusted
+server composition factory. Worker composition can use that documented surface
+to supply the same retained, version-pinned adapter without importing API
+internals or copying game rules. The export has no startup or catalog activation
+side effect; callers must provide explicit validated rules. Generic Worker jobs,
+Bot and API feature modules cannot import this composition surface. Boundary tests
+enforce those restrictions.
+
 `startMatchAutomation` can also be composed independently. Runtime main
 entry points do not enable this feature implicitly. Production catalog and 7C
 activation gates remain unchanged; do not enable takeover without a compatible

@@ -160,7 +160,9 @@ describe("source ownership boundaries", () => {
     [api("users", "domain/model.ts"), 'import { Handle } from "./handle.js";'],
     ["apps/api/src/composition/games.ts", 'import { engine } from "@hambazi/coup-engine";'],
     ["apps/api/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
+    ["apps/api/src/index.ts", 'export { createCoupMatchGame } from "./composition/coup-match.js";'],
     ["apps/worker/src/composition/main.ts", 'import { createDatabase } from "@hambazi/database";'],
+    ["apps/worker/src/composition/games.ts", 'import { createCoupMatchGame } from "@hambazi/api";'],
     ["apps/worker/src/jobs/timeout.ts", 'import { timeout } from "@hambazi/api/matches";'],
     [repository("users"), 'import type { DatabaseOwner } from "@hambazi/database";'],
     [engine, 'import type { Clock } from "@hambazi/game-core";'],
@@ -174,6 +176,7 @@ describe("source ownership boundaries", () => {
   });
 
   it.each([
+    [api("games"), 'export { createCoupMatchGame } from "../../composition/coup-match.js";'],
     [api("auth"), 'import { room } from "../../rooms/index.js";'],
     [api("users"), 'import { auth } from "../../auth/index.js";'],
     [api("rooms"), 'import { createMatch } from "../../matches/index.js";'],
@@ -189,6 +192,7 @@ describe("source ownership boundaries", () => {
     [api("chat"), 'import { createDatabase } from "@hambazi/database";'],
     ["apps/worker/src/jobs/timeout.ts", 'import { createDatabase } from "@hambazi/database";'],
     ["apps/worker/src/index.ts", 'import { start } from "@hambazi/api";'],
+    ["apps/worker/src/jobs/timeout.ts", 'import { createCoupMatchGame } from "@hambazi/api";'],
     ["apps/bot/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
     ["apps/web/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
     ["packages/contracts/src/index.ts", 'export type { Prisma } from "@prisma/client";'],

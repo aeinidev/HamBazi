@@ -1,0 +1,13 @@
+{
+  "peakCcu": 1000,
+  "peakMatches": 200,
+  "peakCommandsPerSecond": 50,
+  "soakSeconds": 7200,
+  "targets": {
+    "restP95Ms": 300,
+    "commandP95Ms": 300,
+    "dispatchToAllRecipientsP95Ms": 500,
+    "reconnectSuccessPercent": 99,
+    "reconnectP95Ms": 5000
+  }
+}

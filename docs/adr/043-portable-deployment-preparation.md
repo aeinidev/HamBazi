@@ -4,6 +4,11 @@
 - **Owner:** HamBazi owner / Backend and Operations maintainers
 - **Date:** 2026-10-04
 
+**Acceptance update (2026-10-07):** [ADR-048](048-mvp-capacity-acceptance.md)
+completes 17C for MVP with explicit performance exceptions. Production-like
+capacity/reconnect/soak validation remains deferred; no actual staging/recovery
+gate or operating decision in this ADR is waived.
+
 ## Context
 
 ADR-042 provides reviewed local API/Bot/Worker/Web candidates. The owner approved

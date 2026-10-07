@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "./generated/prisma/client.js";
+import { PrismaClient, type Match } from "./generated/prisma/client.js";
 import type { Prisma } from "./generated/prisma/client.js";
 import { Pool } from "pg";
 
@@ -36,12 +36,23 @@ type OwnedClient<O extends DatabaseOwner> = Pick<
   Prisma.TransactionClient,
   (typeof ownership)[O][number]
 >;
+type MatchPresenceRow = Pick<
+  Match,
+  "id" | "status" | "stateVersion" | "lastEventSeq" | "reconnectPolicyJsonb" | "startedAt"
+>;
+const matchIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   ? Omit<OwnedClient<O>, "outboxEvent"> & {
       outboxEvent: Pick<Prisma.TransactionClient["outboxEvent"], "create">;
     }
   : OwnedClient<O>) &
-  (O extends "matches" ? { lockMatch(id: string): Promise<void> } : object) &
+  (O extends "matches"
+    ? {
+        lockMatch(id: string): Promise<void>;
+        lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
+      }
+    : object) &
+  (O extends "rooms" ? { lockRooms(): Promise<void> } : object) &
   (O extends "leaderboard" ? { lockStatistics(): Promise<void> } : object) &
   (O extends "outbox"
     ? { lockDueOutbox(at: Date, limit: number): Promise<readonly string[]> }
@@ -58,17 +69,36 @@ export class DatabaseError extends Error {
 
 function failure(error: unknown): DatabaseError {
   // No Prisma meta, query text, connection URL, or original cause escapes.
-  const code =
-    typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
   const safeCodes: Record<string, string> = {
     P2002: "DATABASE_UNIQUE_CONFLICT",
     P2003: "DATABASE_REFERENCE_CONFLICT",
     P2025: "DATABASE_RECORD_NOT_FOUND",
     P2034: "DATABASE_TRANSACTION_CONFLICT",
   };
-  return new DatabaseError(
-    typeof code === "string" && Object.hasOwn(safeCodes, code) ? safeCodes[code] : undefined,
-  );
+  try {
+    if (typeof error === "object" && error !== null) {
+      const code = "code" in error ? error.code : undefined;
+      if (typeof code === "string" && Object.hasOwn(safeCodes, code))
+        return new DatabaseError(safeCodes[code]);
+      // Prisma 7 maps statement conflicts to P2034, but COMMIT can reject with
+      // its adapter error directly. This kind denotes an aborted transaction;
+      // connection failures or an ambiguous commit must remain generic failures.
+      if (
+        code === undefined &&
+        "name" in error &&
+        error.name === "DriverAdapterError" &&
+        "cause" in error &&
+        typeof error.cause === "object" &&
+        error.cause !== null &&
+        "kind" in error.cause &&
+        error.cause.kind === "TransactionWriteConflict"
+      )
+        return new DatabaseError("DATABASE_TRANSACTION_CONFLICT");
+    }
+  } catch {
+    // Untrusted getters/proxies cannot expose an original error or its payload.
+  }
+  return new DatabaseError();
 }
 
 function scope<O extends DatabaseOwner>(
@@ -116,13 +146,32 @@ function scope<O extends DatabaseOwner>(
     ...(owner === "matches"
       ? {
           async lockMatch(id: string): Promise<void> {
-            if (
-              !inTransaction ||
-              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-            )
+            if (!inTransaction || !matchIdPattern.test(id))
               throw new DatabaseError("DATABASE_LOCK_INVALID");
             // Fixed table and parameterized identity; never expose arbitrary SQL.
             await client.$queryRaw`SELECT id FROM matches WHERE id = ${id}::uuid FOR UPDATE`;
+          },
+          async lockMatchPresence(id: string): Promise<MatchPresenceRow | null> {
+            if (!inTransaction || !matchIdPattern.test(id))
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            // Read only presence metadata in the same statement that takes the
+            // writer lock. No private game state or arbitrary selection escapes.
+            const rows = await client.$queryRaw<MatchPresenceRow[]>`
+              SELECT id, status::text AS status, state_version AS "stateVersion",
+                last_event_seq AS "lastEventSeq", reconnect_policy_jsonb AS "reconnectPolicyJsonb",
+                started_at AS "startedAt"
+              FROM matches WHERE id = ${id}::uuid FOR UPDATE`;
+            return rows[0] ?? null;
+          },
+        }
+      : {}),
+    ...(owner === "rooms"
+      ? {
+          async lockRooms(): Promise<void> {
+            if (!inTransaction) throw new DatabaseError("DATABASE_LOCK_INVALID");
+            // Take the Room lane before the first snapshot-bearing statement.
+            // Coarse SSI predicate dependencies can otherwise couple distinct Rooms.
+            await client.$executeRaw`LOCK TABLE rooms IN SHARE ROW EXCLUSIVE MODE`;
           },
         }
       : {}),

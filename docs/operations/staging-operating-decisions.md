@@ -1,8 +1,17 @@
 # Phase 18B3 operating-decision worksheet
 
 **Prepared:** 2026-10-04. **Status:** Draft; 18B3 operating decisions unapproved.
-**Phase 18B3:** Pending; staging provisioning, deployment and activation remain
-fully deferred. This worksheet is documentation preparation only.
+**Phase 18B3:** Blocked; staging provisioning, deployment and activation remain
+unstarted and fully deferred. Phase 17C is Completed for MVP with documented
+performance exceptions under [ADR-048](../adr/048-mvp-capacity-acceptance.md),
+2026-10-07. The authorized next-phase assessment is complete; independent
+operating/environment/activation prerequisites below are unresolved. This
+worksheet remains decision preparation, not staging acceptance evidence.
+
+The owner's continuous-execution instruction authorizes all remaining implementation
+phases in dependency order. Generic phase approval need not be requested again;
+actual operating decisions, environment/access and acceptance evidence are still
+required before live operations can be made concrete.
 
 The owner has approved portable 18B1/18B2 work and preparation of this worksheet.
 Provider, region, domains, access model, backup/PITR policy, RPO/RTO, retention and
@@ -35,17 +44,27 @@ not approved final targets. Existing config bounds and drain budgets are not SLO
 
 ## Decision register
 
+**OD-001 approved (2026-10-05):** **1,000 concurrent users, 200 active Matches and
+50 gameplay commands/sec**, with **2,000/400/100** at 2x. [ADR-045](../adr/045-initial-capacity-target.md)
+records the complete MVP decision. [ADR-046](../adr/046-normal-load-capacity-slos.md)
+records normal-load REST/ack p95 ≤ 300 ms, event dispatch p95 ≤ 500 ms, reconnect
+success ≥ 99% and reconnect p95 ≤ 5 seconds; those latency gates do not apply at
+2x. Remaining final availability/error-budget/monitoring policy under OD-007,
+hosting and staging/recovery acceptance are unresolved. ADR-048 changes only MVP
+completion acceptance: approved targets remain future optimization/production-like
+staging targets, with local limitations accepted and no SLO success claim.
+
 The architecture assigns owner roles; named approvers have not been assigned here.
 DOMAIN/ACCESS/OPS are worksheet groups, not new architecture open-decision IDs.
 
-| Group                                          | Required owner role                          | Status           | Named approver / approval date / reference / ADR |
-| ---------------------------------------------- | -------------------------------------------- | ---------------- | ------------------------------------------------ |
-| OD-002 — hosting and region                    | Tech                                         | Open; unapproved | Unrecorded                                       |
-| DOMAIN — staging origins and Telegram identity | Tech + designated staging owner              | Unapproved       | Unrecorded                                       |
-| ACCESS — operator and service access           | Tech + designated security/operations owners | Unapproved       | Unrecorded                                       |
-| OPS — deployment and runtime operating policy  | Tech + designated release/operations owners  | Unapproved       | Unrecorded                                       |
-| OD-006 — backup and recovery                   | Tech + Product                               | Open; unapproved | Unrecorded                                       |
-| OD-007 — final SLOs and monitoring             | Tech                                         | Open; unapproved | Unrecorded                                       |
+| Group                                          | Required owner role                          | Status                                           | Named approver / approval date / reference / ADR |
+| ---------------------------------------------- | -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| OD-002 — hosting and region                    | Tech                                         | Open; unapproved                                 | Unrecorded                                       |
+| DOMAIN — staging origins and Telegram identity | Tech + designated staging owner              | Unapproved                                       | Unrecorded                                       |
+| ACCESS — operator and service access           | Tech + designated security/operations owners | Unapproved                                       | Unrecorded                                       |
+| OPS — deployment and runtime operating policy  | Tech + designated release/operations owners  | Unapproved                                       | Unrecorded                                       |
+| OD-006 — backup and recovery                   | Tech + Product                               | Open; unapproved                                 | Unrecorded                                       |
+| OD-007 — final SLOs and monitoring             | Tech                                         | Partially approved: 17C normal-load targets only | ADR-046, owner approval 2026-10-05               |
 
 Use this record for each group when an owner supplies a proposal:
 
@@ -150,14 +169,14 @@ boundaries, percentile where applicable, measurement window, exclusions, signal
 source and response owner. Record units with every target. Do not exclude failures
 merely because telemetry is missing; identify coverage/freshness requirements.
 
-| SLO to decide                                          | Approved target / window | Approved definition / signal / owner |
-| ------------------------------------------------------ | ------------------------ | ------------------------------------ |
-| Critical path availability: Auth → Room/Match → Finish | Unresolved               | Unresolved                           |
-| REST latency                                           | Unresolved               | Unresolved                           |
-| Match command commit and acknowledgement latency       | Unresolved               | Unresolved                           |
-| Committed Match-event fanout latency                   | Unresolved               | Unresolved                           |
-| Reconnect success within the approved grace policy     | Unresolved               | Unresolved                           |
-| Critical path correlation coverage and detection time  | Unresolved               | Unresolved                           |
+| SLO to decide                                          | Approved target / window                                   | Approved definition / signal / owner                                   |
+| ------------------------------------------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Critical path availability: Auth → Room/Match → Finish | Unresolved                                                 | Unresolved                                                             |
+| REST latency                                           | 17C normal load: p95 ≤ 300 ms                              | ADR-046; final operating window/signal/owner unresolved                |
+| Match command commit and acknowledgement latency       | 17C normal load: acknowledgement p95 ≤ 300 ms              | ADR-046; final operating window/signal/owner unresolved                |
+| Committed Match-event fanout latency                   | 17C normal load: dispatch-to-all-recipient p95 ≤ 500 ms    | ADR-046; exact staging signal/owner unresolved                         |
+| Reconnect success and completion timing                | 17C normal load: success ≥ 99%; completion p95 ≤ 5 seconds | ADR-046; independent gates; final grace policy/signal/owner unresolved |
+| Critical path correlation coverage and detection time  | Unresolved                                                 | Unresolved                                                             |
 
 | Monitoring decision                                                                               | Approved answer |
 | ------------------------------------------------------------------------------------------------- | --------------- |
@@ -177,18 +196,18 @@ this worksheet cannot trade them against a latency or availability target.
 
 ## Separate prerequisites and release gates
 
-| Item                                                        | Boundary retained                                                                                                                                            |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OD-001 — approved peak CCU, active Matches and commands/sec | Needed for sizing and 17C; no peak is inferred from fixtures or local runs.                                                                                  |
-| OD-003 — session lifecycle                                  | Already resolved by ADR-014; preserve it. This worksheet chooses no replacement session strategy.                                                            |
-| OD-004 — reclaim after Bot takeover                         | Existing MVP behavior stays unchanged; no reclaim decision is made here.                                                                                     |
-| OD-005 — final retention/moderation/age/privacy             | Separate owner policy; temporary chat/statistics baselines do not resolve it. Coordinate backup/audit retention without silently choosing product retention. |
-| OD-008 — Coup rights                                        | Separate Product/Legal public-release decision; no clearance is supplied here.                                                                               |
-| Phase 7C — secured live game configuration                  | Pending; implement/verify the separately approved controls and gameplay readiness before live activation.                                                    |
-| Phase 17C — capacity/reconnect/soak                         | Pending and required before final readiness: production-like staging, 2x approved peak, reconnect storm, at least two-hour soak and durable reconciliation.  |
-| Phase 19 — final readiness review                           | Pending; this worksheet supplies no production launch approval.                                                                                              |
+| Item                                                        | Boundary retained                                                                                                                                                                              |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OD-001 — approved peak CCU, active Matches and commands/sec | Approved MVP: 1,000 concurrent users, 200 active Matches and 50 gameplay commands/sec; 2x stress is 2,000/400/100 under ADR-045.                                                               |
+| OD-003 — session lifecycle                                  | Already resolved by ADR-014; preserve it. This worksheet chooses no replacement session strategy.                                                                                              |
+| OD-004 — reclaim after Bot takeover                         | Existing MVP behavior stays unchanged; no reclaim decision is made here.                                                                                                                       |
+| OD-005 — final retention/moderation/age/privacy             | Separate owner policy; temporary chat/statistics baselines do not resolve it. Coordinate backup/audit retention without silently choosing product retention.                                   |
+| OD-008 — Coup rights                                        | Separate Product/Legal public-release decision; no clearance is supplied here.                                                                                                                 |
+| Phase 7C — secured live game configuration                  | Pending; implement/verify the separately approved controls and gameplay readiness before live activation.                                                                                      |
+| Phase 17C — capacity/reconnect/soak                         | Completed for MVP under ADR-048: mandatory local correctness/recovery gates pass; documented performance exceptions and strict measurement/optimization/staging/two-hour soak remain deferred. |
+| Phase 19 — final readiness review                           | Blocked / hold: independent staging/activation/operating/privacy/rights evidence is absent; this worksheet supplies no production launch approval.                                             |
 
-## Authorization record — no grants recorded
+## Authorization record
 
 Keep decision acceptance separate from permission to execute. Before each future
 authorized operation, record the named operator, target account/environment,
@@ -196,15 +215,17 @@ approved change plan/resource and cost limits, data scope, time window, exact
 artifact/config revisions, failure/rollback conditions and durable approval
 reference. Recovery cutover and production release require their own scope.
 
-| Authorization                                                 | Current state                              | Approver / date / exact scope / reference       |
-| ------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------- |
-| Prepare this documentation worksheet                          | Authorized by owner; documentation only    | Owner request, 2026-10-04; no operational scope |
-| Accept proposed operating decisions                           | Not granted                                | Unrecorded                                      |
-| Publish artifacts or change hosted CI/repository settings     | Not granted                                | Unrecorded                                      |
-| Provision staging resources/domains/access                    | Not granted; fully deferred                | Unrecorded                                      |
-| Migrate/deploy/run staging drills or change Telegram settings | Not granted; fully deferred                | Unrecorded                                      |
-| Enable live gameplay/admin controls                           | Not granted; 7C gate retained              | Unrecorded                                      |
-| Run 17C or approve final production release                   | Not granted; separate phase gates retained | Unrecorded                                      |
+| Authorization                                                 | Current state                                                                   | Approver / date / exact scope / reference                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Prepare this documentation worksheet                          | Authorized by owner; documentation only                                         | Owner request, 2026-10-04; no operational scope                                                 |
+| Accept proposed operating decisions                           | Not granted                                                                     | Unrecorded                                                                                      |
+| Publish artifacts or change hosted CI/repository settings     | Not granted                                                                     | Unrecorded                                                                                      |
+| Provision staging resources/domains/access                    | Not granted; fully deferred                                                     | Unrecorded                                                                                      |
+| Migrate/deploy/run staging drills or change Telegram settings | Not granted; fully deferred                                                     | Unrecorded                                                                                      |
+| Enable live gameplay/admin controls                           | Not granted; 7C gate retained                                                   | Unrecorded                                                                                      |
+| Run local 17C tooling/smoke                                   | Authorized; actual evidence recorded                                            | Owner request, 2026-10-05; [capacity scope](../testing/capacity.md)                             |
+| Proceed to Phase 18B3 after actual 17C completion             | Authorized assessment performed; execution Blocked by independent prerequisites | Owner instructions, 2026-10-05 and 2026-10-07; [ADR-048](../adr/048-mvp-capacity-acceptance.md) |
+| Approve final production release                              | Not granted; separate phase gates retained                                      | Unrecorded                                                                                      |
 
 ## Future staging acceptance evidence
 
@@ -227,8 +248,15 @@ may be attached to this worksheet or public CI artifacts.
 | Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Unrecorded / unverified     |
 
 Local 18B1/18B2 implementation and rehearsal evidence remains recorded in the
-plan; it cannot fill these staging rows. Completing 18B3 would still leave 17C
-as a required pre-release gate and 19 as the separate final-readiness review.
+plan; it cannot fill these staging rows. MVP 17C completion satisfies the
+sequencing condition, so 18B3 was assessed immediately. Unapproved operating
+choices and the explicit staging deferral still block execution. Phase 19 remains
+the separate final-readiness review; neither phase supplies launch approval.
 
-**Current outcome:** worksheet prepared; no operating decision resolved, no
-staging action authorized, and 18B3 remains Pending and fully deferred.
+**Current outcome (2026-10-07):** worksheet prepared and next-phase prerequisites
+assessed. Phase 17C is Completed for MVP with mandatory-gate evidence and explicit
+performance exceptions. Original production capacity/SLO targets remain future
+optimization/staging validation targets; they were not declared met. Hosting,
+recovery, origins/access, applicable 7C authority and remaining operating decisions
+are unresolved. 18B3 is Blocked; staging remains fully deferred and no staging
+action has begun. Phase 19 readiness is hold, not production release approval.

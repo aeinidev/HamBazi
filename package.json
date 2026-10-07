@@ -21,6 +21,8 @@
     "test:infra": "vitest run infra",
     "test:auth:local": "turbo run build --filter=@hambazi/worker --filter=@hambazi/bot && pnpm --filter @hambazi/database test:local --api-auth",
     "test:auth-http:local": "node infra/scripts/test-auth-http-local.mjs",
+    "test:capacity:local": "node infra/scripts/test-capacity-local.mjs",
+    "test:capacity:smoke": "node infra/scripts/test-capacity-local.mjs --smoke",
     "infra:env": "node infra/scripts/create-local-env.mjs",
     "infra:config": "docker compose --env-file .env --file infra/docker/compose.yaml config --quiet",
     "infra:up": "docker compose --env-file .env --file infra/docker/compose.yaml up --detach --wait --wait-timeout 90",

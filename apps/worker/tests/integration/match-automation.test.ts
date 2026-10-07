@@ -150,6 +150,64 @@ async function fixture(bot: boolean) {
     dispose,
   };
 }
+it("lets 64 obsolete jobs finish while eight current Match writer locks are held", async () => {
+  const fixtures = await Promise.all(Array.from({ length: 8 }, () => fixture(false)));
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const locked = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  let completed = 0;
+  let jobs: Promise<unknown>[] = [];
+  for (const f of fixtures)
+    await admin
+      .forModule("matches")
+      .execute((db) => db.match.update({ where: { id: f.matchId }, data: { stateVersion: 10 } }));
+  const hold = admin.forModule("matches").transaction(async (db) => {
+    for (const f of fixtures) await db.lockMatch(f.matchId);
+    entered();
+    await gate;
+  });
+  try {
+    await locked;
+    jobs = fixtures.flatMap((f) =>
+      Array.from({ length: 8 }, async () => {
+        const result = await f.real.execute({
+          schemaVersion: 1,
+          matchId: f.matchId,
+          expectedStateVersion: 0,
+          expectedRevision: 0,
+          deadlineAt: f.created,
+          kind: "TIMER",
+          playerId: null,
+          expectedConnectionEpoch: null,
+        });
+        expect(result).toMatchObject({ stateVersion: 10, lastEventSeq: 0 });
+        completed++;
+      }),
+    );
+    // Attach rejection handlers before the assertion, including on the red path.
+    const settled = Promise.allSettled(jobs);
+    await vi.waitFor(() => expect(completed).toBe(64), { timeout: 1000, interval: 10 });
+    expect(await settled).toHaveLength(64);
+  } finally {
+    release();
+    await hold;
+    await Promise.allSettled(jobs);
+    for (const f of fixtures) {
+      expect((await f.read()).stateVersion).toBe(10);
+      const counts = await admin.forModule("matches").execute(async (db) => ({
+        commands: await db.processedCommand.count({ where: { matchId: f.matchId } }),
+        events: await db.gameEvent.count({ where: { matchId: f.matchId } }),
+        outbox: await db.outboxEvent.count({ where: { aggregateId: f.matchId } }),
+      }));
+      expect(counts).toEqual({ commands: 0, events: 0, outbox: 0 });
+      await f.dispose();
+    }
+  }
+}, 10000);
 it("drives a full bot game through real BullMQ and Worker-role atomic writes", async () => {
   const f = await fixture(true);
   const worker = await startMatchAutomation(f.config);

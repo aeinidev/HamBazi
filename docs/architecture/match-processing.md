@@ -61,6 +61,18 @@ to observe the completed writer's receipt. The callback performs only PostgreSQL
 operations and synchronous domain/engine work. Existing database pool/transaction
 limits apply; at most three transaction-conflict attempts are made.
 
+Trusted automation jobs first read only the durable lifecycle/checkpoint metadata.
+An already mismatched version or non-active Match returns the same harmless
+checkpoint without a writer transaction, roster or private-state read. Durable
+versions never decrease, and terminal Matches never reactivate. Player authority
+cannot use this path. Every job that might still apply enters the unchanged
+locked transaction and rechecks version, seat/epoch, revision, deadline and pinned
+engine before writing. This avoids thousands of obsolete delayed jobs competing
+with current gameplay for writer locks; it changes no timer, retry or job schema.
+Unit waves and a Worker-role PostgreSQL regression cover 64 obsolete jobs
+completing while eight writer locks remain held, with no receipts/events/outbox
+changes. Existing real timer/Bot/epoch/replay and atomic-write tests remain guards.
+
 The transaction inserts ordered game_events, updates matches and any readiness
 marker, inserts the receipt and inserts a pending MATCH_CHANGED_V1 outbox row. A finish
 also inserts MATCH_FINISHED_V1 in that transaction. Any failure rolls

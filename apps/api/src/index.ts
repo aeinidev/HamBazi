@@ -1,2 +1,2 @@
-// Public surface for api; behavior is introduced in its implementation phase.
-export {};
+// Trusted server composition only; does not activate catalog or select live policy.
+export { createCoupMatchGame } from "./composition/coup-match.js";

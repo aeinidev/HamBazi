@@ -83,6 +83,11 @@ export function createMatchResyncRepository(
               row.lastEventSeq - afterSeq > 100
             )
               return fallback;
+            // The locked checkpoint has no tail beyond this cursor. Still build
+            // the fresh authorized view above; empty event/receipt reads add no
+            // information and amplify reconnect waves.
+            if (afterSeq === row.lastEventSeq)
+              return { schemaVersion: 1, mode: "EVENTS", events: [], snapshot };
             const events = await db.gameEvent.findMany({
               where: { matchId, seq: { gt: afterSeq, lte: row.lastEventSeq } },
               orderBy: { seq: "asc" },

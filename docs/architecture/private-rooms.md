@@ -63,6 +63,29 @@ expiry is checked at use time, so a lost/delayed future expiry job cannot allow
 late admission/start. The explicit expiry port can materialize unused-room expiry;
 periodic scheduling/event publication remain future integrations.
 
+Phase 17CP preserves Serializable isolation and the existing five-attempt
+transaction retry bound. Known transaction/unique conflicts wait with bounded
+jitter after rollback: 10–20, 20–40, 40–80 and 80–160 ms, at most 300 ms total
+scheduled backoff. No connection, lock or transaction remains held during these
+waits; each attempt rechecks the original intent against durable state. The
+database boundary now also normalizes the pinned
+adapter's explicit commit-time transaction conflict to the same safe conflict
+code as a statement-time serialization abort. A rolled-back attempt can therefore
+repeat the original intent inside the existing bound. Network/unknown-commit
+failures remain generic; public INTERNAL_ERROR remains non-retryable. Invite
+verification, actor/host checks, eligibility, expiry, capacity, version checks,
+atomic membership/receipt writes and post-commit acknowledgements are unchanged.
+
+Phase 17CR adds the fixed Rooms-owned transaction lock described in
+[ADR-047](../adr/047-room-transaction-ordering.md). Every Room repository
+transaction acquires it before its first snapshot read, including reads that can
+materialize expiry. This prevents unrelated Room workflows from establishing the
+reproduced SSI coarse-predicate cycle. The lock is released by PostgreSQL on commit or
+rollback; it queues Room transactions across processes and reduces their
+concurrency. Match and other owners retain their own concurrency. Existing
+Serializable isolation, five attempts, jitter, time budgets and public errors
+remain. Bounded recovery-page enumeration remains the existing read operation.
+
 Rollback by disabling the opt-in group or returning to the previous application
 release; keep the expanded schema and receipts. Do not revert the migration or
 activate Games through SQL. Phase 7C controls and complete gameplay readiness

@@ -4,7 +4,9 @@
 These entry points create **local candidates**, never publish or deploy. OD-002,
 OD-006 and OD-007 remain open. Provider, region, domains, access model, backup/PITR,
 RPO/RTO, retention and final SLOs require explicit later approval. Parent 18B
-remains In Progress; 17C remains a required pre-release staging gate.
+remains In Progress. 17C is Completed for MVP with performance exceptions under
+[ADR-048](../adr/048-mvp-capacity-acceptance.md); production-like capacity/soak
+acceptance remains deferred and unproven.
 
 ## Build inputs and inventory
 
@@ -115,5 +117,5 @@ explicit approval of the unresolved decisions and deployment scope. Production
 TLS ingress, private service networks and credentials, immutable registry policy,
 hosted CI, real staging migration/deploy/rollback, backup/PITR restore meeting
 approved recovery objectives, mobile WebViews and final SLOs are unverified.
-Local packaging cannot satisfy those gates, Phase 7C live activation, Phase 17C
-capacity/reconnect/two-hour soak or Phase 19 final release readiness.
+Local packaging cannot satisfy those gates, Phase 7C live activation, deferred
+production capacity/reconnect/two-hour soak or Phase 19 final release readiness.

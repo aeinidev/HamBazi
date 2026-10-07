@@ -596,3 +596,66 @@ it("returns bounded durable catch-up with safe per-player views, pinned versions
     /myCards|exchangeChoices|legalCommands|deck|influence/,
   );
 });
+
+it("keeps current-cursor recovery waves fresh across concurrent commands and locked role changes", async () => {
+  const { createMatchResyncPort } = await import("../../src/matches/index.js");
+  const resync = createMatchResyncPort(b, [createCoupMatchGame(rules)]);
+  const tables = [];
+  for (let i = 0; i < 8; i++) {
+    const f = await fixture();
+    await f.active();
+    tables.push(f);
+  }
+  for (const f of tables) {
+    const input = { schemaVersion: 1, matchId: f.matchId, afterSeq: 7 };
+    const reads = Array.from({ length: 8 }, (_, index) => resync.catchup(f.ids[index % 2], input));
+    const command = f.first.command(f.ids[0], {
+      ...f.request(5),
+      command: { type: "DECLARE_INCOME" },
+    });
+    const outcomes = await Promise.all(reads);
+    const committed = value(await command);
+    for (const [index, result] of outcomes.entries()) {
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error("Recovery wave unavailable");
+      const snapshot = result.value.snapshot;
+      expect([5, committed.stateVersion]).toContain(snapshot.stateVersion);
+      expect(snapshot.view).toMatchObject({ viewerId: f.ids[index % 2] });
+      expect(result.value.events).toHaveLength(snapshot.lastEventSeq - input.afterSeq);
+      if (snapshot.stateVersion === 5) expect(result.value.events).toEqual([]);
+      else
+        expect(result.value.events.at(-1)).toMatchObject({ stateVersion: committed.stateVersion });
+    }
+    await a.forModule("matches").transaction(async (db) => {
+      await db.lockMatch(f.matchId);
+      await db.matchPlayer.update({
+        where: { matchId_userId: { matchId: f.matchId, userId: f.ids[0]! } },
+        data: { agentType: "BOT", replacedAt: new Date(2000), connectionStatus: "REPLACED_BY_BOT" },
+      });
+    });
+    const current = { ...input, afterSeq: committed.lastEventSeq };
+    const wave = await Promise.all(
+      Array.from({ length: 8 }, () => resync.catchup(f.ids[0], current)),
+    );
+    for (const result of wave) {
+      expect(result).toMatchObject({
+        ok: true,
+        value: {
+          mode: "EVENTS",
+          events: [],
+          snapshot: {
+            stateVersion: committed.stateVersion,
+            role: "SPECTATOR",
+            view: { kind: "SPECTATOR" },
+          },
+        },
+      });
+      expect(JSON.stringify(result)).not.toMatch(
+        /myCards|exchangeChoices|legalCommands|deck|influence/,
+      );
+    }
+    expect(await resync.catchup(randomUUID(), current)).toMatchObject({
+      error: { code: "NOT_FOUND" },
+    });
+  }
+});

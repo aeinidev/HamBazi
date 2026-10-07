@@ -203,6 +203,26 @@ async function fixture() {
   };
 }
 
+it("recovers eight active private Matches concurrently without duplicate Room reads or durable effects", async () => {
+  const tables = [];
+  for (let index = 0; index < 8; index++) {
+    const f = await fixture();
+    const matchId = await f.active();
+    const before = await f.stored();
+    const startSnapshot = vi.fn(f.rooms.startSnapshot);
+    const port = f.build(a, { ...f.rooms, startSnapshot });
+    tables.push({ f, matchId, before, startSnapshot, port });
+  }
+  await Promise.all(
+    tables.map(async ({ f, matchId, startSnapshot, port }) => {
+      for (let wave = 0; wave < 16; wave++)
+        expect(await port.resume(f.roomId)).toEqual({ ok: true, matchId });
+      expect(startSnapshot).toHaveBeenCalledTimes(16);
+    }),
+  );
+  for (const { f, before } of tables) expect(await f.stored()).toEqual(before);
+});
+
 it("races private starts across two processes with one durable Match/roster and original acknowledgements", async () => {
   const f = await fixture(),
     first = f.build(),

@@ -13,6 +13,21 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
+  it("restricts the fixed Room transaction lock to its owner and an active transaction", async () => {
+    const database = createDatabase(options);
+    try {
+      await database.forModule("rooms").execute(async (db) => {
+        expect("$executeRaw" in db).toBe(false);
+        await expect(db.lockRooms()).rejects.toMatchObject({ code: "DATABASE_LOCK_INVALID" });
+      });
+      for (const owner of ["users", "auth", "matches", "outbox"] as const)
+        await database.forModule(owner).execute(async (db) => {
+          expect("lockRooms" in db).toBe(false);
+        });
+    } finally {
+      await database.disconnect();
+    }
+  });
   it("sanitizes an unavailable read-only probe without exposing connection data", async () => {
     const database = createDatabase(options);
     try {
@@ -123,6 +138,69 @@ describe("database infrastructure boundary", () => {
     );
     expect(Object.keys(manifest.exports)).toEqual(["."]);
   });
+  it("classifies commit-time adapter write conflicts without exposing their cause", async () => {
+    const database = createDatabase(options);
+    // Prisma 7's transaction commit can expose the adapter error directly;
+    // statement execution converts this same kind into P2034.
+    const error = Object.assign(new Error("PRIVATE_COMMIT_CANARY"), {
+      name: "DriverAdapterError",
+      cause: { kind: "TransactionWriteConflict", detail: "PRIVATE_SQL_CANARY" },
+    });
+    try {
+      await expect(
+        database.forModule("rooms").execute(async () => {
+          throw error;
+        }),
+      ).rejects.toMatchObject({ code: "DATABASE_TRANSACTION_CONFLICT" });
+      try {
+        await database.forModule("rooms").execute(async () => {
+          throw error;
+        });
+      } catch (failure) {
+        expect(
+          [String(failure), inspect(failure), JSON.stringify(failure)].every(
+            (value) => !value.includes("PRIVATE_"),
+          ),
+        ).toBe(true);
+        expect("cause" in (failure as Error)).toBe(false);
+      }
+    } finally {
+      await database.disconnect();
+    }
+  });
+  it("does not infer a retryable commit from messages or unrelated adapter failures", async () => {
+    const database = createDatabase(options);
+    try {
+      for (const error of [
+        {
+          name: "DriverAdapterError",
+          cause: { kind: "postgres", code: "08006" },
+          message: "TransactionWriteConflict",
+        },
+        { name: "UnknownError", cause: { kind: "TransactionWriteConflict" } },
+        { name: "DriverAdapterError", cause: null },
+        { name: "DriverAdapterError", cause: { kind: "PRIVATE_UNKNOWN_CANARY" } },
+        {
+          name: "DriverAdapterError",
+          code: "PRIVATE_UNKNOWN_CANARY",
+          cause: { kind: "TransactionWriteConflict" },
+        },
+        Object.defineProperty({}, "code", {
+          get() {
+            throw new Error("PRIVATE_GETTER_CANARY");
+          },
+        }),
+      ]) {
+        await expect(
+          database.forModule("rooms").execute(async () => {
+            throw error;
+          }),
+        ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+      }
+    } finally {
+      await database.disconnect();
+    }
+  });
   it("keeps append-only and version checks in the checked-in migration", async () => {
     const sql = await readFile(
       new URL("../../prisma/migrations/202609130001_foundation/migration.sql", import.meta.url),
@@ -139,7 +217,7 @@ describe("database infrastructure boundary", () => {
 it("exposes room receipts only to the Rooms owner and keeps the migration additive", async () => {
   const database = createDatabase(options);
   await database.forModule("rooms").execute(async (db) => {
-    expect(Object.keys(db)).toEqual(["room", "roomMember", "roomCommandReceipt"]);
+    expect(Object.keys(db)).toEqual(["room", "roomMember", "roomCommandReceipt", "lockRooms"]);
     expect("user" in db).toBe(false);
     expect("match" in db).toBe(false);
   });
@@ -185,14 +263,19 @@ it("expands Match processing without rewriting history or exposing a general SQL
   const database = createDatabase(options);
   await database.forModule("matches").execute(async (db) => {
     expect("lockMatch" in db).toBe(true);
+    expect("lockMatchPresence" in db).toBe(true);
     expect("$queryRaw" in db).toBe(false);
     await expect(db.lockMatch("00000000-0000-4000-8000-000000000001")).rejects.toMatchObject({
       code: "DATABASE_LOCK_INVALID",
     });
+    await expect(
+      db.lockMatchPresence("00000000-0000-4000-8000-000000000001"),
+    ).rejects.toMatchObject({ code: "DATABASE_LOCK_INVALID" });
   });
   for (const owner of ["users", "rooms", "outbox"] as const)
     await database.forModule(owner).execute(async (db) => {
       expect("lockMatch" in db).toBe(false);
+      expect("lockMatchPresence" in db).toBe(false);
     });
   await database.disconnect();
 });

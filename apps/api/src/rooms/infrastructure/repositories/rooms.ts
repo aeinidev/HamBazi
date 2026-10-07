@@ -1,4 +1,4 @@
-import { hash, randomBytes, randomUUID } from "node:crypto";
+import { hash, randomBytes, randomInt, randomUUID } from "node:crypto";
 import { z } from "zod";
 import { DatabaseError, type createDatabase } from "@hambazi/database";
 import type {
@@ -75,6 +75,7 @@ export function createRoomsRepository(
     for (let attempt = 0; ; attempt++) {
       try {
         const result = await scope.transaction(async (db) => {
+          await db.lockRooms();
           try {
             return await operation(db);
           } catch (error) {
@@ -91,6 +92,13 @@ export function createRoomsRepository(
           attempt >= 4
         )
           throw error;
+        // The failed transaction has already rolled back. Spread retries so
+        // independent serializable admissions do not repeatedly collide.
+        // Four waits total 150–300 ms; retain the existing five-attempt bound.
+        const backoffMs = 10 * 2 ** attempt;
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, backoffMs + randomInt(backoffMs + 1)),
+        );
       }
     }
   }

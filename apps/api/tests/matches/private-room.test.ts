@@ -176,6 +176,42 @@ it("uses stored pins during recovery even after catalog/configuration becomes un
   expect(f.descriptor).toHaveBeenCalledTimes(1);
   expect(f.match().descriptor).toEqual(f.pins);
 });
+
+it("avoids duplicate owner reads in a 128-operation active recovery wave", async () => {
+  const f = fixture();
+  await f.service.resume(f.roomId);
+  f.match().status = "READY";
+  await f.service.resume(f.roomId);
+  expect(f.match().status).toBe("ACTIVE");
+  f.rooms.startSnapshot.mockClear();
+  vi.mocked(f.repository.read).mockClear();
+  f.processing.lifecycle.mockClear();
+  expect(await Promise.all(Array.from({ length: 128 }, () => f.service.resume(f.roomId)))).toEqual(
+    Array(128).fill({ ok: true, matchId: f.matchId }),
+  );
+  expect(f.rooms.startSnapshot).toHaveBeenCalledTimes(128);
+  expect(f.repository.read).toHaveBeenCalledTimes(128);
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+  expect(f.rooms.closeStarted).not.toHaveBeenCalled();
+});
+
+it("still validates active recovery provenance and closes a subsequently finished Match", async () => {
+  const f = fixture();
+  await f.service.resume(f.roomId);
+  f.match().status = "READY";
+  await f.service.resume(f.roomId);
+  f.snapshot.startedMatchId = randomUUID();
+  expect(await f.service.resume(f.roomId)).toMatchObject({ error: { code: "ROOM_CONFLICT" } });
+  f.snapshot.startedMatchId = f.matchId;
+  f.snapshot.status = "CLOSED";
+  expect(await f.service.resume(f.roomId)).toMatchObject({ error: { code: "ROOM_CONFLICT" } });
+  f.snapshot.status = "STARTED";
+  expect(await f.service.resume(f.roomId)).toEqual({ ok: true, matchId: f.matchId });
+  f.match().status = "FINISHED";
+  expect(await f.service.resume(f.roomId)).toEqual({ ok: true, matchId: f.matchId });
+  expect(f.rooms.closeStarted).toHaveBeenCalledWith(f.roomId, f.matchId);
+  expect(f.snapshot.status).toBe("CLOSED");
+});
 it("resumes creation and confirmation failures without releasing or replacing the frozen roster", async () => {
   const f = fixture();
   f.rooms.confirmStarted.mockRejectedValueOnce(new Error("hidden diagnostic"));

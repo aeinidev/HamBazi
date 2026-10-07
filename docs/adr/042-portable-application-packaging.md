@@ -5,6 +5,11 @@
 - **Date:** 2026-10-04.
 - **Supersedes:** None. Preserves ADR-034/035 scanner policy, ADR-037/038 Web privacy and ADR-041 CI trust boundaries.
 
+**Acceptance update (2026-10-07):** [ADR-048](048-mvp-capacity-acceptance.md)
+completes 17C for MVP with performance exceptions. The original context below is
+historical; production capacity/staging validation remains deferred and unproven.
+Packaging decisions, security requirements and staging deferral are unchanged.
+
 ## Context
 
 Architecture sections 19/24 require separate API/Socket, Bot, Worker and static

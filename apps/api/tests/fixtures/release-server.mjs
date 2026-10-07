@@ -3,9 +3,27 @@ import console from "node:console";
 import { createHmac, hash, randomBytes, randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { fork } from "node:child_process";
+import { monitorEventLoopDelay } from "node:perf_hooks";
+import { Session } from "node:inspector/promises";
+import { createClient } from "redis";
+import { Queue } from "bullmq";
+import { createRequire } from "node:module";
 import { fileURLToPath, URL, URLSearchParams } from "node:url";
 import { setTimeout, clearTimeout } from "node:timers";
 import { createDatabase } from "@hambazi/database";
+import {
+  observeCapacityDatabase,
+  observeCapacityPgClient,
+  observeCapacityPgPool,
+  createCapacityDeliveryObservation,
+  capacityCpuSummary,
+  capacityFailureKey,
+  observeCapacityOutcome,
+  observeCapacityAdmissionRedis,
+  observeCapacityGame,
+  capacityAutomationObservation,
+  capacityDeliveryActivity,
+} from "../../../../infra/scripts/capacity-diagnostics.mjs";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import {
   createAuthSessions,
@@ -45,24 +63,60 @@ import {
 import { createHttpApplication } from "../../dist/composition/http.js";
 import { createCoupMatchGame } from "../../dist/composition/coup-match.js";
 import { createSafeLogger } from "../../dist/composition/safe-logger.js";
+import {
+  capacityFixtureLimits,
+  capacityFixturePresencePolicy,
+} from "../../../../infra/scripts/capacity-model.mjs";
 
 // Synthetic loopback composition only. No production registry, fabricated Matches,
 // implicit readiness, SQL game transitions or browser-only game outcomes.
 const namespace = randomUUID();
 const origin = "http://127.0.0.1:4173";
 const clock = { nowMs: () => Date.now() };
-const policy = {
-  httpRequestsPerMinute: 10000,
-  engineRequestsPerMinute: 10000,
-  socketConnectionsPerMinute: 10000,
-  socketEventsPerMinute: 10000,
-  maxHttpInFlight: 100,
-  maxEngineInFlight: 100,
-  maxConnections: 100,
-  maxPendingPerSocket: 100,
-  maxPendingTotal: 1000,
-  maxSubscriptions: 10,
-};
+const capacity = process.env.TEST_CAPACITY_MODE === "isolated";
+const dispatchObservation = createCapacityDeliveryObservation();
+const cpuProfileEnabled = capacity && process.env.TEST_CAPACITY_CPU_PROFILE === "isolated";
+let cpuSession,
+  cpuTimer,
+  cpuResult,
+  cpuArmed = false;
+async function stopCpuProfile() {
+  cpuArmed = false;
+  clearTimeout(cpuTimer);
+  if (!cpuSession) return;
+  const session = cpuSession;
+  cpuSession = null;
+  try {
+    const { profile } = await session.post("Profiler.stop");
+    // Raw profiles never leave memory: only fixed aggregate bucket counts escape.
+    cpuResult = capacityCpuSummary(profile);
+  } finally {
+    session.disconnect();
+  }
+}
+const presencePolicy = capacity
+  ? capacityFixturePresencePolicy
+  : {
+      heartbeatIntervalMs: 1000,
+      heartbeatTimeoutMs: 5000,
+      leaseMs: 15000,
+      graceMs: 60000,
+      maxConnections: 4,
+    };
+const policy = capacity
+  ? capacityFixtureLimits(Number(process.env.TEST_CAPACITY_CCU))
+  : {
+      httpRequestsPerMinute: 10000,
+      engineRequestsPerMinute: 10000,
+      socketConnectionsPerMinute: 10000,
+      socketEventsPerMinute: 10000,
+      maxHttpInFlight: 100,
+      maxEngineInFlight: 100,
+      maxConnections: 100,
+      maxPendingPerSocket: 100,
+      maxPendingTotal: 1000,
+      maxSubscriptions: 10,
+    };
 const rules = {
   rulesetVersion: "coup-provisional-complete-v1",
   copiesPerRole: 3,
@@ -90,18 +144,26 @@ const sessionKey = randomBytes(32).toString("base64url");
 const admissionKey = randomBytes(32).toString("base64url");
 const closes = [];
 let database,
+  gameObservation,
+  queryObservation,
   projectionAudit,
   http,
   control,
   worker,
   timer,
+  recoveryTimer,
+  recoveryWork,
+  recoveryCursor,
   active,
   stopping = false,
   closing;
 let actorSequence = 45000000;
 let startupStage = "isolation guard";
 const actors = new Set();
+const loopDelay = capacity ? monitorEventLoopDelay({ resolution: 20 }) : null;
+loopDelay?.enable();
 let sessions, rooms, resync, processing, privateRooms, matchmaking, chat, admission, dependencies;
+let capacityDeliveryQueue;
 const logger = createSafeLogger({ write() {} });
 function required(result) {
   if (!result.ok) throw new Error("Release fixture operation failed");
@@ -134,11 +196,28 @@ async function startWorker() {
         WORKER_DATABASE_URL: process.env.WORKER_DATABASE_URL,
         TEST_WORKER_REDIS_URL: process.env.TEST_WORKER_REDIS_URL,
         TEST_RELEASE_NAMESPACE: namespace,
+        ...(capacity ? { TEST_CAPACITY_MODE: "isolated" } : {}),
       },
       stdio: ["ignore", "ignore", "ignore", "ipc"],
     },
   );
   const child = worker;
+  if (capacity)
+    child.on("message", (message) => {
+      if (capacityFailureKey(message))
+        process.send?.({ ...message, type: "capacity-worker-failure" });
+      if (capacityAutomationObservation(message)) process.send?.(message);
+      if (
+        message?.type === "capacity-outbox" &&
+        [
+          "worker.outbox_published",
+          "worker.outbox_retry",
+          "worker.outbox_failed",
+          "worker.outbox_unavailable",
+        ].includes(message.name)
+      )
+        process.send?.({ type: "capacity-outbox", name: message.name });
+    });
   await new Promise((resolve, reject) => {
     const deadline = setTimeout(() => reject(new Error("Release worker startup deadline")), 10000);
     child.once("message", (message) => {
@@ -178,16 +257,24 @@ async function startHttp() {
 async function stopHttp() {
   if (!http) return;
   http.stopAdmission();
-  await http.realtime.close();
-  await http.app.close();
-  await http.settled();
+  try {
+    await http.realtime.close();
+  } finally {
+    // A timed-out close is not cancellation. Do not dispose the database/Redis
+    // beneath the still-running durable disconnects; retain the deadline error.
+    await http.realtime.settled();
+    await http.app.close();
+    await http.settled();
+  }
 }
 async function tick() {
   if (!stopping && http.realtime.ready()) {
     const found = await matchmaking.run({ gameId: "coup", mode: "standard", capacity: 2 });
     if (found.ok && found.value.matchId) await lifecycle(found.value.matchId, "WAIT", 0);
     let cursor;
-    for (let page = 0; page < 20; page++) {
+    // Capacity recovery uses its own bounded scheduler below, so growing Room
+    // inventory cannot delay every matchmaking tick with a full sweep.
+    for (let page = 0; !capacity && page < 20; page++) {
       const recovery = await privateRooms.recover({
         schemaVersion: 1,
         limit: 50,
@@ -225,6 +312,109 @@ function launch(id, startParam) {
 }
 async function controlRequest(request) {
   if (request.method === "GET" && request.url === "/health") return { ready: true };
+  if (capacity && request.method === "POST" && request.url === "/actor/refresh") {
+    const input = await body(request);
+    if (!actors.has(input.telegramUserId)) throw new Error("Unknown synthetic actor");
+    return { initData: launch(input.telegramUserId) };
+  }
+  if (capacity && request.method === "GET" && request.url === "/capacity/metrics") {
+    return {
+      rssBytes: process.memoryUsage().rss,
+      heapUsedBytes: process.memoryUsage().heapUsed,
+      eventLoopP99Ms: loopDelay.percentile(99) / 1e6,
+      eventLoopMaxMs: loopDelay.max / 1e6,
+      cpuUserMicros: process.cpuUsage().user,
+      cpuSystemMicros: process.cpuUsage().system,
+      pool: database.poolSnapshot(),
+      databaseWork: database.capacityWorkSnapshot(),
+      ...(process.env.TEST_CAPACITY_QUERY_WORK === "isolated"
+        ? { databaseQueryWork: queryObservation.snapshot() }
+        : {}),
+      realtimeWork: http.realtime.workSnapshot(),
+    };
+  }
+  if (capacity && request.method === "GET" && request.url === "/capacity/dispatch") {
+    return {
+      ...dispatchObservation.result(),
+      gameWork: gameObservation.result(),
+      ...(cpuResult ? { cpu: cpuResult } : {}),
+    };
+  }
+  if (cpuProfileEnabled && request.method === "POST" && request.url === "/capacity/cpu/start") {
+    if (cpuArmed || cpuSession || cpuResult) throw new Error("Capacity profile already started");
+    cpuArmed = true;
+    async function startOnBacklog() {
+      if (!cpuArmed || stopping) return;
+      const work = http.realtime.workSnapshot();
+      if (!Object.values(work.phases).some((phase) => phase.maximumAgeMs >= 2000)) {
+        cpuTimer = setTimeout(() => void startOnBacklog().catch(() => {}), 500);
+        return;
+      }
+      cpuArmed = false;
+      cpuSession = new Session();
+      cpuSession.connect(); // Same-process session only; no debug listener/port.
+      await cpuSession.post("Profiler.enable");
+      await cpuSession.post("Profiler.start");
+      cpuTimer = setTimeout(() => {
+        void stopCpuProfile().catch(() => {});
+      }, 10000);
+    }
+    void startOnBacklog().catch(() => {});
+    closes.push(stopCpuProfile);
+    return { armed: true };
+  }
+  if (capacity && request.method === "POST" && request.url === "/audit/commands") {
+    const input = await body(request);
+    if (
+      !/^[a-f0-9-]{36}$/.test(input.matchId) ||
+      !Array.isArray(input.actionIds) ||
+      input.actionIds.length > 100 ||
+      input.actionIds.some((id) => !/^[a-f0-9-]{36}$/.test(id))
+    )
+      throw new Error("Invalid capacity audit");
+    return database.forModule("matches").execute((db) =>
+      db.processedCommand.findMany({
+        where: { matchId: input.matchId, actionId: { in: input.actionIds } },
+        select: { actionId: true, resultingVersion: true },
+      }),
+    );
+  }
+  if (capacity && request.method === "POST" && request.url === "/capacity/wait") {
+    const input = await body(request);
+    if (!/^[a-f0-9-]{36}$/.test(input.matchId) || !Number.isSafeInteger(input.version))
+      throw new Error("Invalid capacity wait audit");
+    const durable = await database.forModule("matches").execute(async (db) => {
+      const row = await db.match.findUniqueOrThrow({
+        where: { id: input.matchId },
+        select: { stateVersion: true },
+      });
+      const events = await db.outboxEvent.findMany({
+        where: { aggregateId: input.matchId, type: "MATCH_CHANGED_V1" },
+        select: { status: true, attempts: true },
+      });
+      return {
+        durableVersionLag: row.stateVersion - input.version,
+        pending: events.filter((e) => e.status === "PENDING").length,
+        published: events.filter((e) => e.status === "PUBLISHED").length,
+        failed: events.filter((e) => e.status === "FAILED").length,
+        maximumAttempts: Math.max(0, ...events.map((e) => e.attempts)),
+      };
+    });
+    const counts = await capacityDeliveryQueue.getJobCounts("wait", "active", "delayed", "failed");
+    const [oldest] = await capacityDeliveryQueue.getJobs(["wait"], 0, 0, true);
+    const activeJobs = await capacityDeliveryQueue.getJobs(["active"], 0, 99, true);
+    return {
+      ...durable,
+      deliveryQueue: {
+        waiting: counts.wait,
+        active: counts.active,
+        delayed: counts.delayed,
+        failed: counts.failed,
+        oldestWaitingAgeMs: oldest ? Math.max(0, Date.now() - oldest.timestamp) : 0,
+        ...capacityDeliveryActivity(activeJobs, Date.now()),
+      },
+    };
+  }
   if (request.method === "POST" && request.url === "/actor") {
     const input = await body(request);
     if (input.startParam !== undefined && !/^room_[A-Za-z0-9_-]{43}$/.test(input.startParam))
@@ -248,6 +438,10 @@ async function controlRequest(request) {
   if (request.method === "POST" && request.url === "/api/drain") {
     http.stopAdmission();
     return { draining: true };
+  }
+  if (capacity && request.method === "POST" && request.url === "/capacity/drain") {
+    await stopHttp();
+    return { drained: true };
   }
   if (request.method === "POST" && request.url === "/api/restart") {
     await stopHttp();
@@ -341,6 +535,34 @@ async function main() {
     transactionMaxWaitMs: 5000,
     transactionTimeoutMs: 5000,
   });
+  if (capacity) {
+    const pg = createRequire(
+      new URL("../../../../packages/database/package.json", import.meta.url),
+    )("pg");
+    queryObservation = observeCapacityPgClient(pg.Client, (message) => process.send?.(message), {
+      work: process.env.TEST_CAPACITY_QUERY_WORK === "isolated",
+    });
+    closes.push(queryObservation);
+    let firstPoolTimeout = true;
+    closes.push(
+      observeCapacityPgPool(pg.Pool, (message) => {
+        if (firstPoolTimeout && message.code === "PG_POOL_ACQUIRE_TIMEOUT") {
+          firstPoolTimeout = false;
+          process.send?.(
+            {
+              type: "capacity-database-work",
+              work: database.capacityWorkSnapshot(),
+              pool: database.poolSnapshot(),
+              gameWork: gameObservation?.result(),
+            },
+            () => {},
+          );
+        }
+        process.send?.(message, () => {});
+      }),
+    );
+  }
+  if (capacity) database = observeCapacityDatabase(database, (message) => process.send?.(message));
   startupStage = "database connection";
   await database.connect();
   closes.push(() => database.disconnect());
@@ -373,6 +595,16 @@ async function main() {
     lifetimeSeconds: 900,
     signing,
   });
+  if (capacity)
+    sessions = {
+      ...sessions,
+      authenticate: observeCapacityOutcome(
+        "auth",
+        "session:authenticate",
+        sessions.authenticate,
+        (message) => process.send?.(message, () => {}),
+      ),
+    };
   const onboarding = createMiniAppOnboarding({
     accounts: createAccountCreationPort(database),
     users,
@@ -380,6 +612,10 @@ async function main() {
     clock,
   });
   startupStage = "rate composition";
+  if (capacity) {
+    const prototype = Object.getPrototypeOf(Object.getPrototypeOf(createClient()));
+    closes.push(observeCapacityAdmissionRedis(prototype, (message) => process.send?.(message)));
+  }
   const authRate = createRedisAuthRateLimiter({
     url: redisUrl,
     namespace,
@@ -393,13 +629,29 @@ async function main() {
     writeLimit: 60,
   });
   const catalogRate = createCatalogRate({ url: redisUrl, namespace, readLimit: 600 });
-  const roomsRate = createRoomsRate({
+  const baseRoomsRate = createRoomsRate({
     url: redisUrl,
     namespace,
     readLimit: 600,
     createLimit: 60,
     inviteLimit: 60,
   });
+  const roomsRate = capacity
+    ? {
+        ...baseRoomsRate,
+        async consume(operation, userId) {
+          const decision = await baseRoomsRate.consume(operation, userId);
+          if (!decision.allowed)
+            process.send?.({
+              type: "capacity-failure",
+              owner: "rooms",
+              operation: `rate:${operation}`,
+              code: decision.reason === "unavailable" ? "RATE_UNAVAILABLE" : "RATE_LIMITED",
+            });
+          return decision;
+        },
+      }
+    : baseRoomsRate;
   const chatRate = createChatRate({ url: redisUrl, namespace, readLimit: 60, sendLimit: 10 });
   admission = createRedisTransportAdmission({ url: redisUrl, namespace, policy });
   startupStage = "rate connections";
@@ -408,7 +660,11 @@ async function main() {
     closes.push(async () => rate.close());
   }
   startupStage = "game ports";
-  const game = createCoupMatchGame(rules);
+  let game = createCoupMatchGame(rules);
+  if (capacity) {
+    gameObservation = observeCapacityGame(game);
+    game = gameObservation.game;
+  }
   const enabled = {
     id: "coup",
     slug: "coup",
@@ -447,6 +703,13 @@ async function main() {
   );
   processing = createMatchProcessingPort(database, { clock, games: [game] }, users);
   resync = createMatchResyncPort(database, [game]);
+  if (capacity) {
+    const emit = (message) => process.send?.(message, () => {});
+    resync = {
+      snapshot: observeCapacityOutcome("matches", "projection:snapshot", resync.snapshot, emit),
+      catchup: observeCapacityOutcome("matches", "projection:catchup", resync.catchup, emit),
+    };
+  }
   privateRooms = createPrivateRoomMatchPort(
     database,
     { clock },
@@ -512,6 +775,27 @@ async function main() {
     const result = await sessions.authenticate(token);
     return result.ok ? { ok: true, userId: result.session.userId } : result;
   };
+  let reconnect = createMatchReconnectPort(database, {
+    clock,
+    policy: {
+      schemaVersion: 1,
+      leaseMs: presencePolicy.leaseMs,
+      graceMs: presencePolicy.graceMs,
+      maxConnections: presencePolicy.maxConnections,
+    },
+  });
+  if (capacity)
+    reconnect = Object.fromEntries(
+      ["connect", "renew", "disconnect", "reconcile", "timeout"].map((operation) => [
+        operation,
+        observeCapacityOutcome(
+          "matches",
+          `reconnect:${operation}`,
+          reconnect[operation],
+          (message) => process.send?.(message, () => {}),
+        ),
+      ]),
+    );
   dependencies = {
     auth: { sessions, telegram, clock, limiter: authRate.limiter, onboarding },
     profile: {
@@ -537,6 +821,7 @@ async function main() {
     production: false,
     logger,
     realtime: {
+      ...(capacity ? { execution: { intentConcurrency: 4, disconnectConcurrency: 4 } } : {}),
       sessions,
       rooms,
       matches: processing,
@@ -565,17 +850,20 @@ async function main() {
       presence: {
         port: createPresencePort({
           resync,
-          reconnect: createMatchReconnectPort(database, {
-            clock,
-            policy: { schemaVersion: 1, leaseMs: 15000, graceMs: 60000, maxConnections: 4 },
-          }),
+          reconnect,
         }),
-        heartbeatIntervalMs: 1000,
-        heartbeatTimeoutMs: 5000,
-        leaseMs: 15000,
+        heartbeatIntervalMs: presencePolicy.heartbeatIntervalMs,
+        heartbeatTimeoutMs: presencePolicy.heartbeatTimeoutMs,
+        leaseMs: presencePolicy.leaseMs,
+        ...(capacity ? { heartbeatConcurrency: 4 } : {}),
       },
       admission: { policy, ip: admission.ip, production: false, trustedProxies: [] },
-      rate: admission.rate,
+      rate: capacity
+        ? (id, operation) =>
+            observeCapacityOutcome("realtime", `rate:${operation}`, admission.rate, (message) =>
+              process.send?.(message, () => {}),
+            )(id, operation)
+        : admission.rate,
       allowedOrigins: [origin],
       nowMs: clock.nowMs,
     },
@@ -591,14 +879,31 @@ async function main() {
       publish: (event) =>
         kind === "CHAT_MESSAGE_V1"
           ? http.realtime.publishChat(event)
-          : http.realtime.publish(event),
+          : capacity
+            ? dispatchObservation.publish((input) => http.realtime.publish(input), event)
+            : http.realtime.publish(event),
       unavailable() {},
       drainTimeoutMs: 5000,
+      ...(capacity && kind === "MATCH_CHANGED_V1" ? { concurrency: 4 } : {}),
     });
     closes.push(() => consumer.close());
     await consumer.ready();
   }
   startupStage = "Worker composition";
+  if (capacity) {
+    const url = new URL(process.env.TEST_AUTH_REDIS_URL);
+    capacityDeliveryQueue = new Queue("match-changed-v1", {
+      prefix: `hambazi:jobs:${namespace}`,
+      connection: {
+        host: url.hostname,
+        port: Number(url.port),
+        username: url.username,
+        password: url.password,
+        maxRetriesPerRequest: 0,
+      },
+    });
+    closes.push(() => capacityDeliveryQueue.close());
+  }
   await startWorker();
   const schedule = () => {
     if (stopping) return;
@@ -610,6 +915,26 @@ async function main() {
       });
   };
   schedule();
+  if (capacity) {
+    const recover = () => {
+      if (stopping) return;
+      recoveryWork = privateRooms
+        .recover({
+          schemaVersion: 1,
+          limit: 50,
+          ...(recoveryCursor ? { afterRoomId: recoveryCursor } : {}),
+        })
+        .then((result) => {
+          if (result.ok) recoveryCursor = result.nextRoomId;
+        })
+        .catch(() => {})
+        .finally(() => {
+          recoveryWork = undefined;
+          if (!stopping) recoveryTimer = setTimeout(recover, 1000);
+        });
+    };
+    recoveryTimer = setTimeout(recover, 1000);
+  }
   startupStage = "control listener";
   control = createServer((request, response) => {
     void controlRequest(request).then(
@@ -630,12 +955,16 @@ async function main() {
     control.once("error", reject);
     control.listen(4176, "127.0.0.1", resolve);
   });
+  if (capacity) process.send?.({ ready: true });
 }
 async function close() {
   return (closing ??= (async () => {
     stopping = true;
+    loopDelay?.disable();
     clearTimeout(timer);
+    clearTimeout(recoveryTimer);
     await active;
+    await recoveryWork;
     http?.stopAdmission();
     const failures = [];
     const attempt = async (stop) => {

@@ -72,6 +72,7 @@ export function createPeerResolver(trustedProxies: readonly string[]) {
 }
 
 // Fixed window anchored by Redis TTL, shared across nodes. Rejection never renews it.
+// Zero is a live window's final millisecond; only negative TTLs signal missing expiry/key.
 const script = `
 local value = redis.call('GET', KEYS[1])
 if not value then
@@ -80,7 +81,7 @@ if not value then
 end
 local ttl = redis.call('PTTL', KEYS[1])
 local count = tonumber(value)
-if ttl <= 0 or ttl > 60000 or not count or count < 1 or count ~= math.floor(count) then
+if ttl < 0 or ttl > 60000 or not count or count < 1 or count ~= math.floor(count) then
   return {-1, 0}
 end
 if count >= tonumber(ARGV[1]) then return {0, ttl} end
@@ -100,7 +101,15 @@ export function createRedisTransportAdmission(options: {
       return createClient({
         url: options.url.reveal(),
         disableOfflineQueue: true,
-        commandsQueueMaxLength: 256,
+        // Keep Redis work bounded by the configured admission budgets. A fixed
+        // 256-command queue otherwise rejects an explicitly admitted reconnect
+        // wave before its rate limits or connection budget can be evaluated.
+        commandsQueueMaxLength: Math.max(
+          256,
+          policy.data.maxHttpInFlight,
+          policy.data.maxEngineInFlight,
+          policy.data.maxPendingTotal,
+        ),
         socket: {
           connectTimeout: 2000,
           reconnectStrategy: (attempt) => Math.min(100 * 2 ** Math.min(attempt, 5), 2000),
@@ -135,13 +144,17 @@ export function createRedisTransportAdmission(options: {
         (allowed !== 0 && allowed !== 1) ||
         typeof ttl !== "number" ||
         !Number.isInteger(ttl) ||
-        ttl <= 0 ||
+        ttl < 0 ||
         ttl > 60000
       )
         throw new Error();
       return allowed === 1
         ? { allowed: true }
-        : { allowed: false, reason: "limited", retryAfterSeconds: Math.ceil(ttl / 1000) };
+        : {
+            allowed: false,
+            reason: "limited",
+            retryAfterSeconds: Math.max(1, Math.ceil(ttl / 1000)),
+          };
     } catch {
       return { allowed: false, reason: "unavailable" };
     }

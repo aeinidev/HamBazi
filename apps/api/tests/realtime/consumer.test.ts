@@ -1,6 +1,24 @@
 import { expect, it, vi } from "vitest";
-import { realtimeJobProcessor } from "../../src/realtime/index.js";
+import { realtimeJobProcessor, createRealtimeConsumer } from "../../src/realtime/index.js";
 const id = "11111111-1111-4111-8111-111111111111";
+it.each([0, -1, 101, NaN, Infinity, 1.5])(
+  "rejects invalid delivery concurrency before connecting: %s",
+  (concurrency) => {
+    expect(() =>
+      createRealtimeConsumer({
+        concurrency,
+        redisUrl: {
+          reveal: () => {
+            throw new Error("must not read credentials");
+          },
+        },
+        namespace: "test",
+        publish: async () => {},
+        unavailable() {},
+      }),
+    ).toThrow("Invalid realtime consumer concurrency");
+  },
+);
 const event = {
   schemaVersion: 1,
   eventId: id,

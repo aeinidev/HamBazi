@@ -84,6 +84,13 @@ real-gameplay fixture.
 - FINISHED/TERMINATED committed, close failed: recovery closes only the bound room.
   Worker/bot finishes that bypass the wrapper are repaired by the same scan.
 
+When the first owner projections already show STARTED/ACTIVE with matching frozen
+provenance, recovery returns without rereading both owners. No lifecycle write is
+needed in that case. Every invocation still validates the binding; terminal
+Matches continue through bound-room closure, including a finish observed on a
+later sweep. This removes duplicate reads from active-room recovery waves without
+changing the page bound, scheduling policy or lifecycle conflict handling.
+
 A fixed follow-up error may arrive after the original command committed. Retry
 with the same command/action ID; do not invent a new intent after an ambiguous
 outcome. Successful retries preserve the original owner acknowledgement. Recovery

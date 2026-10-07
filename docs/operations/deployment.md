@@ -163,8 +163,10 @@ staging provisioning/deployment/activation fully deferred.
 - Approved private DB/Redis/TLS credentials, Bot trust/peer policy, ingress/WSS/
   browser headers, Telegram/mobile WebView smoke and measured staging rollback.
 - Applicable 7C live composition/security/admin activation before enabling gameplay.
-- 17C remains **Pending**: production-like 2x approved peak, reconnect storm, at
-  least two-hour soak and durable reconciliation before final Phase 19 readiness.
+- 17C is **Completed for MVP with performance exceptions** under
+  [ADR-048](../adr/048-mvp-capacity-acceptance.md). Production-like 2x approved peak,
+  reconnect storm, at least two-hour soak and complete durable reconciliation
+  remain deferred validation; no production performance acceptance is claimed.
 
 Parent 18B cannot complete on these local results. No provider-specific staging
 provisioning/activation is authorized by a successful preparation file.

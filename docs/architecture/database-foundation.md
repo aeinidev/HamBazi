@@ -20,6 +20,16 @@ payloads in these callbacks. Errors are sanitized. Match-specific locking,
 expected-version comparison, idempotent response selection, and bounded retries
 remain Phase 11A, not claims made by this generic foundation.
 
+Phase 17CP corrects conflict normalization for the pinned Prisma 7 PostgreSQL
+adapter: statement-time `P2034` and a commit-time `DriverAdapterError` whose
+cause kind is exactly `TransactionWriteConflict` both become
+`DATABASE_TRANSACTION_CONFLICT`. This adapter kind represents an aborted
+serialization/deadlock transaction. Other adapter errors, unknown codes and
+connection failures stay `DATABASE_OPERATION_FAILED`; their commit outcome may
+be ambiguous. Classification never reads message text or exposes the original
+cause. Existing owning repositories retain responsibility for bounded retries
+and durable idempotency; the database package adds no automatic retry.
+
 | Owner       | Tables/delegates                                                                                                           |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
 | auth        | sessions, bot_update_receipts, bot_onboarding_flows                                                                        |
@@ -42,6 +52,11 @@ through public application ports. Phase 5B's [boundary checks](boundaries.md)
 enforce repository locations, literal owner selection, and explicit scalar query
 shapes; they do not replace mapping review or integration tests. Bot, Gateway, frontend, shared contracts, and game engines
 must not import this package.
+
+The Rooms transaction client additionally exposes only the fixed `lockRooms()`
+primitive from [ADR-047](../adr/047-room-transaction-ordering.md). It acquires the
+Room table transaction lock before snapshot reads; it cannot run through
+`execute()` or another owner. There is no arbitrary SQL or lock-name argument.
 
 ## Schema and migration workflow
 
@@ -200,6 +215,12 @@ nullable readiness/digest metadata and trusted lifecycle receipt actors.
 See [Match processing](match-processing.md) and [ADR-023](../adr/023-match-atomic-processing.md)
 for transaction ordering, compatibility and replay requirements. Future seat/state
 writers must serialize through the same Match lock.
+
+Phase 17CQ adds the Matches-only `lockMatchPresence(uuid)` transaction helper.
+It takes the same `FOR UPDATE` row lock and returns only the six required
+presence metadata fields in that statement, or null for a missing Match. This
+removes the subsequent metadata SELECT without exposing private game state,
+arbitrary SQL or selection options. Existing writers retain `lockMatch(uuid)`.
 
 ## Outbox delivery extension (Phase 11B)
 

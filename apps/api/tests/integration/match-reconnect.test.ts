@@ -18,6 +18,7 @@ import {
 } from "../../src/matches/index.js";
 import { createCoupMatchGame } from "../../src/composition/coup-match.js";
 import { rules } from "../fixtures/match-rules.js";
+import { createPresencePort } from "../../src/presence/index.js";
 if (
   process.env.TEST_DATABASE_CONFIRM !== "isolated-hambazi-test" ||
   process.env.TEST_AUTH_DATABASE_READY !== "foundation-completed" ||
@@ -153,6 +154,142 @@ async function connected() {
     },
   };
 }
+
+it("renews concurrent Presence heartbeats without views while retaining atomic lease and state guards", async () => {
+  let allowProjection = true;
+  const game = createCoupMatchGame(rules);
+  const resync = createMatchResyncPort(a, [
+    {
+      ...game,
+      project: (...args) => {
+        if (!allowProjection) throw new Error("Discarded heartbeat projection");
+        return game.project(...args);
+      },
+    },
+  ]);
+  const tables = [];
+  for (let i = 0; i < 8; i++) {
+    const f = await connected();
+    const presence = createPresencePort({ reconnect: f.firstReconnect, resync });
+    const sessions = Array.from({ length: 3 }, () =>
+      presence.open({ userId: f.ids[0]!, sessionExpiresAt: 20000 }),
+    );
+    await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
+    const before = await f.stored();
+    tables.push({
+      f,
+      sessions,
+      version: before.match.stateVersion,
+      seq: before.match.lastEventSeq,
+    });
+  }
+  allowProjection = false;
+  await expect(
+    a.forModule("matches").transaction((db) => db.lockMatchPresence(randomUUID())),
+  ).resolves.toBeNull();
+  const metadata = await Promise.all(
+    tables.map(({ f }) =>
+      b.forModule("matches").transaction((db) => db.lockMatchPresence(f.matchId)),
+    ),
+  );
+  for (const [index, row] of metadata.entries()) {
+    const { f, version, seq } = tables[index]!;
+    const stored = await f.stored();
+    expect(row).toEqual({
+      id: f.matchId,
+      status: "ACTIVE",
+      stateVersion: version,
+      lastEventSeq: seq,
+      reconnectPolicyJsonb: stored.match.reconnectPolicyJsonb,
+      startedAt: stored.match.startedAt,
+    });
+  }
+  for (let wave = 0; wave < 4; wave++) {
+    tables.forEach(({ f }) => f.at(2200 + wave * 200));
+    await Promise.all(
+      tables.flatMap(({ sessions }) => sessions.map((session) => session.heartbeat())),
+    );
+  }
+  for (const { f, sessions, version, seq } of tables) {
+    const after = await f.stored();
+    expect(after.match.stateVersion).toBe(version);
+    expect(after.match.lastEventSeq).toBe(seq);
+    const leases = await a
+      .forModule("matches")
+      .execute((db) =>
+        db.matchConnectionLease.findMany({ where: { matchId: f.matchId, userId: f.ids[0]! } }),
+      );
+    expect(leases.filter((lease) => lease.leaseUntil.getTime() === 3800)).toHaveLength(3);
+    // A missing/expired lease still fails closed through the same durable renewal.
+    f.at(4000);
+    await expect(sessions[0]!.heartbeat()).rejects.toThrow("Presence lease unavailable");
+    await Promise.all(sessions.map((session) => session.close()));
+  }
+});
+it("registers 32 pre-activation Presence subscriptions with one guard projection and atomic leases", async () => {
+  const game = createCoupMatchGame(rules);
+  let projected = 0;
+  const resync = createMatchResyncPort(a, [
+    {
+      ...game,
+      project: (...args) => {
+        projected++;
+        return game.project(...args);
+      },
+    },
+  ]);
+  const tables = [];
+  for (let i = 0; i < 8; i++) {
+    const f = await fixture();
+    const reconnect = createMatchReconnectPort(a, {
+      clock: { nowMs: () => 2100 },
+      policy: { schemaVersion: 1, leaseMs: 1000, graceMs: 2000, maxConnections: 4 },
+    });
+    const presence = createPresencePort({ reconnect, resync });
+    const sessions = Array.from({ length: 4 }, () =>
+      presence.open({ userId: f.ids[0]!, sessionExpiresAt: 20000 }),
+    );
+    await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
+    expect(
+      await a
+        .forModule("matches")
+        .execute((db) => db.matchConnectionLease.count({ where: { matchId: f.matchId } })),
+    ).toBe(0);
+    await f.active();
+    tables.push({ f, sessions, before: await f.stored() });
+  }
+  try {
+    projected = 0;
+    await Promise.all(
+      tables.flatMap(({ sessions }) => sessions.map((session) => session.heartbeat())),
+    );
+    expect(projected).toBe(32);
+    for (const { f, before } of tables) {
+      const after = await f.stored();
+      expect(after.match.stateVersion).toBe(before.match.stateVersion + 4);
+      expect(after.match.lastEventSeq).toBe(before.match.lastEventSeq + 4);
+      expect(
+        JSON.stringify(after.match.stateJsonb) === JSON.stringify(before.match.stateJsonb),
+      ).toBe(true);
+      const leases = await a
+        .forModule("matches")
+        .execute((db) => db.matchConnectionLease.findMany({ where: { matchId: f.matchId } }));
+      expect(leases).toHaveLength(4);
+      expect(
+        leases.every((lease) => lease.closedAt === null && lease.leaseUntil.getTime() === 3100),
+      ).toBe(true);
+      expect(new Set(leases.map((lease) => lease.connectionId)).size).toBe(4);
+    }
+    projected = 0;
+    await Promise.all(
+      tables.flatMap(({ sessions }) => sessions.map((session) => session.heartbeat())),
+    );
+    expect(projected).toBe(0);
+  } finally {
+    await Promise.all(tables.flatMap(({ sessions }) => sessions.map((session) => session.close())));
+  }
+});
+
 it("keeps a seat live across nodes until the last socket closes; duplicate close preserves grace", async () => {
   const f = await connected();
   const two = f.input();

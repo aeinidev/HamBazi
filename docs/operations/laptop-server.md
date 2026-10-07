@@ -4,7 +4,9 @@ The owner selected their own laptop for temporary development hosting.
 [ADR-044](../adr/044-temporary-laptop-server.md) records this limited scope.
 API, cleanup Worker, PostgreSQL, Redis and built Web are real services. Gameplay
 is not enabled: the existing API entrypoint does not compose its realtime ports,
-and secured game activation remains Phase 7C. Phase 17C remains Pending.
+and secured game activation remains Phase 7C. Phase 17C is complete for MVP with
+performance exceptions under [ADR-048](../adr/048-mvp-capacity-acceptance.md);
+that acceptance does not enable gameplay in this public laptop composition.
 
 ## Start, status and stop
 

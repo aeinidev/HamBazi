@@ -49,8 +49,12 @@ export function createRealtimeConsumer(options: {
   publish(event: unknown): Promise<void>;
   unavailable(): void;
   drainTimeoutMs?: number;
+  concurrency?: number;
 }) {
   const drainTimeoutMs = options.drainTimeoutMs ?? 15000;
+  const concurrency = options.concurrency ?? 1;
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 100)
+    throw new Error("Invalid realtime consumer concurrency");
   if (!Number.isInteger(drainTimeoutMs) || drainTimeoutMs < 1 || drainTimeoutMs > 120000)
     throw new Error("Invalid realtime consumer drain timeout");
   const url = new URL(options.redisUrl.reveal());
@@ -94,7 +98,7 @@ export function createRealtimeConsumer(options: {
         maxRetriesPerRequest: null,
         connectTimeout: 2000,
       },
-      concurrency: 1,
+      concurrency,
     },
   );
   worker.on("error", () => {

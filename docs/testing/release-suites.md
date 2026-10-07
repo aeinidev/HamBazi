@@ -7,8 +7,12 @@ WebView acceptance and Phase 17C capacity/soak measurements remain separate.
 Phase 18A's [CI runner](../operations/ci.md) invokes these suites sequentially
 with pinned real local service images and an isolated restore drill. It captures
 only scalar results and restores the normal Web policy before evidence. The
-owner deferred **17C as Pending** until production-like staging is available;
-that phase remains required before final release readiness.
+owner originally deferred 17C until production-like staging was available, then
+resumed local tooling. On 2026-10-07 [ADR-048](../adr/048-mvp-capacity-acceptance.md)
+accepted MVP completion with documented performance exceptions and mandatory
+correctness/security gates. Approved capacity/normal SLO targets remain future
+optimization/staging targets; final operating policy and staging evidence are open.
+These local suites do not authorize release or complete staging acceptance.
 
 ## Commands and isolation
 

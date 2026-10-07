@@ -347,6 +347,32 @@ export function createMatchProcessingRepository(
   }
   return {
     async process(actor, request, correlation = {}) {
+      if (request.kind === "AUTOMATION") {
+        const checkpoint = await scope.execute((db) =>
+          db.match.findUnique({
+            where: { id: request.matchId },
+            select: { id: true, status: true, stateVersion: true, lastEventSeq: true },
+          }),
+        );
+        if (!checkpoint) throw new MatchFault("NOT_FOUND");
+        if (actor !== null) throw new MatchFault("FORBIDDEN");
+        // Durable versions never decrease and terminal Matches never reactivate.
+        // An already obsolete worker job cannot mutate this Match. Do not make
+        // it wait for a writer lock or load discarded state/roster data. A job
+        // that might still apply goes through all existing locked guards below.
+        if (
+          checkpoint.status !== "ACTIVE" ||
+          checkpoint.stateVersion !== request.intent.expectedStateVersion
+        )
+          return {
+            schemaVersion: 1,
+            matchId: checkpoint.id,
+            actionId: request.actionId,
+            stateVersion: checkpoint.stateVersion,
+            lastEventSeq: checkpoint.lastEventSeq,
+            status: checkpoint.status as MatchStatus,
+          };
+      }
       for (let attempt = 0; ; attempt++) {
         let fault: MatchFault | undefined;
         try {

@@ -51,6 +51,12 @@ acknowledgements return `{ok:true,value:<snapshot>}`; catch-up returns
 `{ok:true,value:{schemaVersion:1,mode,events,snapshot}}`. A prior subscription is
 not required for these authorized reads.
 
+When a catch-up cursor equals the checkpoint read under the Match writer lock,
+Matches returns `mode:EVENTS` with an empty tail without querying events or
+receipts. It still reads the current roster, derives the recipient role and
+constructs a fresh pinned PlayerView/SpectatorView. This is not a cached response:
+concurrent commands and committed takeover remain visible through that lock.
+
 On each connection, subscribe then request catch-up (or an initial snapshot).
 Listen before subscribing. `match:event` contains a durable ID, seq, originating
 stateVersion and empty invalidation payload. `match:snapshot` contains the pinned
@@ -90,6 +96,94 @@ unhealthy and reconnects its clients; restart it before readmitting traffic.
 All gateway/realtime composition remains disabled in `startApi` pending the
 existing activation and production configuration gates.
 
+Phase 17CQ adds optional `concurrency` (integer 1–100, default 1) to the consumer
+factory. The disposable capacity composition explicitly uses four Match delivery
+workers after a one-worker queue reached approximately ten seconds of age while
+publication service p95 stayed at or below 200 ms. A withheld recipient ACK also
+reproduced blocking of unrelated tables in a real BullMQ/Socket regression.
+This setting overlaps independent delivery jobs; each socket retains its existing
+serialized work queue and acknowledged cursor. Match writes and projections keep
+their existing row locks, authorization, version checks and recipient views.
+Retry counts, deadlines and transport admission bounds are unchanged. Drain
+awaits all admitted parallel jobs before closing connections. Production
+composition remains opt-in; this local setting does not select provider sizing
+or final operational policy.
+
+Phase 17CQ also records each socket's **acknowledged** sequence, state version
+and role. An older or duplicate wakeup may omit projection and transmission only
+when that checkpoint covers both counters and live session and Match membership
+checks still succeed with the same role. Checks run inside the existing socket
+tail. A newer counter, changed role, missing ACK or reconnect uses the full
+locked, recipient-safe read and existing post-projection session check. Membership
+loss still removes the subscription and closes orphaned Presence transports. No
+cached view or shared private state is introduced; v1 delivery remains at least once.
+
+The gateway delivers and validates the covering pushed snapshot acknowledgement
+before emitting its content-free invalidations in ascending sequence order. The
+current Mini App otherwise requests another locked catch-up read as soon as each
+invalidation arrives, even though the covering view is already in flight. A
+32-socket regression reproduces 32 redundant reads before this ordering repair
+and none afterward. Snapshots still require live authority before transmission;
+missing/invalid acknowledgements fail delivery and leave the cursor unchanged.
+An invalidation without a covering snapshot still triggers normal gap recovery.
+
+Optional `execution.intentConcurrency` and `execution.disconnectConcurrency`
+pace work already admitted within the unchanged socket/global pending budgets.
+Compatible defaults use the existing pending and connection bounds. The capacity
+fixture selects four for each after observing 55 simultaneous Match transactions
+and pool admission waits beyond two seconds. Both 32-socket bursts reproduce
+unbounded execution before this repair and four concurrent operations afterward.
+Intents retain their arrival order in a separate per-socket chain. They enter the
+transport tail after an execution slot becomes available, with the same atomic
+tail recheck as maintenance; waiting intents cannot hold up recipient delivery.
+If intervening fanout is still active when a slot becomes available, the task
+waits without holding that slot and retains its original queue position. Once
+eligible, it precedes newer queued work in that scheduler; active operations are
+never preempted. This prevents repeated demotion under overlapping delivery.
+Live authentication, rate and owner guards run when execution starts. Disconnect
+cleanup joins that ordered chain after all admitted intents and retains its reserved admission and
+drain tracking. FIFO execution adds no new rejection code, retry, deadline or
+quota. These local composition settings do not approve production sizing.
+
+After admitted work settles, graceful gateway shutdown closes one transport and
+awaits its disconnect cleanup before closing the next. This avoids submitting
+hundreds of durable disconnect transactions to the connection pool simultaneously.
+The existing drain deadline, lease/grace guards and handling of lost processes are
+unchanged. Natural disconnect and measured reconnect storms retain their original
+behavior; this scheduling change applies to intentional shutdown.
+
+`close()` keeps its existing deadline failure. A deadline does not cancel the
+underlying drain: `settled()` lets the resource owner retain database/Redis
+dependencies until admitted work and durable disconnect cleanup finish. The
+release/capacity composition awaits settlement in `finally` before disposing
+these resources, retaining a timed-out close as a failed cleanup. A 32-transport
+held-cleanup regression covers a deadline expiring before resource disposal.
+
+Optional `presence.heartbeatConcurrency` bounds concurrent transport-pong
+reauthentication and renewal (integer 1 through the configured connection bound).
+Omitting it preserves the previous concurrency. The capacity fixture explicitly
+uses four to pace synchronized pong waves before database acquisition. One
+coalesced heartbeat remains pending per socket; queued work rechecks connection,
+drain state and the live durable session after acquiring its FIFO slot. Expired
+or revoked authority and rejected leases still close the transport. All admitted
+work remains in the existing socket tail and drain set. Engine.IO timing,
+session expiry timers, lease/grace guards and admission quotas are unchanged.
+Waiting maintenance reserves the same socket/global pending-work budget and is
+tracked for drain immediately. It waits for the current socket tail before
+acquiring a heartbeat slot, then rechecks the tail before appending. New socket
+work arriving during the slot wait causes it to release the slot and wait again.
+Busy socket tails therefore cannot reserve every heartbeat slot and starve idle
+leases; waiting heartbeat slots cannot block commands or recipient delivery.
+Once appended, renewal remains serialized with other socket operations;
+disconnect cleanup retains its separate reserved capacity.
+
+The tail map contains only unfinished work. Completed intervening fanout or
+maintenance does not send a waiting intent/heartbeat to the back of the global
+FIFO again. A real-socket regression holds one slot, completes fanout on the
+older waiting socket, then admits a newer socket; the older intent keeps its
+turn. The active-tail race still releases a slot before waiting for unfinished
+socket work, and per-socket mutation/disconnect ordering remains enforced.
+
 ## Phase 15A Chat delivery
 
 The optional Chat port implements `chat:send`, `chat:list` and the formerly
@@ -115,3 +209,10 @@ reads and Chat projection revalidate durable identity/expiry before delivery.
 See [policy and authorization matrix](../security/transport-admission.md) for
 configuration, failure semantics, evidence and production gates. No wire schema,
 business authority or production activation changes.
+
+The fixed Redis window accepts a nonnegative TTL, including zero at the expiry
+boundary. An exhausted live window remains rejected without renewing its TTL,
+with a positive retry hint. Missing expiry/key, malformed counters, unavailable
+Redis and out-of-bounds replies still fail closed; quotas and window length are
+unchanged. Concurrent near-expiry Redis and response-boundary regressions cover
+this Phase 17CQ correction.

@@ -100,6 +100,33 @@ it("atomically shares every quota across two nodes, canonicalizes subjects and n
   expect(await nodes[1]!.probe(AbortSignal.timeout(1000))).toBe(true);
 });
 
+it("keeps near-expiry admission available across concurrent Redis nodes without renewing live windows", async () => {
+  const { nodes, namespace } = await adapters({ socketEventsPerMinute: 2 });
+  const redis = createClient({ url: process.env.TEST_AUTH_REDIS_URL!, disableOfflineQueue: true });
+  redis.on("error", () => {});
+  await redis.connect();
+  cleanups.push(() => redis.destroy());
+  const hash = (input: string) => createHash("sha256").update(input).digest("hex");
+  const subjects = Array.from({ length: 64 }, () => randomUUID());
+  let unavailable = 0;
+  for (let wave = 0; wave < 32; wave++) {
+    await Promise.all(
+      subjects.map((subject) =>
+        redis.set(`hambazi:transport-rate:v1:${hash(namespace)}:event:${hash(subject)}`, "2", {
+          PX: 1,
+        }),
+      ),
+    );
+    const decisions = await Promise.all(
+      subjects.flatMap((subject) => nodes.map((node) => node.rate(subject, "event"))),
+    );
+    unavailable += decisions.filter(
+      (decision) => !decision.allowed && decision.reason === "unavailable",
+    ).length;
+  }
+  expect(unavailable).toBe(0);
+});
+
 it("shares HTTP pre-authentication admission across applications before parsing or authenticating", async () => {
   const { nodes, policy } = await adapters({ httpRequestsPerMinute: 3 });
   const instances: Awaited<ReturnType<typeof createHttpApplication>>[] = [];

@@ -108,10 +108,12 @@ Record the hosted run URL and actual required-check configuration when available
 
 Before final release readiness also require Phase 7C activation controls, 18B
 non-root scanned deployment images/migration/rollback/restore/HTTPS staging smoke,
-and **Phase 17C on that production-like staging environment**: 2x approved peak,
+and **deferred production-like capacity validation**: 2x approved peak,
 reconnect storm, at least two-hour soak and durable result reconciliation.
-Resolve the applicable owner decisions, including peak/provider/SLO/backup policy.
-17C is **Pending**, deferred by the owner, never waived by CI or packaging.
+Resolve the applicable owner decisions, including provider/final SLO/backup policy.
+17C is **Completed for MVP with performance exceptions** under
+[ADR-048](../adr/048-mvp-capacity-acceptance.md); neither CI nor packaging claims
+the production performance targets passed. OD-001's peaks are already approved.
 Phase 19 must hold release if any of these gates lacks accepted evidence.
 
 Phase 18B1 supplies only portable local image candidates and actual image

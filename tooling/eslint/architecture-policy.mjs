@@ -206,7 +206,9 @@ export function createPolicy(root, workspaces = readWorkspaces(root)) {
         return "Domain code cannot depend on application or infrastructure layers.";
       const sourceModule = moduleOf(from);
       const targetModule = moduleOf(to);
-      if (sourceModule !== targetModule || crossPackage) {
+      const publicComposition =
+        from.file === "src/index.ts" && to.file.startsWith("src/composition/") && !crossPackage;
+      if ((sourceModule !== targetModule || crossPackage) && !publicComposition) {
         if (
           !Object.hasOwn(apiDependencies, targetModule) ||
           (to.file !== `src/${targetModule}/index.ts` && to.file !== `src/${targetModule}/index.js`)
@@ -226,7 +228,14 @@ export function createPolicy(root, workspaces = readWorkspaces(root)) {
       )
         return "Public ports cannot import or re-export repository/persistence implementations.";
     }
-    if (to.workspace.id === "api" && from.workspace.id !== "api" && to.file === "src/index.ts")
+    const workerComposition =
+      from.workspace.id === "worker" && from.file.startsWith("src/composition/");
+    if (
+      to.workspace.id === "api" &&
+      from.workspace.id !== "api" &&
+      to.file === "src/index.ts" &&
+      !workerComposition
+    )
       return "Bot/Worker must use an explicitly exported application module port, not API startup.";
     if (from.workspace.id === "web" && to.workspace.id === "web") {
       const owner = (file) => file.match(/^src\/(features\/[^/]+|games\/[^/]+)\//)?.[1];

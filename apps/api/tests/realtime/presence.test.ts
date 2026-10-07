@@ -105,3 +105,72 @@ it("fails closed on an expired lease; disconnect still cleans up an uncertain co
   await f.session.close();
   expect(f.reconnect.disconnect).toHaveBeenCalledTimes(1);
 });
+
+it("renews a registered heartbeat wave through durable lease guards without constructing discarded views", async () => {
+  const f = fixture();
+  const sessions = Array.from({ length: 32 }, () =>
+    f.port.open({ userId: f.userId, sessionExpiresAt: 10000 }),
+  );
+  await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
+  f.resync.snapshot.mockClear();
+  for (let wave = 0; wave < 4; wave++)
+    await Promise.all(sessions.map((session) => session.heartbeat()));
+  expect(f.reconnect.renew).toHaveBeenCalledTimes(128);
+  expect(f.resync.snapshot).not.toHaveBeenCalled();
+  f.reconnect.renew.mockResolvedValueOnce(createErrorEnvelope("GAME_STATE_CONFLICT") as never);
+  await expect(sessions[0]!.heartbeat()).rejects.toThrow("Presence lease unavailable");
+  await sessions[0]!.close();
+  expect(f.reconnect.disconnect).toHaveBeenCalledTimes(1);
+  expect(f.reconnect.connect).toHaveBeenCalledTimes(32);
+});
+
+it("registers 32 pre-activation subscriptions without a discarded post-connect projection", async () => {
+  const f = fixture();
+  f.snapshot.status = "READY";
+  const sessions = Array.from({ length: 32 }, () =>
+    f.port.open({ userId: f.userId, sessionExpiresAt: 10000 }),
+  );
+  await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
+  expect(f.reconnect.connect).not.toHaveBeenCalled();
+  f.snapshot.status = "ACTIVE";
+  f.resync.snapshot.mockClear();
+  await Promise.all(sessions.map((session) => session.heartbeat()));
+  expect(f.reconnect.connect).toHaveBeenCalledTimes(32);
+  // Each registration keeps its initial fresh role/lifecycle/pinned-view guard.
+  // Heartbeats transmit no view and need no second projection after lease commit.
+  expect(f.resync.snapshot.mock.calls.length).toBe(32);
+  f.resync.snapshot.mockClear();
+  await Promise.all(sessions.map((session) => session.heartbeat()));
+  expect(f.reconnect.renew).toHaveBeenCalledTimes(32);
+  expect(f.resync.snapshot).not.toHaveBeenCalled();
+  await Promise.all(sessions.map((session) => session.close()));
+  expect(f.reconnect.disconnect).toHaveBeenCalledTimes(32);
+});
+
+it("still returns the fresh spectator view when takeover races initial subscription", async () => {
+  const f = fixture();
+  f.reconnect.connect.mockImplementation(async () => {
+    f.snapshot.role = "SPECTATOR";
+    return { ok: true, value: { ...f.value, role: "SPECTATOR" } };
+  });
+  expect(await f.session.subscribe(f.matchId)).toMatchObject({ role: "SPECTATOR" });
+  expect(f.resync.snapshot).toHaveBeenCalledTimes(2);
+});
+
+it.each(["projection", "lease"])(
+  "fails registration heartbeat closed on %s failure and retains uncertain-commit cleanup",
+  async (kind) => {
+    const f = fixture();
+    f.snapshot.status = "READY";
+    await f.session.subscribe(f.matchId);
+    f.snapshot.status = "ACTIVE";
+    if (kind === "projection")
+      f.resync.snapshot.mockResolvedValueOnce(createErrorEnvelope("INTERNAL_ERROR") as never);
+    else f.reconnect.connect.mockResolvedValueOnce(createErrorEnvelope("INTERNAL_ERROR") as never);
+    await expect(f.session.heartbeat()).rejects.toThrow(
+      kind === "projection" ? "Presence projection unavailable" : "Presence lease unavailable",
+    );
+    await f.session.close();
+    expect(f.reconnect.disconnect).toHaveBeenCalledTimes(kind === "lease" ? 1 : 0);
+  },
+);

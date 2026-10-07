@@ -23,8 +23,7 @@ export function createMatchReconnectRepository(
     request: ReconnectRequest,
     correlation: MatchCorrelation,
   ): Promise<ReconnectResult> {
-    await db.lockMatch(request.matchId);
-    const row = await db.match.findUnique({ where: { id: request.matchId } });
+    const row = await db.lockMatchPresence(request.matchId);
     const foundPlayer = await db.matchPlayer.findUnique({
       where: { matchId_userId: { matchId: request.matchId, userId: request.playerId } },
     });
@@ -147,6 +146,15 @@ export function createMatchReconnectRepository(
             ),
           },
         });
+        // Under the same Match lock, this owned, open lease was already live
+        // and is extended monotonically. Another live-lease lookup cannot
+        // change the outcome; renewal neither connects nor changes authority.
+        if (row.reconnectPolicyJsonb === null)
+          await db.match.update({
+            where: { id: row.id },
+            data: { reconnectPolicyJsonb: storedPolicy },
+          });
+        return result();
       }
     } else if (request.kind === "DISCONNECT") {
       const lease = await db.matchConnectionLease.findUnique({

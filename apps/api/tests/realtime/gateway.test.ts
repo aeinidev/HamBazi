@@ -709,6 +709,42 @@ function wakeup() {
     payload: { schemaVersion: 1, matchId, stateVersion: 2, lastEventSeq: 3, status: "ACTIVE" },
   };
 }
+it("delivers the covering snapshot before invalidations without triggering 32 redundant catch-up reads", async () => {
+  const d = dependencies(),
+    f = delivery(d);
+  const url = await start(d.ports);
+  const reads: Promise<unknown>[] = [];
+  let invalidations = 0;
+  for (let i = 0; i < 32; i++) {
+    const client = await connect(url);
+    await connected(client);
+    const sequence = createMatchSequence(matchId);
+    let syncing = false;
+    client.on("match:snapshot", (snapshot: typeof f.snapshot, respond: (seq: number) => void) => {
+      expect(sequence.snapshot(snapshot)).toBe("APPLY");
+      respond(snapshot.lastEventSeq);
+    });
+    client.on("match:event", (event: Parameters<typeof sequence.event>[0]) => {
+      invalidations++;
+      const action = sequence.event(event);
+      // The current Mini App and capacity client request a read on either result.
+      if (!syncing && (action === "GAP" || action === "ACCEPT")) {
+        syncing = true;
+        reads.push(
+          ack(client, "match:catchup", { schemaVersion: 1, matchId, afterSeq: 0 }).finally(() => {
+            syncing = false;
+          }),
+        );
+      }
+    });
+    await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  }
+  await gateway!.publish(wakeup());
+  await vi.waitFor(() => expect(invalidations).toBe(96));
+  await Promise.all(reads);
+  expect(reads).toHaveLength(0);
+  expect(f.catchup).toHaveBeenCalledTimes(32);
+});
 it("delivers ordered events and acknowledged snapshots independently to multiple sockets; duplicates stay harmless", async () => {
   const d = dependencies();
   const f = delivery(d);
@@ -726,12 +762,19 @@ it("delivers ordered events and acknowledged snapshots independently to multiple
     await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
   }
   await gateway!.publish(wakeup());
+  await Promise.all(Array.from({ length: 32 }, () => gateway!.publish(wakeup())));
+  await vi.waitFor(() =>
+    expect(seen).toEqual([
+      [1, 2, 3],
+      [1, 2, 3],
+    ]),
+  );
+  expect(f.catchup).toHaveBeenCalledTimes(2);
+  // A covered wakeup still checks live session validity, without another projection.
+  d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED"));
   await gateway!.publish(wakeup());
-  expect(seen).toEqual([
-    [1, 2, 3, 1, 2, 3],
-    [1, 2, 3, 1, 2, 3],
-  ]);
-  expect(f.catchup).toHaveBeenCalledWith(userId, { schemaVersion: 1, matchId, afterSeq: 3 });
+  expect(f.catchup).toHaveBeenCalledTimes(2);
+  await vi.waitFor(() => expect(clients.every((client) => !client.connected)).toBe(true));
 });
 it("fails delivery closed on session revocation", async () => {
   const d = dependencies();
@@ -746,6 +789,57 @@ it("fails delivery closed on session revocation", async () => {
   await gateway!.publish(wakeup());
   expect(f.catchup).not.toHaveBeenCalled();
   expect(received).not.toHaveBeenCalled();
+});
+
+it("never suppresses a newer state or sequence just because the other checkpoint is covered", async () => {
+  const d = dependencies(),
+    f = delivery(d);
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  client.on("match:snapshot", (snapshot: typeof f.snapshot, respond: (seq: number) => void) =>
+    respond(snapshot.lastEventSeq),
+  );
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  await gateway!.publish(wakeup());
+  f.snapshot.stateVersion = 3;
+  await gateway!.publish({ ...wakeup(), payload: { ...wakeup().payload, stateVersion: 3 } });
+  f.snapshot.lastEventSeq = 4;
+  await gateway!.publish({
+    ...wakeup(),
+    payload: { ...wakeup().payload, stateVersion: 3, lastEventSeq: 4 },
+  });
+  expect(f.catchup).toHaveBeenCalledTimes(3);
+});
+
+it("reprojects a changed membership role even when an old wakeup checkpoint is covered", async () => {
+  const d = dependencies(),
+    f = delivery(d);
+  const client = await connect(await start(d.ports));
+  await connected(client);
+  const roles: string[] = [];
+  client.on("match:snapshot", (snapshot: typeof f.snapshot, respond: (seq: number) => void) => {
+    roles.push(snapshot.role);
+    respond(snapshot.lastEventSeq);
+  });
+  await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
+  await gateway!.publish(wakeup());
+  d.ports.membership = {
+    authorize: async () => ({ ok: true, value: { schemaVersion: 1, matchId, role: "SPECTATOR" } }),
+  };
+  d.ports.delivery!.resync = {
+    ...d.ports.delivery!.resync,
+    catchup: async () => ({
+      ok: true,
+      value: {
+        schemaVersion: 1,
+        mode: "SNAPSHOT",
+        events: [],
+        snapshot: { ...f.snapshot, stateVersion: 3, role: "SPECTATOR", view: { public: true } },
+      },
+    }),
+  };
+  await gateway!.publish(wakeup());
+  expect(roles).toEqual(["PLAYER", "SPECTATOR"]);
 });
 
 it("withholds a snapshot acknowledgement after revocation during projection", async () => {
@@ -797,6 +891,7 @@ it("closes orphaned Presence subscriptions after Match membership loss", async (
     ...d.ports.delivery!.resync,
     catchup: async () => createErrorEnvelope("NOT_FOUND"),
   };
+  d.ports.membership = { authorize: async () => createErrorEnvelope("NOT_FOUND") };
   await gateway!.publish(wakeup());
   await vi.waitFor(() => expect(close).toHaveBeenCalledTimes(1));
   await gateway!.close();
@@ -874,7 +969,15 @@ it("retries publication after missing snapshot acknowledgement and rejects raw i
   const client = await connect(await start(d.ports));
   await connected(client);
   await ack(client, "match:subscribe", { schemaVersion: 1, matchId });
-  await expect(gateway!.publish(wakeup())).rejects.toThrow("Realtime publication failed");
+  const invalidations = vi.fn();
+  client.on("match:event", invalidations);
+  const publication = gateway!.publish(wakeup());
+  const failedPublication = expect(publication).rejects.toThrow("Realtime publication failed");
+  await vi.waitFor(() => expect(gateway!.workSnapshot().phases["fanout/ack"]?.active).toBe(1));
+  await failedPublication;
+  expect(gateway!.workSnapshot().phases["fanout/ack"]).toBeUndefined();
+  expect(gateway!.workSnapshot().completedPhases["fanout/ack"]?.count).toBe(1);
+  expect(invalidations).not.toHaveBeenCalled();
   await expect(
     gateway!.publish({ ...wakeup(), type: "GAME_ENGINE_EVENT", payload: { deck: "private" } }),
   ).rejects.toThrow("Invalid realtime wakeup");
@@ -915,6 +1018,473 @@ it("drains an in-flight command, rejects new connections and closes idempotently
   await close;
   await gateway!.close();
 });
+
+it("drains a shutdown burst without starting every durable disconnect concurrently", async () => {
+  const d = dependencies();
+  let active = 0,
+    maximumActive = 0,
+    completed = 0;
+  d.ports.presence = {
+    port: {
+      open: () => ({
+        subscribe: vi.fn(),
+        heartbeat: vi.fn(),
+        async close() {
+          active++;
+          maximumActive = Math.max(maximumActive, active);
+          await new Promise<void>((resolve) => setImmediate(resolve));
+          active--;
+          completed++;
+        },
+      }),
+    },
+    heartbeatIntervalMs: 1000,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+  };
+  delivery(d);
+  const url = await start(d.ports);
+  for (let i = 0; i < 32; i++) await connected(await connect(url));
+  await gateway!.close();
+  expect(completed).toBe(32);
+  expect(active).toBe(0);
+  expect(maximumActive).toBe(1);
+});
+
+it("keeps durable cleanup owned after its drain deadline rejects", async () => {
+  const d = dependencies();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  let completed = 0,
+    databaseClosed = false;
+  const usedClosedDatabase = vi.fn();
+  d.ports.presence = {
+    port: {
+      open: () => ({
+        subscribe: vi.fn(),
+        heartbeat: vi.fn(),
+        async close() {
+          await gate;
+          if (databaseClosed) usedClosedDatabase();
+          completed++;
+        },
+      }),
+    },
+    heartbeatIntervalMs: 10000,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 30000,
+  };
+  delivery(d);
+  const url = await start({ ...d.ports, drainTimeoutMs: 20 });
+  for (let i = 0; i < 32; i++) await connected(await connect(url));
+  const draining = gateway!;
+  try {
+    await expect(draining.close()).rejects.toThrow("Operation deadline exceeded");
+    expect(completed).toBe(0);
+    expect(draining.ready()).toBe(false);
+    let settled = false;
+    const ownership = draining.settled().then(() => {
+      settled = true;
+      databaseClosed = true;
+    });
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(settled).toBe(false);
+    release();
+    await ownership;
+    expect(completed).toBe(32);
+    expect(usedClosedDatabase).not.toHaveBeenCalled();
+    expect(draining.workSnapshot().pending).toBe(0);
+    await expect(draining.close()).rejects.toThrow("Operation deadline exceeded");
+  } finally {
+    release();
+    // A recorded deadline remains an error on close; it must not prevent
+    // the fixture from retaining resources until the owned work settles.
+    if ("settled" in draining) await draining.settled();
+    gateway = undefined;
+  }
+});
+
+it("bounds a 32-socket command burst without changing admitted outcomes", async () => {
+  const d = dependencies();
+  const result = await d.command();
+  d.command.mockClear();
+  let active = 0,
+    maximumActive = 0,
+    release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  d.command.mockImplementation(async () => {
+    active++;
+    maximumActive = Math.max(maximumActive, active);
+    try {
+      await gate;
+      return result;
+    } finally {
+      active--;
+    }
+  });
+  Object.assign(d.ports, { execution: { intentConcurrency: 4 } });
+  const url = await start(d.ports);
+  const commands: Promise<unknown>[] = [];
+  try {
+    for (let i = 0; i < 32; i++) await connected(await connect(url));
+    for (const client of clients)
+      commands.push(
+        client.timeout(2000).emitWithAck("game:command", {
+          schemaVersion: 1,
+          matchId,
+          actionId,
+          expectedVersion: 1,
+          command: { type: "DECLARE_INCOME" },
+        }),
+      );
+    await vi.waitFor(() => expect(d.command.mock.calls.length).toBeGreaterThanOrEqual(4));
+    expect(maximumActive).toBe(4);
+    await vi.waitFor(() =>
+      expect(gateway!.workSnapshot().intents).toEqual({ active: 4, waiting: 28 }),
+    );
+    const work = gateway!.workSnapshot();
+    expect(work.phases["command/owner"]?.active).toBe(4);
+    for (const privateValue of [userId, matchId, actionId, "DECLARE_INCOME", "valid"])
+      expect(JSON.stringify(work)).not.toContain(privateValue);
+  } finally {
+    release();
+    expect(await Promise.all(commands)).toEqual(Array(32).fill(result));
+  }
+  expect(maximumActive).toBe(4);
+});
+
+it("delivers to a socket whose admitted intents await other sockets' execution slots", async () => {
+  const d = dependencies(),
+    f = delivery(d),
+    result = await d.command();
+  d.command.mockClear();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  d.command.mockImplementation(async () => {
+    await gate;
+    return result;
+  });
+  Object.assign(d.ports, { execution: { intentConcurrency: 4 } });
+  const url = await start(d.ports);
+  const tasks: Promise<unknown>[] = [];
+  let publication: Promise<void> | undefined;
+  try {
+    for (let i = 0; i < 5; i++) await connected(await connect(url));
+    const recipient = clients.at(-1)!;
+    const received = vi.fn((_view: unknown, respond: (seq: number) => void) =>
+      respond(f.snapshot.lastEventSeq),
+    );
+    recipient.on("match:snapshot", received);
+    await ack(recipient, "match:subscribe", { schemaVersion: 1, matchId });
+    const command = {
+      schemaVersion: 1,
+      matchId,
+      actionId,
+      expectedVersion: 1,
+      command: { type: "DECLARE_INCOME" },
+    };
+    for (const client of clients.slice(0, 4)) tasks.push(ack(client, "game:command", command));
+    await vi.waitFor(() => expect(d.command).toHaveBeenCalledTimes(4));
+    tasks.push(ack(recipient, "game:command", command));
+    await vi.waitFor(() => expect(gateway!.workSnapshot().intents.waiting).toBe(1));
+    expect(gateway!.workSnapshot().phases["command/slot"]?.active).toBe(1);
+    publication = gateway!.publish(wakeup());
+    await vi.waitFor(() => expect(received).toHaveBeenCalledTimes(1), { timeout: 300 });
+    expect(d.command).toHaveBeenCalledTimes(4);
+    await publication;
+  } finally {
+    release();
+    await Promise.allSettled([...tasks, publication]);
+  }
+  expect(d.command).toHaveBeenCalledTimes(5);
+});
+
+it("preserves queued intent order across fanout and closes its lease after all admitted commands", async () => {
+  const d = dependencies(),
+    f = delivery(d),
+    result = await d.command();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  const order: string[] = [];
+  const command = vi.fn(async (_actor: unknown, input: unknown) => {
+    const id = (input as { actionId: string }).actionId;
+    order.push(id);
+    if (id === otherId) await gate;
+    return { ...result, value: { ...result.value, actionId: id } };
+  });
+  let opened = 0;
+  d.ports.matches = { ...d.ports.matches, command };
+  d.ports.execution = { intentConcurrency: 1 };
+  d.ports.presence = {
+    port: {
+      open: () => {
+        const number = ++opened;
+        return {
+          subscribe: async () => f.snapshot,
+          heartbeat: vi.fn(),
+          close: async () => {
+            order.push(`close-${number}`);
+          },
+        };
+      },
+    },
+    heartbeatIntervalMs: 10000,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 30000,
+  };
+  const url = await start(d.ports);
+  const blocker = await connect(url);
+  await connected(blocker);
+  const recipient = await connect(url);
+  await connected(recipient);
+  recipient.on("match:snapshot", (_view: unknown, respond: (seq: number) => void) => respond(3));
+  await ack(recipient, "match:subscribe", { schemaVersion: 1, matchId });
+  const input = {
+    schemaVersion: 1,
+    matchId,
+    expectedVersion: 1,
+    command: { type: "DECLARE_INCOME" },
+  };
+  const blocked = ack(blocker, "game:command", { ...input, actionId: otherId });
+  try {
+    await vi.waitFor(() => expect(command).toHaveBeenCalledTimes(1));
+    for (const id of [actionId, ticketId, roomId])
+      recipient.emit("game:command", { ...input, actionId: id }, () => {});
+    await vi.waitFor(() => expect(gateway!.workSnapshot().pending).toBe(4));
+    expect(gateway!.workSnapshot().phases["command/slot"]?.active).toBe(1);
+    expect(gateway!.workSnapshot().phases["command/order"]?.active).toBe(2);
+    await gateway!.publish(wakeup());
+    expect(order).toEqual([otherId]);
+    recipient.disconnect();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(order).toEqual([otherId]);
+    release();
+    await blocked;
+    await vi.waitFor(() => expect(order).toEqual([otherId, actionId, ticketId, roomId, "close-2"]));
+  } finally {
+    release();
+    await blocked;
+  }
+});
+
+it("does not requeue an older intent behind newer sockets after its intervening fanout completed", async () => {
+  const d = dependencies(),
+    f = delivery(d),
+    result = await d.command();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  const order: string[] = [];
+  d.ports.matches = {
+    ...d.ports.matches,
+    command: async (_actor, input) => {
+      const id = (input as { actionId: string }).actionId;
+      order.push(id);
+      if (id === otherId) await gate;
+      return { ...result, value: { ...result.value, actionId: id } };
+    },
+  };
+  d.ports.execution = { intentConcurrency: 1 };
+  const url = await start(d.ports);
+  for (let i = 0; i < 3; i++) await connected(await connect(url));
+  const [blocker, older, newer] = clients as [ClientSocket, ClientSocket, ClientSocket];
+  older.on("match:snapshot", (_view: unknown, respond: (seq: number) => void) => respond(3));
+  await ack(older, "match:subscribe", { schemaVersion: 1, matchId });
+  const input = {
+    schemaVersion: 1,
+    matchId,
+    expectedVersion: 1,
+    command: { type: "DECLARE_INCOME" },
+  };
+  const tasks = [ack(blocker, "game:command", { ...input, actionId: otherId })];
+  try {
+    await vi.waitFor(() => expect(order).toEqual([otherId]));
+    tasks.push(ack(older, "game:command", { ...input, actionId }));
+    await vi.waitFor(() => expect(gateway!.workSnapshot().intents.waiting).toBe(1));
+    await gateway!.publish(wakeup());
+    tasks.push(ack(newer, "game:command", { ...input, actionId: ticketId }));
+    await vi.waitFor(() => expect(gateway!.workSnapshot().intents.waiting).toBe(2));
+    release();
+    await Promise.all(tasks);
+    expect(order).toEqual([otherId, actionId, ticketId]);
+  } finally {
+    release();
+    await Promise.allSettled(tasks);
+  }
+  expect(f.catchup).toHaveBeenCalledTimes(1);
+});
+
+it.each([1, 29])(
+  "preserves an older intent's queue position while its active fanout lets %s newer sockets proceed",
+  async (newerCount) => {
+    const d = dependencies(),
+      f = delivery(d),
+      result = await d.command();
+    const view = await f.catchup();
+    let releaseBlocker!: () => void, releaseNewer!: () => void, releaseProjection!: () => void;
+    const blockerGate = new Promise<void>((resolve) => (releaseBlocker = resolve));
+    const newerGate = new Promise<void>((resolve) => (releaseNewer = resolve));
+    const projectionGate = new Promise<void>((resolve) => (releaseProjection = resolve));
+    f.catchup.mockClear();
+    f.catchup.mockImplementation(async () => {
+      await projectionGate;
+      return view;
+    });
+    const order: string[] = [];
+    const lastIds = Array.from(
+      { length: newerCount },
+      (_, i) => `88888888-8888-4888-8888-${String(i + 1).padStart(12, "0")}`,
+    );
+    d.ports.matches = {
+      ...d.ports.matches,
+      command: async (_actor, input) => {
+        const id = (input as { actionId: string }).actionId;
+        order.push(id);
+        if (id === otherId) await blockerGate;
+        if (id === ticketId) await newerGate;
+        return { ...result, value: { ...result.value, actionId: id } };
+      },
+    };
+    d.ports.execution = { intentConcurrency: 1 };
+    const url = await start(d.ports);
+    for (let i = 0; i < 3 + newerCount; i++) await connected(await connect(url));
+    const [blocker, older, newer] = clients as [ClientSocket, ClientSocket, ClientSocket];
+    older.on("match:snapshot", (_view: unknown, respond: (seq: number) => void) => respond(3));
+    await ack(older, "match:subscribe", { schemaVersion: 1, matchId });
+    const input = {
+      schemaVersion: 1,
+      matchId,
+      expectedVersion: 1,
+      command: { type: "DECLARE_INCOME" },
+    };
+    const tasks = [ack(blocker, "game:command", { ...input, actionId: otherId })];
+    let publication: Promise<void> | undefined;
+    try {
+      await vi.waitFor(() => expect(order).toEqual([otherId]));
+      tasks.push(ack(older, "game:command", { ...input, actionId }));
+      await vi.waitFor(() => expect(gateway!.workSnapshot().intents.waiting).toBe(1));
+      publication = gateway!.publish(wakeup());
+      await vi.waitFor(() => expect(f.catchup).toHaveBeenCalledTimes(1));
+      tasks.push(ack(newer, "game:command", { ...input, actionId: ticketId }));
+      for (const [index, lastId] of lastIds.entries())
+        tasks.push(ack(clients[index + 3]!, "game:command", { ...input, actionId: lastId }));
+      await vi.waitFor(() => expect(gateway!.workSnapshot().intents.waiting).toBe(2 + newerCount));
+      releaseBlocker();
+      await vi.waitFor(() => expect(order).toEqual([otherId, ticketId]));
+      releaseProjection();
+      await publication;
+      releaseNewer();
+      await Promise.all(tasks);
+      expect(order).toEqual([otherId, ticketId, actionId, ...lastIds]);
+    } finally {
+      releaseBlocker();
+      releaseProjection();
+      releaseNewer();
+      await Promise.allSettled([...tasks, ...(publication ? [publication] : [])]);
+    }
+  },
+);
+
+it("bounds natural disconnect cleanup while preserving all 32 lease closures", async () => {
+  const d = dependencies();
+  let active = 0,
+    maximumActive = 0,
+    completed = 0,
+    release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  Object.assign(d.ports, { execution: { disconnectConcurrency: 4 } });
+  d.ports.presence = {
+    port: {
+      open: () => ({
+        subscribe: vi.fn(),
+        heartbeat: vi.fn(),
+        async close() {
+          active++;
+          maximumActive = Math.max(maximumActive, active);
+          try {
+            await gate;
+            completed++;
+          } finally {
+            active--;
+          }
+        },
+      }),
+    },
+    heartbeatIntervalMs: 10000,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 30000,
+  };
+  delivery(d);
+  const url = await start(d.ports);
+  try {
+    for (let i = 0; i < 32; i++) await connected(await connect(url));
+    for (const client of clients) client.disconnect();
+    await vi.waitFor(() => expect(active).toBeGreaterThanOrEqual(4));
+    expect(maximumActive).toBe(4);
+  } finally {
+    release();
+    await gateway!.close();
+  }
+  expect(completed).toBe(32);
+  expect(maximumActive).toBe(4);
+});
+
+it("rechecks live authentication before a waiting intent can reach its owner port", async () => {
+  const d = dependencies(),
+    result = await d.command();
+  d.command.mockClear();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  d.command.mockImplementation(async () => {
+    await gate;
+    return result;
+  });
+  Object.assign(d.ports, { execution: { intentConcurrency: 1 } });
+  const url = await start(d.ports);
+  const first = await connect(url),
+    second = await connect(url);
+  await Promise.all([connected(first), connected(second)]);
+  const input = {
+    schemaVersion: 1,
+    matchId,
+    actionId,
+    expectedVersion: 1,
+    command: { type: "DECLARE_INCOME" },
+  };
+  const accepted = first.timeout(2000).emitWithAck("game:command", input);
+  let waiting: Promise<unknown> | undefined;
+  try {
+    await vi.waitFor(() => expect(d.command).toHaveBeenCalledTimes(1));
+    waiting = second.timeout(2000).emitWithAck("game:command", input);
+    d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED"));
+  } finally {
+    release();
+    expect(await accepted).toEqual(result);
+  }
+  expect(await waiting).toMatchObject({ ok: false, error: { code: "UNAUTHENTICATED" } });
+  expect(d.command).toHaveBeenCalledTimes(1);
+});
+
+it.each(["intentConcurrency", "disconnectConcurrency"] as const)(
+  "rejects invalid %s before starting a transport",
+  (name) => {
+    for (const value of [0, -1, 1.5, NaN, Infinity, 1000000]) {
+      const d = dependencies();
+      Object.assign(d.ports, { execution: { [name]: value } });
+      const server = createServer();
+      expect(() => createRealtimeGateway(server, d.ports)).toThrow(
+        "Invalid realtime execution concurrency",
+      );
+      expect(d.authenticate).not.toHaveBeenCalled();
+      server.close();
+    }
+  },
+);
 it("handles gaps, stale snapshots, foreign matches and initial version zero in the client cursor", () => {
   const cursor = createMatchSequence(matchId);
   const snap = { schemaVersion: 1, matchId, stateVersion: 0, lastEventSeq: 0 };
@@ -1026,6 +1596,172 @@ it("renews only after authenticated transport pongs and drains disconnect cleanu
   expect(close).toHaveBeenCalledTimes(1);
 });
 
+it("bounds a synchronized transport heartbeat wave while unrelated admitted commands continue", async () => {
+  const d = dependencies();
+  let active = 0,
+    maximumActive = 0,
+    completed = 0;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const heartbeat = vi.fn(async () => {
+    active++;
+    maximumActive = Math.max(maximumActive, active);
+    await gate;
+    active--;
+    completed++;
+  });
+  d.ports.presence = {
+    port: { open: () => ({ heartbeat, close: vi.fn(), subscribe: vi.fn() }) },
+    heartbeatIntervalMs: 100,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+  };
+  Object.assign(d.ports.presence, { heartbeatConcurrency: 4 });
+  delivery(d);
+  const url = await start(d.ports);
+  try {
+    for (let i = 0; i < 32; i++) await connected(await connect(url));
+    await vi.waitFor(() => expect(active).toBeGreaterThanOrEqual(4), { interval: 10 });
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    const work = gateway!.workSnapshot();
+    expect(work.phases["heartbeat/renew"]?.active).toBe(4);
+    expect(work.phases["heartbeat/queue"]?.active).toBe(28);
+    expect(work.phases["heartbeat/renew"]?.maximumAgeMs).toBeGreaterThan(0);
+    for (const privateValue of [userId, matchId, "valid"])
+      expect(JSON.stringify(work)).not.toContain(privateValue);
+    expect(maximumActive).toBe(4);
+    const another = clients.at(-1)!; // Its heartbeat is waiting for a global slot.
+    expect(
+      await another.timeout(1000).emitWithAck("game:command", {
+        schemaVersion: 1,
+        actionId,
+        matchId,
+        expectedVersion: 0,
+        command: { type: "DECLARE_INCOME" },
+      }),
+    ).toMatchObject({ ok: true });
+    expect(d.command).toHaveBeenCalledTimes(1);
+  } finally {
+    release();
+  }
+  await vi.waitFor(() => expect(completed).toBeGreaterThanOrEqual(32), { interval: 10 });
+  expect(maximumActive).toBe(4);
+});
+
+it("keeps idle leases renewing when busy socket tails would occupy every heartbeat slot", async () => {
+  const d = dependencies(),
+    result = await d.command();
+  d.command.mockClear();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  d.command.mockImplementation(async () => {
+    await gate;
+    return result;
+  });
+  const renewals: ReturnType<typeof vi.fn>[] = [];
+  delivery(d);
+  Object.assign(d.ports, { execution: { intentConcurrency: 4 } });
+  d.ports.presence = {
+    port: {
+      open: () => {
+        const heartbeat = vi.fn(async () => {});
+        renewals.push(heartbeat);
+        return { heartbeat, close: vi.fn(), subscribe: vi.fn() };
+      },
+    },
+    heartbeatIntervalMs: 500,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+    heartbeatConcurrency: 4,
+  };
+  const url = await start(d.ports);
+  const commands: Promise<unknown>[] = [];
+  try {
+    for (let i = 0; i < 32; i++) await connected(await connect(url));
+    for (const client of clients.slice(0, 4))
+      commands.push(
+        ack(client, "game:command", {
+          schemaVersion: 1,
+          matchId,
+          actionId,
+          expectedVersion: 1,
+          command: { type: "DECLARE_INCOME" },
+        }),
+      );
+    await vi.waitFor(() => expect(d.command).toHaveBeenCalledTimes(4));
+    await vi.waitFor(
+      () => expect(renewals.slice(4).every((renew) => renew.mock.calls.length > 0)).toBe(true),
+      { timeout: 2000, interval: 10 },
+    );
+    expect(renewals.slice(0, 4).every((renew) => renew.mock.calls.length === 0)).toBe(true);
+  } finally {
+    release();
+    expect(await Promise.all(commands)).toEqual(Array(4).fill(result));
+  }
+});
+
+it("releases a heartbeat slot when its socket acquired new work while awaiting that slot", async () => {
+  const d = dependencies(),
+    result = await d.command();
+  d.command.mockClear();
+  let releaseHeartbeat!: () => void, releaseCommand!: () => void;
+  const heartbeatGate = new Promise<void>((resolve) => {
+    releaseHeartbeat = resolve;
+  });
+  const commandGate = new Promise<void>((resolve) => {
+    releaseCommand = resolve;
+  });
+  d.command.mockImplementation(async () => {
+    await commandGate;
+    return result;
+  });
+  const renewals: ReturnType<typeof vi.fn>[] = [];
+  delivery(d);
+  d.ports.presence = {
+    port: {
+      open: () => {
+        const index = renewals.length;
+        const heartbeat = vi.fn(async () => {
+          if (index === 0) await heartbeatGate;
+        });
+        renewals.push(heartbeat);
+        return { heartbeat, close: vi.fn(), subscribe: vi.fn() };
+      },
+    },
+    heartbeatIntervalMs: 100,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+    heartbeatConcurrency: 1,
+  };
+  const url = await start(d.ports);
+  let command: Promise<unknown> | undefined;
+  try {
+    for (let i = 0; i < 3; i++) await connected(await connect(url));
+    await vi.waitFor(() =>
+      expect(gateway!.workSnapshot().heartbeats).toEqual({ active: 1, waiting: 2 }),
+    );
+    command = ack(clients[1]!, "game:command", {
+      schemaVersion: 1,
+      matchId,
+      actionId,
+      expectedVersion: 1,
+      command: { type: "DECLARE_INCOME" },
+    });
+    await vi.waitFor(() => expect(d.command).toHaveBeenCalledTimes(1));
+    releaseHeartbeat();
+    await vi.waitFor(() => expect(renewals[2]).toHaveBeenCalled(), { interval: 10 });
+    expect(renewals[1]).not.toHaveBeenCalled();
+  } finally {
+    releaseHeartbeat();
+    releaseCommand();
+    if (command) expect(await command).toEqual(result);
+  }
+});
+
 it("rejects heartbeat settings that cannot keep a lease alive", async () => {
   const d = dependencies();
   d.ports.presence = {
@@ -1039,3 +1775,109 @@ it("rejects heartbeat settings that cannot keep a lease alive", async () => {
     "Invalid presence heartbeat configuration",
   );
 });
+
+it("reauthenticates queued heartbeats after acquiring a slot and closes revoked transports", async () => {
+  const d = dependencies();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const heartbeat = vi.fn(() => gate);
+  const close = vi.fn();
+  delivery(d);
+  d.ports.presence = {
+    port: { open: () => ({ heartbeat, close, subscribe: vi.fn() }) },
+    heartbeatIntervalMs: 100,
+    heartbeatTimeoutMs: 1000,
+    leaseMs: 5000,
+    heartbeatConcurrency: 1,
+  };
+  const url = await start(d.ports);
+  const a = await connect(url);
+  await connected(a);
+  const b = await connect(url);
+  await connected(b);
+  try {
+    await vi.waitFor(() => expect(heartbeat).toHaveBeenCalledTimes(1), { interval: 10 });
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(heartbeat).toHaveBeenCalledTimes(1); // Coalesced pongs do not create another queued lease renewal.
+    d.authenticate.mockResolvedValue(createErrorEnvelope("UNAUTHENTICATED") as never);
+  } finally {
+    release();
+  }
+  await vi.waitFor(() => expect(a.connected || b.connected).toBe(false), { interval: 10 });
+  await gateway!.close();
+  expect(heartbeat).toHaveBeenCalledTimes(1);
+  expect(close).toHaveBeenCalledTimes(2);
+});
+
+it.each([0, -1, 1.5, NaN, Infinity, 101])(
+  "rejects invalid heartbeat concurrency %s before opening transports",
+  (heartbeatConcurrency) => {
+    const d = dependencies();
+    delivery(d);
+    d.ports.presence = {
+      port: { open: vi.fn() },
+      heartbeatIntervalMs: 100,
+      heartbeatTimeoutMs: 100,
+      leaseMs: 1000,
+      heartbeatConcurrency,
+    };
+    server = createServer();
+    expect(() => createRealtimeGateway(server!, d.ports)).toThrow(
+      "Invalid presence heartbeat concurrency",
+    );
+  },
+);
+
+it.each(["socket", "global"])(
+  "reserves %s work capacity for deferred heartbeats and still drains disconnect cleanup",
+  async (bound) => {
+    const d = dependencies();
+    d.ports.admission.policy = {
+      ...d.ports.admission.policy,
+      maxPendingPerSocket: bound === "socket" ? 1 : 2,
+      maxPendingTotal: bound === "global" ? 2 : 1000,
+    };
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const heartbeat = vi.fn(() => gate),
+      close = vi.fn();
+    delivery(d);
+    d.ports.presence = {
+      port: { open: () => ({ heartbeat, close, subscribe: vi.fn() }) },
+      heartbeatIntervalMs: 100,
+      heartbeatTimeoutMs: 1000,
+      leaseMs: 5000,
+      heartbeatConcurrency: 1,
+    };
+    const url = await start(d.ports);
+    const a = await connect(url);
+    await connected(a);
+    const b = await connect(url);
+    await connected(b);
+    try {
+      await vi.waitFor(() => expect(heartbeat).toHaveBeenCalledTimes(1), { interval: 10 });
+      await new Promise<void>((resolve) => setTimeout(resolve, 150));
+      expect(
+        await b.timeout(1000).emitWithAck("game:command", {
+          schemaVersion: 1,
+          actionId,
+          matchId,
+          expectedVersion: 0,
+          command: { type: "DECLARE_INCOME" },
+        }),
+      ).toMatchObject({ error: { code: "RATE_LIMITED" } });
+      expect(d.command).not.toHaveBeenCalled();
+      a.disconnect();
+      b.disconnect();
+      await vi.waitFor(() => expect(close).toHaveBeenCalledTimes(1), { interval: 10 });
+    } finally {
+      release();
+    }
+    await gateway!.close();
+    expect(close).toHaveBeenCalledTimes(2);
+  },
+);

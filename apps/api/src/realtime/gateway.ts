@@ -51,6 +51,7 @@ export interface RealtimeDependencies {
     production: boolean;
   };
   drainTimeoutMs?: number;
+  execution?: { intentConcurrency?: number; disconnectConcurrency?: number };
   telemetry?: Telemetry;
   metrics?: OperationalMetrics;
   chat?: { port: ChatPort; ackTimeoutMs: number };
@@ -59,6 +60,7 @@ export interface RealtimeDependencies {
     heartbeatIntervalMs: number;
     heartbeatTimeoutMs: number;
     leaseMs: number;
+    heartbeatConcurrency?: number;
   };
   delivery?: {
     resync: MatchResyncPort;
@@ -93,6 +95,53 @@ function safeAck(ack: Ack, value: unknown) {
   }
 }
 
+function intentOperation(name: string) {
+  return !Object.hasOwn(incomingEvents, name)
+    ? "invalid"
+    : name.startsWith("room:")
+      ? "room"
+      : name.startsWith("matchmaking:")
+        ? "matchmaking"
+        : name.startsWith("chat:")
+          ? "chat"
+          : name === "game:command"
+            ? "command"
+            : name === "presence:ping"
+              ? "presence"
+              : name.slice(6);
+}
+
+function workSlots(concurrency: number) {
+  let active = 0;
+  let nextPosition = 0;
+  const reserve = () => nextPosition++;
+  const waiting: { position: number; resume(): void }[] = [];
+  const run = async function <T>(operation: () => Promise<T>, position = reserve()): Promise<T> {
+    if (active >= concurrency)
+      await new Promise<void>((resume) => {
+        const entry = { position, resume };
+        const last = waiting.at(-1);
+        if (!last || last.position <= position) waiting.push(entry);
+        else
+          waiting.splice(
+            waiting.findIndex((queued) => queued.position > position),
+            0,
+            entry,
+          );
+      });
+    else active++;
+    try {
+      return await operation();
+    } finally {
+      const next = waiting.shift();
+      if (next)
+        next.resume(); // Transfer the slot in original admission order among eligible waiters.
+      else active--;
+    }
+  };
+  return Object.assign(run, { reserve, snapshot: () => ({ active, waiting: waiting.length }) });
+}
+
 /** Adapter only: every mutation and membership decision goes through a public port. */
 export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDependencies) {
   if (typeof deps.admission.production !== "boolean")
@@ -102,6 +151,50 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   const drainTimeoutMs = deps.drainTimeoutMs ?? 15000;
   if (!Number.isInteger(drainTimeoutMs) || drainTimeoutMs < 1 || drainTimeoutMs > 120000)
     throw new Error("Invalid realtime drain timeout");
+  const heartbeatConcurrency = deps.presence?.heartbeatConcurrency ?? policy.maxConnections;
+  if (
+    !Number.isInteger(heartbeatConcurrency) ||
+    heartbeatConcurrency < 1 ||
+    heartbeatConcurrency > policy.maxConnections
+  )
+    throw new Error("Invalid presence heartbeat concurrency");
+  const intentConcurrency = deps.execution?.intentConcurrency ?? policy.maxPendingTotal;
+  const disconnectConcurrency = deps.execution?.disconnectConcurrency ?? policy.maxConnections;
+  for (const [value, bound] of [
+    [intentConcurrency, policy.maxPendingTotal],
+    [disconnectConcurrency, policy.maxConnections],
+  ] as const)
+    if (!Number.isInteger(value) || value < 1 || value > bound)
+      throw new Error("Invalid realtime execution concurrency");
+  const withHeartbeatSlot = workSlots(heartbeatConcurrency);
+  const withIntentSlot = workSlots(intentConcurrency);
+  const withDisconnectSlot = workSlots(disconnectConcurrency);
+  const activeDispatch = new Set<{ operation: string; phase: string; began: number }>();
+  const completedPhases = new Map<string, { count: number; totalMs: number; maximumMs: number }>();
+  function beginWork(operation: string, initialPhase: string) {
+    const work = { operation, phase: initialPhase, began: performance.now() };
+    activeDispatch.add(work);
+    function record() {
+      const key = `${work.operation}/${work.phase}`;
+      const elapsed = performance.now() - work.began;
+      const entry = completedPhases.get(key) ?? { count: 0, totalMs: 0, maximumMs: 0 };
+      entry.count++;
+      entry.totalMs += elapsed;
+      entry.maximumMs = Math.max(entry.maximumMs, elapsed);
+      completedPhases.set(key, entry);
+    }
+    return {
+      phase(name: string) {
+        record();
+        work.phase = name;
+        work.began = performance.now();
+      },
+      end() {
+        record();
+        activeDispatch.delete(work);
+      },
+    };
+  }
   let draining = false;
   const connectedUsers = new Map<string, number>();
   let socketCount = 0;
@@ -119,24 +212,77 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   const pendingTransports = new WeakSet<object>();
   const namespaceLeases = new WeakMap<Socket, () => void>();
   const tails = new WeakMap<Socket, Promise<void>>();
-  const cursors = new WeakMap<Socket, Map<string, number>>();
+  const intentTails = new WeakMap<Socket, Promise<void>>();
+  const cursors = new WeakMap<
+    Socket,
+    Map<string, { seq: number; stateVersion: number; role?: "PLAYER" | "SPECTATOR" }>
+  >();
   const queued = new WeakMap<Socket, number>();
   const available = () => !draining && (deps.delivery?.redis?.ready() ?? true);
-  function enqueue(socket: Socket, operation: () => Promise<void>, cleanup = false): Promise<void> {
+  function enqueue(
+    socket: Socket,
+    operation: () => Promise<void>,
+    cleanup = false,
+    schedule?: ReturnType<typeof workSlots>,
+    ordered = false,
+    observePhase?: (phase: string) => void,
+  ): Promise<void> {
     const count = queued.get(socket) ?? 0;
     // A single disconnect cleanup per admitted connection is reserved outside normal work slots.
     if (!cleanup && (count >= policy.maxPendingPerSocket || pending.size >= policy.maxPendingTotal))
       return Promise.reject(new Error("Realtime work capacity exceeded"));
     queued.set(socket, count + 1);
+    // A busy tail may temporarily make this work ineligible. Retain its
+    // original slot position instead of moving it behind every newer socket.
+    const position = schedule?.reserve();
     // Capture when queued, not when the preceding socket operation finishes.
     const context = currentCorrelation() ?? createCorrelation();
-    const task = (tails.get(socket) ?? Promise.resolve()).then(() =>
-      withCorrelation(context, operation),
-    );
+    const append = () => {
+      const task = (tails.get(socket) ?? Promise.resolve()).then(() =>
+        withCorrelation(context, operation),
+      );
+      // The tracked task below owns failure closure. A rejected tail must not poison later cleanup.
+      const tail = task.catch(() => {});
+      tails.set(socket, tail);
+      void tail.then(() => {
+        if (tails.get(socket) === tail) tails.delete(socket);
+      });
+      return task;
+    };
+    async function scheduled() {
+      for (;;) {
+        // Neither side may hold the other queue's scarce capacity while waiting:
+        // a busy socket must not reserve a heartbeat execution slot, and a
+        // heartbeat waiting for that slot must not occupy the socket tail.
+        observePhase?.("tail");
+        await tails.get(socket);
+        let appended = false;
+        observePhase?.("slot");
+        await schedule!(async () => {
+          // Release the slot only for currently unfinished socket work. A
+          // completed intervening read must not send this task to the back of
+          // the global FIFO again. Check/append is atomic.
+          if (tails.has(socket)) return;
+          appended = true;
+          await append();
+        }, position);
+        if (appended) return;
+      }
+    }
+    // Reserve/track deferred maintenance immediately within the same budgets.
+    const run = () => (schedule ? scheduled() : append());
+    // Mutations keep their arrival order separately from the transport tail.
+    // Waiting for global execution capacity must not hold up recipient delivery.
+    // Disconnect cleanup joins this same chain after every admitted intent.
+    const task = ordered ? (intentTails.get(socket) ?? Promise.resolve()).then(run) : run();
+    if (ordered)
+      intentTails.set(
+        socket,
+        task.catch(() => {}),
+      );
     const safe = task.catch(() => {
       socket.conn.close();
     });
-    tails.set(socket, safe);
     pending.add(safe);
     void safe.finally(() => {
       pending.delete(safe);
@@ -399,8 +545,12 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       void enqueue(
         socket,
         async () => {
-          await presence?.close();
+          await withDisconnectSlot(async () => {
+            await presence?.close();
+          });
         },
+        true,
+        undefined,
         true,
       )
         .catch(() => {})
@@ -414,46 +564,51 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
       if (packet.type !== "pong" || !presence || !available()) return;
       if (heartbeatPending) return;
       heartbeatPending = true;
-      void enqueue(socket, async () => {
-        if (!socket.connected || !available()) return;
-        const current = await deps.sessions.authenticate(token);
-        if (
-          !current.ok ||
-          current.session.userId !== userId ||
-          current.session.sessionId !== sessionId ||
-          current.session.expiresAt * 1000 <= deps.nowMs()
-        ) {
-          socket.disconnect(true);
-          return;
-        }
-        await presence.heartbeat();
-      })
+      const work = beginWork("heartbeat", "queue");
+      void enqueue(
+        socket,
+        async () => {
+          if (!socket.connected || !available()) return;
+          work.phase("authenticate");
+          const current = await deps.sessions.authenticate(token);
+          if (
+            !current.ok ||
+            current.session.userId !== userId ||
+            current.session.sessionId !== sessionId ||
+            current.session.expiresAt * 1000 <= deps.nowMs()
+          ) {
+            socket.disconnect(true);
+            return;
+          }
+          work.phase("renew");
+          await presence.heartbeat();
+        },
+        false,
+        withHeartbeatSlot,
+      )
         .catch(() => {
           socket.conn.close();
         })
         .finally(() => {
+          work.end();
           heartbeatPending = false;
         });
     });
 
-    async function dispatch(name: string, payload: unknown, ack: unknown) {
+    async function dispatch(
+      name: string,
+      payload: unknown,
+      ack: unknown,
+      work: ReturnType<typeof beginWork>,
+    ) {
       const respond: Ack = typeof ack === "function" ? (ack as Ack) : () => {};
       const started = performance.now();
-      const operation = !Object.hasOwn(incomingEvents, name)
-        ? "invalid"
-        : name.startsWith("room:")
-          ? "room"
-          : name.startsWith("matchmaking:")
-            ? "matchmaking"
-            : name.startsWith("chat:")
-              ? "chat"
-              : name === "game:command"
-                ? "command"
-                : name === "presence:ping"
-                  ? "presence"
-                  : name.slice(6);
+      const operation = intentOperation(name);
       const fields: Record<string, unknown> = { userId, operation };
+      work.phase("rate");
+      const phase = work.phase;
       const complete = (value: unknown) => {
+        phase("ack");
         if (
           typeof value === "object" &&
           value !== null &&
@@ -478,6 +633,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         }
         if (!Object.hasOwn(incomingEvents, name)) return complete(failure("INVALID_INPUT"));
         if (typeof ack !== "function") return; // No unacknowledged mutation.
+        phase("authenticate");
         const current = await deps.sessions.authenticate(token);
         if (
           !current.ok ||
@@ -494,6 +650,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         for (const key of ["matchId", "roomId", "actionId"] as const)
           if (key in parsed.data) fields[key] = parsed.data[key as keyof typeof parsed.data];
         let outcome: unknown;
+        phase("owner");
         switch (name) {
           case "room:subscribe": {
             const input = roomSubscriptionSchema.parse(parsed.data);
@@ -544,7 +701,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
             outcome = result;
             if (result.ok) {
               await socket.join(`match:${input.matchId}`);
-              cursors.get(socket)?.set(input.matchId, 0);
+              cursors.get(socket)?.set(input.matchId, { seq: 0, stateVersion: -1 });
               if (presence) {
                 const snapshot = await presence.subscribe(input.matchId);
                 if (!(await stillAuthenticated())) {
@@ -557,7 +714,11 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
                   .emitWithAck("match:snapshot", snapshot);
                 if (received !== snapshot.lastEventSeq)
                   throw new Error("Realtime acknowledgement invalid");
-                cursors.get(socket)?.set(input.matchId, snapshot.lastEventSeq);
+                cursors.get(socket)?.set(input.matchId, {
+                  seq: snapshot.lastEventSeq,
+                  stateVersion: snapshot.stateVersion,
+                  role: snapshot.role,
+                });
                 outcome = { ok: true, value: { ...result.value, role: snapshot.role } };
               }
             }
@@ -607,6 +768,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
             outcome = { ok: true, value: { schemaVersion: 1 } };
             break;
         }
+        phase("postAuthenticate");
         if (
           [
             "room:subscribe",
@@ -648,15 +810,20 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         return;
       }
       withCorrelation(createCorrelation(), () => {
-        void enqueue(socket, () =>
-          dispatch(
-            args.length === (typeof ack === "function" ? 2 : 1) ? name : "invalid",
-            payload,
-            ack,
-          ),
-        ).catch(() => {
-          if (typeof ack === "function") safeAck(ack as Ack, failure("RATE_LIMITED"));
-        });
+        const event = args.length === (typeof ack === "function" ? 2 : 1) ? name : "invalid";
+        const work = beginWork(intentOperation(event), "order");
+        void enqueue(
+          socket,
+          () => dispatch(event, payload, ack, work),
+          false,
+          withIntentSlot,
+          true,
+          work.phase,
+        )
+          .catch(() => {
+            if (typeof ack === "function") safeAck(ack as Ack, failure("RATE_LIMITED"));
+          })
+          .finally(work.end);
       });
     });
   });
@@ -664,19 +831,22 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     const event = matchDomainEventSchema.safeParse(input);
     if (!event.success || event.data.type !== "MATCH_CHANGED_V1" || !available() || !deps.delivery)
       throw new Error("Realtime delivery unavailable");
+    const checkpoint = event.data.payload;
     return withCorrelation(createCorrelation(event.data.correlation), async () => {
       const matchId = event.data.aggregateId;
       const results = await Promise.allSettled(
         [...namespace.sockets.values()]
           .filter((s) => s.rooms.has(`match:${matchId}`))
-          .map((socket) =>
-            enqueue(socket, async () => {
+          .map((socket) => {
+            const work = beginWork("fanout", "tail");
+            return enqueue(socket, async () => {
               if (!socket.connected) return;
               const identity = identities.get(socket);
               if (!identity) {
                 socket.disconnect(true);
                 return;
               }
+              work.phase("authenticate");
               const session = await deps.sessions.authenticate(identity.token);
               if (
                 !session.ok ||
@@ -687,10 +857,36 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
                 socket.disconnect(true);
                 return;
               }
+              // A previously acknowledged view already covers older/duplicate wakeups.
+              // Check inside the socket tail, after live authentication; never skip an
+              // unacknowledged checkpoint or a newer state/role, even at the same seq.
+              const cursor = cursors.get(socket)?.get(matchId);
+              if (
+                cursor &&
+                cursor.seq >= checkpoint.lastEventSeq &&
+                cursor.stateVersion >= checkpoint.stateVersion
+              ) {
+                work.phase("membership");
+                const member = await deps.membership.authorize(identity.userId, {
+                  schemaVersion: 1,
+                  matchId,
+                });
+                if (!member.ok) {
+                  if (member.error.code === "NOT_FOUND" || member.error.code === "FORBIDDEN") {
+                    await socket.leave(`match:${matchId}`);
+                    cursors.get(socket)?.delete(matchId);
+                    if (deps.presence) socket.conn.close();
+                    return;
+                  }
+                  throw new Error("Realtime membership unavailable");
+                }
+                if (member.value.role === cursor.role) return;
+              }
+              work.phase("projection");
               const result = await deps.delivery!.resync.catchup(identity.userId, {
                 schemaVersion: 1,
                 matchId,
-                afterSeq: cursors.get(socket)?.get(matchId) ?? 0,
+                afterSeq: cursor?.seq ?? 0,
               });
               if (!result.ok) {
                 if (result.error.code === "NOT_FOUND" || result.error.code === "FORBIDDEN") {
@@ -705,6 +901,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
               }
               if (!available()) throw new Error("Realtime delivery unavailable");
               // Session may expire while waiting for the database/earlier socket work.
+              work.phase("postAuthenticate");
               const current = await deps.sessions.authenticate(identity.token);
               if (
                 !current.ok ||
@@ -715,16 +912,24 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
                 socket.disconnect(true);
                 return;
               }
-              for (const item of result.value.events) socket.emit("match:event", item);
               // Cursor advances only after recipient acknowledgement. Loss/disconnect retries from durable state.
+              work.phase("ack");
               const ack: unknown = await socket
                 .timeout(deps.delivery!.ackTimeoutMs)
                 .emitWithAck("match:snapshot", result.value.snapshot);
               if (ack !== result.value.snapshot.lastEventSeq)
                 throw new Error("Realtime acknowledgement invalid");
-              cursors.get(socket)?.set(matchId, result.value.snapshot.lastEventSeq);
-            }),
-          ),
+              // The validated view covers these content-free invalidations. Deliver it
+              // first so clients do not request the same locked projection again while
+              // the covering snapshot is in flight. Event sequence order stays intact.
+              for (const item of result.value.events) socket.emit("match:event", item);
+              cursors.get(socket)?.set(matchId, {
+                seq: result.value.snapshot.lastEventSeq,
+                stateVersion: result.value.snapshot.stateVersion,
+                role: result.value.snapshot.role,
+              });
+            }).finally(work.end);
+          }),
       );
       if (results.some((r) => r.status === "rejected"))
         throw new Error("Realtime delivery incomplete");
@@ -802,7 +1007,28 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
     );
   });
   let closing: Promise<void> | undefined;
+  let drainWork: Promise<void> | undefined;
   return Object.freeze({
+    workSnapshot() {
+      const phases: Record<string, { active: number; maximumAgeMs: number }> = {};
+      for (const work of activeDispatch) {
+        const key = `${work.operation}/${work.phase}`;
+        const entry = (phases[key] ??= { active: 0, maximumAgeMs: 0 });
+        entry.active++;
+        entry.maximumAgeMs = Math.max(entry.maximumAgeMs, performance.now() - work.began);
+      }
+      return {
+        intents: withIntentSlot.snapshot(),
+        disconnects: withDisconnectSlot.snapshot(),
+        heartbeats: withHeartbeatSlot.snapshot(),
+        pending: pending.size,
+        handshakes: handshakes.size,
+        phases,
+        completedPhases: Object.fromEntries(
+          [...completedPhases].map(([key, value]) => [key, { ...value }]),
+        ),
+      };
+    },
     stopAdmission() {
       draining = true;
     },
@@ -874,19 +1100,30 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
         clearTimeout(timer);
       }
     },
-    close: () =>
-      (closing ??= withDeadline(
-        (async () => {
-          draining = true;
-          stopObserving?.();
-          await Promise.allSettled([...engineChecks]);
-          await Promise.allSettled([...handshakes]);
+    // A deadline is an observation, not cancellation of admitted durable work.
+    // Resource owners must retain dependencies until this underlying drain settles,
+    // even when close() has already reported its unchanged deadline failure.
+    settled: () => drainWork ?? Promise.resolve(),
+    close: () => {
+      if (closing) return closing;
+      drainWork = (async () => {
+        draining = true;
+        stopObserving?.();
+        await Promise.allSettled([...engineChecks]);
+        await Promise.allSettled([...handshakes]);
+        await Promise.allSettled([...pending]);
+        // Close and settle each transport's durable lease cleanup before the next.
+        // Dumping every disconnect into the pool at once can exhaust acquisition
+        // deadlines after otherwise successful admitted work has drained.
+        for (const socket of namespace.sockets.values()) {
+          socket.conn.close();
           await Promise.allSettled([...pending]);
-          for (const socket of namespace.sockets.values()) socket.conn.close();
-          await new Promise<void>((resolve) => io.close(() => resolve()));
-          await Promise.allSettled([...pending]);
-        })(),
-        drainTimeoutMs,
-      )),
+        }
+        await new Promise<void>((resolve) => io.close(() => resolve()));
+        await Promise.allSettled([...pending]);
+      })();
+      closing = withDeadline(drainWork, drainTimeoutMs);
+      return closing;
+    },
   });
 }
