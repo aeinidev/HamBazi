@@ -1,106 +1,109 @@
 # Temporary owner-only staging execution plan
 
-**Updated:** 2026-10-09 Tehran. **Status:** The native startup fix is deployed;
-owner-only Web/Auth and personal Coup pass real network tests. **Phase:** 18B3 remains In Progress;
-actual native Telegram and full operational acceptance remain unpassed. ADR-053/
-054 and explicit bounded deployment supersede historical preparation/gameplay
-restrictions only for this personal subset. Telegram settings, ordinary Admin/
-public catalog/Room, production and destructive data actions remain excluded.
+**Updated:** 2026-10-09 Tehran. **Status:** Owner-only Web/Auth/personal Coup are open,
+real iPhone native acceptance is recorded as user-reported, and the applicable
+bounded rollback/availability/renewal checks pass. **Phase:** 18B3 remains In Progress.
+ADR-050/052/053/054/055 and the owner's explicit deployment scope remain binding.
+No Telegram setting, production, paid resource, destructive operation or later phase.
 
-## Native owner report and bounded remediation
+## Current configuration and accepted native lineage
 
-The owner reports an actual native iPhone missing-launch screen. Native acceptance
-is failed at startup, not merely unperformed. ADR-055 fixes verified query-only
-launch loss and removes runtime external SDK delivery, adds fixed safe diagnostics,
-and requires the [actual mobile retest](runbooks/native-mini-app-startup.md).
-The precise iPhone failure boundary remains pending those observations; no download
-or synthetic browser result is accepted as native success. The replacement below
-is now deployed and available for the owner's actual iPhone retest.
-
-## Actual final personal staging binding
-
-Immutable app source: `a8b97f8dc57014f130aaedee604faf95e91da593`.
-Build: `825f4886581e10dde2ab7382acceba3e771f10faaf85cb32309e77f5fad870f7`.
-Preparation: `/opt/hambazi-staging/private/prepared-20261008-native-02`.
-Compose SHA-256: `669bc5eb8f230f3a3115ed76b040bfcde7fb2900d2f3506b7bffac97abe432af`.
+Clean app source: `48ff852ba6b732ae51d239f6cf875186d64d588a`.
+Build: `da3c1d62e59ce7df219ce92d02e9cb320dc19c31c2a507184216abf8f7321b0b`.
+Preparation: `/opt/hambazi-staging/private/prepared-20261009-native-accepted-02`.
+Compose SHA-256: `b799cdbcd6336de8767df6a87d87f0343d2bf45ac5af00950b46f4a7fc7c5921`.
 The [current binding](../../infra/docker/staging/execution-current.json) records
-all exact images, scans, runner and restricted evidence hashes. Old outputs,
-failed attempts and immutable candidates are preserved.
+all four exact images, inventory/scan/preparation/runner hashes, current patched
+`d6eb25b` ingress/ACME and private evidence references. Previous candidates and
+failed attempts are retained. Four apps are READY; no active synthetic game remains.
 
-All eight exact target scans now pass the normal 24-hour policy:
-High/Critical/Unknown zero, one Moderate zlib finding per app/PostgreSQL/Redis image.
-The official database updated Oct 8 at 19:05:21 UTC and downloaded at 22:19:19 UTC
-replaces stale advisory evidence. No ADR-053 extension is used. A fresh scan found
-High CVE-2026-4775 in old ingress tiff 4.7.1-r0; signed, hash-pinned Alpine
-tiff 4.7.2-r0 fixes it in clean component source `d6eb25b`. New ingress/ACME
-identities and zero findings are bound separately. The owned timer now applies
-canonical maintenance and a 45-second app drain/stop at normal evidence expiry,
-Oct 9 **22:35:21 Tehran**. Installed state/next trigger pass; future execution is
-unperformed. Refresh scans before that deadline to retain safe availability.
+The owner's real iPhone confirmation applies to `a8b97f8` and
+`prepared-20261008-native-02`, as **user-reported native acceptance**. No direct
+agent observation, client version or separate full-game count is invented.
+The original reported failure remains historical; its exact cause is unproven.
+Temporary native-01 display is removed per ADR-055. The successor keeps SDK bytes,
+SRI, storage guard, query/fragment launch preservation and signature/freshness/
+constant-time exact owner admission unchanged. Its own six actual-network
+Chromium/WebKit launch/Auth/privacy cases pass separately; no new native owner
+retest is claimed or required merely for removing the display.
 
-The separate migrator's 14th additive migration/repeat/grants passed at 12:32 UTC.
-The final SDK-only release verifies unchanged 14 migrations/12 contracts/grants
-and populated data; no further migration/backfill/reset runs. API → Worker → Bot
-→ Web are READY with safe private health/logs/metrics and bounded retention.
-Latest actual evidence: 35 Auth controls, 37 complete-game controls (15 owner
-commands, 27 turns), nine HTTP and 15 accepted WSS drain/restart/receipt controls;
-all pass on this candidate. Six real public-network Chromium/WebKit startup tests
-exercise fragment and query launches, actual bundled SDK initialization, owner
-auth 200, signed non-owner 401, URL cleanup, logout and credential-storage denial.
-They use no SDK/API interception or laptop proxy. Earlier full browser gameplay
-evidence remains historical; the actual current-candidate complete game runs
-through private TLS/WSS with the real Worker. Actual iPhone replacement acceptance
-remains pending after the prior owner-reported failure. Final private operator
-checks confirm four READY apps, safe logs/metrics and no active test game; six
-final public status/isolation checks and public SDK SRI checks pass at 22:57 UTC.
+## Applicable staging checks completed
 
-Owner Web/Auth and personal WSS are open. Existing trusted public TLS, private
-upstreams/data TLS/grants, firewall and SSH access remain intact. Public private
-endpoints/webhook and ordinary Admin/catalog/Room remain 404. Main Mini App
-personal launch requires no invented short_name; Room invitations remain disabled.
-The mounted personal route SHA-256 is
-`07a8528b7dce63bb7d068c7291f170f9ef9ac7b0bf23008bae9c65ca6debde04`.
-Its WSS location explicitly retains Origin and trusted proxy headers because
-[Nginx local proxy headers replace inheritance](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_set_header).
-Actual positive and negative TLS handshakes prove this boundary.
+- Real paused Redis revealed a stalled already-written transport admission reply:
+  node-redis removes its AbortSignal listener after write. `48ff852` enforces the
+  existing one-second reply deadline through the public observability primitive.
+  Late replies cannot grant a timed-out request; quotas and fail-closed sensitive
+  issuance/writes/WSS remain. Five meaningful regression cases, 181 targeted API
+  tests, typecheck/lint/boundary/contract checks and 275 isolated real HTTP/PG/Redis
+  integration executions pass. No new dependency, migration or policy.
+- Four fresh exact application scans pass, and unchanged exact PG/Redis/ingress/ACME
+  evidence remains normally fresh. High/Critical/Unknown are zero; each app and
+  data image retains one allowed Moderate zlib finding. No suppression, scan skip
+  or historical 48-hour extension. Private archive hash and both Docker identities,
+  all four `/app` byte/mode/path/symlink fingerprints and new exclusive prepare pass.
+  OS-layer fingerprints are not claimed.
+- Current → previous native-accepted → current application rollback passes **71**
+  controls with unchanged live data, roles, TLS, networks and all 14 migrations/12
+  contracts/grant fingerprints. Existing session, active Match pins, monotonic
+  snapshot, original command receipt, exactly one processed command and contiguous
+  events survive. Idle stops are graceful within approved 45 seconds; ordered
+  API → Worker → Bot → Web startup passes. No migration/reset/purge is executed.
+  Compatibility is only `48ff852 ↔ a8b97f8` with current patched components and
+  healthy data services; previous a8 retains the Redis-stall defect. Keep maintenance,
+  check Redis/readiness/Auth and preserve the current patched ingress on rollback.
+  Historical nine HTTP/15 accepted WSS drain checks remain separately bound to a8;
+  unchanged drain handlers/config and actual pair compatibility justify reuse.
+- Real PG/Redis pause drills pass **31** controls with automatic 30-second unpause
+  guards and still-paused assertions. PG loss closes readiness while liveness remains;
+  Redis loss produces API DEGRADED/Worker NOT_READY and private metrics reflect it.
+  Existing sessions/logout remain available, fresh issuance fails closed with zero
+  durable effects, revocation survives recovery and all four return READY. This is
+  service availability evidence, never backup restore/PITR/provider failover proof.
+- Current Auth passes **35** controls, including signed non-owner/forged/expired
+  denial without durable effects, CORS/private-route isolation and policy revocation.
+  Complete personal game passes **37** controls, **15** owner commands/**27** turns,
+  own-PlayerView isolation, normal command validation, no fake Telegram User,
+  idempotency/reconnect and cleanup. Six actual public-network Chromium/WebKit
+  fragment/query/non-owner cases pass exact preserved launch in Auth, owner 200,
+  non-owner 401, URL cleanup/logout/no credential storage/no sensitive console.
+  Eight public route checks, SDK SRI/trusted TLS and external data-port denial pass.
+  One earlier probe incorrectly required SDK.initData for guarded query fallback;
+  corrected probe passes without product change and its failure is preserved.
+- Current exact ACME dry-run and normal no-due renewal pass. Two transient issuer
+  `rateLimited / service busy / Retry-After 3` failures are retained; a delayed third
+  dry-run succeeds. Old/new ACME filesystems match. Public certificate remains valid
+  until **2027-01-06T06:11:04Z**. Actual future due renewal is unperformed, not passed.
+- Private SSH/operator health, safe logs and metrics pass; unknown log lines omitted
+  are zero. Existing compressed local rotation is 10m × three files. Public private
+  health/metrics/Admin/Room/catalog/webhook routes remain 404; PG/Redis have no public
+  ports. TLS/least-privilege role separation/firewall/SSH are unchanged and retained.
 
-The reviewed official SDK is now served unmodified from the Web artifact; external
-SDK delivery is unnecessary. SRI/CSP, storage guard and server signature/freshness/
-owner admission stay enforced. Query-only launch data is captured in memory before
-URL cleanup. Temporary `native-01` diagnostics show only fixed presence/init/auth
-states. All 69 Web units, 34 Chromium browser cases, 18 WebKit cases and 113 infra
-tests pass; one WebKit introspection case and one existing infra case are skipped,
-not passed. A later eight-case Chromium CSP subset also passes. Scope/type/boundary/
-format/build and zero-finding history/current-file secret scans pass.
+Normal advisory evidence expires **2026-10-09 22:35:21 Tehran**. The installed timer
+applies canonical maintenance and a 45-second app stop at that expiry. Installed
+state passes; future execution is unperformed. Refresh scans before expiry, and
+never keep traffic open by extending the old exception without an explicit decision.
 
-Two owner-confirmed manual reboots interrupted transfer and testing. A first target
-Worker `/app/package.json` was empty and Web `/app` content differed from the local
-candidate despite matching image IDs. Both exact images were privately reloaded;
-all four `/app` byte/mode/path/symlink fingerprints then matched, including after
-the second reboot. Repair rescans produce the same accepted evidence bytes, so the
-existing preparation is reused. Fingerprints cover `/app`, not every OS layer.
-Four apps are again READY; 14 migrations and private TLS/roles were retained.
-Old stopped apps exited 255: no graceful pre-replacement drain or automatic reboot
-recovery is claimed. New HTTP/WSS drain acceptance passes separately after restart.
+## Exact remaining items and consequences
 
-| Deferred or unaccepted item                         | Consequence                                                                                                                                                |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actual mobile Telegram owner test                   | Real SDK/browser protocol proof is separate; owner still verifies their native Main Mini App.                                                              |
-| Telegram Web iframe support                         | Current frame-ancestors none blocks embedding; no framing expansion was approved/applied.                                                                  |
-| Ordinary Admin/catalog/Room invitations             | Required Admin controls and Main invitation behavior remain incomplete; these routes stay disabled.                                                        |
-| Competitive stats/chat/matchmaking/full multiplayer | Personal bot flow only; no competitive result or fake Telegram User is created.                                                                            |
-| Personal outbox fanout                              | Wake-ups retained pending; acknowledged two-second snapshots supply the personal view.                                                                     |
-| Version rollback                                    | Current-version containment/restart pass; no compatible scanned previous release pair has passed rollback. Historical ingress now has a High tiff finding. |
-| Full secret rotation                                | Current separate credentials/trust/runtime pass; replacement and recovery of every authority remain unperformed.                                           |
-| Recovery                                            | ADR-050 excluded/unperformed; no restore/PITR/RPO/RTO evidence is passed.                                                                                  |
-| Production-like load/soak/SLO/protected publication | Unperformed for this scope; targets/thresholds and full 18B3 gates remain unchanged.                                                                       |
-| WebKit permission-policy introspection              | One case skipped because the browser lacks document.featurePolicy; Chromium denial assertions pass.                                                        |
-| Automatic recovery after host reboot                | restart=no remains; use maintenance-first, identity/scan/TLS checks and ordered manual startup. Abrupt reboots interrupt availability.                     |
+| Item                                                                  | Disposition and consequence                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hosted protected CI/provenance/publication and protected staging E2E  | Unperformed; actual VPS/browser tests do not prove hosted promotion protection. No production release readiness claimed.                                                                                                                                           |
+| Allowed Moderate zlib findings                                        | Unremediated in four app and two data images; allowed by the preserved thresholds, not suppressed or claimed fixed.                                                                                                                                                |
+| Full authority secret rotation/recovery drill                         | Unperformed; current separate credentials/TLS/trust pass. Telegram settings remain separately scoped.                                                                                                                                                              |
+| Production-like load/reconnect storm/two-hour soak/SLO validation     | Deferred/unproven; approved targets/thresholds are unchanged. Personal success is not capacity acceptance.                                                                                                                                                         |
+| Redis queue storage loss/bulk reconciliation/provider failover        | Unperformed; bounded pauses cover availability, not deleted queues or lost storage.                                                                                                                                                                                |
+| Ordinary Admin and full 7C activation                                 | Disabled pending separate auth/RBAC/MFA/network/audit and retained activation controls. Personal admission is not Admin authorization.                                                                                                                             |
+| Room/Main invitations and ordinary multiplayer/chat/stats/matchmaking | Disabled; Main personal launch works without an invented short_name, but the link builder and response schema require appName; a reviewed Main link variant and native invitation launch/join proof are missing. Personal bot games produce no competitive result. |
+| Personal outbox fanout                                                | Wake-ups retained pending; acknowledged two-second snapshots provide the personal view, not accepted event fanout.                                                                                                                                                 |
+| Telegram Web                                                          | Current frame-ancestors none blocks iframe embedding; native-only policy unchanged.                                                                                                                                                                                |
+| WebKit permission-policy introspection                                | One existing case skipped because document.featurePolicy is unavailable; Chromium permission-denial assertions pass.                                                                                                                                               |
+| Future due renewal/advisory expiry and automatic host recovery        | Future triggers are unperformed; restart=no requires maintenance-first scan/identity/TLS checks and manual ordered restart after reboot. Owner-confirmed manual reboots are not automatic-recovery proof.                                                          |
+| Backup/PITR/WAL/restore/RPO/RTO                                       | ADR-050 accepted exception: excluded, unperformed, never passed; disposable data has no recovery promise.                                                                                                                                                          |
 
-No additional owner decision/secret input is missing for this implemented flow.
-The exact next owner action is opening the already configured Main Mini App in
-actual mobile Telegram and verifying the personal game; never send initData or
-session tokens in chat. No later phase starts automatically.
+No additional owner policy or private reference is missing for the implemented
+personal flow. No current deployment blocker remains. The next operating action
+is refreshing exact scan evidence before the normal expiry; full-phase evidence
+above is retained for review, without reopening settled decisions or starting Phase 19.
 
 The following sections are historical and do not supersede this final binding.
 

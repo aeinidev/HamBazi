@@ -1,38 +1,40 @@
 # Temporary staging native Mini App startup
 
-Scope: owner-only personal staging; ADR-055. Native acceptance remains failed at
-the owner's reported missing-launch screen until the owner verifies the fix on
-their actual iPhone. Synthetic browser results are separate evidence.
+Scope: owner-only personal staging; ADR-055. On 2026-10-09 Tehran the owner
+confirmed the real iPhone Telegram Mini App retest succeeded and everything
+worked as expected. Record this as **user-reported native acceptance** of
+`a8b97f8` / `prepared-20261008-native-02`, not agent observation or inferred client
+versions/full-game measurements. The original failure and unknown exact cause
+remain historical; do not reopen acceptance merely for retiring its display.
 
-The replacement is deployed from `a8b97f8`, using
-`/opt/hambazi-staging/private/prepared-20261008-native-02`. Six actual-network
-Chromium/WebKit query/fragment/owner/non-owner startup scenarios pass; this does
-not substitute for the iPhone result. See the [current binding](../../../infra/docker/staging/execution-current.json).
+Current clean source `48ff852`, preparation
+`/opt/hambazi-staging/private/prepared-20261009-native-accepted-02`, removes the
+temporary native-01 UI and enforces an existing Redis admission reply deadline.
+SDK/bootstrap/Auth signature/freshness/owner policy are unchanged. Six current
+actual-network Chromium/WebKit fragment/query/non-owner scenarios pass separately,
+without claiming a new owner iPhone retest. See the
+[current binding](../../../infra/docker/staging/execution-current.json).
 
-## Mobile retest
+## Owner launch and future regression investigation
 
-1. Close the Mini App with its close control, rather than minimizing it. Close and
-   reopen Telegram once to discard the previous in-memory document.
-2. In Telegram, open `https://t.me/Hambazidev_bot?startapp`, or use the configured
-   Main Mini App **Launch app** button on the bot's profile. Do not open the plain
-   staging HTTPS URL in Safari or Telegram's ordinary link browser. This uses the
-   existing Main configuration and changes no Telegram setting.
-3. Find **Telegram startup check · native-01**. Expected before sign-in:
-   `SDK: present`, `Launch data: present`, `Initialization: ready`,
-   `Authentication: not-requested`.
-4. Tap **Continue with Telegram**. Expected: `Authentication: authenticated` and
-   the **Temporary owner staging** screen with **Personal Coup test**. If an owner account has not yet been
-   created, use the existing account-creation form; backend owner admission still
-   applies before any durable account write.
-5. Only after sign-in succeeds, optionally use **Start game with bot**. Report
-   native acceptance only after the owner confirms this actual client result.
+1. Use the existing Telegram Main Mini App link
+   `https://t.me/Hambazidev_bot?startapp`, or **Launch app** on the bot profile.
+   Opening the plain staging URL in Safari does not supply Telegram credentials.
+2. Tap **Continue with Telegram**; an existing admitted account reaches
+   **Temporary owner staging** and **Personal Coup test**. If needed, the existing
+   account-creation form remains guarded before any durable account write.
+3. **Start game with bot** is the enabled personal test flow. Invitations/Admin/
+   ordinary catalog/gameplay remain disabled. No Telegram setting is changed.
+4. After sign-out, obtain a fresh native launch; credentials are memory-only. For
+   a future stale minimized document, fully close the Mini App/Telegram and relaunch.
+   native-01 is intentionally absent in the accepted successor.
 
-If blocked, report only the four diagnostic lines (including a fixed error code,
-if present) and optionally iOS/Telegram versions. Never send raw initData, a launch
-URL containing Telegram fields, credentials, profile contents or game screenshots.
-The native-01 marker is required to distinguish the new artifact from an old
-minimized document. A clean reload deliberately has no stored launch credential;
-obtain a fresh native launch instead.
+If a new regression occurs, inspect the actual bound artifact, redirects/URL
+cleanup, SDK loading/guarded initialization and actual Auth response. Query-only
+launch can have empty SDK.initData while the reviewed loader preserves launch in
+memory; SDK download/presence alone is not initialization/authentication evidence.
+Do not ask the owner for initData, credential-bearing links, profile contents or
+game screenshots. Use only fixed presence/state/auth-code diagnostics if needed.
 
 ## Technical boundary
 
@@ -43,8 +45,10 @@ obtain a fresh native launch instead.
   stay in memory; URL cleanup remains enabled. A loader/guard failure grants none.
 - Signature, freshness, constant-time comparison and exact server owner admission
   are unchanged. Diagnostic presence flags never authorize a request.
-- Diagnostic fields remain client memory/UI only; no raw error or telemetry sink.
-  Remove temporary display after the native blocker is resolved.
+- Temporary native-01 display is removed after owner acceptance. Closed diagnostic
+  state stays memory-only. Any future investigation may temporarily display only
+  SDK/launch presence, initialization state and fixed auth status/code; never raw
+  errors or a telemetry sink.
 - Verify real deployed HTML/CSP/assets and actual auth outcomes, not SDK download
   success alone. Preserve failed attempts and native/browser distinctions.
 

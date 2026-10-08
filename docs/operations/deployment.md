@@ -189,20 +189,22 @@ proof. Backup/PITR restore against approved objectives remains deferred.
 ## Required staging acceptance
 
 For the actual temporary personal VPS, use the bound
-[owner-only staging execution plan](staging-execution-plan.md). It preserves
-`prepared-20261008-02`, distinguishes proposed infrastructure from accepted inputs
-and records owner-admission/ingress-scan/7C/Main-invitation/rollback prerequisites.
-The latest explicit owner request/ADR-052 authorizes the bounded owner Web/Auth
-deployment. Private data, migrations, firewall and trusted public TLS/503 are now
-executed. Current [exact binding](../../infra/docker/staging/execution-current.json)
-records the new clean scanned candidates; actual private owner enrollment blocks
-new preparation and API/Bot startup. The historical `-02` is preserved. Gameplay,
-Admin, Room, Telegram settings and other phases remain outside the scope.
+[owner-only staging execution plan](staging-execution-plan.md) and
+[exact binding](../../infra/docker/staging/execution-current.json). The approved
+owner/disposable-data/manual-monitoring profile is deployed from clean `48ff852`
+in exclusive `prepared-20261009-native-accepted-02`. Owner enrollment is resolved,
+not a startup blocker. Private data/TLS/grants, compatible migrations, firewall/
+SSH, public TLS, Auth/full personal bot game, private observability and exact
+current/previous application rollback pass. The owner confirms real iPhone native
+acceptance on previous `a8b97f8`; the UI/deadline successor has separate current
+browser/VPS evidence. No new migration or Telegram setting is changed.
 
-Use the [18B3 operating-decision worksheet](staging-operating-decisions.md) to
-record proposals, individual owner approvals, separate execution authorization
-and future evidence. It preserves supplied decisions and separates actual infrastructure evidence from
-pending application/readiness/native/rollback acceptance.
+The [18B3 operating-decision worksheet](staging-operating-decisions.md) preserves
+approved decisions and distinguishes passed evidence from remaining full rotation,
+protected hosted CI/publication/E2E, production-like validation and broader recovery.
+ADR-050 backup/PITR recovery is excluded/unperformed, never passed. Ordinary Admin/
+Room/Main invitations/Telegram Web and later phases remain gated. Normal fresh
+scans are required before expiry (Oct 9 22:35:21 Tehran); full 18B3 is incomplete.
 
 - OD-002 provider/region and explicit domains/access/provisioning authorization.
 - OD-006 backup/PITR, RPO/RTO, retention, secure archive access and actual recovery

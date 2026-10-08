@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-10-04. **Updated:** 2026-10-09 Tehran. **Status:** Temporary owner-only
 Web/Auth/personal Coup are deployed and browser-accepted. **Phase 18B3:** In Progress,
-with the native startup fix deployed and actual iPhone retest pending. ADR-052/053/054/055 and
+with user-reported real iPhone acceptance and bounded rollback/availability checks passed. ADR-052/053/054/055 and
 the supplied owner authorization supersede preparation-only restrictions for this
 bounded personal deployment. The ordinary product/Admin/Room paths remain disabled.
 The [current execution checkpoint](staging-execution-plan.md) and
@@ -374,14 +374,14 @@ owner or monitoring responder is requested. Actual service credentials and acces
 mechanisms remain separate from human ownership.
 DOMAIN/ACCESS/OPS are worksheet groups, not new architecture open-decision IDs.
 
-| Group                                          | Required owner role | Status                                                                                                       | Named approver / approval date / reference / ADR |
-| ---------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| OD-002 — hosting and region                    | Project owner       | Temporary host/topology confirmed; actual private TLS/grants pass; production policy remains separate        | ADR-049/050/051; 2026-10-07/08                   |
-| DOMAIN — staging origins and Telegram identity | Project owner       | Origins/Bot/DNS/public TLS verified; Main needs no short name; native client unperformed, Web frames blocked | ADR-049/050/051; 2026-10-07/08                   |
-| ACCESS — operator and service access           | Project owner       | Sole owner/SSH/private operator and owner/non-owner checks pass; ordinary Admin retains 7C gates             | ADR-050/051; 2026-10-08                          |
-| OPS — deployment and runtime operating policy  | Project owner       | Exact real preparation, compatible deploy/drain pass; full previous-version rollback remains unaccepted      | ADR-050/051; 2026-10-08                          |
-| OD-006 — backup and recovery                   | Project owner       | Excluded for disposable personal staging, unperformed; production decision remains open                      | ADR-050; 2026-10-08                              |
-| OD-007 — final SLOs and monitoring             | Project owner       | Private manual coverage verified; final production alerts/SLOs remain unpassed                               | ADR-046/050; 2026-10-05/08                       |
+| Group                                          | Required owner role | Status                                                                                                                         | Named approver / approval date / reference / ADR |
+| ---------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| OD-002 — hosting and region                    | Project owner       | Temporary host/topology confirmed; actual private TLS/grants pass; production policy remains separate                          | ADR-049/050/051; 2026-10-07/08                   |
+| DOMAIN — staging origins and Telegram identity | Project owner       | Origins/Bot/DNS/public TLS verified; Main needs no short name; native iPhone accepted by owner report, Web frames blocked      | ADR-049/050/051; 2026-10-07/08                   |
+| ACCESS — operator and service access           | Project owner       | Sole owner/SSH/private operator and owner/non-owner checks pass; ordinary Admin retains 7C gates                               | ADR-050/051; 2026-10-08                          |
+| OPS — deployment and runtime operating policy  | Project owner       | Exact real preparation/deploy/drain pass; actual 48ff852 ↔ a8b97f8 rollback pair passes; arbitrary-version rollback unaccepted | ADR-050/051; 2026-10-08                          |
+| OD-006 — backup and recovery                   | Project owner       | Excluded for disposable personal staging, unperformed; production decision remains open                                        | ADR-050; 2026-10-08                              |
+| OD-007 — final SLOs and monitoring             | Project owner       | Private manual coverage verified; final production alerts/SLOs remain unpassed                                                 | ADR-046/050; 2026-10-05/08                       |
 
 Use this blank record for a new proposal; it does not erase the confirmed decisions above:
 
@@ -421,7 +421,7 @@ extend the accepted portable preparation path to a different topology.
 | Question to resolve                                                                                            | Approved answer                                                                                                                                                                                                  |
 | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What are the staging Web, public API/WSS and Bot webhook domains and DNS owners?                               | ADR-049 exact origins; owner-managed ParsPack DNS-only records/delegation                                                                                                                                        |
-| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot and Main presence; target URL/mobile unverified; named-only Room invitation remains gated                                                                                         |
+| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot; Main native owner launch accepted by owner report; named-only Room invitation remains gated                                                                                      |
 | Which HTTPS/WSS certificates, issuers/trust, renewal owners and ingress peers apply?                           | Private data TLS/grants, trusted LE three-host TLS and scan-gated renewal verified; personal WSS passes                                                                                                          |
 | Which exact CORS origins, Mini App frame ancestors and immutable Web build policy are approved?                | Exact approved Web/API origins in immutable production candidate; framing remains deny-by-default pending reviewed Telegram Web origins                                                                          |
 | Who may use staging, through which access model, with what enrollment/revocation and test-data policy?         | Owner/disposable policy accepted; admission implementation and negative local checks pass; actual private nonce enrollment verified; actual owner admission and non-owner rejection without durable effects pass |
@@ -442,8 +442,8 @@ assigns no operator and implements no mutation authority; 7C remains separately 
 | Question to resolve                                                                                                                            | Approved answer                                                                                                                                                                   |
 | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Who publishes/reviews immutable images, where are they stored, and what protected hosted CI checks/evidence bind the exact source and digests? | Project owner; private exact-image import/daemon/provenance checks pass; hosted protected publication unperformed                                                                 |
-| Who approves the current/previous release pair, active engine/state/ruleset pins and retained job/consumer versions?                           | Project owner; current engine/state/ruleset and old-job compatibility pass; previous-version rollback unaccepted                                                                  |
-| Which supervisor, readiness/admission sequence, traffic switching, stop grace and failure/rollback rules apply?                                | 45-second grace, exact route/hold, accepted HTTP/WSS drain and same-version restart pass; rollback pair unaccepted                                                                |
+| Who approves the current/previous release pair, active engine/state/ruleset pins and retained job/consumer versions?                           | Project owner; actual 48ff852 → a8b97f8 → 48ff852 pair retains active engine/state/ruleset pins, session and command receipts; broader rollback unaccepted                        |
+| Which supervisor, readiness/admission sequence, traffic switching, stop grace and failure/rollback rules apply?                                | 45-second grace, exact route/hold, prior accepted HTTP/WSS drain and current 71-control compatible pair pass; current 31-control availability drill passes                        |
 | Which separate migrator operator/access, compatible expansion/grant review, lock budgets and backfill recovery apply?                          | Separate private migrator: 14 compatible migrations/repeat/grants pass; 5s/60s bounds; ADR-050 recovery excluded/unperformed                                                      |
 | Which explicit runtime quotas, pools, cleanup/queue budgets and configuration revisions apply within existing validated bounds?                | ADR-051 accepted public role profile, pools 5/3, connection ceiling 32 and real parser/preparation pass                                                                           |
 | Which allowlisted telemetry sink, access, retention, on-call roster and incident/release ledger apply?                                         | Sole owner; ADR-051 private operator profile, loopback metrics and local 10m/three-file compressed rotation; actual safe logs/health/metrics and private evidence ledger verified |
@@ -561,60 +561,34 @@ reference. Recovery cutover and production release require their own scope.
 
 ## Current staging acceptance and remaining full-phase evidence
 
-This checklist records actual evidence for the authorized bounded subset and
-remaining full 18B3 gates. Partial infrastructure results do not complete the phase.
-Use dated restricted evidence references and safe scalar results/hashes; no raw
-DB rows/dumps, chat, cards/decks/hidden state, RNG material or error/trace payloads
-may be attached to this worksheet or public CI artifacts.
+This records actual staging evidence, not local-fixture substitutes or production
+readiness. The [current execution plan](staging-execution-plan.md) and
+[exact binding](../../infra/docker/staging/execution-current.json) retain private
+hashes/references and previous failures. No raw data, secrets or gameplay payloads.
 
-| Acceptance item                                                                                                          | Evidence reference / result                                                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052/053/054 accepted scope; real owner enrollment, exclusive preparation and personal acceptance pass                                                                         |
-| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean a8b97f8 apps/d6eb25b components and eight exact target scans pass normal 24h freshness; release-pair rollback/hosted protection unpassed                                                |
-| Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual data/application TLS/grants/negative/peer/firewall isolation passes; full secret-rotation drill unperformed                                                                            |
-| Compatible migration/redeploy, active Match pins and retained job-handler review                                         | 14 additive migrations/grants/repeat and unchanged final-release fingerprints pass; pinned personal engine/jobs and same-version restart pass                                                 |
-| Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted HTTPS/WSS/bundled SDK and six current public-network startup/auth scenarios pass; current real private full game passes; original iPhone failure recorded, replacement retest pending |
-| Supervisor/ingress drain with accepted-work settlement, retry/reconnect and durable reconciliation                       | Nine HTTP and 15 accepted WSS drain checks pass: readiness closes, accepted work settles, same-version restart/retry/reconnect preserve receipts                                              |
-| Actual candidate-to-previous staging rollback preserving schema/history/receipts                                         | Unaccepted; no compatible scanned previous pair; historical ingress has a new High tiff finding; containment/same-version restart do not prove version rollback                               |
-| Selected backup/PITR isolated restore, measured recovery point/time against approved RPO/RTO and reconciled durable data | Excluded by ADR-050 for personal disposable staging — not performed, not passed; production gate retained                                                                                     |
-| Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Private manual logs/health/metrics/retention pass; production alert/aggregation/load/soak/SLO evidence remains unperformed                                                                    |
+| Acceptance item                                                    | Current evidence and limits                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Owner/provider/region/domains/access/monitoring/recovery decisions | Supplied/approved ADR-049/050/051/052/053/054/055; no new personal-flow owner decision or private reference missing.                                                                                                                                                                                                                           |
+| Exact release/preparation and fresh security gates                 | Clean 48ff852 apps, d6eb25b components, all eight exact image gates normally fresh; four /app fingerprints pass. High/Critical/Unknown zero, no suppression/48h extension.                                                                                                                                                                     |
+| Private data/roles/TLS/firewall/SSH                                | Retained real positive/negative TLS/grant/isolation evidence; no public data ports; private bounded operator logs/health/metrics pass. Full rotation is unperformed.                                                                                                                                                                           |
+| Migrations, engine/job compatibility and actual rollback           | Same 14 migrations/12 contracts/grants, no new migration; 71-control actual current → previous a8b97f8 → current rollback retains active pins/session/durable receipt. Exact pair only with current patched components and healthy Redis; previous a8 still has Redis-stall availability defect.                                               |
+| Native Mini App and current personal game                          | Owner-reported real iPhone acceptance bound to a8b97f8; original failure preserved. Current UI removal/deadline successor has 35 Auth/37 complete-game controls (15 owner commands/27 turns), six public Chromium/WebKit startup/privacy/Auth cases and eight isolation routes passed. Agent browser proof does not claim a new iPhone retest. |
+| Availability containment, drain and recovery                       | Current 31-control real PG/Redis pause drill passes with 30-second unpause guards; prior nine HTTP/15 accepted WSS drain controls retain separate source binding and unchanged-handler compatibility. No backup/queue-loss/provider-failover proof inferred.                                                                                   |
+| Public TLS and renewal                                             | Trusted three-host TLS retained; current exact ACME dry-run/no-due path pass. Two issuer service-busy failures are preserved, delayed third dry-run succeeds. Future actual due renewal unperformed.                                                                                                                                           |
+| Advisory expiry/manual operating access                            | Normal evidence expires Oct 9 22:35:21 Tehran; installed containment timer verified, future trigger unperformed. Four READY, no active synthetic Match; automatic reboot recovery unperformed with restart=no.                                                                                                                                 |
+| Backup/PITR/restore/RPO/RTO                                        | ADR-050 excluded, unperformed, never passed. No recovery promise or provisioning reopened.                                                                                                                                                                                                                                                     |
+| Remaining full-phase evidence                                      | Protected hosted CI/publication/E2E, full rotation, production-like load/reconnect/soak/SLO and broader operational recovery remain unperformed/deferred; existing approved thresholds retained.                                                                                                                                               |
 
-Local 18B1/18B2 implementation and rehearsal evidence remains recorded in the
-plan; it cannot fill these staging rows. MVP 17C completion satisfies the
-sequencing condition, so 18B3 was assessed immediately. Personal traffic is open with fresh normal-policy scans; remaining full
-acceptance gates are recorded separately and do not imply public-launch readiness. Phase 19 remains
-the separate final-readiness review; neither phase supplies launch approval.
+Current preparation is
+`/opt/hambazi-staging/private/prepared-20261009-native-accepted-02`.
+Owner traffic is open; private/Admin/ordinary catalog/Room/webhook routes remain 404. Main personal launch requires no invented short_name. The Room link builder and response schema still require appName; a reviewed Main
+link variant and native invitation launch/join proof are missing. Ordinary Admin
+auth/RBAC/MFA/network/audit controls remain incomplete and disabled, alongside ordinary
+multiplayer/chat/stats/matchmaking. Personal fanout wake-ups remain pending while
+acknowledged two-second snapshots work. Telegram Web frames stay blocked, and one
+WebKit permission-policy introspection case is skipped, not passed.
 
-**Current outcome (2026-10-09 Tehran):** no additional owner policy/private
-reference is missing for the personal flow. Clean `a8b97f8` apps and exclusive
-`prepared-20261008-native-02` are deployed, with separately patched `d6eb25b`
-ingress/ACME. Fresh official advisory DB restores normal 24-hour acceptance for
-all eight exact images; High/Critical/Unknown remain zero. No historical 48-hour
-exception is extended. Signed pinned tiff 4.7.2-r0 fixes the newly detected High
-ingress finding. Normal evidence expires Oct 9 at 22:35:21 Tehran; the installed
-owned timer then applies maintenance/app stop, with future execution unperformed.
-
-Four READY apps, 14 unchanged compatible migrations/grants, private verified TLS/
-role separation/no public data ports, 35 Auth, 37 full-game (15 owner commands,
-27 turns), nine HTTP and 15 accepted WSS drain checks pass. Six real public-network
-Chromium/WebKit startup scenarios pass query/fragment SDK initialization, owner
-200/non-owner 401, safe diagnostics, logout/URL cleanup/no stored credentials.
-No external SDK dependency, transport interception, proxy or integrity bypass is
-used. Signature/freshness/constant-time checks and exact owner policy are retained.
-Private observability/retention and six public isolation checks pass. Two manually
-confirmed host reboots interrupted transfer/tests; exact Worker/Web image reload
-and four-role `/app` fingerprints after repair/second boot verify their content.
-No OS-layer fingerprint, old graceful drain or automatic reboot recovery is claimed.
-Exact hashes/restricted evidence and historical bindings are in
-[execution-current.json](../../infra/docker/staging/execution-current.json).
-
-Actual iPhone acceptance is pending the owner's retest after the recorded original
-failure; see [mobile steps](runbooks/native-mini-app-startup.md). Telegram Web
-frames and ordinary Admin/catalog/Room/invitations/chat/matchmaking/stats remain
-disabled. Personal outbox fanout, full secret rotation and version rollback remain
-unaccepted; recovery is excluded/unperformed. One WebKit permission-policy
-introspection check is skipped and Chromium denial assertions pass. Production-like
-load/soak/SLO/protected publication remain unpassed. These are acceptance/functional
-gaps with consequences in the [execution plan](staging-execution-plan.md), not
-unanswered owner decisions. No Telegram setting, production/destructive action
-or later phase occurs; full 18B3 is incomplete.
+These are implementation/evidence limits, not unanswered owner proposals.
+**18B3 remains In Progress**; no Phase 19, production, paid resource, destructive
+operation or Telegram setting is started. Next operating action: refresh exact
+scan evidence before the normal expiry. See the plan for each deferred consequence.
