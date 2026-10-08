@@ -27,7 +27,7 @@ describe("temporary private-safe Telegram diagnostics", () => {
     expect(diagnosticErrorCode(new Error(canary))).toBe("INTERNAL_ERROR");
     expect(diagnosticErrorCode("FORBIDDEN")).toBe("FORBIDDEN");
   });
-  it("traces an auth denial while excluding launch data and arbitrary error contents from UI/state", async () => {
+  it("keeps safe auth-denial state private after temporary diagnostic UI removal", async () => {
     vi.stubGlobal("window", { location: { hash: "" } });
     const fetcher = vi
       .fn<typeof fetch>()
@@ -53,8 +53,8 @@ describe("temporary private-safe Telegram diagnostics", () => {
     expect(JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body)).initData === canary).toBe(true);
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const ui = renderToStaticMarkup(<App runtime={runtime} />);
-    expect(ui).toContain("Telegram startup check");
-    expect(ui).toContain("Authentication: failed");
+    expect(ui).not.toContain("Telegram startup check");
+    expect(ui).not.toContain("Authentication: failed");
     expect(ui).not.toContain(canary);
     expect(JSON.stringify(runtime.store.getState())).not.toContain(canary);
     runtime.dispose();

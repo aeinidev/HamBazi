@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "owner-gameplay-open-native-startup-fix-deployed-real-iphone-retest-pending",
+  "status": "owner-gameplay-open-user-reported-native-accepted",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -83,7 +83,7 @@
     "secondIndependentSSH": true,
     "publicTLSMaintenance": false,
     "certificateNotAfterUTC": "2027-01-06T06:11:04Z",
-    "nativeOwnerFlow": false,
+    "nativeOwnerFlow": true,
     "applicationReadiness": true,
     "versionRollbackAccepted": false,
     "recoveryEvidence": "excluded-unperformed-ADR-050",
@@ -151,11 +151,7 @@
     "updatesAcknowledged": false,
     "telegramSettingsChanged": false
   },
-  "currentBlocker": {
-    "code": "ACTUAL_IPHONE_RETEST_PENDING",
-    "preparedOutputCreated": true,
-    "nextAction": "Owner relaunches configured Main Mini App in native iPhone Telegram, verifies native-01 marker and authenticated screen, or supplies only four fixed diagnostic lines."
-  },
+  "currentBlocker": null,
   "privateEvidence": [
     "/opt/hambazi-staging/private/execution-20261008/evidence/owner-enrollment-preflight-20261008-0754.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/owner-config-validation-20261008-0756.json",
@@ -198,7 +194,8 @@
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-startup-live-evidence-02.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-final-operator-02.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-final-public-02.json",
-    "/opt/hambazi-staging/private/execution-20261008/evidence/native-worker-role-denials-02.json"
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-worker-role-denials-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-owner-confirmation-20261009-01.json"
   ],
   "checkedAt": "2026-10-08T22:58:37.888321+00:00",
   "personalGameplayEnabled": true,
@@ -304,10 +301,15 @@
       "sha256": "d1d2e89ed0760fb483f7bad4026e2deff5f2e80ef377dc388feb882a63fa5ad1",
       "checkedAt": "2026-10-08T22:58:37.886015+00:00",
       "passed": true
+    },
+    "native-owner-confirmation-20261009-01.json": {
+      "sha256": "c1934959074c7eddc9f88994793c659de1bb60099c0f83e8cb701bbafdf639a8",
+      "recordedAtUTC": "2026-10-08T23:12:08.239134+00:00",
+      "passed": true,
+      "evidenceKind": "user-reported-real-native-acceptance"
     }
   },
   "deferred": {
-    "nativeTelegramClient": "original owner iPhone missing-launch failure recorded; fixed artifact deployed and six actual-network browser startup/auth scenarios pass; actual iPhone retest remains pending",
     "telegramWebFrames": "blocked by current frame-ancestors none",
     "ordinaryAdminCatalogRoom": "disabled pending required controls/invitation implementation",
     "competitiveStatsChatMatchmaking": "unavailable in personal profile",
@@ -324,7 +326,7 @@
     "matchingLaptopVpsSha384": "3f223aba4f0ede97d1465e3e09a7a9692fbe16ab446dca3f1da5778f3758978cbe53b1cc42f9f781655f2a18eecdfcc6",
     "approvedPinRefreshInProgress": false,
     "serverlessApiUsed": false,
-    "nativeClientVerified": false,
+    "nativeClientVerified": true,
     "approvedPinRefreshDeployed": true,
     "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG",
     "realNetworkDeliveryVerified": true,
@@ -334,7 +336,8 @@
     "sdkDistribution": "unmodified reviewed bytes bundled in immutable Web artifact",
     "runtimeUIDReadabilityGatePassed": true,
     "queryLaunchPreservationRegressionPassed": true,
-    "startupLiveScenarios": 6
+    "startupLiveScenarios": 6,
+    "nativeClientEvidenceKind": "user-reported"
   },
   "historicalPersonalBinding": {
     "checkedAt": "2026-10-08T13:28:51.064486+00:00",
@@ -552,5 +555,21 @@
       "checkedAt": "2026-10-08T13:28:51.064486+00:00",
       "passed": true
     }
+  },
+  "nativeOwnerAcceptance": {
+    "evidenceKind": "user-reported-real-native-acceptance",
+    "reportedBy": "project-owner",
+    "recordedAtUTC": "2026-10-08T23:12:08.239134+00:00",
+    "reportedDateAsiaTehran": "2026-10-09",
+    "device": "iPhone",
+    "client": "native Telegram Mini App",
+    "passed": true,
+    "directlyObservedByAgent": false,
+    "scope": "owner-reported success of requested actual native relaunch/sign-in/personal-staging retest; no separate full-game command count, client version or timing is inferred",
+    "sourceCommit": "a8b97f8dc57014f130aaedee604faf95e91da593",
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-native-02",
+    "composeSha256": "669bc5eb8f230f3a3115ed76b040bfcde7fb2900d2f3506b7bffac97abe432af",
+    "previousFailurePreserved": true,
+    "exactOriginalIPhoneFailureCauseProven": false
   }
 }

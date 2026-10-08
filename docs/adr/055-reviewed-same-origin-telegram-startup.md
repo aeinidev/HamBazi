@@ -61,6 +61,18 @@ storage protection and signed auth requests. Real iPhone results remain pending;
 reproduced query/transport issues are not asserted as the owner's exact cause.
 The bounded Trivy expiry, role separation, TLS and owner-only scope are unchanged.
 
+## Native acceptance follow-up — 2026-10-09
+
+The owner confirms that the real iPhone native Telegram retest succeeded and
+everything worked as expected. Record this as user-reported native acceptance
+of clean `a8b97f8` / `prepared-20261008-native-02`, separately from agent-observed
+browser evidence. It closes the reported native blocker; the exact original
+iPhone failure cause is not inferred. Remove the temporary diagnostic display
+now that its purpose is fulfilled. Guarded SDK loading, query/fragment launch,
+in-memory credentials, signature/freshness and owner admission remain unchanged.
+UI-only successor validation and release-pair rollback evidence must keep their
+own source/configuration bindings; the confirmation is not blanket 18B3 completion.
+
 ## References
 
 [Official SDK](https://telegram.org/js/telegram-web-app.js),

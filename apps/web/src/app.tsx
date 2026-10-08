@@ -34,7 +34,6 @@ function Shell({
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
   const ownerAuthOnly = runtime.scope === "owner-auth";
-  const diagnostics = useSession((s) => s.telegramDiagnostics);
   const task = useTask();
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
   const directPreview =
@@ -121,18 +120,6 @@ function Shell({
             Reconnect
           </button>
         </div>
-      )}
-      {ownerAuthOnly && diagnostics && (
-        <details className="notice" open>
-          <summary>Telegram startup check · native-01</summary>
-          <p>SDK: {diagnostics.sdkPresent ? "present" : "absent"}</p>
-          <p>Launch data: {diagnostics.launchDataPresent ? "present" : "absent"}</p>
-          <p>Initialization: {diagnostics.initialization}</p>
-          <p>
-            Authentication: {diagnostics.authentication}
-            {diagnostics.errorCode ? ` · ${diagnostics.errorCode}` : ""}
-          </p>
-        </details>
       )}
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
         {directPreview ? (
