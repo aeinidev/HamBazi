@@ -43,6 +43,8 @@ const exact = (value, keys) => {
 const groups = {
   operations: ["HEALTH_PORT", "HEALTH_PROBE_TIMEOUT_MS", "DRAIN_TIMEOUT_MS", "METRICS_ENABLED"],
   api: [
+    "AUTH_ADMISSION_POLICY",
+    "OWNER_ADMISSION_FILE",
     "NODE_EXTRA_CA_CERTS",
     "API_DATABASE_URL",
     "API_REDIS_URL",
@@ -88,6 +90,8 @@ const groups = {
     "ADMISSION_SUBSCRIPTIONS",
   ],
   bot: [
+    "AUTH_ADMISSION_POLICY",
+    "OWNER_ADMISSION_FILE",
     "TELEGRAM_BOT_TOKEN",
     "TELEGRAM_BOT_USERNAME",
     "TELEGRAM_WEBHOOK_SECRET",
@@ -181,6 +185,11 @@ export function validateEnvironments(envs, inputs) {
       bot = envs.bot,
       worker = envs.worker,
       web = envs.web;
+    const aOwner = config.parseOwnerAdmissionConfig(api),
+      bOwner = config.parseOwnerAdmissionConfig(bot);
+    if (inputs.ownerAdmissionFile !== undefined || aOwner || bOwner) {
+      if (!inputs.ownerAdmissionFile || !aOwner || !bOwner) invalid();
+    }
     if (
       api.NODE_EXTRA_CA_CERTS !== undefined ||
       worker.NODE_EXTRA_CA_CERTS !== undefined ||
@@ -347,6 +356,7 @@ export async function prepare(inputsPath, output) {
     "privateAddresses",
     "stopGraceSeconds",
     ...(Object.hasOwn(inputs, "operatorMonitoring") ? ["operatorMonitoring"] : []),
+    ...(Object.hasOwn(inputs, "ownerAdmissionFile") ? ["ownerAdmissionFile"] : []),
   ]);
   for (const field of ["roleEnvFiles", "privateAddresses", "stopGraceSeconds"])
     exact(inputs[field], roles);
@@ -414,6 +424,8 @@ export async function prepare(inputsPath, output) {
   for (const role of roles)
     envs[role] = parseRoleFile((await privateFile(inputs.roleEnvFiles[role])).toString(), role);
   validateEnvironments(envs, inputs);
+  if (inputs.ownerAdmissionFile)
+    config.parseOwnerAdmissionPolicy((await privateFile(inputs.ownerAdmissionFile)).toString());
   const tls = {};
   for (const [name, path] of Object.entries(inputs.tlsFiles))
     tls[name] = await privateFile(path, name.endsWith("Key"));
@@ -468,7 +480,7 @@ export async function prepare(inputsPath, output) {
   // Numeric duration interpolation needs one YAML scalar, rather than a quoted prefix.
   let compose = rendered.replace(/stop_grace_period: "(\d+)"s/g, 'stop_grace_period: "$1s"');
   const definition = parse(compose, { merge: true });
-  if (inputs.operatorMonitoring === operatorProfile || tls.dataCa) {
+  if (inputs.operatorMonitoring === operatorProfile || tls.dataCa || inputs.ownerAdmissionFile) {
     for (const role of roles) {
       if (inputs.operatorMonitoring === operatorProfile)
         definition.services[role].logging = structuredClone(operatorLogging);
@@ -477,6 +489,14 @@ export async function prepare(inputsPath, output) {
           type: "bind",
           source: inputs.tlsFiles.dataCa,
           target: "/run/hambazi/tls/data-ca.pem",
+          read_only: true,
+          bind: { create_host_path: false },
+        });
+      if (inputs.ownerAdmissionFile && ["api", "bot"].includes(role))
+        (definition.services[role].volumes ??= []).push({
+          type: "bind",
+          source: inputs.ownerAdmissionFile,
+          target: config.ownerAdmissionPath,
           read_only: true,
           bind: { create_host_path: false },
         });
@@ -514,6 +534,16 @@ export async function prepare(inputsPath, output) {
       inventorySha256: hash(inventoryBytes),
       scanSha256: hash(scanBytes),
       composeSha256: hash(compose),
+      ...(inputs.ownerAdmissionFile
+        ? {
+            ownerAdmission: {
+              profile: config.ownerAdmissionProfile,
+              privateFile: inputs.ownerAdmissionFile,
+              memberCount: 1,
+              activationVerified: false,
+            },
+          }
+        : {}),
       ...(inputs.operatorMonitoring === operatorProfile
         ? {
             operatorMonitoring: {

@@ -30,7 +30,7 @@ const invalid = () => {
 const count = (n) => Number.isSafeInteger(n) && n >= 0;
 const blocked = (severity) => policy.blockingSeverities.includes(severity);
 const pinnedImage = (image) =>
-  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+|hambazi-candidate\/(api|bot|worker|web):[a-f0-9]{40}-[a-f0-9]{16})@sha256:[a-f0-9]{64}$/.test(
+  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+|hambazi-candidate\/(api|bot|worker|web):[a-f0-9]{40}-[a-f0-9]{16}|hambazi-staging\/(ingress|acme):[a-f0-9]{40}-[a-f0-9]{16})@sha256:[a-f0-9]{64}$/.test(
     image,
   );
 

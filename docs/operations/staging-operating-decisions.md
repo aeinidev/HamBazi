@@ -291,6 +291,14 @@ for provider, staffing, backups or runtime values. They are not passed by prepar
 
 ## Concrete execution-plan preparation — 2026-10-08
 
+The subsequent owner instruction explicitly supersedes the earlier preparation-only
+restriction for the bounded owner-only deployment in [ADR-052](../adr/052-temporary-owner-admission-and-execution.md).
+Latest proposed infrastructure values are now authorized. The plan's historical
+unperformed/blocked observations remain evidence at their original timestamp;
+new execution evidence is recorded separately. No generic repeat approval is needed
+for authorized implementation. Gameplay/Admin/Room invitations and Telegram settings
+remain outside the new scope; full 18B3 acceptance is not inferred.
+
 The [owner-only staging execution plan](staging-execution-plan.md) binds the exact
 `prepared-20261008-02` definition, preparation/inventory/scan hashes, source/build
 and four immutable image identities. At `2026-10-07T22:48:00Z`, read-only target

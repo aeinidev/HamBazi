@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Account, AccountCreationPort, UserIdentityPort } from "../../users/index.js";
 import type { SessionClock, SessionFailure } from "./session-ports.js";
 import type { TelegramVerifier } from "./telegram-verifier.js";
+import type { OwnerAdmission } from "./owner-admission.js";
 
 export interface MiniAppOnboarding {
   create(
@@ -20,6 +21,7 @@ export function miniAppOnboardingService(deps: {
   users: UserIdentityPort;
   telegram: TelegramVerifier;
   clock: SessionClock;
+  ownerAdmission?: OwnerAdmission;
 }): MiniAppOnboarding {
   function time() {
     const value = deps.clock.nowMs();
@@ -40,6 +42,8 @@ export function miniAppOnboardingService(deps: {
         const verified = deps.telegram.verify(initData, start);
         if (!verified.ok) return createErrorEnvelope("UNAUTHENTICATED");
         const { telegramUserId, startParam } = verified.identity;
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsTelegramId(telegramUserId)))
+          return createErrorEnvelope("UNAUTHENTICATED");
         // Preserve signed routing data opaquely, bounded by the existing initData transport cap.
         if (startParam !== undefined && startParam.length > 16384)
           return createErrorEnvelope("INVALID_INPUT");
@@ -60,6 +64,8 @@ export function miniAppOnboardingService(deps: {
           !stillVerified.ok ||
           stillVerified.identity.telegramUserId !== telegramUserId
         )
+          return createErrorEnvelope("UNAUTHENTICATED");
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsTelegramId(telegramUserId)))
           return createErrorEnvelope("UNAUTHENTICATED");
         // Explicit allowlist; persistence fields cannot leak through a repository/service object.
         return {

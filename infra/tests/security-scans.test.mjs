@@ -25,6 +25,37 @@ const cleanImage = {
   Results: [{ Class: "os-pkgs" }],
 };
 
+it("admits only pinned clean-source staging artifact names and preserves Unknown/High blocks", () => {
+  const ref =
+    "hambazi-staging/ingress:" +
+    "a".repeat(40) +
+    "-" +
+    "b".repeat(16) +
+    "@sha256:" +
+    "c".repeat(64);
+  const report = { ...cleanImage, ArtifactName: ref };
+  expect(assessImage(report, ref).ok).toBe(true);
+  for (const severity of ["HIGH", "CRITICAL", "UNKNOWN"])
+    expect(
+      assessImage(
+        {
+          ...report,
+          Results: [
+            {
+              Class: "os-pkgs",
+              Vulnerabilities: [
+                { VulnerabilityID: "CVE-2026-12345", PkgName: "synthetic", Severity: severity },
+              ],
+            },
+          ],
+        },
+        ref,
+      ).ok,
+    ).toBe(false);
+  for (const bad of ["nginx:latest", "hambazi-staging/ingress:latest@sha256:" + "c".repeat(64)])
+    expect(() => assessImage({ ...report, ArtifactName: bad }, bad)).toThrow();
+});
+
 it("blocks known High dependencies and rejects unavailable/inconsistent audit evidence", () => {
   expect(assessAudit(cleanAudit, 0)).toMatchObject({ ok: true, findings: [] });
   const advisory = {

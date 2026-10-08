@@ -3,6 +3,7 @@ export {
   createAuthSessions,
   createBotOnboarding,
   createBotOnboardingCleanup,
+  createFileOwnerAdmission,
 } from "./module.js";
 export { botOnboardingUpdateSchema, botOnboardingAckSchema } from "./application/bot-onboarding.js";
 export type { BotOnboarding } from "./application/bot-onboarding.js";
@@ -29,3 +30,4 @@ export { createAuthHttpModule, sendRateDecision } from "./infrastructure/http.js
 export { createRedisAuthRateLimiter } from "./infrastructure/redis-rate-limit.js";
 export { authOpenApiDocument, authPaths } from "./infrastructure/http-contract.js";
 export type { AuthRateLimiter, RateDecision } from "./application/rate-limit.js";
+export type { OwnerAdmission } from "./application/owner-admission.js";

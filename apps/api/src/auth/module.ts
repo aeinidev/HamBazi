@@ -10,6 +10,12 @@ import { createSessionCodec, type SessionSigningOptions } from "./infrastructure
 import { botOnboardingService } from "./application/bot-onboarding.js";
 import { createBotOnboardingRepository } from "./infrastructure/repositories/bot-onboarding.js";
 import { botCleanupService } from "./application/bot-cleanup.js";
+import { ownerAdmissionPolicy, type OwnerAdmission } from "./application/owner-admission.js";
+import { ownerFileSource } from "./infrastructure/owner-file.js";
+
+export function createFileOwnerAdmission(file: string, users?: UserIdentityPort): OwnerAdmission {
+  return ownerAdmissionPolicy({ readOwner: ownerFileSource(file), ...(users ? { users } : {}) });
+}
 
 export function createBotOnboardingCleanup(
   database: Parameters<typeof createBotOnboardingRepository>[0],
@@ -38,6 +44,7 @@ export function createAuthSessions(options: {
   clock: SessionClock;
   lifetimeSeconds: number;
   signing: SessionSigningOptions;
+  ownerAdmission?: OwnerAdmission;
 }): AuthSessions {
   return sessionService({
     repository: createSessionRepository(options.database),
@@ -47,6 +54,7 @@ export function createAuthSessions(options: {
     clock: options.clock,
     lifetimeSeconds: options.lifetimeSeconds,
     newSessionId: randomUUID,
+    ...(options.ownerAdmission ? { ownerAdmission: options.ownerAdmission } : {}),
   });
 }
 

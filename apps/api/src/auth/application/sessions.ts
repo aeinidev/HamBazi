@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { UserIdentityPort } from "../../users/index.js";
 import { isLiveSession, type SessionContext, type SessionRecord } from "../domain/session.js";
 import type { TelegramVerifier } from "./telegram-verifier.js";
+import type { OwnerAdmission } from "./owner-admission.js";
 import type {
   AuthSessions,
   SessionClock,
@@ -41,6 +42,7 @@ export function sessionService(deps: {
   clock: SessionClock;
   newSessionId(): string;
   lifetimeSeconds: number;
+  ownerAdmission?: OwnerAdmission;
 }): AuthSessions {
   const { repository, codec, telegram, users, clock, newSessionId, lifetimeSeconds } = deps;
   if (
@@ -65,6 +67,11 @@ export function sessionService(deps: {
         const start = time();
         const verified = telegram.verify(initData, start.ms);
         if (!verified.ok) return denied();
+        if (
+          deps.ownerAdmission &&
+          !(await deps.ownerAdmission.allowsTelegramId(verified.identity.telegramUserId))
+        )
+          return denied();
         const user = await users.findActiveByTelegramId(verified.identity.telegramUserId);
         if (!user || !uuid.safeParse(user.userId).success) return denied();
         const issuedAt = time().seconds;
@@ -106,6 +113,8 @@ export function sessionService(deps: {
           !telegram.verify(initData, end.ms).ok
         )
           return denied();
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(record.userId)))
+          return denied();
         return { ok: true as const, session: context(current), accessToken };
       } catch {
         return failed();
@@ -116,11 +125,15 @@ export function sessionService(deps: {
         const start = time().seconds;
         const claims = await codec.verify(token, start);
         if (!claims) return denied();
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(claims.userId)))
+          return denied();
         const user = await users.findActiveById(claims.userId);
         if (!user || user.userId !== claims.userId) return denied();
         const row = await repository.find(claims.id);
         const now = time().seconds;
         if (now < start || !row || !matches(row, claims) || !isLiveSession(row, now))
+          return denied();
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(claims.userId)))
           return denied();
         return { ok: true as const, session: context(row) };
       } catch {
@@ -132,6 +145,8 @@ export function sessionService(deps: {
         const start = time().seconds;
         const claims = await codec.verify(token, start);
         if (!claims) return denied();
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(claims.userId)))
+          return denied();
         const row = await repository.find(claims.id);
         const now = time().seconds;
         if (

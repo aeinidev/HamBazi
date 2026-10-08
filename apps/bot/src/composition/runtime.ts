@@ -1,5 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { parseBotRuntimeConfig, SecretValue } from "@hambazi/config";
+import { parseOwnerAdmissionConfig } from "@hambazi/config";
+import { createFileOwnerAdmission } from "@hambazi/api/auth";
 import { createBackend } from "../backend.js";
 import { createTelegramSender } from "../telegram.js";
 import { createDeliveryHandler } from "../delivery.js";
@@ -31,6 +33,10 @@ export async function startBot(
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
     const config = parseBotRuntimeConfig(env);
+    const ownerConfig = parseOwnerAdmissionConfig(env);
+    const ownerAdmission = ownerConfig ? createFileOwnerAdmission(ownerConfig.file) : undefined;
+    if (ownerAdmission && !(await ownerAdmission.telegramId()))
+      throw new Error("OWNER_ADMISSION_POLICY_INVALID");
     if (operations.port)
       healthServer = await startHealthServer(
         health,
@@ -60,6 +66,7 @@ export async function startBot(
       secret: config.webhookSecret,
       backend: backend.backend,
       handle: createDeliveryHandler({
+        ...(ownerAdmission ? { ownerAdmission } : {}),
         backend: backend.backend,
         sender,
         botId: config.botId,

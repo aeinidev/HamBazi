@@ -27,3 +27,9 @@ export {
   transportAdmissionPolicySchema,
 } from "./transport-admission.js";
 export type { TransportAdmissionPolicy } from "./transport-admission.js";
+export {
+  parseOwnerAdmissionConfig,
+  parseOwnerAdmissionPolicy,
+  ownerAdmissionProfile,
+  ownerAdmissionPath,
+} from "./owner-admission.js";

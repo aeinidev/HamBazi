@@ -3,6 +3,7 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AccountCreationPort, UserIdentityPort } from "../../users/index.js";
 import type { BotServiceContext } from "./bot-service.js";
 import type { SessionClock } from "./session-ports.js";
+import type { OwnerAdmission } from "./owner-admission.js";
 import { botCleanupService } from "./bot-cleanup.js";
 import {
   FLOW_LIFETIME_MS,
@@ -99,6 +100,7 @@ export function botOnboardingService(deps: {
   clock: SessionClock;
   newId(): string;
   leaseMs: number;
+  ownerAdmission?: OwnerAdmission;
 }) {
   if (!Number.isSafeInteger(deps.leaseMs) || deps.leaseMs < 1000 || deps.leaseMs > 60000)
     throw new Error("Invalid onboarding lease configuration");
@@ -117,6 +119,8 @@ export function botOnboardingService(deps: {
         return createErrorEnvelope("INVALID_INPUT");
       const update = parsed.data;
       try {
+        if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsTelegramId(update.senderId)))
+          return createErrorEnvelope("UNAUTHENTICATED");
         const receivedAt = now();
         const id = z.uuid().parse(deps.newId());
         const claim = await deps.repository.claim({
@@ -232,10 +236,17 @@ export function botOnboardingService(deps: {
       if (!parsed.success) return createErrorEnvelope("INVALID_INPUT");
       try {
         const ack = parsed.data;
+        const ownerId = deps.ownerAdmission ? await deps.ownerAdmission.telegramId() : undefined;
+        if (deps.ownerAdmission && !ownerId) return createErrorEnvelope("UNAUTHENTICATED");
+        let deniedOwner = false;
         const result = await deps.repository.transition(
           { id: ack.receiptId, botId: context.botId, version: ack.version },
           now,
           (r, flow, at) => {
+            if (ownerId !== undefined && r.telegramUserId !== ownerId) {
+              deniedOwner = true;
+              return undefined;
+            }
             if (r.phase !== "REPLY") return undefined;
             const matches =
               flow &&
@@ -252,6 +263,7 @@ export function botOnboardingService(deps: {
             };
           },
         );
+        if (deniedOwner) return createErrorEnvelope("UNAUTHENTICATED");
         return result?.phase === "DONE"
           ? { ok: true as const, schemaVersion: 1 as const, status: "DONE" as const }
           : retry();

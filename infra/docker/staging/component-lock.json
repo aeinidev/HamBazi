@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux/amd64",
+  "components": {
+    "ingress": {
+      "base": "nginx:1.30.5-alpine@sha256:8f84ed99befc3891b8f329c5c202785278a2cfb7c25107d57fb2a134a3117433",
+      "apkPatches": [
+        {
+          "package": "libexpat",
+          "version": "2.8.5-r0",
+          "filename": "libexpat-2.8.5-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libexpat-2.8.5-r0.apk",
+          "sha256": "2e56946bc495cbed9eb1ad70859a79cba9db6420016453e065a0628848b32c7e"
+        },
+        {
+          "package": "libpng",
+          "version": "1.6.59-r0",
+          "filename": "libpng-1.6.59-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libpng-1.6.59-r0.apk",
+          "sha256": "d16aeb0597f2bc43e0583ac9ff779388ec160c3e22568b640122e94ba55be6d7"
+        },
+        {
+          "package": "nghttp2-libs",
+          "version": "1.70.0-r0",
+          "filename": "nghttp2-libs-1.70.0-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/nghttp2-libs-1.70.0-r0.apk",
+          "sha256": "f0c4014eb2f10308dcdfd84cd49c121673c7b78cb8182b6e7a1388d8ae112a3b"
+        },
+        {
+          "package": "pcre2",
+          "version": "10.49-r0",
+          "filename": "pcre2-10.49-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/pcre2-10.49-r0.apk",
+          "sha256": "2919897914820f42a17a8d7d37df310d2dfad1c82ebe5f539cc5c765f916752a"
+        },
+        {
+          "package": "zlib",
+          "version": "1.3.2-r1",
+          "filename": "zlib-1.3.2-r1.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/zlib-1.3.2-r1.apk",
+          "sha256": "63aeea03c15a2f9018f81805cfc8aa926bdf5cd68921f22149c2fbb5d0ee9f47"
+        }
+      ],
+      "wheels": []
+    },
+    "acme": {
+      "base": "certbot/certbot:v5.8.0@sha256:398c47284a6d6782825be71685f677ef3a1e65b8b5c278a8b1e99f6da84b4eb9",
+      "apkPatches": [
+        {
+          "package": "libuuid",
+          "version": "2.41.6-r1",
+          "filename": "libuuid-2.41.6-r1.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libuuid-2.41.6-r1.apk",
+          "sha256": "e428f43397e863243f17aa85c5b1c3a99adfcb9277d2300b1df7759502db4b6c"
+        },
+        {
+          "package": "zlib",
+          "version": "1.3.2-r1",
+          "filename": "zlib-1.3.2-r1.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/zlib-1.3.2-r1.apk",
+          "sha256": "ee62e1864c235901e2aa4d1868c7ae8f7cc5d0740a98c48a2525332eb4bfda73"
+        }
+      ],
+      "wheels": [
+        {
+          "package": "msgpack",
+          "version": "1.2.1",
+          "filename": "msgpack-1.2.1-cp314-cp314-musllinux_1_2_x86_64.whl",
+          "archiveUrl": "https://files.pythonhosted.org/packages/59/86/1edc67270099a528fa2093ea60fe191233cd238e4bd30cfacf7db79fc959/msgpack-1.2.1-cp314-cp314-musllinux_1_2_x86_64.whl",
+          "sha256": "5ad5467fc3f68b5468e06c5f788d712e9f8ffc8b0cd1bcb160c105c1ee92dae7"
+        },
+        {
+          "package": "setuptools",
+          "version": "83.0.0",
+          "filename": "setuptools-83.0.0-py3-none-any.whl",
+          "archiveUrl": "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl",
+          "sha256": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3"
+        },
+        {
+          "package": "urllib3",
+          "version": "2.8.0",
+          "filename": "urllib3-2.8.0-py3-none-any.whl",
+          "archiveUrl": "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl",
+          "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+        }
+      ]
+    }
+  }
+}

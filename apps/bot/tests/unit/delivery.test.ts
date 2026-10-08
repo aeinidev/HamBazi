@@ -1,8 +1,32 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createDeliveryHandler } from "../../src/delivery.js";
 import { RetryDelivery } from "../../src/backend.js";
 import { fixture, raw, delivery } from "./fixtures.js";
 describe("commit/send/ack orchestration", () => {
+  it("denies non-owner original senders before backend and Telegram effects", async () => {
+    const f = fixture();
+    const ownerAdmission = {
+      telegramId: async () => "101",
+      allowsTelegramId: vi.fn(async () => false),
+      allowsUserId: async () => false,
+    };
+    await createDeliveryHandler({ ...f, ownerAdmission })(raw(), AbortSignal.timeout(1000));
+    expect(f.backend.process).not.toHaveBeenCalled();
+    expect(f.sender.send).not.toHaveBeenCalled();
+    expect(f.backend.acknowledge).not.toHaveBeenCalled();
+  });
+  it("rechecks revoked admission before Telegram delivery", async () => {
+    const f = fixture();
+    const ownerAdmission = {
+      telegramId: async () => "100",
+      allowsTelegramId: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
+      allowsUserId: async () => false,
+    };
+    await createDeliveryHandler({ ...f, ownerAdmission })(raw(), AbortSignal.timeout(1000));
+    expect(f.backend.process).toHaveBeenCalledOnce();
+    expect(f.sender.send).not.toHaveBeenCalled();
+    expect(f.backend.acknowledge).not.toHaveBeenCalled();
+  });
   it("only acknowledges after a successful send", async () => {
     const f = fixture();
     await createDeliveryHandler(f)(raw(), AbortSignal.timeout(1000));

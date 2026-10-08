@@ -29,6 +29,23 @@ const lines = (env) =>
     .map(([key, value]) => `${key}=${value}\n`)
     .join("");
 
+it("binds complete owner admission for API/Bot and denies partial or unknown profiles", () => {
+  const { envs, inputs } = deploymentFixture();
+  inputs.ownerAdmissionFile = "/private/owner-admission.json";
+  const profile = {
+    AUTH_ADMISSION_POLICY: "telegram-owner-only-v1",
+    OWNER_ADMISSION_FILE: "/run/hambazi/owner-admission.json",
+  };
+  Object.assign(envs.api, profile);
+  Object.assign(envs.bot, profile);
+  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+  delete envs.bot.AUTH_ADMISSION_POLICY;
+  expect(() => validateEnvironments(envs, inputs)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
+  Object.assign(envs.bot, profile);
+  delete inputs.ownerAdmissionFile;
+  expect(() => validateEnvironments(envs, inputs)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
+});
+
 it("validates actual production role parsers, literal JSON secrets and distinct credentials", () => {
   const { envs, inputs } = deploymentFixture();
   for (const role of Object.keys(envs)) envs[role] = parseRoleFile(lines(envs[role]), role);

@@ -9,6 +9,7 @@ import {
   parseCatalogConfig,
   parseRoomsConfig,
   parseTransportAdmissionConfig,
+  parseOwnerAdmissionConfig,
 } from "@hambazi/config";
 import { createRoomsPort, createRoomsRate } from "../rooms/index.js";
 import { createCatalogPort, createCatalogRate } from "../games/index.js";
@@ -19,6 +20,7 @@ import {
   createRedisAuthRateLimiter,
   createMiniAppOnboarding,
   createBotOnboarding,
+  createFileOwnerAdmission,
 } from "../auth/index.js";
 import {
   createUserIdentityPort,
@@ -47,6 +49,7 @@ export async function startApi(
   const runtime = parseRuntimeConfig(environment, "api");
   if (runtime.role !== "api") throw new Error("Invalid runtime role");
   const auth = parseAuthRuntimeConfig(environment);
+  const ownerConfig = parseOwnerAdmissionConfig(environment);
   const profileConfig = parseProfileConfig(environment);
   const catalogConfig = parseCatalogConfig(environment);
   const roomsConfig = parseRoomsConfig(environment);
@@ -121,6 +124,11 @@ export async function startApi(
   });
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
+    const ownerAdmission = ownerConfig
+      ? createFileOwnerAdmission(ownerConfig.file, createUserIdentityPort(database))
+      : undefined;
+    if (ownerAdmission && !(await ownerAdmission.telegramId()))
+      throw new Error("OWNER_ADMISSION_POLICY_INVALID");
     const collect = createMetricCollection(
       metrics,
       [
@@ -152,12 +160,14 @@ export async function startApi(
     const telegram = createTelegramVerifier(auth.botToken, auth.telegram);
     const clock = { nowMs: () => Date.now() };
     const onboarding = createMiniAppOnboarding({
+      ...(ownerAdmission ? { ownerAdmission } : {}),
       accounts: createAccountCreationPort(database),
       users: createUserIdentityPort(database),
       telegram,
       clock,
     });
     const sessions = createAuthSessions({
+      ...(ownerAdmission ? { ownerAdmission } : {}),
       database,
       users: createUserIdentityPort(database),
       telegram,
@@ -250,6 +260,7 @@ export async function startApi(
       logger,
       onboarding: (leaseMs) =>
         createBotOnboarding({
+          ...(ownerAdmission ? { ownerAdmission } : {}),
           database,
           accounts: createAccountCreationPort(database),
           users: createUserIdentityPort(database),
