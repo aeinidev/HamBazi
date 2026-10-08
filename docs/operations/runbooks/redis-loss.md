@@ -13,6 +13,11 @@ SEV1 if admission consistency or durable recovery is at risk.
    loss or grant admission from client tickets. Disable new game admission via the
    approved containment path if coordination cannot be trusted; current catalog
    remains unplayable. No unsafe Redis fallback or reconstructed hidden Match state.
+   Bound transport admission replies to the existing one-second deadline as well
+   as cancelling queued commands. An already-written Redis command can ignore
+   AbortSignal; its late reply must never grant a timed-out admission. Include a
+   paused-service probe of existing-session reads, logout and denied fresh issuance
+   in staging availability drills. Do not count the drill as full queue-storage recovery.
 3. Preserve PostgreSQL Matches/events/commands/outbox/results and consumer receipts.
    Stop/drain local publishers/consumers if needed; do not delete failed jobs,
    flush Redis, reset counters or remove shared schedules. Connection health failure

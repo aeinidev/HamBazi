@@ -3,6 +3,7 @@ import { BlockList, isIP } from "node:net";
 import type { IncomingMessage } from "node:http";
 import { createClient } from "redis";
 import { transportAdmissionPolicySchema, type TransportAdmissionPolicy } from "@hambazi/config";
+import { withDeadline } from "@hambazi/observability";
 import type { RealtimeRate } from "./gateway.js";
 
 export type AdmissionDecision =
@@ -135,9 +136,15 @@ export function createRedisTransportAdmission(options: {
       return { allowed: false, reason: "unavailable" };
     const key = `hambazi:transport-rate:v1:${namespace}:${operation}:${createHash("sha256").update(subject).digest("hex")}`;
     try {
-      const result = await client
-        .withAbortSignal(AbortSignal.timeout(1000))
-        .eval(script, { keys: [key], arguments: [String(limits[operation])] });
+      // Redis removes AbortSignal listeners once a command is written. Bound
+      // the reply too, so durable reads/logout can follow their outage policy.
+      // A late command may consume quota, but never grants timed-out admission.
+      const result = await withDeadline(
+        client
+          .withAbortSignal(AbortSignal.timeout(1000))
+          .eval(script, { keys: [key], arguments: [String(limits[operation])] }),
+        1000,
+      );
       if (!Array.isArray(result) || result.length !== 2) throw new Error();
       const [allowed, ttl] = result;
       if (
