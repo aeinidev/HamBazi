@@ -1,0 +1,23 @@
+[Unit]
+Description=HamBazi temporary staging TLS renewal with mandatory fresh scans
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/opt/hambazi-staging/private/toolchain/node-v24.20.0-linux-x64/bin/node /opt/hambazi-staging/private/runner-current/infra/release/staging-renew.mjs --renew
+TimeoutStartSec=900
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/opt/hambazi-staging/private/execution-20261008
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE
+StandardOutput=journal
+StandardError=journal

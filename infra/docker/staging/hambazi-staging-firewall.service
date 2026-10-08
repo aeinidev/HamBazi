@@ -1,0 +1,14 @@
+[Unit]
+Description=SSH-preserving HamBazi staging firewall and private peer controls
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStartPre=/usr/sbin/modprobe br_netfilter
+ExecStart=/opt/hambazi-staging/private/execution-20261008/firewall.sh reload
+
+[Install]
+WantedBy=multi-user.target
