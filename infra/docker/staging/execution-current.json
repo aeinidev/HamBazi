@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "purpose": "temporary-owner-staging-execution-binding",
+  "status": "maintenance-only-owner-enrollment-blocked",
+  "target": {
+    "ipv4": "185.110.191.104",
+    "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
+    "platform": "linux/amd64"
+  },
+  "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-02",
+  "historicalPreparedComposeSha256": "fa51354d1c1e78a6fe919bd2d2c4840b4b7d9578e9ac4f242435c7c0712e4780",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008",
+  "nextInputs": "/opt/hambazi-staging/private/execution-20261008/owner-inputs.json",
+  "nextPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-owner-01",
+  "newPreparationPassed": false,
+  "applicationsStarted": false,
+  "ownerTrafficOpened": false,
+  "application": {
+    "sourceCommit": "6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "6d2012bb9868c47a5ca682b205069dd698fc14458efdbfac8a2c73c0873d1725",
+    "buildInputSha256": "695b5353018e358a11b24613c8e591c0e7747e31e85c2ef0c6282c241ed28771",
+    "inventorySha256": "e48ddf7385560b2c7804b2471438577d79819c544c6a9e101b55890d019b915e",
+    "scanSha256": "016f66e088a4f22d655be5daf8268e46d19dc0b71b929c67463261f8f3e5a4cb",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81-695b5353018e358a@sha256:dc0604888c05f9b793aa1882f790d8b83b8a833a0ba0f5bdf1e37f7b3dc21b81"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81-695b5353018e358a@sha256:89e22a5dbbf0cc88bac136cd17dca55d102ed6a715a71fa29d5ca7b3596d642d"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81-695b5353018e358a@sha256:978e57a44257c70882b8ed7cb3ac3bf2be175211ed81f1b78000eb3e02aec801"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81-695b5353018e358a@sha256:237cd40c38dc539c9ae12d929dafec71a89e58002801beb4d77f3a802d5e2f5e"
+      }
+    ]
+  },
+  "components": {
+    "sourceCommit": "fcfac0a0eb08739f60f6c8a9e38c797bf581c772",
+    "lockSha256": "c3d08af8baa3af5ef5877f88d926457028a6c1ca791057becd9da3ef6d3c3f14",
+    "inventorySha256": "888de0521a3e2fb1055304f51d1fd2c47f740348c351c8cb4c2313380feec152",
+    "scanSha256": "fcf346bc9b477707c748931ddf667fddc78020c0528cb8563db64cca943f4655",
+    "images": [
+      {
+        "role": "ingress",
+        "image": "hambazi-staging/ingress:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-5d569d0ba9eca3e4@sha256:c2ad9ad7678c022eeb50784bf1a9dc68eb45735c5881d3f90c9cc2bb1ca6b57b",
+        "buildInputSha256": "5d569d0ba9eca3e4cb32ff742b5557230ebb1e85aaaf9c9716e6f853bd88c48a"
+      },
+      {
+        "role": "acme",
+        "image": "hambazi-staging/acme:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-7793e071a2a421b6@sha256:c91a2b4547cd45dec7cfe020971197d9c2e75938d04637409143bdc5d2c5abd7",
+        "buildInputSha256": "7793e071a2a421b67af479deba7ca05c40a8c1040ca192c67e043c40d413b6dd"
+      }
+    ]
+  },
+  "scanner": {
+    "databaseMaximumAgeHours": 24,
+    "earliestEvidenceExpiryUTC": "2026-10-08T07:38:55.515Z",
+    "expiryAsiaTehran": "2026-10-08 11:08:55",
+    "blocking": ["high", "critical", "unknown"],
+    "secretFindingsAllowed": 0
+  },
+  "acceptedObservations": {
+    "privateDataTLS": true,
+    "privateDataGrantDenials": true,
+    "compatibleMigrations": 13,
+    "repeatMigratePassed": true,
+    "secondIndependentSSH": true,
+    "publicTLSMaintenance": true,
+    "certificateNotAfterUTC": "2027-01-06T06:11:04Z",
+    "nativeOwnerFlow": false,
+    "applicationReadiness": false,
+    "versionRollbackAccepted": false,
+    "recoveryEvidence": "excluded-unperformed-ADR-050",
+    "telegramSettingsChanged": false,
+    "maintenanceContainmentCommandVerified": true,
+    "ownerRouteParserVerified": true,
+    "renewalDryRunPassed": true,
+    "renewalSystemdServicePassed": true,
+    "runnerSourceCommit": "b9448d2fd81c0394be679d980f1913c7197aee46"
+  },
+  "assets": {
+    "infra/docker/staging/bootstrap.routes.conf": "6000763dfc76baf809c5d05d35163245d90ffff3593174156a1c6175b2ebf740",
+    "infra/docker/staging/firewall.sh": "7d95f344344dec9c71d38771a0e1aadf6e16f0646137716a7f41e695b85ea7a7",
+    "infra/docker/staging/hambazi-staging-firewall.service": "a36954b0ffb9c49d8f8237fde37f8e5c290b78a4756158c70066c9ba3cf5c75d",
+    "infra/docker/staging/hambazi-staging-renewal.service": "043ddf18ace80335746a5fa1dcb5b652f2c9b41a12c773541c22ed5d35b03f1d",
+    "infra/docker/staging/hambazi-staging-renewal.timer": "e705d8a55ce00af81a69f3c412f3e266e58f1eb2aefa69aaf9aa036d1805fc39",
+    "infra/docker/staging/hold.routes.conf": "c3de14340245b7be3a0ad8863486eace1d0778f5124b1076a4ba1bacea1240ba",
+    "infra/docker/staging/nginx.conf": "3b308c6e5e4f8e21c2fcf575401406b312439cbf61d10e9e5a5725a9dfe8b1f7",
+    "infra/docker/staging/owner.routes.conf": "cad352e4fe09411b6d0ca583dac6e27d9611d3e6e1a7be7078551b7f801b4896",
+    "infra/docker/staging/pg_hba.proposed.conf": "cb5cf09ee3a24200cd9e9d70762cd9b00c0f04479bf3e5011a7a645286fe0c4b",
+    "infra/docker/staging/postgresql.proposed.conf": "12bfbeb055e9cc32a308ca3fff68e74295220b00febea21bccd14f08bae7b1fd",
+    "infra/docker/staging/redis.proposed.conf": "d1d9dd79800c5442e294fbf7dff087dfaa3ef50f7f62f11cdfba73f652b9b06c",
+    "infra/docker/staging/start-redis-tls.sh": "3acb5285aacf1203615c6847e12ee407e60ad5843e80d6df75e3d4132555430c"
+  }
+}

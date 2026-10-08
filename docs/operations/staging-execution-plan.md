@@ -1,20 +1,75 @@
 # Temporary owner-only staging execution plan
 
-**Date:** 2026-10-08. **Status:** Review draft; execution is not authorized by this
-document. **Phase:** 18B3 remains Blocked. No service, migration, public certificate
-or Telegram setting was activated while preparing this plan.
+**Date:** 2026-10-08. **Status:** Bounded infrastructure executed; ingress remains
+503 and application activation is blocked by private owner enrollment. **Phase:**
+18B3 is not complete. The latest owner request supersedes preparation-only limits
+for the explicit temporary staging subset in [ADR-052](../adr/052-temporary-owner-admission-and-execution.md).
+Telegram settings, gameplay/Admin/Room activation, production, destructive data
+operations and other phases remain outside that request.
 
-This plan uses the real preparation at
-`/opt/hambazi-staging/private/prepared-20261008-02`. Preserve it unchanged. The
-approved inputs and bounded preparation remain [ADR-049](../adr/049-temporary-parspack-staging-preparation.md),
-[ADR-050](../adr/050-disposable-personal-staging-exception.md) and
-[ADR-051](../adr/051-private-manual-staging-preparation.md). The sole owner,
-disposable synthetic data, omitted backups/PITR/WAL archiving/offsite storage and
-private manual monitoring are supplied decisions. Recovery evidence remains
-**excluded/unperformed, not passed**. Transactional durability and application
-rollback are still required. No production policy or capacity/SLO target changes.
+## Current execution checkpoint
 
-## Binding and read-only observations
+The immutable historical preparation at
+`/opt/hambazi-staging/private/prepared-20261008-02` is preserved. Its older images
+are not the current owner-only candidate. The exact current release/configuration
+binding is [execution-current.json](../../infra/docker/staging/execution-current.json).
+Application source is clean `6fa2bdc1f851d2663f82dc0f915ec1f1b3be5e81`, build
+`695b5353018e358a11b24613c8e591c0e7747e31e85c2ef0c6282c241ed28771`;
+all four exact target digests/source/build/UID identities passed. Ingress and ACME
+are separately bound clean `fcfac0a` artifacts. The reviewed runner archive is
+`b9448d2fd81c0394be679d980f1913c7197aee46`, SHA-256
+`0eed5761cdecc239cc9dd08f8a268ddb2cefa4f285b053b838c12b1ea9149022`, at
+`/opt/hambazi-staging/private/runner-b9448d2`; private `runner-current` points there.
+The archive has no Git metadata; do not interpret that as repository drift.
+
+| Actual check    | Evidence and boundary                                                                                                                                                                                                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DNS             | 56 local/VPS parent, authoritative SOA/A/AAAA/CAA and resolver checks; all 12 Cloudflare/Google A results match `185.110.191.104`. Parent NS is tornado/rainbow. No DNS mutation. No AAAA or restrictive CAA found.                                                                                                                                 |
+| Security        | Four new apps and both data images pass unchanged High/Critical/Unknown gates; each retains one Moderate zlib finding. Patched Nginx/Certbot have zero findings. Gitleaks zero. Existing advisory update expires **2026-10-08 11:08:55 Tehran**; new download time does not extend it. Refresh exact scans before any later execution after expiry. |
+| Private data    | PG `.20`, Redis `.21`; no published ports. Actual TLS 1.3 verifies chains/SANs; wrong CA/SAN/password/plaintext denied. API/Worker separate credentials, DDL/foreign DB grants and out-of-namespace/dangerous Redis commands denied; health only PING and default Redis user disabled.                                                              |
+| Migration       | 13 reviewed migration and 11 contract fingerprints plus grants match; separate migrator deploy/grants and repeat deploy pass on the empty new PG18 cluster. Lock/statement limits 5s/60s. No active durable pins/retained jobs existed. No reset/down migration.                                                                                    |
+| Firewall        | Owned IPv4/IPv6 chains, Docker forwarding and actual bridge peer controls applied; independent second key-authenticated SSH passed before cancelling the owned rollback timer. Boot unit retains filtering. External private ports and Web-peer data access denied.                                                                                 |
+| Public TLS      | One Let's Encrypt HTTP-01 SAN certificate for all three approved hosts, valid to `2027-01-06T06:11:04Z`. Both local/VPS trust/hostname/TLS/503 checks pass. Hold-only maintenance command and owner-route parser pass.                                                                                                                              |
+| Renewal         | Actual fresh-scan dry-run and normal no-due renewal pass. Daily 03:00 UTC plus ≤15-minute systemd scheduling jitter; fixed safe journal outcomes, no raw Docker logs, ≤7 safe scan records and bounded private ACME logs. Scan failure/staleness blocks ACME. Certbot's own random sleep is replaced by the bounded timer jitter.                   |
+| Web             | 64 unit tests, typecheck/build, 26 browser/privacy tests and exact final production-artifact account/logout/no-realtime/no-invite browser smoke pass. Synthetic browser transport does not count as native Telegram or actual owner admission acceptance.                                                                                           |
+| New preparation | Four real mode-0600 role files and inventory/scan/config bounds pass. Real `prepare.mjs` exits 1 because the actual owner reference is absent; no new prepared directory or application is started.                                                                                                                                                 |
+
+Private execution/evidence is under
+`/opt/hambazi-staging/private/execution-20261008`, mirrored safely in the laptop's
+`~/.cache/hambazi-18b3-activation-20261008`. Do not publish raw role/credential,
+owner ID, launch, SQL diagnostic or gameplay contents. Required private logs,
+loopback health/metrics and compressed 10m × 3 app retention are configured;
+actual app readiness/monitoring/fault/drain acceptance still awaits startup.
+Recovery is **excluded/unperformed under ADR-050, never passed**. No compatible
+scanned previous owner-scoped release pair exists; hold containment is not version
+rollback acceptance. Full 7C/game/Room/Main invitation and native-client gates
+remain explicitly deferred.
+
+**Exact next executable action:** match the owner's original private nonce message
+using read-only `getUpdates` without `offset`, privately create exactly one actual
+owner-ID policy, and transfer it exclusively to
+`/opt/hambazi-staging/private/execution-20261008/owner-admission.json` (0600,
+UID 1000). No fixture, Bot ID, first visitor or arbitrary backlog sender is valid.
+Then, from `runner-current`, execute the existing CLI against
+`execution-20261008/owner-inputs.json` and a new
+`/opt/hambazi-staging/private/prepared-20261008-owner-01`. Recheck freshness first.
+Do not overwrite historical preparation or record token/environment hashes.
+
+After successful preparation, continue API → Worker → Bot → Web with actual
+readiness, real private privileged TLS and manual observer checks. Keep public
+503 while testing the limited owner routes through an unpublished exact ingress
+composition. Require owner success, signed non-owner refusal with zero durable
+effects, forged/expired/duplicate authentication, current-session revocation,
+proxy spoofing, CORS/CSP/rates/private-route isolation and a real graceful drain/
+containment observation before opening only the reviewed Web/Auth routes.
+Bot's public routes remain withheld until separately authorized Telegram setting
+work. Native Telegram owner flow remains an explicit manual acceptance item.
+
+The sections below retain the reviewed historical baseline and ordered gate
+requirements. Their older Caddy candidate and preparation-only wording do not
+supersede this current checkpoint or ADR-052.
+
+## Historical binding and read-only observations
 
 Target: existing ParsPack Germany VPS `185.110.191.104`, linux/amd64. Require Docker
 daemon ID `342f251a-9e56-4353-af12-a32429b7a2e7` and local Unix socket context;
@@ -178,8 +233,8 @@ The concrete proposed ingress artifact is
 `caddy:2.11.7-alpine@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229`.
 Local pinned-scanner execution found Moderate zlib `CVE-2026-85091` and
 **Unknown `GO-2026-5932` in `golang.org/x/crypto` v0.57.0, no fix reported**.
-Unknown is blocking; the strict assessor also rejects that unsupported advisory
-identity. No accepted scan report exists for this image. Preserve raw private
+Unknown is blocking; the strict assessor also rejects the unsupported artifact
+and advisory grammar. No accepted scan report exists for this image. Preserve raw private
 evidence, investigate/remediate or review a safe replacement and rescan through
 the same gate. Do not suppress/reclassify to approve it. Both proposed Caddyfiles
 pass local `caddy adapt` parsing only; no runtime provisioning, public TLS or
@@ -383,7 +438,7 @@ No such production-compatible staging pair currently exists. Older vulnerable
 release. First-run **hold + stop apps + preserve data** is containment, not evidence
 of candidate-to-previous rollback. The real rollback-pair drill remains an 18B3 gate.
 
-## Exact bounded authorization to request
+## Historical authorization review — superseded by ADR-052
 
 The next independent preparation step is local investigation/remediation of the
 blocked ingress scan. The first target execution step after explicit bounded
@@ -420,7 +475,7 @@ trust, 7C/Main/composition, multiplayer proof, rollback pair and protected stagi
 CI evidence remain blockers at their respective gates. Approval never makes their
 evidence passed. Preparation success remains preparation; 18B3 is not complete.
 
-## Plan preparation validation
+## Historical plan preparation validation
 
 Local Compose `config --no-env-resolution --quiet`, both Caddyfile adaptations,
 Redis helper `sh -n`, proposed-definition invariants/seven asset hash checks,

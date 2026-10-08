@@ -192,12 +192,17 @@ For the actual temporary personal VPS, use the bound
 [owner-only staging execution plan](staging-execution-plan.md). It preserves
 `prepared-20261008-02`, distinguishes proposed infrastructure from accepted inputs
 and records owner-admission/ingress-scan/7C/Main-invitation/rollback prerequisites.
-Its draft assets are not a service-start or migration authorization.
+The latest explicit owner request/ADR-052 authorizes the bounded owner Web/Auth
+deployment. Private data, migrations, firewall and trusted public TLS/503 are now
+executed. Current [exact binding](../../infra/docker/staging/execution-current.json)
+records the new clean scanned candidates; actual private owner enrollment blocks
+new preparation and API/Bot startup. The historical `-02` is preserved. Gameplay,
+Admin, Room, Telegram settings and other phases remain outside the scope.
 
 Use the [18B3 operating-decision worksheet](staging-operating-decisions.md) to
 record proposals, individual owner approvals, separate execution authorization
-and future evidence. Its preparation selects no operating values and keeps
-staging provisioning/deployment/activation fully deferred.
+and future evidence. It preserves supplied decisions and separates actual infrastructure evidence from
+pending application/readiness/native/rollback acceptance.
 
 - OD-002 provider/region and explicit domains/access/provisioning authorization.
 - OD-006 backup/PITR, RPO/RTO, retention, secure archive access and actual recovery
