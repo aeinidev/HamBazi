@@ -18,6 +18,7 @@ const delegates = {
     "matchReservation",
     "match",
     "matchPlayer",
+    "matchBotSeat",
     "matchConnectionLease",
     "gameEvent",
     "processedCommand",

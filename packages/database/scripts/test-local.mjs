@@ -117,7 +117,7 @@ if (!bin) {
     let legacyRoomId;
     let legacyGameId;
     let legacyOutboxId;
-    if (process.argv.includes("--api-auth")) {
+    if (process.argv.includes("--api-auth") || process.argv.includes("--api-personal")) {
       stage = "populated foundation upgrade setup";
       // Isolated-cluster rehearsal only: establish the previous schema and a
       // synthetic old-release row, then let normal deploy apply the expansion.
@@ -336,7 +336,7 @@ if (!bin) {
       const result = await restored.query(
         "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
       );
-      if (result.rows[0].count !== 13) throw new Error();
+      if (result.rows[0].count !== 14) throw new Error();
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -347,28 +347,32 @@ if (!bin) {
       await restored.end();
     }
     console.info("Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.");
-    if (process.argv.includes("--api-auth")) {
+    if (process.argv.includes("--api-auth") || process.argv.includes("--api-personal")) {
       stage = "API session integration";
       // The session suite asserts the pristine foundation fixture before seeding.
       // Keep suite setup/restart drills isolated; each suite still tests concurrent clients.
-      for (const suite of [
-        "sessions.test.ts",
-        "bot-delivery.test.mjs",
-        "profile.test.ts",
-        "catalog.test.ts",
-        "rooms.test.ts",
-        "match-admission.test.ts",
-        "matchmaking.test.ts",
-        "match-processing.test.ts",
-        "private-room-match.test.ts",
-        "match-reconnect.test.ts",
-        "realtime.test.ts",
-        "transport-admission.test.ts",
-        "chat.test.ts",
-        "statistics.test.ts",
-        "diagnostics.test.ts",
-        "release-contract.test.mjs",
-      ]) {
+      const suites = process.argv.includes("--api-personal")
+        ? ["personal-bots.test.ts", "release-contract.test.mjs"]
+        : [
+            "sessions.test.ts",
+            "bot-delivery.test.mjs",
+            "profile.test.ts",
+            "catalog.test.ts",
+            "rooms.test.ts",
+            "match-admission.test.ts",
+            "matchmaking.test.ts",
+            "match-processing.test.ts",
+            "private-room-match.test.ts",
+            "match-reconnect.test.ts",
+            "realtime.test.ts",
+            "transport-admission.test.ts",
+            "chat.test.ts",
+            "statistics.test.ts",
+            "diagnostics.test.ts",
+            "release-contract.test.mjs",
+            "personal-bots.test.ts",
+          ];
+      for (const suite of suites) {
         const result = await run(
           process.execPath,
           [
@@ -390,6 +394,30 @@ if (!bin) {
         const client = new pg.Client({ connectionString: childEnv.MIGRATION_DATABASE_URL });
         await client.connect();
         try {
+          if (process.argv.includes("--api-personal")) {
+            const matches = await client.query(
+              "SELECT * FROM matches WHERE match_type='PERSONAL_BOTS_V1' ORDER BY id",
+            );
+            if (
+              !matches.rows.some((r) => r.status === "FINISHED") ||
+              matches.rows.filter((r) => r.status === "TERMINATED").length !== 2
+            )
+              throw new Error();
+            const bots = await client.query("SELECT * FROM match_bot_seats ORDER BY match_id,seat");
+            if (bots.rows.length !== matches.rows.length) throw new Error();
+            const events = await client.query(
+              "SELECT * FROM game_events WHERE match_id IN (SELECT id FROM matches WHERE match_type='PERSONAL_BOTS_V1') ORDER BY match_id,seq",
+            );
+            const commands = await client.query(
+              "SELECT * FROM processed_commands WHERE match_id IN (SELECT id FROM matches WHERE match_type='PERSONAL_BOTS_V1') ORDER BY match_id,action_id",
+            );
+            return JSON.stringify({
+              matches: matches.rows,
+              bots: bots.rows,
+              events: events.rows,
+              commands: commands.rows,
+            });
+          }
           const result = await client.query(
             "SELECT id, user_id, command_id, schema_version, key_id, issuer, audience, issued_at, expires_at, revoked_at FROM sessions ORDER BY id",
           );
@@ -515,20 +543,25 @@ if (!bin) {
         ]);
       if (before !== (await snapshot())) throw new Error();
       console.info(
-        "API session/account/onboarding integration and account/session/receipt/flow/result/statistics restart persistence passed.",
+        process.argv.includes("--api-personal")
+          ? "Personal finished/terminated Match, bot-seat, event and receipt restart persistence passed."
+          : "API session/account/onboarding integration and account/session/receipt/flow/result/statistics restart persistence passed.",
       );
       if (childEnv.TEST_WORKER_REDIS_URL) {
         stage = "Worker cleanup integration";
         // Rebuild reads real finish truth. Run before the outbox quarantine suite
         // deliberately inserts malformed finish-shaped records into this same DB.
-        for (const suites of [
-          ["tests/integration/statistics.test.ts"],
-          [
-            "tests/integration/cleanup.test.ts",
-            "tests/integration/outbox.test.ts",
-            "tests/integration/match-automation.test.ts",
-          ],
-        ]) {
+        const workerSuites = process.argv.includes("--api-personal")
+          ? [["tests/integration/personal-automation.test.ts"]]
+          : [
+              ["tests/integration/statistics.test.ts"],
+              [
+                "tests/integration/cleanup.test.ts",
+                "tests/integration/outbox.test.ts",
+                "tests/integration/match-automation.test.ts",
+              ],
+            ];
+        for (const suites of workerSuites) {
           const workerTests = await run(
             process.execPath,
             [join(dirname(require.resolve("vitest/package.json")), "vitest.mjs"), "run", ...suites],

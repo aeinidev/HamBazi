@@ -1,3 +1,4 @@
+import { personalRoster, personalMatchType } from "./personal-roster.js";
 import { persistMatchResult } from "./results.js";
 import {
   matchFinishedInputSchema,
@@ -39,6 +40,7 @@ function json(value: unknown) {
 export function createMatchProcessingRepository(
   database: ReturnType<typeof createDatabase>,
   options: {
+    personal?: boolean;
     clock: { nowMs(): number };
     games: readonly MatchGame[];
   },
@@ -62,10 +64,14 @@ export function createMatchProcessingRepository(
     const found = await db.match.findUnique({ where: { id: request.matchId } });
     if (!found) throw new MatchFault("NOT_FOUND");
     const row = found;
-    const players = await db.matchPlayer.findMany({
-      where: { matchId: row.id },
-      orderBy: { seat: "asc" },
-    });
+    if ((row.matchType === personalMatchType) !== (options.personal === true))
+      throw new MatchFault("FORBIDDEN");
+    const players = options.personal
+      ? await personalRoster(db, row.id)
+      : await db.matchPlayer.findMany({
+          where: { matchId: row.id },
+          orderBy: { seat: "asc" },
+        });
     const player = players.find((seat) => seat.userId === actor);
     if (
       actor !== null &&
@@ -297,7 +303,7 @@ export function createMatchProcessingRepository(
       data: {
         id: randomUUID(),
         aggregateId: row.id,
-        type: "MATCH_CHANGED_V1",
+        type: options.personal ? "PERSONAL_MATCH_CHANGED_V1" : "MATCH_CHANGED_V1",
         schemaVersion: 1,
         payloadJsonb: {
           schemaVersion: 1,
@@ -313,7 +319,8 @@ export function createMatchProcessingRepository(
         createdAt: new Date(at),
       },
     });
-    if (resultInput !== null) {
+    // Personal bot results stay in the durable engine snapshot/events; no fake user stats.
+    if (resultInput !== null && !options.personal) {
       const payload = matchFinishedInputSchema.parse({
         schemaVersion: 1,
         matchId: row.id,

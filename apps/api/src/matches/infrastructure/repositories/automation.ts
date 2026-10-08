@@ -1,3 +1,4 @@
+import { personalRoster, personalMatchType } from "./personal-roster.js";
 import { createCorrelation, currentCorrelation } from "@hambazi/observability";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -31,13 +32,20 @@ export function createMatchAutomationRepository(
         const rows = await scope.execute((db) =>
           after === null
             ? db.match.findMany({
-                where: { status: "ACTIVE" },
+                where: {
+                  status: "ACTIVE",
+                  matchType: options.personal ? personalMatchType : { not: personalMatchType },
+                },
                 orderBy: { id: "asc" },
                 take: limit,
                 select: { id: true },
               })
             : db.match.findMany({
-                where: { status: "ACTIVE", id: { gt: after } },
+                where: {
+                  status: "ACTIVE",
+                  id: { gt: after },
+                  matchType: options.personal ? personalMatchType : { not: personalMatchType },
+                },
                 orderBy: { id: "asc" },
                 take: limit,
                 select: { id: true },
@@ -52,6 +60,29 @@ export function createMatchAutomationRepository(
       safe(async () => {
         const parsed = z.uuid().safeParse(input);
         if (!parsed.success) throw new MatchFault("INVALID_INPUT");
+        if (options.personal) {
+          const old = await scope.execute((db) =>
+            db.match.findUnique({
+              where: { id: parsed.data },
+              select: { matchType: true, status: true, stateVersion: true, createdAt: true },
+            }),
+          );
+          if (
+            old?.matchType === personalMatchType &&
+            old.status === "ACTIVE" &&
+            options.clock.nowMs() - old.createdAt.getTime() >= 7200000
+          ) {
+            await writer.process(null, {
+              schemaVersion: 1,
+              matchId: parsed.data,
+              actionId: randomUUID(),
+              expectedVersion: old.stateVersion,
+              kind: "LIFECYCLE",
+              operation: "TERMINATE",
+            });
+            return null;
+          }
+        }
         let fault: MatchFault | undefined;
         try {
           return await scope.transaction(async (db) => {
@@ -59,10 +90,14 @@ export function createMatchAutomationRepository(
               await db.lockMatch(parsed.data);
               const row = await db.match.findUnique({ where: { id: parsed.data } });
               if (!row || row.status !== "ACTIVE") return null;
-              const players = await db.matchPlayer.findMany({
-                where: { matchId: row.id },
-                orderBy: { seat: "asc" },
-              });
+              if ((row.matchType === personalMatchType) !== (options.personal === true))
+                throw new MatchFault("FORBIDDEN");
+              const players = options.personal
+                ? await personalRoster(db, row.id)
+                : await db.matchPlayer.findMany({
+                    where: { matchId: row.id },
+                    orderBy: { seat: "asc" },
+                  });
               const game = games.find(
                 (g) =>
                   g.gameId === row.gameId &&
@@ -86,7 +121,9 @@ export function createMatchAutomationRepository(
               );
               const seat = players.find((p) => p.userId === intent?.playerId);
               return {
-                playerIds: players.filter((p) => p.agentType === "HUMAN").map((p) => p.userId),
+                playerIds: options.personal
+                  ? []
+                  : players.filter((p) => p.agentType === "HUMAN").map((p) => p.userId),
                 intent:
                   intent === null
                     ? null

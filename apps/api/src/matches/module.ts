@@ -101,3 +101,10 @@ export function createAdmissionDiagnostics(
 ) {
   return createAdmissionDiagnosticsRepository(database);
 }
+import { createPersonalMatchRepository } from "./infrastructure/repositories/personal.js";
+export function createPersonalMatchPort(
+  database: Parameters<typeof createPersonalMatchRepository>[0],
+  options: Parameters<typeof createPersonalMatchRepository>[1],
+) {
+  return createPersonalMatchRepository(database, options);
+}

@@ -10,3 +10,7 @@ export {
   canonicalIp,
 } from "./transport-admission.js";
 export type { IpAdmission, AdmissionDecision } from "./transport-admission.js";
+export { createPersonalGateway } from "./personal-gateway.js";
+export type { PersonalGatewayDependencies } from "./personal-gateway.js";
+
+export { personalEventCatalog } from "./personal-contracts.js";

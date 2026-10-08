@@ -1,3 +1,4 @@
+import { PersonalGame } from "./features/personal-game/index.js";
 import { LeaderboardScreen } from "./features/leaderboard/index.js";
 import { useEffect, useState } from "react";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -125,9 +126,7 @@ function Shell({
           <DirectCoupPreview matchId={directCoupPreviewMatchId} />
         ) : session && ownerAuthOnly ? (
           <Panel title="Temporary owner staging">
-            <p className="notice">
-              Account access is enabled. Games and invitations are unavailable.
-            </p>
+            <p className="notice">Owner access is enabled. Invitations are unavailable.</p>
             {profile.isPending ? (
               <Loading />
             ) : profile.error ? (
@@ -140,6 +139,7 @@ function Shell({
             ) : (
               <p dir="auto">{profile.data.displayName}</p>
             )}
+            <PersonalGame />
             <button
               className="secondary"
               disabled={task.blocked}

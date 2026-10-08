@@ -1,3 +1,5 @@
+import { createPersonalCoupGame } from "@hambazi/api";
+import { parsePersonalGameplayConfig } from "@hambazi/config";
 import { startStatisticsConsumer } from "../statistics.js";
 import { createStatisticsProjection } from "@hambazi/api/leaderboard";
 import { createMatchResultPort } from "@hambazi/api/matches";
@@ -58,6 +60,18 @@ export async function startWorker(
   telemetry?: Telemetry,
 ) {
   const runtime = parseRuntimeConfig(environment, "worker");
+  const personal = parsePersonalGameplayConfig(environment, "worker");
+  if (personal && resilience) throw new Error("PERSONAL_GAMEPLAY_CONFIGURATION_INVALID");
+  if (personal)
+    resilience = {
+      games: [createPersonalCoupGame()],
+      policy: { schemaVersion: 1, graceMs: 30000, leaseMs: 30000, maxConnections: 1 },
+      intervalMs: 500,
+      batchSize: 10,
+      attempts: 3,
+      backoffMs: 1000,
+      drainTimeoutMs: 30000,
+    };
   const config = parseOnboardingWorkerConfig(environment);
   const outboxConfig = parseOutboxWorkerConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "worker");
@@ -204,7 +218,11 @@ export async function startWorker(
         backoffMs: resilience.backoffMs,
         drainTimeoutMs: resilience.drainTimeoutMs,
         event,
-        automation: createMatchAutomationPort(database, { clock, games: resilience.games }),
+        automation: createMatchAutomationPort(database, {
+          clock,
+          games: resilience.games,
+          ...(personal ? { personal: true } : {}),
+        }),
         reconnect: createMatchReconnectPort(database, { clock, policy: resilience.policy }),
       });
     }

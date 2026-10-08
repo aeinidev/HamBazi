@@ -44,6 +44,7 @@ const exact = (value, keys) => {
 const groups = {
   operations: ["HEALTH_PORT", "HEALTH_PROBE_TIMEOUT_MS", "DRAIN_TIMEOUT_MS", "METRICS_ENABLED"],
   api: [
+    "PERSONAL_GAMEPLAY_PROFILE",
     "AUTH_ADMISSION_POLICY",
     "OWNER_ADMISSION_FILE",
     "NODE_EXTRA_CA_CERTS",
@@ -111,6 +112,7 @@ const groups = {
     "BOT_MAX_IN_FLIGHT",
   ],
   worker: [
+    "PERSONAL_GAMEPLAY_PROFILE",
     "NODE_EXTRA_CA_CERTS",
     "WORKER_DATABASE_URL",
     "WORKER_REDIS_URL",
@@ -186,6 +188,9 @@ export function validateEnvironments(envs, inputs) {
       bot = envs.bot,
       worker = envs.worker,
       web = envs.web;
+    const personalApi = config.parsePersonalGameplayConfig(api, "api"),
+      personalWorker = config.parsePersonalGameplayConfig(worker, "worker");
+    if (Boolean(personalApi) !== Boolean(personalWorker)) invalid();
     const aOwner = config.parseOwnerAdmissionConfig(api),
       bOwner = config.parseOwnerAdmissionConfig(bot);
     if (inputs.ownerAdmissionFile !== undefined || aOwner || bOwner) {

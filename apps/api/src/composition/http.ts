@@ -1,3 +1,4 @@
+import { createPersonalGateway, type PersonalGatewayDependencies } from "../realtime/index.js";
 import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import {
   createStatisticsHttpModule,
@@ -27,6 +28,7 @@ export async function createHttpApplication(options: {
   statistics?: StatisticsHttpDependencies;
   catalog?: CatalogHttpDependencies;
   rooms?: RoomsHttpDependencies;
+  personal?: PersonalGatewayDependencies;
   realtime?: RealtimeDependencies;
   admission?: HttpAdmission;
   allowedOrigins: readonly string[];
@@ -197,7 +199,11 @@ export async function createHttpApplication(options: {
         telemetry: options.realtime.telemetry ?? options.logger.telemetry,
       })
     : undefined;
+  const personal = options.personal
+    ? createPersonalGateway(server.server, options.personal)
+    : undefined;
   return {
+    personal,
     app,
     server,
     realtime,
@@ -205,6 +211,7 @@ export async function createHttpApplication(options: {
     stopAdmission() {
       draining = true;
       realtime?.stopAdmission();
+      personal?.stopAdmission();
     },
   };
 }

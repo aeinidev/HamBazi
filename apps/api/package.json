@@ -35,8 +35,8 @@
   },
   "scripts": {
     "start": "node dist/composition/main.js",
-    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write && node scripts/realtime-contract.mjs --write && node scripts/statistics-contract.mjs --write",
-    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs && node scripts/statistics-contract.mjs",
+    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write && node scripts/realtime-contract.mjs --write && node scripts/statistics-contract.mjs --write && node scripts/personal-contract.mjs --write",
+    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs && node scripts/statistics-contract.mjs && node scripts/personal-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
     "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime tests/chat tests/leaderboard",

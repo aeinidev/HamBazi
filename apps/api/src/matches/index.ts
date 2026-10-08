@@ -78,3 +78,15 @@ export {
   createAdmissionDiagnostics,
   createOutboxDiagnostics,
 } from "./module.js";
+export { createPersonalMatchPort } from "./module.js";
+import type { createPersonalMatchPort } from "./module.js";
+export type PersonalMatchPort = ReturnType<typeof createPersonalMatchPort>;
+
+export {
+  personalStartSchema,
+  personalReadSchema,
+  personalCloseSchema,
+  personalCurrentSchema,
+  personalCurrentResultSchema,
+} from "./application/personal.js";
+export { matchAckSchema } from "./application/processing.js";

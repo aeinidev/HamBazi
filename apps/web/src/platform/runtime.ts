@@ -149,6 +149,30 @@ export function createRuntime(
         store.setState({ invite: null });
       }
     },
+    personal: () => {
+      if (scope !== "owner-auth" || !token || !store.getState().session)
+        throw new ClientError("UNAUTHENTICATED");
+      realtime ??= createRealtime(
+        origin,
+        token,
+        {
+          state: (connection) => store.setState({ connection }),
+          snapshot: (snapshot) =>
+            store.setState({
+              snapshot:
+                snapshot && store.getState().session
+                  ? publicSnapshot(snapshot, store.getState().session!.userId)
+                  : null,
+            }),
+          resync: (resyncNeeded) => store.setState({ resyncNeeded }),
+          expired: () => clear(true),
+          error: (realtimeError) => store.setState({ realtimeError }),
+        },
+        undefined,
+        true,
+      );
+      return realtime;
+    },
     realtime: () => {
       if (!realtime) throw new ClientError("UNAUTHENTICATED");
       return realtime;

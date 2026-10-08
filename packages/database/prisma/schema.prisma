@@ -203,6 +203,7 @@ model Match {
   updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   game                 Game               @relation(fields: [gameId], references: [id], onDelete: Restrict)
   room                 Room?              @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  botSeats             MatchBotSeat[]
   players              MatchPlayer[]
   events               GameEvent[]
   commands             ProcessedCommand[]
@@ -488,4 +489,15 @@ model StatsValue {
   @@id([generationId, userId, gameId, metric, period])
   @@index([generationId, gameId, metric, period, value, userId])
   @@map("stats_values")
+}
+
+// Server actors have no User or Telegram identity. Durable membership belongs to Matches.
+model MatchBotSeat {
+  matchId String @map("match_id") @db.Uuid
+  actorId String @map("actor_id") @db.Uuid
+  seat Int
+  match Match @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  @@id([matchId, actorId])
+  @@unique([matchId, seat])
+  @@map("match_bot_seats")
 }

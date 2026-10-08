@@ -13,6 +13,7 @@ const ownership = {
     "matchReservation",
     "match",
     "matchPlayer",
+    "matchBotSeat",
     "matchConnectionLease",
     "gameEvent",
     "processedCommand",
@@ -48,6 +49,7 @@ type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   : OwnedClient<O>) &
   (O extends "matches"
     ? {
+        lockPersonalAdmission(): Promise<void>;
         lockMatch(id: string): Promise<void>;
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
       }
@@ -145,6 +147,10 @@ function scope<O extends DatabaseOwner>(
       : {}),
     ...(owner === "matches"
       ? {
+          async lockPersonalAdmission(): Promise<void> {
+            if (!inTransaction) throw new DatabaseError("DATABASE_LOCK_INVALID");
+            await client.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(181803)`;
+          },
           async lockMatch(id: string): Promise<void> {
             if (!inTransaction || !matchIdPattern.test(id))
               throw new DatabaseError("DATABASE_LOCK_INVALID");

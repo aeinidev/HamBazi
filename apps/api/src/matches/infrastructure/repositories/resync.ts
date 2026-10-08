@@ -1,3 +1,4 @@
+import { personalRoster, personalMatchType } from "./personal-roster.js";
 import type { createDatabase } from "@hambazi/database";
 import { MatchFault, matchAckSchema } from "../../application/processing.js";
 import {
@@ -10,6 +11,7 @@ import {
 export function createMatchResyncRepository(
   database: ReturnType<typeof createDatabase>,
   games: readonly MatchViewGame[],
+  personal = false,
 ): MatchResyncRepository {
   const registrations = games.map(
     (game) =>
@@ -28,10 +30,14 @@ export function createMatchResyncRepository(
             await db.lockMatch(matchId);
             const row = await db.match.findUnique({ where: { id: matchId } });
             if (!row || row.status === "TERMINATED") throw new MatchFault("NOT_FOUND");
-            const players = await db.matchPlayer.findMany({
-              where: { matchId },
-              orderBy: { seat: "asc" },
-            });
+            if ((row.matchType === personalMatchType) !== personal)
+              throw new MatchFault("NOT_FOUND");
+            const players = personal
+              ? await personalRoster(db, matchId)
+              : await db.matchPlayer.findMany({
+                  where: { matchId },
+                  orderBy: { seat: "asc" },
+                });
             const player = players.find((p) => p.userId === userId);
             if (!player) throw new MatchFault("NOT_FOUND");
             const role =

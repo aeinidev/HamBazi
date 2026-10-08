@@ -23,6 +23,7 @@ export function createRealtime(
     resync(value: boolean): void;
   },
   connect: typeof io = io,
+  personal = false,
 ) {
   const chatListeners = new Set<(message: ChatMessage) => void>();
   let disposed = false;
@@ -30,8 +31,9 @@ export function createRealtime(
   let sequence: ReturnType<typeof createMatchSequence> | undefined;
   let syncing = false;
   let generation = 0;
-  const socket: Socket = connect(`${origin}/v1`, {
-    path: "/v1/socket.io",
+  const socket: Socket = connect(`${origin}/${personal ? "personal-v1" : "v1"}`, {
+    path: personal ? "/v1/personal/socket.io" : "/v1/socket.io",
+    ...(personal ? { transports: ["websocket"] } : {}),
     auth: { schemaVersion: 1, accessToken },
     autoConnect: false,
     reconnection: true,

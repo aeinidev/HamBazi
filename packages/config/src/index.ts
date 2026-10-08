@@ -33,3 +33,4 @@ export {
   ownerAdmissionProfile,
   ownerAdmissionPath,
 } from "./owner-admission.js";
+export { parsePersonalGameplayConfig } from "./personal-gameplay.js";

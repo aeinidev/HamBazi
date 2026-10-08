@@ -30,7 +30,9 @@
     "infra:status": "docker compose --env-file .env --file infra/docker/compose.yaml ps",
     "laptop:start": "node infra/scripts/laptop-server.mjs start",
     "laptop:status": "node infra/scripts/laptop-server.mjs status",
-    "laptop:stop": "node infra/scripts/laptop-server.mjs stop"
+    "laptop:stop": "node infra/scripts/laptop-server.mjs stop",
+    "test:personal:local": "turbo run build --filter=@hambazi/worker --filter=@hambazi/bot && pnpm --filter @hambazi/database test:local --api-personal",
+    "test:personal-http:local": "node infra/scripts/test-auth-http-local.mjs --personal"
   },
   "devDependencies": {
     "@hambazi/eslint": "workspace:*",

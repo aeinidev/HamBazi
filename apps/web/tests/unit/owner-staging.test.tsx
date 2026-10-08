@@ -45,7 +45,7 @@ describe("temporary staging account scope", () => {
     ]);
     runtime.dispose();
   });
-  it("shows only the account even when the URL requests a gameplay screen", () => {
+  it("keeps public gameplay navigation closed and offers only personal bot tests", () => {
     vi.stubGlobal("window", { location: { hash: `#/match/${id}` } });
     const runtime = createRuntime(
       "https://api-staging.hambazi.top",
@@ -64,11 +64,13 @@ describe("temporary staging account scope", () => {
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
     expect(html).toContain("Synthetic owner");
-    expect(html).toContain("Games and invitations are unavailable");
+    expect(html).toContain("Invitations are unavailable");
+    expect(html).toContain("Start game with bot");
+    expect(html).toContain("Personal test results do not enter leaderboards");
     expect(html).toContain("Sign out");
     expect(html).not.toContain('aria-label="Main navigation"');
     expect(html).not.toContain("Reconnect");
-    expect(html).not.toContain("Coup");
+    expect(html).not.toContain("Match session");
     runtime.dispose();
   });
 });

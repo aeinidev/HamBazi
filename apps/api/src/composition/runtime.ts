@@ -1,3 +1,6 @@
+import { createPersonalMatchPort } from "../matches/index.js";
+import { createPersonalCoupGame } from "./personal-coup.js";
+import { parsePersonalGameplayConfig } from "@hambazi/config";
 import { hash } from "node:crypto";
 import { createStatisticsPort } from "../leaderboard/index.js";
 import { createPublicNamesPort } from "../users/index.js";
@@ -50,6 +53,7 @@ export async function startApi(
   if (runtime.role !== "api") throw new Error("Invalid runtime role");
   const auth = parseAuthRuntimeConfig(environment);
   const ownerConfig = parseOwnerAdmissionConfig(environment);
+  const personalConfig = parsePersonalGameplayConfig(environment, "api");
   const profileConfig = parseProfileConfig(environment);
   const catalogConfig = parseCatalogConfig(environment);
   const roomsConfig = parseRoomsConfig(environment);
@@ -184,6 +188,24 @@ export async function startApi(
     await statisticsRate?.connect().catch(() => {});
     await admission?.connect().catch(() => {});
     http = await createHttpApplication({
+      ...(personalConfig && ownerAdmission && admission && admissionPolicy
+        ? {
+            personal: {
+              matches: createPersonalMatchPort(database, {
+                clock,
+                game: createPersonalCoupGame(),
+                owner: ownerAdmission,
+              }),
+              sessions,
+              rate: admission.rate,
+              ip: admission.ip,
+              policy: admissionPolicy,
+              trustedProxies: auth.trustedProxies,
+              allowedOrigins: runtime.allowedOrigins,
+              production: runtime.environment === "production",
+            },
+          }
+        : {}),
       ...(admission && admissionPolicy
         ? { admission: { policy: admissionPolicy, ip: admission.ip } }
         : {}),
@@ -287,6 +309,7 @@ export async function startApi(
           (async () => {
             const drains = await Promise.allSettled([
               http?.realtime?.close(),
+              http?.personal?.close(),
               (async () => {
                 await http!.app.close();
                 await http!.settled();
@@ -321,6 +344,7 @@ export async function startApi(
     health.stopAdmission();
     await internal?.close().catch(() => {});
     await http?.realtime?.close().catch(() => {});
+    await http?.personal?.close().catch(() => {});
     await http?.app.close().catch(() => {});
     rate.close();
     profileRate.close();
