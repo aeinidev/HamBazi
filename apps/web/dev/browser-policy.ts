@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, chmod } from "node:fs/promises";
 import { verifyTelegramSdkAsset } from "../security/telegram-sdk-asset.js";
 import { resolve } from "node:path";
 import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
@@ -38,6 +38,11 @@ export function browserPolicyPlugin(): Plugin {
         fileName: "security-headers.json",
         source: JSON.stringify(policy, null, 2) + "\n",
       });
+    },
+    async writeBundle() {
+      // This reviewed asset is public. A privately provisioned source fixture may
+      // have restrictive permissions; the runtime UID must read the emitted bytes.
+      await chmod(resolve(config.root, config.build.outDir, telegramSdkUrl.slice(1)), 0o644);
     },
     async configurePreviewServer(server) {
       let verified: ReturnType<typeof createBrowserPolicy>;

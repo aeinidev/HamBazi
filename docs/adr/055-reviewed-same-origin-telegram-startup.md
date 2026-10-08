@@ -22,7 +22,9 @@ Deliver the unmodified official SDK reviewed on Oct 8 from the immutable Web
 artifact, under `/telegram-sdk/telegram-web-app-3f223aba4f0ede97.js`. Preserve its
 exact SHA-384 SRI pin, anonymous script CORS and no-referrer. Every production
 build verifies the included file against the source pin before copying it;
-modified/empty/oversized bytes fail the build. Exclude only this exact third-party
+modified/empty/oversized bytes fail the build. The public emitted asset is mode
+0644, and packaging verifies UID-1000 readability and SRI inside the actual
+read-only, network-isolated image before publishing its inventory. Exclude only this exact third-party
 file from formatting/lint rewriting; security and artifact scans still include it.
 The official source URL and CI download pin remain recorded. No external script
 hostname, inline/eval permission or broader framing/network policy is added.

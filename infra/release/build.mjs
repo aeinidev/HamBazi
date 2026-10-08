@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { snapshotCandidate } from "../scripts/security-scan.mjs";
 import { runGate } from "../ci/gates.mjs";
 import { createBrowserPolicy } from "../../apps/web/security/browser-policy.ts";
-import { telegramSdkIntegrity } from "../../apps/web/src/platform/telegram-sdk.ts";
+import { telegramSdkIntegrity, telegramSdkUrl } from "../../apps/web/src/platform/telegram-sdk.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 export const roles = Object.freeze(["api", "bot", "worker", "web"]);
@@ -197,6 +197,33 @@ export async function buildCandidates(directory, environment = process.env) {
         config?.Labels?.["io.hambazi.build-input-sha256"] !== buildInputSha256
       )
         invalid();
+      if (role === "web") {
+        const probe = JSON.parse(
+          await runGate(
+            "packaging-web-sdk-runtime",
+            "docker",
+            [
+              "run",
+              "--rm",
+              "--network",
+              "none",
+              "--read-only",
+              "--cap-drop",
+              "ALL",
+              "--security-opt",
+              "no-new-privileges",
+              "--entrypoint",
+              "node",
+              image,
+              "--input-type=module",
+              "-e",
+              `import {readFileSync} from 'node:fs'; import {createHash} from 'node:crypto'; const bytes=readFileSync(${JSON.stringify("/app/dist/client" + telegramSdkUrl)}); console.log(JSON.stringify({uid:process.getuid(),integrity:'sha384-'+createHash('sha384').update(bytes).digest('base64')}));`,
+            ],
+            { env: safeEnvironment },
+          ),
+        );
+        if (probe.uid !== 1000 || probe.integrity !== telegramSdkIntegrity) invalid();
+      }
       images.push({ role, image });
       await rm(metadata);
       console.info(`Packaging candidate built: ${role}`);
