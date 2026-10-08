@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "owner-gameplay-open-native-sdk-refresh-required",
+  "status": "owner-only-personal-gameplay-deployed-and-accepted",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,44 +10,44 @@
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-02",
   "historicalPreparedComposeSha256": "fa51354d1c1e78a6fe919bd2d2c4840b4b7d9578e9ac4f242435c7c0712e4780",
   "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008",
-  "nextInputs": "/opt/hambazi-staging/private/execution-20261008/personal-inputs-02.json",
-  "nextPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-01",
+  "nextInputs": "/opt/hambazi-staging/private/execution-20261008/personal-inputs-03.json",
+  "nextPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-02",
   "newPreparationPassed": true,
   "applicationsStarted": true,
   "ownerTrafficOpened": true,
   "application": {
-    "sourceCommit": "71529920003174d037b9606f5fb82db71d1febd2",
+    "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "531a25ac1f0f3bdd6adba1c4a27c7192819aa6ac80148774ad5a508057af3d20",
-    "buildInputSha256": "29867f1267af3e3c8251d49af65f2197886cce3c5967fc9b2cdbe729f3e3444b",
+    "sourceSnapshotSha256": "cbfc1eeab43a68fd281cf1fa85e8aa64f6584a2c83627a728d5f2a93a4a2c883",
+    "buildInputSha256": "fd6d159d9a682e1a730f3fc97caa3accf0f19528d7d3e0748d2b1dbefb46716b",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:71529920003174d037b9606f5fb82db71d1febd2-29867f1267af3e3c@sha256:4e2c0c74770e984290b7ef3e8698ffcd559559f3045f222d569d6fa0c4a7cc19"
+        "image": "hambazi-candidate/api:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b88cd1d392ac1d2a04f3d2ad13fa43f24c98056b3ece774a2aedbc1623666af4"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:71529920003174d037b9606f5fb82db71d1febd2-29867f1267af3e3c@sha256:2ce1bdb5e5659619c52b791f6e143b8c3da9afb2de61102a8c94b25f9d6a8a87"
+        "image": "hambazi-candidate/bot:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:745c963e1db10c31b77bf37ff9d28575701a64c94ba644f88314fca6b51b627a"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:71529920003174d037b9606f5fb82db71d1febd2-29867f1267af3e3c@sha256:be3357ff129594734f7f27680380e61dc04f41328c1039fd696223818226eda8"
+        "image": "hambazi-candidate/worker:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:68c0999be0144760776568ec8ded39d9382582de69317e65bb82cfefd4264915"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:71529920003174d037b9606f5fb82db71d1febd2-29867f1267af3e3c@sha256:ddca046b432f6da9de9b21882144b1a8ae110cc2e1bbfc96ba6e5fd511187450"
+        "image": "hambazi-candidate/web:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b1d5f213663aa48036601fb3a0779515adad941603ec395b912ff28b8731ab43"
       }
     ],
-    "composeSha256": "6c654aff5625ad7c7b4a1de13739c9b85bf09f5b2410287db4e6b95b755458f1",
-    "inventorySha256": "32e4171d6a722a0236a5d1c1fadf6ba8d062f07860cc207c090d897171c8d119",
-    "scanSha256": "371a8cd1b5ca26ed80d30cda14e9058fb945e0667bde8405f7da12e1ae425021",
-    "preparationSha256": "73282a554e1e7e5a1da17c520fe5ef2f39e40031ba72bb58c62e795c4029328c"
+    "composeSha256": "d892bebda5c238db8a7d4946e75c5638eadb12ef1d75d773878bdfcdf49da312",
+    "inventorySha256": "8e7cf488d0adab04493246b60e029768dba2d23beaa965f33ebf643830a946fc",
+    "scanSha256": "12046d82e83787afad721f4e7aa33191bb74e56814c0e5b722f1e9a63f9dcde6",
+    "preparationSha256": "5103b756b61cf343d79ef16fd760fabaa6eebbf32c63e34915533cc7ada0c873"
   },
   "components": {
     "sourceCommit": "fcfac0a0eb08739f60f6c8a9e38c797bf581c772",
     "lockSha256": "c3d08af8baa3af5ef5877f88d926457028a6c1ca791057becd9da3ef6d3c3f14",
     "inventorySha256": "888de0521a3e2fb1055304f51d1fd2c47f740348c351c8cb4c2313380feec152",
-    "scanSha256": "9ec1b3b9afc5d71dd33ebece5ed7247762f3887bfa910595a4dd7ab28352d432",
+    "scanSha256": "db56e49e44650d8ca2b1f2e6913b7b9f607336a96fde8a0eb5dc79b5b0b95ede",
     "images": [
       {
         "role": "ingress",
@@ -69,7 +69,7 @@
     "secretFindingsAllowed": 0,
     "currentEvidenceFresh": true,
     "activationScanPassed": true,
-    "refreshCheckedAtUTC": "2026-10-08T12:30:50Z",
+    "refreshCheckedAtUTC": "2026-10-08T13:10:03.325672316Z",
     "latestRetrievedUpdatedAtUTC": "2026-10-07T07:38:55.515026687Z",
     "refreshStatus": "actual-eight-image-scans-passed-under-explicit-ADR-053-only",
     "retrievalSources": ["mirror.gcr.io/aquasec/trivy-db:2", "ghcr.io/aquasecurity/trivy-db:2"],
@@ -77,7 +77,7 @@
     "upstreamFailedStep": "Login to Docker Hub",
     "temporaryMaximumAgeHours": 48,
     "standard24HourGatePassed": false,
-    "downloadedAtUTC": "2026-10-08T12:06:22.219170324Z",
+    "downloadedAtUTC": "2026-10-08T13:10:03.325672316Z",
     "exception": {
       "profile": "personal-owner-staging-48h-20261008",
       "maximumAgeHours": 48,
@@ -105,7 +105,7 @@
     "ownerRouteParserVerified": true,
     "renewalDryRunPassed": true,
     "renewalSystemdServicePassed": true,
-    "runnerSourceCommit": "71529920003174d037b9606f5fb82db71d1febd2",
+    "runnerSourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
     "ownerEnrollmentVerified": true,
     "privateOwnerConfigurationValidated": true,
     "candidateIdentityRechecked": true,
@@ -116,18 +116,24 @@
     "contractFingerprints": 12,
     "ownerNonOwnerProtocolChecks": 35,
     "actualPersonalGameChecks": 37,
-    "actualPersonalGameHumanCommands": 15,
-    "actualPersonalGameMaximumTurn": 27,
+    "actualPersonalGameHumanCommands": 12,
+    "actualPersonalGameMaximumTurn": 12,
     "httpDrainContainmentChecks": 9,
-    "acceptedWssDrainChecks": 16,
-    "publicOwnerTrafficOpenedAtUTC": "2026-10-08T12:42:00.395Z",
+    "acceptedWssDrainChecks": 15,
+    "publicOwnerTrafficOpenedAtUTC": "2026-10-08T13:16:56.714Z",
     "publicOwnerBrowserAccepted": true,
     "trustedPublicTLS": true,
     "advisoryExpiryTimerEnabled": true,
     "advisoryExpiryFutureExecutionVerified": false,
     "publicOwnerBrowserChecks": 13,
-    "publicOwnerBrowserCommands": 12,
-    "publicOwnerBrowserScope": "real public applications, reviewed cached official SDK bytes, signed-synthetic owner; actual native false"
+    "publicOwnerBrowserCommands": 15,
+    "publicOwnerBrowserScope": "public-TLS-real-Web-API-WSS-Worker-signed-synthetic-owner-with-reviewed-official-SDK",
+    "realNetworkSdkOwnerChecks": 13,
+    "realNetworkSdkOwnerScope": "real-network-SDK-public-TLS-Web-API-WSS-owner-legal-move-close-logout-and-non-owner; no transport/SDK interception",
+    "officialNetworkSdkDeliveryVerified": true,
+    "laptopSdkProxyRequired": true,
+    "finalPrivateOperatorVerified": true,
+    "finalPublicIsolationChecks": 6
   },
   "assets": {
     "infra/docker/staging/bootstrap.routes.conf": "6000763dfc76baf809c5d05d35163245d90ffff3593174156a1c6175b2ebf740",
@@ -156,9 +162,9 @@
     "telegramSettingsChanged": false
   },
   "currentBlocker": {
-    "code": "OFFICIAL_TELEGRAM_SDK_SRI_CHANGED",
+    "code": null,
     "preparedOutputCreated": true,
-    "nextAction": "Review new matching laptop/VPS official SDK bytes, update production/CI SRI pins, run real SDK privacy/browser tests, build/scan/prepare new candidate and deploy bound configuration."
+    "nextAction": "Owner opens the configured Main Mini App in their actual mobile Telegram account to record native acceptance. No additional deployment decision or secret input is missing."
   },
   "privateEvidence": [
     "/opt/hambazi-staging/private/execution-20261008/evidence/owner-enrollment-preflight-20261008-0754.json",
@@ -172,76 +178,119 @@
     "/opt/hambazi-staging/private/execution-20261008/evidence/personal-drain-containment-01.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/personal-wss-drain-01.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/personal-traffic-open-01.json",
-    "/opt/hambazi-staging/private/execution-20261008/evidence/advisory-expiry-timer-01.json"
+    "/opt/hambazi-staging/private/execution-20261008/evidence/advisory-expiry-timer-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-compatibility-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/ordered-startup-personal-sdk-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-owner-access-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-game-acceptance-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-drain-containment-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-wss-drain-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-traffic-open-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-browser-live-evidence-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-network-owner-evidence-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/sdk-network-browser-probe-evidence-03.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-final-operator-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-final-public-01.json"
   ],
-  "checkedAt": "2026-10-08T12:42:57.511654+00:00",
+  "checkedAt": "2026-10-08T13:28:51.064486+00:00",
   "personalGameplayEnabled": true,
   "fullPhase18B3Completed": false,
-  "dataScanSha256": "cfa66a9f33bb411734d01d2bf22544e439481d7088ef0aee07ad9678d9d902f8",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-01",
+  "dataScanSha256": "fafdb362f81167ca9f74f480f8ebcd3c9fcfd68957b963d1a3f6c3e8ddeb8901",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-02",
   "runner": {
-    "sourceCommit": "71529920003174d037b9606f5fb82db71d1febd2",
-    "archiveSha256": "2dc3f51e9c5428ef7ccd9458e67044fd3b322431e064f4ed79d894ed2edda6bf",
-    "directory": "/opt/hambazi-staging/private/runner-7152992"
+    "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
+    "archiveSha256": "bf18953207ba6bc35d80dd944de59545ac7433a1ebbc6864d8d28bebca5b079b",
+    "directory": "/opt/hambazi-staging/private/runner-d28d4b0"
   },
   "currentEvidence": {
-    "personal-migration-01.json": {
-      "sha256": "d884be8d24a3957531ea189df9a4147f2a290279f0a8dd02aafd7f7a7bf94311",
-      "checkedAt": "2026-10-08T12:32:19.019356+00:00",
+    "personal-sdk-compatibility-01.json": {
+      "sha256": "c8df62b31283f3b109a5d2ef92fdeb113894c61cce5bc570a26e9018a10e07c4",
+      "checkedAt": "2026-10-08T13:12:10.807443+00:00",
       "passed": true
     },
-    "ordered-startup-personal-01.json": {
-      "sha256": "b1c4cb5f783210b261601482540b096e315515b23cf793e856e22606692aed56",
-      "checkedAt": "2026-10-08T12:33:21.100Z",
+    "ordered-startup-personal-sdk-01.json": {
+      "sha256": "732609367a144a09bed63d92e4fdf000d5f0da82a8aed0a2f5dc440a25024fb2",
+      "checkedAt": "2026-10-08T13:12:19.862Z",
       "passed": true
     },
-    "personal-owner-access-01.json": {
-      "sha256": "ba147723b01fa0a576e3116755a6ace9df487623a0c2058958a4a16e57207e70",
-      "checkedAt": "2026-10-08T12:33:58.284825+00:00",
+    "personal-sdk-owner-access-01.json": {
+      "sha256": "bff8580363147e7626477598385f0865d35d2f1654694e97f29bc896e41a1cd6",
+      "checkedAt": "2026-10-08T13:12:47.977620+00:00",
       "passed": true
     },
-    "personal-game-acceptance-01.json": {
-      "sha256": "875dfd621bdd489676fb57ad62e40f65858b343d4d36ea0aa7801baa136a2a35",
-      "checkedAt": "2026-10-08T12:38:18.808Z",
+    "personal-sdk-game-acceptance-01.json": {
+      "sha256": "1ca7745643fc3f5649dc353aa5be3659fb55d0b4eace8a7c272927584ff9b426",
+      "checkedAt": "2026-10-08T13:13:15.801Z",
       "passed": true
     },
-    "personal-drain-containment-01.json": {
-      "sha256": "42e5e193b77856b1352599ba1e45f952f19ace69e183aac35796779ccda3dbb9",
-      "checkedAt": "2026-10-08T12:38:31.853Z",
+    "personal-sdk-drain-containment-01.json": {
+      "sha256": "4fff3448e52b2af374d03545c35f745301dcf505261701d03154f570920aaebc",
+      "checkedAt": "2026-10-08T13:13:20.123Z",
       "passed": true
     },
-    "personal-wss-drain-01.json": {
-      "sha256": "c84bbdf85021346eed0655e622872b6aaafea22abf40b6cee038b4ed6c4727fd",
-      "checkedAt": "2026-10-08T12:40:50.234Z",
+    "personal-sdk-wss-drain-01.json": {
+      "sha256": "24736dc61ab254b055a6e705ff6ecde8f6c86c70a9229e8585108d042ca7fd27",
+      "checkedAt": "2026-10-08T13:14:49.609Z",
       "passed": true
     },
-    "personal-traffic-open-01.json": {
-      "sha256": "e2abdaedc7aab64c7893424f297f79e528b06522027934797d3440307eb1e9e0",
-      "checkedAt": "2026-10-08T12:42:00.395Z",
+    "personal-sdk-traffic-open-01.json": {
+      "sha256": "054a26f87c510ca6f834002888e4b0cf6b435f147e3c430deec78647ab0bc803",
+      "checkedAt": "2026-10-08T13:16:56.714Z",
       "passed": true
     },
     "advisory-expiry-timer-01.json": {
       "sha256": "b1bee1037771005f25e1ef87ce52107269aba346795aeadb5bfcf44bed29377f",
       "checkedAt": "2026-10-08T12:26:46.593729+00:00",
       "passed": true
+    },
+    "personal-sdk-browser-live-evidence-01.json": {
+      "sha256": "912b0a9ec9369274b4abc05aa130f7b6c058017db7f44f33f965483501d7f8b7",
+      "checkedAt": "2026-10-08T13:18:15.807Z",
+      "passed": true
+    },
+    "personal-sdk-network-owner-evidence-01.json": {
+      "sha256": "6f9d74d83bb55bae923700f6090d630ee580952b627dd99a4d6af7c37ee76dc4",
+      "checkedAt": "2026-10-08T13:21:44.282Z",
+      "passed": true
+    },
+    "sdk-network-browser-probe-evidence-03.json": {
+      "sha256": "d323b833c58c70f6258beb140f70a3f381a8409bbde501e65b83a673804a48fd",
+      "checkedAt": "2026-10-08T13:20:07.456Z",
+      "passed": true
+    },
+    "personal-sdk-final-operator-01.json": {
+      "sha256": "2903933ee69dfd3810024bf7f6373025ecb4c2c7ab8c172afd630f1dbbffcbe5",
+      "checkedAt": "2026-10-08T13:23:45.393Z",
+      "passed": true
+    },
+    "personal-sdk-final-public-01.json": {
+      "sha256": "dac26f49f3cd2e8bbe4742de8972f7638bdd6e891625bd5e375633a2b53b5201",
+      "checkedAt": "2026-10-08T13:28:51.064486+00:00",
+      "passed": true
     }
   },
   "deferred": {
     "normalAdvisoryFreshness": "failed 24-hour gate; bounded ADR-053 only until fixed expiry",
-    "nativeTelegramClient": "unperformed; synthetic signed protocol is separate",
+    "nativeTelegramClient": "actual mobile user verification unperformed; full real browser gameplay and real-network SDK owner smoke passed separately",
     "telegramWebFrames": "blocked by current frame-ancestors none",
     "ordinaryAdminCatalogRoom": "disabled pending required controls/invitation implementation",
     "competitiveStatsChatMatchmaking": "unavailable in personal profile",
     "personalOutboxFanout": "pending wake-ups retained; 2-second acknowledged snapshots used",
-    "versionRollback": "unaccepted; no compatible scanned previous gameplay release",
+    "versionRollback": "unaccepted; previous gameplay release has obsolete live SDK SRI, and no full current/previous rollback acceptance was performed",
     "recovery": "excluded-unperformed-ADR-050",
-    "productionLoadSoakSloProtectedPublication": "unperformed; approved targets/thresholds unchanged"
+    "productionLoadSoakSloProtectedPublication": "unperformed; approved targets/thresholds unchanged",
+    "fullSecretRotationDrill": "unperformed; separate current credentials, trust and runtime identities pass, but rotation/recovery of every authority is not accepted"
   },
   "nativeSdkRecheck": {
     "bytes": 119731,
     "matchingLaptopVpsSha384": "3f223aba4f0ede97d1465e3e09a7a9692fbe16ab446dca3f1da5778f3758978cbe53b1cc42f9f781655f2a18eecdfcc6",
-    "approvedPinRefreshInProgress": true,
+    "approvedPinRefreshInProgress": false,
     "serverlessApiUsed": false,
-    "nativeClientVerified": false
+    "nativeClientVerified": false,
+    "approvedPinRefreshDeployed": true,
+    "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG",
+    "realNetworkDeliveryVerified": true,
+    "laptopDirectNetworkError": "ERR_CONNECTION_REFUSED",
+    "existingLaptopProxyDeliveryPassed": true
   }
 }

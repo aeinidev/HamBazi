@@ -1203,8 +1203,8 @@ The repository has workspace, configuration, database, contract and boundary-che
 - **Dependencies:** completed portable preparation; explicit OD-002/006/007 decisions, staging domains/access and provisioning/deployment authorization; applicable activation gates including 7C.
 - **Acceptance criteria:** actual staging deployment/migration/rollback and restore meet approved requirements; no local fixture is substituted for staging evidence.
 - **Required tests and validations:** actual staging health/E2E/headers/TLS, deployment rollback and recovery drills, fresh image/security checks; retain deferred production capacity/SLO/fault/soak validation separately from MVP 17C completion.
-- **Status:** In Progress (owner-only Web/Auth/personal gameplay deployed; public-browser acceptance in progress; full 18B3 gates remain unpassed)
-- **Current personal deployment checkpoint (2026-10-08):** owner explicitly approved the bounded 48-hour advisory exception (ADR-053) and server-controlled bot opponents (ADR-054), superseding the earlier gameplay/preparation-only restriction for this personal scope. Clean application source `7152992`, build `29867f12`, four exact target digests and all eight actual image scans pass with High/Critical/Unknown zero; ordinary 24-hour freshness remains failed, hard expiry 2026-10-09 11:08:55 Tehran. Real exclusive `prepared-20261008-personal-01` passes, Compose `6c654aff5625ad7c7b4a1de13739c9b85bf09f5b2410287db4e6b95b755458f1`. Four role files retain verified TLS/separate credentials, approved networks/pools/bounds and fail-closed owner admission. Separate migrator applied/repeated the 14th additive migration; previous data/13 migration/11 contract checksums are preserved, 12 contracts and bot-seat grants verified. API → Worker → Bot → Web are READY with private safe logs/health/metrics. Thirty-five real owner/non-owner Auth checks, 37 real TLS/WSS complete-game/isolation/retry/reconnect/cleanup checks (15 owner moves, 27 turns), nine actual HTTP containment and 16 accepted WSS drain/same-release restart checks pass. Only owner Web/Auth/personal WSS opened at 12:42 UTC; public private endpoints and webhook remain 404. Local/VPS Cloudflare/Google A checks all pass. Actual public browser/UI acceptance passes 13 checks with reviewed cached SDK bytes; a changed live official SDK SRI is being refreshed and revalidated; native Telegram is unperformed. Normal catalog/Admin/Room/chat/matchmaking/competitive statistics stay disabled, personal outbox fanout is deferred, and version rollback/recovery/production-like soak/SLO/protected-publication acceptance is not claimed. Owned hard-expiry containment timer is installed/verified, future execution unperformed. Current binding/evidence/deferred consequences are in [execution-current.json](../infra/docker/staging/execution-current.json). No Telegram setting, production/destructive operation or later phase occurs; 18B3 is not complete. Older checkpoints below are historical and superseded only within this accepted personal scope.
+- **Status:** In Progress (owner-only personal gameplay and real browser/network SDK acceptance pass; native/full 18B3 gates remain unpassed)
+- **Current personal deployment checkpoint (2026-10-08):** temporary owner-only staging is deployed and passes end-to-end personal Coup tests under ADR-053/054. Final clean app source `d28d4b0`, build `fd6d159d`, four exact target digests, inventory/scan/runner and private evidence hashes are bound in [execution-current.json](../infra/docker/staging/execution-current.json). Exclusive `prepared-20261008-personal-02` passes; Compose SHA-256 `d892bebda5c238db8a7d4946e75c5638eadb12ef1d75d773878bdfcdf49da312`. All eight actual target scans have High/Critical/Unknown zero; six images retain one Moderate zlib finding each. Official DB redownload at 13:10 UTC still has the Oct 7 update; ordinary 24-hour freshness remains failed. The approved 48-hour exception ends Oct 9 at 11:08:55 Tehran, with an installed owned maintenance/application-stop timer (future execution unperformed). Four real role files retain approved bounds, verified TLS, separate credentials and fail-closed owner admission. The 14th additive migration/repeat/grants passed at 12:32 UTC; latest SDK replacement verifies unchanged populated migration/contract/grant fingerprints and runs no new migration. API → Worker → Bot → Web are READY with private safe health/logs/metrics and bounded retention. Latest release passes 35 owner/non-owner Auth, 37 real full-game controls (12 owner commands, 12 turns), nine HTTP drain/containment and 15 focused accepted-WSS drain/restart controls. Public Web UI completes a game with 15 commands, privacy/cleanup/logout/non-owner denial (13 checks); a separate 13-check owner legal-move/close/logout/non-owner smoke loads the SDK from the real official network without interception. Laptop direct SDK access refuses the connection, while the existing proxy and VPS succeed. The reviewed new official SDK pin matches independent laptop/VPS bytes, passes all 26 browser/privacy, 64 Web unit and 114 infra tests, and stays SRI/CSP checked; the added unused Serverless API is not activated. Owner Web/Auth/personal WSS are open; private endpoints and webhook remain 404. Real mobile Telegram acceptance remains manual/unperformed. Ordinary Admin/catalog/Room/chat/matchmaking/competitive stats remain disabled; personal outbox fanout is deferred and snapshots are acknowledged/polled. Previous gameplay SDK is obsolete, so full version rollback acceptance is unperformed; recovery is excluded/unperformed, not passed. Full protected publication, production-like load/soak/SLO and other applicable 18B3 gates remain unpassed. No new owner decision/private input is missing for this flow, no Telegram setting/production/destructive operation/later phase occurs, and 18B3 is not complete. Historical preparations, failed attempts and previous images/evidence are preserved.
 - **Historical owner enrollment and ordinary freshness blocker (2026-10-08):** original nonce DM verified exactly one actual human/private-chat owner; installed exclusive 0600 UID/GID-1000 policy, without raw responses, personal-ID/hash telemetry, update acknowledgement or Telegram setting changes. Four real role files/config bounds, leaf/key/IP-SAN references, exact clean `6fa2bdc` candidate identities and compatibility fingerprints pass. At 07:56 UTC all 56 local/VPS parent/authority/public DNS checks pass; at 07:57 UTC private data TLS/no-public-ports, three separate non-superuser roles, 13 reviewed finished migrations and trusted three-host public 503 hold remain verified; zero app containers run. Advisory evidence expired at 11:08:55 Tehran. Ordinary download hit Trivy's one-hour cache guard; preserving it and downloading into separate empty mirror/direct-GHCR caches still retrieves the same 2026-10-07 07:38:55 UTC DB. The latest official publication [workflow failed](https://github.com/aquasecurity/trivy-db/actions/runs/37736159029) at Docker Hub login (expired upstream organization token). Actual `prepare` rejects stale evidence and creates no output. No new successful scan/preparation/deployment is claimed; no suppression/metadata rewrite/freshness exception. Next obtain actually fresh official advisories, rescan all eight exact application/data/ingress/ACME identities, bind new private successful evidence and run `prepare.mjs` into preserved-absent `prepared-20261008-owner-01`, then continue authorized ordered startup/containment/owner acceptance. No current owner decision or private reference remains missing; unrelated full 7C/Room/native/rollback/recovery boundaries remain as documented. Private safe evidence is recorded in the [exact binding](../infra/docker/staging/execution-current.json); full 18B3 is not completed.
 - **Historical bounded infrastructure checkpoint (2026-10-08; owner enrollment superseded by the follow-up above):** [current execution plan](operations/staging-execution-plan.md) and [exact non-secret binding](../infra/docker/staging/execution-current.json) record clean owner-gated/restricted-Web app source `6fa2bdc`, patched Nginx/Certbot source `fcfac0a`, actual target identities/fresh unchanged scan gates, private PG/Redis verified TLS and role/peer/grant/negative denials, 13 compatible migrator migrations/grants/repeat deploy, preserved baseline, SSH-verified persistent firewall, trusted three-host public TLS maintained at 503 and real scan-gated renewal. Root check and relevant API/Bot/config/infra/Web integration/unit/build/contract/privacy/browser validation pass; exact production-Web synthetic transport remains local evidence. Four new real role/config references validate, but real preparation exits 1 solely at missing actual private owner enrollment; new prepared output/apps/public owner traffic are absent. Owner nonce collection is pending and no fixture/Bot ID/first visitor is admitted. Actual app readiness/observability/fault/drain/owner/no-effects/native acceptance and version rollback pair remain unperformed. Recovery remains excluded/unperformed under ADR-050. No Telegram setting, game/Admin/Room activation, production, destructive migration or later phase occurs; full 18B3 stays Blocked, with completed independent infrastructure preserved.
 - **Bounded deployment authorized (2026-10-08):** owner explicitly supersedes preparation-only restrictions for owner-admission/ingress remediation, new checked/scanned candidates/preparation, independent host/private PostgreSQL/Redis startup, compatible migrator execution, API → Worker → Bot → Web readiness, public TLS/firewall with verified second SSH, maintenance-first containment and only verified owner Web/Auth traffic. Latest execution-plan proposed data/resource/bootstrap/firewall values are accepted. [ADR-052](adr/052-temporary-owner-admission-and-execution.md) records exact limits and fail-closed admission; no gameplay/Admin/Room invitation, Telegram setting, paid/production/destructive operation or other phase is authorized. Private owner enrollment uses a one-time original private-message nonce and does not acknowledge unrelated updates. Historical prepared output/failed scans remain unchanged. Current work is implementing/reviewing these bounded prerequisites; deployment success is not yet claimed. Nginx/Certbot candidates replace blocked Caddy without any threshold/Unknown/freshness suppression; actual affected libraries are patched from signed/hash-pinned sources and new pinned staging artifact grammar is separately tested.
@@ -1282,46 +1282,42 @@ is made. Remaining 17CQ performance work and proposed 17CT measurement work are
 explicitly deferred post-MVP. Numeric targets, budgets and runtime semantics stay
 unchanged. No further local performance tuning is in progress.
 
-The current authorized **18B3** has bounded infrastructure executed and private owner
-enrollment verified, with actual application acceptance
-**Blocked**. Temporary ParsPack Germany hosting and exact staging origins/Bot/DNS
-are confirmed under [ADR-049](adr/049-temporary-parspack-staging-preparation.md).
-Local read/write preparation is authorized. Sole ownership, disposable synthetic
-personal data, no-backup/PITR/WAL-archive/offsite-storage exception and manual
-monitoring are confirmed under ADR-050; recovery is excluded/unperformed, not passed.
-ADR-051 authorizes bounded runner/network/private-file/TLS/image-transfer/observation
-preparation. Networks/toolchain/private certificate identity and exact image transfer
-are verified. Actual private data TLS/grants, compatible migrations and public TLS/firewall
-are executed under ADR-052. The new owner-scoped preparation is blocked by expired
-official advisory evidence; application signal coverage/activation and secured 7C remain gated.
-The [operating worksheet](operations/staging-operating-decisions.md) records the
-confirmed temporary inputs without inventing remaining policies. 18A, 18B1 and 18B2
-remain Completed locally; parent 18B remains In Progress for actual staging.
-Continuous phase authorization is retained; no generic approval is requested again.
+The current authorized **18B3 is In Progress**. Temporary owner-only Web/Auth
+and owner-versus-server-bot Coup are deployed from clean `d28d4b0` using actual
+`prepared-20261008-personal-02`. Exact image/config/scan/evidence identities are
+in the [current binding](../infra/docker/staging/execution-current.json).
+Owner enrollment, non-owner rejection without durable effects, separate private
+data TLS/grants, fourteen compatible migrations, trusted public TLS/firewall/SSH,
+four READY apps, private manual observability, full game/private views and
+accepted HTTP/WSS drain/retry/reconnect checks pass. Real public browser gameplay
+and a separate real-network official-SDK owner flow pass. Actual mobile Telegram
+acceptance remains unperformed.
 
-The [concrete conditional execution plan](operations/staging-execution-plan.md)
-now binds the successful real preparation and proposes separate infrastructure
-assets. The first external execution is still gated: current images lack owner
-admission and proposed ingress has a blocking Unknown scan finding. Secured 7C,
-production gameplay composition, Main Room invitation support and real staging
-rollback/multiplayer evidence remain required; no automatic phase transition.
+ADR-049/050/051/052/053/054 record supplied temporary decisions and bounded
+authorization. No additional owner decision or private input is missing for this
+implemented personal flow. Recovery remains excluded/unperformed under ADR-050.
+Eight exact target scans have zero High/Critical/Unknown under the explicitly
+approved 48-hour exception; the ordinary 24-hour gate fails. The installed timer
+applies maintenance and stops apps at Oct 9, 11:08:55 Tehran; future execution is
+unperformed. Original scans/failed attempts and immutable outputs remain preserved.
 
-The owner-authorized dependency remediation and local candidate validation are
-complete at source `65ff180`; the dated 18B3 record above preserves exact inventory,
-fresh scan and rehearsal evidence. Preparation inputs are complete; activation
-access/framing/ingress decisions and actual deployment/rollback/manual-monitoring
-coverage are current blockers. Recovery is
-excluded only for the disposable personal target under ADR-050, not passed. Freshness
-must be checked again for any future release; successful local scans are not
-protected hosted CI, registry provenance or staging acceptance.
+The [execution plan](operations/staging-execution-plan.md) and
+[operating worksheet](operations/staging-operating-decisions.md) record deferred
+consequences. Telegram Web frames, ordinary Admin/catalog/Room invitations,
+chat/matchmaking/competitive stats and full multiplayer stay disabled. Personal
+outbox fanout, full secret rotation, version rollback, native Telegram and
+production-like load/soak/SLO/protected publication remain unaccepted. Previous
+gameplay SDK integrity is obsolete; same-version containment/restart is not a
+full current/previous release rollback certificate. Required 7C controls remain
+mandatory for ordinary Admin activation; personal admission does not bypass them.
+18A/18B1/18B2 remain Completed locally; parent 18B and full 18B3 are incomplete.
+No Telegram settings, production actions or automatic later-phase work occur.
 
-The authorized **Phase 19 readiness assessment is Blocked / hold** for these
-missing external gates, 7C secured operator implementation/activation policy,
-OD-005 public-beta safety/privacy and OD-008 rights. Its evidence matrix above
-separates the usable locally tested implementation from production launch
-readiness. It does not falsely mark staging, 7C or Phase 19 complete. Original
-OD-001 peaks and normal performance targets remain future optimization/staging
-validation targets. Final operating decisions remain open.
+The **historical Phase 19 readiness assessment remains Blocked / hold** for
+full launch gates, 7C secured operator controls, OD-005 public-beta policy and
+OD-008 rights. Its earlier evidence matrix is not a fresh assessment of this
+personal deployment. Approved OD-001 peaks, SLOs and correctness/security targets
+remain unchanged; this task supplies no production launch approval.
 
 The repository has implemented account/profile/catalog, Rooms/invites,
 Matchmaking, pure Coup, atomic Match processing/outbox, reconnect/timeout/Bot
@@ -1333,15 +1329,12 @@ with production gameplay disabled pending 7C. It is not a publicly playable
 release. Existing instructions and actual commands are in [release suites](testing/release-suites.md),
 [Mini App shell](architecture/mini-app-shell.md) and [laptop operations](operations/laptop-server.md).
 
-The earlier 17C acceptance/readiness review preserved its existing dirty work,
-tracked `.aws` deletion, root environment and laptop durable volume, and added
-documentation only. The current 18B3 follow-up preserves the resulting checkpoint
-and adds the explicitly authorized dependency/preparation-metadata/documentation
-remediation and local commits. Existing contracts, schema/grants, engines, approved targets and activation controls
-remain unchanged. Owner-approved staging pools/network/grace and the subsequently
-accepted full public role profile are validated with real private files. No push,
-production publication or application activation has occurred. Authorized temporary
-private data startup/migrations and public maintenance TLS/firewall are recorded under
-ADR-052; private owner enrollment used read-only `getUpdates` without acknowledgement.
-Telegram settings remain unchanged. Bounded runner/networks/private certificates/image
-imports are recorded in ADR-051.
+The earlier 17C review preserved user changes, root environment and laptop data.
+Current authorized 18B3 changes add independent bot-seat admission, additive
+personal contracts/schema/grants, private monitoring, owner-only ingress, and
+reviewed official SDK pins while reusing existing engine/writer/Worker paths.
+Separate migration/image/config identities and actual checks are recorded above;
+ordinary contracts/engine versions and approved targets remain preserved.
+Personal application activation is executed under ADR-052/053/054. No push,
+production publication, destructive data action or Telegram setting occurs.
+Private enrollment used original-message matching without update acknowledgement.

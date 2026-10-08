@@ -1,20 +1,18 @@
 # Phase 18B3 operating-decision worksheet
 
-**Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Bounded private
-data/migrations/firewall/public TLS are executed; public ingress remains 503.
-**Phase 18B3:** Actual private owner enrollment is verified. The authorized
-Web/Auth subset is blocked by expired official advisory evidence; full gameplay/Admin/Room/rollback/native acceptance remains gated.
-The supplied owner request and [ADR-052](../adr/052-temporary-owner-admission-and-execution.md)
-authorize bounded temporary deployment and supersede preparation-only restrictions.
+**Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Temporary owner-only
+Web/Auth/personal Coup are deployed and browser-accepted. **Phase 18B3:** In Progress,
+with native Telegram and full operational acceptance unpassed. ADR-052/053/054 and
+the supplied owner authorization supersede preparation-only restrictions for this
+bounded personal deployment. The ordinary product/Admin/Room paths remain disabled.
 The [current execution checkpoint](staging-execution-plan.md) and
 [exact binding](../../infra/docker/staging/execution-current.json) distinguish
-completed independent host evidence from unperformed application acceptance.
+actual personal acceptance from deferred full-phase evidence.
 No later phase or Telegram setting is authorized.
 
-The owner's continuous-execution instruction authorizes all remaining implementation
-phases in dependency order. Generic phase approval need not be requested again;
-actual operating decisions, environment/access and acceptance evidence are still
-required before live operations can be made concrete.
+Continue the authorized 18B3 personal scope without routine approval requests;
+actual safety controls and acceptance evidence remain required. No later phase
+starts automatically.
 
 The owner has approved portable 18B1/18B2 work and preparation of this worksheet.
 Temporary ParsPack Germany hosting, the existing test VPS, staging domains and
@@ -38,7 +36,7 @@ The actual webhook route is `POST /v1/telegram/webhook`. The owner manages
 DNS-only A records to `185.110.191.104` and confirmed the new ParsPack delegation.
 Do not ask again for provider, region, resources or these hostnames.
 
-Read-only checks verified SSH availability, Ubuntu 24.04.5 amd64, four logical
+Historical initial read-only checks verified SSH availability, Ubuntu 24.04.5 amd64, four logical
 CPUs, approximately 3.8 GiB RAM, no swap, active Docker 29.8.2 and Compose v5.6.0.
 At inspection the VPS had no application containers/volumes. Host/provider
 firewall and operator access acceptance remain unverified; the observed SSH
@@ -80,7 +78,7 @@ The original inventory is never rewritten. See the current 18B3 plan record for
 dated hashes and restricted evidence references. No new release rollback pair,
 actual staging acceptance, recovery objective or external authorization is inferred.
 
-## Latest verified follow-up — 2026-10-08
+## Historical enrollment/advisory checkpoint — 2026-10-08 07:57 UTC
 
 The owner sent the nonce; private original-message matching verified exactly one
 actual owner. The regular 0600 UID/GID-1000 admission file is installed privately;
@@ -89,11 +87,11 @@ or Telegram setting change occurred. All four real role parsers, configuration
 bounds, TLS references and current exact target candidate identities pass.
 No policy/private reference is missing for the currently authorized Web/Auth scope.
 
-The current blocker is the unchanged 24-hour scan gate. At 07:53 UTC, new empty
+At that checkpoint, the blocker was the unchanged 24-hour scan gate. At 07:53 UTC, new empty
 private caches from both the mirror and direct official GHCR still download the
 DB updated on 2026-10-07 at 07:38:55 UTC, expired on 2026-10-08 at 11:08:55 Tehran.
 The latest official DB publication workflow failed at `Login to Docker Hub`.
-Current `prepare` rejects expired evidence and creates no output; zero app
+That `prepare` attempt rejects expired evidence and creates no output; zero app
 containers run. At 07:56–07:57 UTC, all 56 DNS checks, actual private data TLS,
 separate roles, 13 finished compatible migrations and trusted public 503 hold
 remain verified. See the exact [execution checkpoint](staging-execution-plan.md)
@@ -114,9 +112,9 @@ security/correctness gates remain mandatory.
 Manual monitoring through existing private health checks, safe logs and metrics
 is the selected model. No new monitoring vendor/responder selection is requested.
 At the initial checkpoint, Compose selected logging driver `none` and prepare
-rejected enabled metrics. ADR-051 now supplies an opt-in private operator profile;
-actual staging coverage remains unverified and the activation gate remains. Production final availability/error-budget/
-automated-alert acceptance remains separate.
+rejected enabled metrics. ADR-051 supplies an opt-in private operator profile;
+actual health, safe logs, metrics and bounded retention now pass private operator
+checks. Production availability/error-budget/automated-alert acceptance remains separate.
 
 The owner selected BotFather's “Enable Mini App” path with the approved Web URL.
 Official Main Mini App links need no short name. Bot/portable preparation accept
@@ -378,12 +376,12 @@ DOMAIN/ACCESS/OPS are worksheet groups, not new architecture open-decision IDs.
 
 | Group                                          | Required owner role | Status                                                                                                       | Named approver / approval date / reference / ADR |
 | ---------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| OD-002 — hosting and region                    | Project owner       | Temporary host/region/operator/private data topology confirmed; actual grants/TLS and production policy open | ADR-049/050/051; 2026-10-07/08                   |
-| DOMAIN — staging origins and Telegram identity | Project owner       | Origins/Bot/DNS confirmed; getMe verifies Main presence; no short name needed; TLS/framing evidence pending  | ADR-049/050/051; 2026-10-07/08                   |
-| ACCESS — operator and service access           | Project owner       | Sole roles/private file delivery/SSH observation confirmed; activation access/7C evidence pending            | ADR-050/051; 2026-10-08                          |
-| OPS — deployment and runtime operating policy  | Project owner       | Runtime profile and real prepare validated; actual release compatibility/deploy/rollback pending             | ADR-050/051; 2026-10-08                          |
+| OD-002 — hosting and region                    | Project owner       | Temporary host/topology confirmed; actual private TLS/grants pass; production policy remains separate        | ADR-049/050/051; 2026-10-07/08                   |
+| DOMAIN — staging origins and Telegram identity | Project owner       | Origins/Bot/DNS/public TLS verified; Main needs no short name; native client unperformed, Web frames blocked | ADR-049/050/051; 2026-10-07/08                   |
+| ACCESS — operator and service access           | Project owner       | Sole owner/SSH/private operator and owner/non-owner checks pass; ordinary Admin retains 7C gates             | ADR-050/051; 2026-10-08                          |
+| OPS — deployment and runtime operating policy  | Project owner       | Exact real preparation, compatible deploy/drain pass; full previous-version rollback remains unaccepted      | ADR-050/051; 2026-10-08                          |
 | OD-006 — backup and recovery                   | Project owner       | Excluded for disposable personal staging, unperformed; production decision remains open                      | ADR-050; 2026-10-08                              |
-| OD-007 — final SLOs and monitoring             | Project owner       | Manual personal monitoring/responder confirmed; coverage and final production SLOs pending                   | ADR-046/050; 2026-10-05/08                       |
+| OD-007 — final SLOs and monitoring             | Project owner       | Private manual coverage verified; final production alerts/SLOs remain unpassed                               | ADR-046/050; 2026-10-05/08                       |
 
 Use this blank record for a new proposal; it does not erase the confirmed decisions above:
 
@@ -401,16 +399,16 @@ Use this blank record for a new proposal; it does not erase the confirmed decisi
 
 ## OD-002 — Hosting and region
 
-| Question to resolve                                                                                                            | Approved answer                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Which provider/account owns staging, and who can administer/bill it?                                                           | Existing ParsPack test host; project owner is the sole owner/operator; no new resource scope inferred                             |
-| Which region and data-residency requirements apply to apps, durable data, archives and telemetry?                              | Germany temporary VPS; backup archives omitted and private manual monitoring selected; production policy unresolved               |
-| Where will API/WS, Bot, Worker and static Web run; who operates PostgreSQL and Redis?                                          | Project owner operates all roles; same-VPS private PostgreSQL/Redis topology approved under ADR-051; services inactive            |
-| What staging budget, resource limits and workload inputs justify sizing?                                                       | Existing 4-CPU / approximately 3.8-GiB host and bounded runtime profile approved; no paid resources authorized; ADR-045 unchanged |
-| How are staging Bot/App, secrets, storage, queues and non-production data isolated from production?                            | Verified development Bot, disposable data, separate real role files and staging queue namespace; actual storage/services inactive |
-| What private DNS, DB/Redis network paths, firewall/peer allowlists and controlled Bot egress are required?                     | ADR-051 networks/IPs/aliases/peers prepared; actual data resolution/firewall/egress enforcement awaits activation evidence        |
-| How do ingress, Socket.IO affinity/adapter and draining work for the approved node topology?                                   | Unresolved                                                                                                                        |
-| Does the chosen topology support the current amd64/IPv4 Compose path and TLS trust model, or need separately reviewed changes? | Host/Docker/Compose compatible; actual private network/data TLS and separate roles/grants verified                                |
+| Question to resolve                                                                                                            | Approved answer                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Which provider/account owns staging, and who can administer/bill it?                                                           | Existing ParsPack test host; project owner is the sole owner/operator; no new resource scope inferred                                          |
+| Which region and data-residency requirements apply to apps, durable data, archives and telemetry?                              | Germany temporary VPS; backup archives omitted and private manual monitoring selected; production policy unresolved                            |
+| Where will API/WS, Bot, Worker and static Web run; who operates PostgreSQL and Redis?                                          | Project owner operates all roles; same-VPS private PostgreSQL/Redis active with verified TLS and separate least-privilege roles                |
+| What staging budget, resource limits and workload inputs justify sizing?                                                       | Existing 4-CPU / approximately 3.8-GiB host and bounded runtime profile approved; no paid resources authorized; ADR-045 unchanged              |
+| How are staging Bot/App, secrets, storage, queues and non-production data isolated from production?                            | Verified development Bot, disposable data, separate real role files and staging queue namespace; actual data services/private storage isolated |
+| What private DNS, DB/Redis network paths, firewall/peer allowlists and controlled Bot egress are required?                     | ADR-051 networks/IPs/aliases/peers, actual data TLS/firewall/egress denials verified                                                           |
+| How do ingress, Socket.IO affinity/adapter and draining work for the approved node topology?                                   | Single API/private ingress, WSS-only personal namespace; accepted HTTP/WSS drain and same-image restart pass                                   |
+| Does the chosen topology support the current amd64/IPv4 Compose path and TLS trust model, or need separately reviewed changes? | Host/Docker/Compose compatible; actual private network/data TLS and separate roles/grants verified                                             |
 
 The portable definition creates no data services, volumes, ingress or networks.
 Docker's internal bridge alone does not prove private provider connectivity or
@@ -420,17 +418,17 @@ extend the accepted portable preparation path to a different topology.
 
 ## DOMAIN and ACCESS — Origins, identities and access
 
-| Question to resolve                                                                                            | Approved answer                                                                                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| What are the staging Web, public API/WSS and Bot webhook domains and DNS owners?                               | ADR-049 exact origins; owner-managed ParsPack DNS-only records/delegation                                                                                                            |
-| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot and Main presence; target URL/mobile unverified; named-only Room invitation remains gated                                                             |
-| Which HTTPS/WSS certificates, issuers/trust, renewal owners and ingress peers apply?                           | Private data TLS/grants and LE three-host TLS/503/scan-gated daily renewal verified; WSS remains unimplemented                                                                       |
-| Which exact CORS origins, Mini App frame ancestors and immutable Web build policy are approved?                | Exact approved Web/API origins in immutable production candidate; framing remains deny-by-default pending reviewed Telegram Web origins                                              |
-| Who may use staging, through which access model, with what enrollment/revocation and test-data policy?         | Owner/disposable policy accepted; admission implementation and negative local checks pass; actual private nonce enrollment verified; live owner/no-effects acceptance awaits startup |
-| Which private operator paths, identity provider, verified MFA/RBAC, role roster and approval separation apply? | Sole human operator confirmed; technical private access/MFA/RBAC and 7C evidence remain pending                                                                                      |
-| How are health/metrics, the private Bot API and future Admin authority kept off public ingress?                | Actual data ports/peer/external isolation pass; hold ingress exposes no app endpoints; app observer/7C checks await startup                                                          |
-| Which secret-store/delivery/rotation mechanism and role-specific DB/Redis/TLS/Bot/session-key owners apply?    | Owner-managed private 0700/0600 files and SSH delivery; separate credentials/trust/key IDs validated; runtime/rotation evidence pending                                              |
-| What audited emergency-access/recovery policy applies, without bypassing authorization?                        | Backup recovery omitted only under ADR-050; private access and separately authorized rebuild/rollback remain required                                                                |
+| Question to resolve                                                                                            | Approved answer                                                                                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What are the staging Web, public API/WSS and Bot webhook domains and DNS owners?                               | ADR-049 exact origins; owner-managed ParsPack DNS-only records/delegation                                                                                                                                        |
+| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot and Main presence; target URL/mobile unverified; named-only Room invitation remains gated                                                                                         |
+| Which HTTPS/WSS certificates, issuers/trust, renewal owners and ingress peers apply?                           | Private data TLS/grants, trusted LE three-host TLS and scan-gated renewal verified; personal WSS passes                                                                                                          |
+| Which exact CORS origins, Mini App frame ancestors and immutable Web build policy are approved?                | Exact approved Web/API origins in immutable production candidate; framing remains deny-by-default pending reviewed Telegram Web origins                                                                          |
+| Who may use staging, through which access model, with what enrollment/revocation and test-data policy?         | Owner/disposable policy accepted; admission implementation and negative local checks pass; actual private nonce enrollment verified; actual owner admission and non-owner rejection without durable effects pass |
+| Which private operator paths, identity provider, verified MFA/RBAC, role roster and approval separation apply? | Sole operator uses private SSH/operator tooling; ordinary Admin MFA/RBAC/7C controls remain gated                                                                                                                |
+| How are health/metrics, the private Bot API and future Admin authority kept off public ingress?                | Actual data ports/peer/external isolation pass; public health/metrics/private Bot/Admin endpoints blocked; actual private operator checks pass                                                                   |
+| Which secret-store/delivery/rotation mechanism and role-specific DB/Redis/TLS/Bot/session-key owners apply?    | Owner-managed private 0700/0600 files and SSH delivery; separate credentials/trust/key IDs and runtime validated; full rotation drill remains unperformed                                                        |
+| What audited emergency-access/recovery policy applies, without bypassing authorization?                        | Backup recovery omitted only under ADR-050; private access and separately authorized rebuild/rollback remain required                                                                                            |
 
 Record only non-secret policy and restricted inventory references. Never place
 tokens, passwords, keys, raw `initData`, MFA assertions or credential-bearing URLs
@@ -441,14 +439,14 @@ assigns no operator and implements no mutation authority; 7C remains separately 
 
 ## OPS — Release and runtime operation
 
-| Question to resolve                                                                                                                            | Approved answer                                                                                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Who publishes/reviews immutable images, where are they stored, and what protected hosted CI checks/evidence bind the exact source and digests? | Project owner; publication mechanism/hosted evidence pending and not an input to prepare.mjs                                                |
-| Who approves the current/previous release pair, active engine/state/ruleset pins and retained job/consumer versions?                           | Project owner; actual pair/compatibility review pending                                                                                     |
-| Which supervisor, readiness/admission sequence, traffic switching, stop grace and failure/rollback rules apply?                                | Reviewed 45-second grace, exact owner-route/hold parser and maintenance command pass; actual app drain/rollback pair pending                |
-| Which separate migrator operator/access, compatible expansion/grant review, lock budgets and backfill recovery apply?                          | Separate private migrator: reviewed 13 deploy/grant/repeat migrations pass; 5s/60s bounds; ADR-050 recovery remains excluded/unperformed    |
-| Which explicit runtime quotas, pools, cleanup/queue budgets and configuration revisions apply within existing validated bounds?                | ADR-051 accepted public role profile, pools 5/3, connection ceiling 32 and real parser/preparation pass                                     |
-| Which allowlisted telemetry sink, access, retention, on-call roster and incident/release ledger apply?                                         | Sole owner; ADR-051 private operator profile, loopback metrics and local 10m/three-file compressed rotation; actual coverage/ledger pending |
+| Question to resolve                                                                                                                            | Approved answer                                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Who publishes/reviews immutable images, where are they stored, and what protected hosted CI checks/evidence bind the exact source and digests? | Project owner; private exact-image import/daemon/provenance checks pass; hosted protected publication unperformed                                                                 |
+| Who approves the current/previous release pair, active engine/state/ruleset pins and retained job/consumer versions?                           | Project owner; current engine/state/ruleset and old-job compatibility pass; previous-version rollback unaccepted                                                                  |
+| Which supervisor, readiness/admission sequence, traffic switching, stop grace and failure/rollback rules apply?                                | 45-second grace, exact route/hold, accepted HTTP/WSS drain and same-version restart pass; rollback pair unaccepted                                                                |
+| Which separate migrator operator/access, compatible expansion/grant review, lock budgets and backfill recovery apply?                          | Separate private migrator: 14 compatible migrations/repeat/grants pass; 5s/60s bounds; ADR-050 recovery excluded/unperformed                                                      |
+| Which explicit runtime quotas, pools, cleanup/queue budgets and configuration revisions apply within existing validated bounds?                | ADR-051 accepted public role profile, pools 5/3, connection ceiling 32 and real parser/preparation pass                                                                           |
+| Which allowlisted telemetry sink, access, retention, on-call roster and incident/release ledger apply?                                         | Sole owner; ADR-051 private operator profile, loopback metrics and local 10m/three-file compressed rotation; actual safe logs/health/metrics and private evidence ledger verified |
 
 Follow [CI trust/evidence](ci.md), [migrations](runbooks/migrations.md) and
 [rollback](runbooks/rollback.md). Keep at least one release overlap and old handlers
@@ -491,7 +489,7 @@ architecture's backup requirements; any departure needs an explicit reviewed ADR
 ## OD-007 — Final SLOs and monitoring acceptance
 
 **Personal staging outcome: manual monitoring and sole responder confirmed.**
-Actual private-health/log/metric availability remains unverified. The following
+Actual private-health/safe-log/metric availability and bounded retention pass operator checks. The following
 final SLO/alert questions apply to normal production acceptance; do not request
 an external platform, responder roster or automated notification policy as an
 unanswered personal-staging decision. Preserve ADR-045/046 targets and ADR-048
@@ -548,20 +546,20 @@ approved change plan/resource and cost limits, data scope, time window, exact
 artifact/config revisions, failure/rollback conditions and durable approval
 reference. Recovery cutover and production release require their own scope.
 
-| Authorization                                                                                                               | Current state                                                                                                                           | Approver / date / exact scope / reference                                                       |
-| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Prepare this documentation worksheet                                                                                        | Authorized by owner; documentation only                                                                                                 | Owner request, 2026-10-04; no operational scope                                                 |
-| Local 18B3 project/development read/write, security remediation, builds/tests/scans and owned disposable migrations/commits | Authorized; prior repository read-only restriction superseded                                                                           | Owner request, 2026-10-07; ADR-049; no external production scope                                |
-| Accept proposed operating decisions                                                                                         | Temporary inputs, sole roles/disposable/no-backup/manual-monitoring and full reviewed public runtime profile accepted                   | Project owner, 2026-10-07/08; ADR-049/050/051                                                   |
-| Publish artifacts or change hosted CI/repository settings                                                                   | Not granted                                                                                                                             | Unrecorded                                                                                      |
-| Provision staging resources/domains/access                                                                                  | Host/DNS supplied; ADR-051 runner/networks/private certificates/files/image imports completed; real prepare validated; activation gated | Owner bounded preparation and follow-up, 2026-10-08; ADR-049/051                                |
-| Migrate/deploy/run bounded staging drills or change Telegram settings                                                       | Bounded compatible personal staging deployment/drain authorized; Telegram settings excluded                                             | Unrecorded                                                                                      |
-| Enable live gameplay/admin controls                                                                                         | Owner-only bot gameplay authorized by ADR-054; ordinary Admin/catalog activation retains 7C                                             | Unrecorded                                                                                      |
-| Run local 17C tooling/smoke                                                                                                 | Authorized; actual evidence recorded                                                                                                    | Owner request, 2026-10-05; [capacity scope](../testing/capacity.md)                             |
-| Proceed to Phase 18B3 after actual 17C completion                                                                           | Authorized assessment performed; execution Blocked by independent prerequisites                                                         | Owner instructions, 2026-10-05 and 2026-10-07; [ADR-048](../adr/048-mvp-capacity-acceptance.md) |
-| Approve final production release                                                                                            | Not granted; separate phase gates retained                                                                                              | Unrecorded                                                                                      |
+| Authorization                                                                                                               | Current state                                                                                                         | Approver / date / exact scope / reference                                                       |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Prepare this documentation worksheet                                                                                        | Authorized by owner; documentation only                                                                               | Owner request, 2026-10-04; no operational scope                                                 |
+| Local 18B3 project/development read/write, security remediation, builds/tests/scans and owned disposable migrations/commits | Authorized; prior repository read-only restriction superseded                                                         | Owner request, 2026-10-07; ADR-049; no external production scope                                |
+| Accept proposed operating decisions                                                                                         | Temporary inputs, sole roles/disposable/no-backup/manual-monitoring and full reviewed public runtime profile accepted | Project owner, 2026-10-07/08; ADR-049/050/051                                                   |
+| Publish artifacts or change hosted CI/repository settings                                                                   | Not granted                                                                                                           | Unrecorded                                                                                      |
+| Provision staging resources/domains/access                                                                                  | Host/DNS supplied; bounded runner/networks/private files/TLS/image imports and exact deployment completed             | Owner bounded preparation and follow-up, 2026-10-08; ADR-049/051                                |
+| Migrate/deploy/run bounded staging drills or change Telegram settings                                                       | Bounded compatible personal deployment/drain authorized and executed; Telegram settings excluded                      | Owner request, 2026-10-08; ADR-052/053/054                                                      |
+| Enable live gameplay/admin controls                                                                                         | Owner-only bot gameplay authorized and accepted; ordinary Admin/catalog retains 7C                                    | Owner explicit bot/test authorization, 2026-10-08; ADR-054                                      |
+| Run local 17C tooling/smoke                                                                                                 | Authorized; actual evidence recorded                                                                                  | Owner request, 2026-10-05; [capacity scope](../testing/capacity.md)                             |
+| Proceed to Phase 18B3 after actual 17C completion                                                                           | Authorized bounded execution performed; full acceptance remains In Progress                                           | Owner instructions, 2026-10-05 and 2026-10-07; [ADR-048](../adr/048-mvp-capacity-acceptance.md) |
+| Approve final production release                                                                                            | Not granted; separate phase gates retained                                                                            | Unrecorded                                                                                      |
 
-## Future staging acceptance evidence
+## Current staging acceptance and remaining full-phase evidence
 
 This checklist records actual evidence for the authorized bounded subset and
 remaining full 18B3 gates. Partial infrastructure results do not complete the phase.
@@ -569,42 +567,41 @@ Use dated restricted evidence references and safe scalar results/hashes; no raw
 DB rows/dumps, chat, cards/decks/hidden state, RNG material or error/trace payloads
 may be attached to this worksheet or public CI artifacts.
 
-| Acceptance item                                                                                                          | Evidence reference / result                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052 accepted scope; owner enrollment verified; fresh scans/new preparation/app acceptance pending            |
-| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean owner-scoped 6fa2bdc identities reverified; retained scans expired; fresh gate/rollback pair/hosted protection pending |
-| Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual TLS/grants/negative/peer/firewall evidence passes; app privileged TLS and rotation acceptance pending                 |
-| Compatible migration/redeploy, active Match pins and retained job-handler review                                         | Reviewed 13 migrations/grants/repeat deploy pass; initial cluster has no active pins/jobs; app redeploy pending              |
-| Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted three-host HTTPS/503 and local exact Web/privacy checks pass; actual owner/native/WSS remain unperformed             |
-| Supervisor/ingress drain with accepted-work settlement, retry/reconnect and durable reconciliation                       | Unrecorded / unverified                                                                                                      |
-| Actual candidate-to-previous staging rollback preserving schema/history/receipts                                         | Unrecorded / unverified                                                                                                      |
-| Selected backup/PITR isolated restore, measured recovery point/time against approved RPO/RTO and reconciled durable data | Excluded by ADR-050 for personal disposable staging — not performed, not passed; production gate retained                    |
-| Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Manual personal monitoring/responder supplied; coverage unverified; normal production alert/SLO evidence pending             |
+| Acceptance item                                                                                                          | Evidence reference / result                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052/053/054 accepted scope; real owner enrollment, exclusive preparation and personal acceptance pass                             |
+| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean d28d4b0 images/daemon/provenance and eight scans pass under explicit 48h exception; ordinary 24h fails; rollback/hosted protection unpassed |
+| Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual data/application TLS/grants/negative/peer/firewall isolation passes; full secret-rotation drill unperformed                                |
+| Compatible migration/redeploy, active Match pins and retained job-handler review                                         | 14 additive migrations/grants/repeat and unchanged final-release fingerprints pass; pinned personal engine/jobs and same-version restart pass     |
+| Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted HTTPS/WSS/current SDK/public full-game/privacy and real-network owner smoke pass; actual native Telegram unperformed                      |
+| Supervisor/ingress drain with accepted-work settlement, retry/reconnect and durable reconciliation                       | Nine HTTP and 15 accepted WSS drain checks pass: readiness closes, accepted work settles, same-version restart/retry/reconnect preserve receipts  |
+| Actual candidate-to-previous staging rollback preserving schema/history/receipts                                         | Unaccepted; previous SDK pin is obsolete; containment/same-version restart do not prove version rollback                                          |
+| Selected backup/PITR isolated restore, measured recovery point/time against approved RPO/RTO and reconciled durable data | Excluded by ADR-050 for personal disposable staging — not performed, not passed; production gate retained                                         |
+| Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Private manual logs/health/metrics/retention pass; production alert/aggregation/load/soak/SLO evidence remains unperformed                        |
 
 Local 18B1/18B2 implementation and rehearsal evidence remains recorded in the
 plan; it cannot fill these staging rows. MVP 17C completion satisfies the
-sequencing condition, so 18B3 was assessed immediately. Expired official advisory
-evidence and remaining acceptance gates block application
-opening; independent authorized infrastructure is already executed. Phase 19 remains
+sequencing condition, so 18B3 was assessed immediately. Personal traffic is open under the bounded advisory exception; remaining full
+acceptance gates are recorded separately and do not imply public-launch readiness. Phase 19 remains
 the separate final-readiness review; neither phase supplies launch approval.
 
-**Current outcome (2026-10-08):** no additional owner policy value/private
-reference is missing for the implemented personal flow. ADR-053/054 record the
-explicit advisory exception and server bot opponents. Clean `7152992` apps and
-all eight target scans pass within that exception; normal 24-hour freshness
-remains failed. Real `prepared-20261008-personal-01`, the 14th additive migration/
-repeat/grants and API → Worker → Bot → Web readiness/private observability pass.
-35 actual Auth, 37 full-game, nine HTTP and 16 accepted WSS drain/restart controls
-pass. Owner Web/Auth/personal WSS opened at 12:42 UTC; public private endpoints,
-ordinary catalog/Admin/Room and bot webhook remain disabled. Current exact hashes,
-restricted evidence and deferred consequences are in
+**Current outcome (2026-10-08):** no additional owner policy/private reference
+is missing for the personal flow. Final `d28d4b0` release and exclusive
+`prepared-20261008-personal-02` are deployed; all eight scans pass under ADR-053
+(normal 24-hour freshness fails). Four READY apps, fourteen unchanged compatible
+migrations/grants, 35 Auth/37 full-game/nine HTTP/15 accepted WSS drain checks,
+13 full browser checks and 13 real-network SDK owner checks pass. Private
+observability/retention is verified. The changed official SDK was reviewed,
+repinned and tested with current matching laptop/VPS bytes; no integrity bypass.
+Exact hashes/restricted evidence are in
 [execution-current.json](../../infra/docker/staging/execution-current.json).
-Actual public browser/privacy/logout acceptance passes 13 checks with reviewed cached official SDK bytes. Independent live SDK fetches from laptop/VPS match each other but differ from the deployed SRI; pin refresh/revalidation/replacement is in progress. Native Telegram
-acceptance is unperformed, Telegram Web frames are blocked, and Room/Main invite
-support is incomplete. These are verification/functionality gaps, not requests to
-resupply settled owner, recovery or monitoring decisions. Version rollback remains
-unaccepted; recovery remains excluded/unperformed, and full production-like soak/
-SLO/protected publication is deferred. Normal thresholds/targets remain unchanged.
-The fixed exception ends tomorrow at 11:08:55 Tehran; an installed owned timer
-contains/stops applications then (future execution unperformed). No Telegram
-setting, production/destructive operation or later phase occurs; 18B3 is incomplete.
+
+Actual native Telegram remains unperformed; Telegram Web frames and ordinary
+Admin/catalog/Room/invitations/chat/matchmaking/stats remain disabled. Personal
+outbox fanout is deferred. Full version rollback is unaccepted (previous SDK is
+obsolete), recovery is excluded/unperformed, and production-like load/soak/SLO/
+protected publication remain unpassed. These are acceptance/functional gaps with
+consequences in the [execution plan](staging-execution-plan.md), not unanswered
+owner decisions. The exception ends Oct 9 at 11:08:55 Tehran, with installed timed
+maintenance/app stop; future timer execution remains unperformed. No Telegram
+setting, production/destructive action or later phase occurs; full 18B3 is incomplete.
