@@ -2,8 +2,8 @@
 
 **Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Bounded private
 data/migrations/firewall/public TLS are executed; public ingress remains 503.
-**Phase 18B3:** Blocked by actual private owner enrollment for the authorized
-Web/Auth subset; full gameplay/Admin/Room/rollback/native acceptance remains gated.
+**Phase 18B3:** Actual private owner enrollment is verified. The authorized
+Web/Auth subset is blocked by expired official advisory evidence; full gameplay/Admin/Room/rollback/native acceptance remains gated.
 The supplied owner request and [ADR-052](../adr/052-temporary-owner-admission-and-execution.md)
 authorize bounded temporary deployment and supersede preparation-only restrictions.
 The [current execution checkpoint](staging-execution-plan.md) and
@@ -79,6 +79,27 @@ Cloudflare/Google sample passed all 72 local/VPS A queries; earlier failures rem
 The original inventory is never rewritten. See the current 18B3 plan record for
 dated hashes and restricted evidence references. No new release rollback pair,
 actual staging acceptance, recovery objective or external authorization is inferred.
+
+## Latest verified follow-up — 2026-10-08
+
+The owner sent the nonce; private original-message matching verified exactly one
+actual owner. The regular 0600 UID/GID-1000 admission file is installed privately;
+no first-visitor/fixture fallback, raw update persistence, update acknowledgement
+or Telegram setting change occurred. All four real role parsers, configuration
+bounds, TLS references and current exact target candidate identities pass.
+No policy/private reference is missing for the currently authorized Web/Auth scope.
+
+The current blocker is the unchanged 24-hour scan gate. At 07:53 UTC, new empty
+private caches from both the mirror and direct official GHCR still download the
+DB updated on 2026-10-07 at 07:38:55 UTC, expired on 2026-10-08 at 11:08:55 Tehran.
+The latest official DB publication workflow failed at `Login to Docker Hub`.
+Current `prepare` rejects expired evidence and creates no output; zero app
+containers run. At 07:56–07:57 UTC, all 56 DNS checks, actual private data TLS,
+separate roles, 13 finished compatible migrations and trusted public 503 hold
+remain verified. See the exact [execution checkpoint](staging-execution-plan.md)
+for failed-attempt evidence and the authorized scan → prepare → ordered startup
+sequence. Owner enrollment is resolved, not an unanswered proposal. Existing
+7C/gameplay/Room/Main/native/rollback gates retain their separate boundaries.
 
 ## Supplied personal-staging decisions — 2026-10-08
 
@@ -399,17 +420,17 @@ extend the accepted portable preparation path to a different topology.
 
 ## DOMAIN and ACCESS — Origins, identities and access
 
-| Question to resolve                                                                                            | Approved answer                                                                                                                         |
-| -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| What are the staging Web, public API/WSS and Bot webhook domains and DNS owners?                               | ADR-049 exact origins; owner-managed ParsPack DNS-only records/delegation                                                               |
-| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot and Main presence; target URL/mobile unverified; named-only Room invitation remains gated                |
-| Which HTTPS/WSS certificates, issuers/trust, renewal owners and ingress peers apply?                           | Private data TLS/grants and LE three-host TLS/503/scan-gated daily renewal verified; WSS remains unimplemented                          |
-| Which exact CORS origins, Mini App frame ancestors and immutable Web build policy are approved?                | Exact approved Web/API origins in immutable production candidate; framing remains deny-by-default pending reviewed Telegram Web origins |
-| Who may use staging, through which access model, with what enrollment/revocation and test-data policy?         | Owner/disposable policy accepted; admission implementation and negative local checks pass; actual private nonce enrollment pending      |
-| Which private operator paths, identity provider, verified MFA/RBAC, role roster and approval separation apply? | Sole human operator confirmed; technical private access/MFA/RBAC and 7C evidence remain pending                                         |
-| How are health/metrics, the private Bot API and future Admin authority kept off public ingress?                | Actual data ports/peer/external isolation pass; hold ingress exposes no app endpoints; app observer/7C checks await startup             |
-| Which secret-store/delivery/rotation mechanism and role-specific DB/Redis/TLS/Bot/session-key owners apply?    | Owner-managed private 0700/0600 files and SSH delivery; separate credentials/trust/key IDs validated; runtime/rotation evidence pending |
-| What audited emergency-access/recovery policy applies, without bypassing authorization?                        | Backup recovery omitted only under ADR-050; private access and separately authorized rebuild/rollback remain required                   |
+| Question to resolve                                                                                            | Approved answer                                                                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| What are the staging Web, public API/WSS and Bot webhook domains and DNS owners?                               | ADR-049 exact origins; owner-managed ParsPack DNS-only records/delegation                                                                                                            |
+| Which separate staging Telegram Bot/App identity and deep-link configuration are approved?                     | getMe verifies @Hambazidev_bot and Main presence; target URL/mobile unverified; named-only Room invitation remains gated                                                             |
+| Which HTTPS/WSS certificates, issuers/trust, renewal owners and ingress peers apply?                           | Private data TLS/grants and LE three-host TLS/503/scan-gated daily renewal verified; WSS remains unimplemented                                                                       |
+| Which exact CORS origins, Mini App frame ancestors and immutable Web build policy are approved?                | Exact approved Web/API origins in immutable production candidate; framing remains deny-by-default pending reviewed Telegram Web origins                                              |
+| Who may use staging, through which access model, with what enrollment/revocation and test-data policy?         | Owner/disposable policy accepted; admission implementation and negative local checks pass; actual private nonce enrollment verified; live owner/no-effects acceptance awaits startup |
+| Which private operator paths, identity provider, verified MFA/RBAC, role roster and approval separation apply? | Sole human operator confirmed; technical private access/MFA/RBAC and 7C evidence remain pending                                                                                      |
+| How are health/metrics, the private Bot API and future Admin authority kept off public ingress?                | Actual data ports/peer/external isolation pass; hold ingress exposes no app endpoints; app observer/7C checks await startup                                                          |
+| Which secret-store/delivery/rotation mechanism and role-specific DB/Redis/TLS/Bot/session-key owners apply?    | Owner-managed private 0700/0600 files and SSH delivery; separate credentials/trust/key IDs validated; runtime/rotation evidence pending                                              |
+| What audited emergency-access/recovery policy applies, without bypassing authorization?                        | Backup recovery omitted only under ADR-050; private access and separately authorized rebuild/rollback remain required                                                                |
 
 Record only non-secret policy and restricted inventory references. Never place
 tokens, passwords, keys, raw `initData`, MFA assertions or credential-bearing URLs
@@ -550,8 +571,8 @@ may be attached to this worksheet or public CI artifacts.
 
 | Acceptance item                                                                                                          | Evidence reference / result                                                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052 accepted scope; owner enrollment and new preparation/actual app acceptance pending                       |
-| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean owner-scoped 6fa2bdc identities/scans verified on VPS; exact binding recorded; rollback pair/hosted protection pending |
+| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052 accepted scope; owner enrollment verified; fresh scans/new preparation/app acceptance pending            |
+| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean owner-scoped 6fa2bdc identities reverified; retained scans expired; fresh gate/rollback pair/hosted protection pending |
 | Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual TLS/grants/negative/peer/firewall evidence passes; app privileged TLS and rotation acceptance pending                 |
 | Compatible migration/redeploy, active Match pins and retained job-handler review                                         | Reviewed 13 migrations/grants/repeat deploy pass; initial cluster has no active pins/jobs; app redeploy pending              |
 | Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted three-host HTTPS/503 and local exact Web/privacy checks pass; actual owner/native/WSS remain unperformed             |
@@ -562,7 +583,8 @@ may be attached to this worksheet or public CI artifacts.
 
 Local 18B1/18B2 implementation and rehearsal evidence remains recorded in the
 plan; it cannot fill these staging rows. MVP 17C completion satisfies the
-sequencing condition, so 18B3 was assessed immediately. Missing actual owner enrollment and remaining acceptance gates block application
+sequencing condition, so 18B3 was assessed immediately. Expired official advisory
+evidence and remaining acceptance gates block application
 opening; independent authorized infrastructure is already executed. Phase 19 remains
 the separate final-readiness review; neither phase supplies launch approval.
 
@@ -570,11 +592,13 @@ the separate final-readiness review; neither phase supplies launch approval.
 disposable data, no-backup exception and manual monitoring decisions are settled.
 Actual private PG/Redis verified TLS/roles/grants, compatible migration/repeat,
 SSH-preserving persistent firewall, three-host trusted TLS/503 and scan-gated daily
-renewal are executed. Exact scanned clean app/component identities and real role
-bounds pass. Private `owner-admission.json` is absent because the nonce message has
-not arrived; real new preparation fails closed and zero applications start.
-This is the immediate subset blocker, not an unanswered access-policy proposal.
-After private enrollment, recheck scan freshness, create a new prepared output,
+renewal are executed. Exact clean app/component identities and real role bounds
+pass. Actual private owner enrollment is verified and the admission policy exists
+with 0600 UID/GID-1000 access. The official advisory DB is over 24 hours old;
+independent empty mirror/GHCR downloads still return that expired update. Real
+new preparation fails closed and zero applications start. This is the current
+subset blocker, not a missing owner decision. Obtain actually fresh official
+advisories, rescan the exact eight images, and create a new prepared output,
 then start API → Worker → Bot → Web and collect real admission/no-effects/private
 TLS/observability/fault/drain/native evidence before opening Web/Auth. Recovery is
 excluded/unperformed, not passed; a compatible scanned rollback pair is absent.

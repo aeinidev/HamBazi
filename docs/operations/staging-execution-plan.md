@@ -1,7 +1,8 @@
 # Temporary owner-only staging execution plan
 
 **Date:** 2026-10-08. **Status:** Bounded infrastructure executed; ingress remains
-503 and application activation is blocked by private owner enrollment. **Phase:**
+503 and application activation is blocked by expired advisory evidence. Private
+owner enrollment is verified. **Phase:**
 18B3 is not complete. The latest owner request supersedes preparation-only limits
 for the explicit temporary staging subset in [ADR-052](../adr/052-temporary-owner-admission-and-execution.md).
 Telegram settings, gameplay/Admin/Room activation, production, destructive data
@@ -22,17 +23,17 @@ are separately bound clean `fcfac0a` artifacts. The reviewed runner archive is
 `/opt/hambazi-staging/private/runner-b9448d2`; private `runner-current` points there.
 The archive has no Git metadata; do not interpret that as repository drift.
 
-| Actual check    | Evidence and boundary                                                                                                                                                                                                                                                                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DNS             | 56 local/VPS parent, authoritative SOA/A/AAAA/CAA and resolver checks; all 12 Cloudflare/Google A results match `185.110.191.104`. Parent NS is tornado/rainbow. No DNS mutation. No AAAA or restrictive CAA found.                                                                                                                                 |
-| Security        | Four new apps and both data images pass unchanged High/Critical/Unknown gates; each retains one Moderate zlib finding. Patched Nginx/Certbot have zero findings. Gitleaks zero. Existing advisory update expires **2026-10-08 11:08:55 Tehran**; new download time does not extend it. Refresh exact scans before any later execution after expiry. |
-| Private data    | PG `.20`, Redis `.21`; no published ports. Actual TLS 1.3 verifies chains/SANs; wrong CA/SAN/password/plaintext denied. API/Worker separate credentials, DDL/foreign DB grants and out-of-namespace/dangerous Redis commands denied; health only PING and default Redis user disabled.                                                              |
-| Migration       | 13 reviewed migration and 11 contract fingerprints plus grants match; separate migrator deploy/grants and repeat deploy pass on the empty new PG18 cluster. Lock/statement limits 5s/60s. No active durable pins/retained jobs existed. No reset/down migration.                                                                                    |
-| Firewall        | Owned IPv4/IPv6 chains, Docker forwarding and actual bridge peer controls applied; independent second key-authenticated SSH passed before cancelling the owned rollback timer. Boot unit retains filtering. External private ports and Web-peer data access denied.                                                                                 |
-| Public TLS      | One Let's Encrypt HTTP-01 SAN certificate for all three approved hosts, valid to `2027-01-06T06:11:04Z`. Both local/VPS trust/hostname/TLS/503 checks pass. Hold-only maintenance command and owner-route parser pass.                                                                                                                              |
-| Renewal         | Actual fresh-scan dry-run and normal no-due renewal pass. Daily 03:00 UTC plus ≤15-minute systemd scheduling jitter; fixed safe journal outcomes, no raw Docker logs, ≤7 safe scan records and bounded private ACME logs. Scan failure/staleness blocks ACME. Certbot's own random sleep is replaced by the bounded timer jitter.                   |
-| Web             | 64 unit tests, typecheck/build, 26 browser/privacy tests and exact final production-artifact account/logout/no-realtime/no-invite browser smoke pass. Synthetic browser transport does not count as native Telegram or actual owner admission acceptance.                                                                                           |
-| New preparation | Four real mode-0600 role files and inventory/scan/config bounds pass. Real `prepare.mjs` exits 1 because the actual owner reference is absent; no new prepared directory or application is started.                                                                                                                                                 |
+| Actual check    | Evidence and boundary                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DNS             | 56 local/VPS parent, authoritative SOA/A/AAAA/CAA and resolver checks; all 12 Cloudflare/Google A results match `185.110.191.104`. Parent NS is tornado/rainbow. No DNS mutation. No AAAA or restrictive CAA found.                                                                                                                                      |
+| Security        | Retained scans passed unchanged High/Critical/Unknown gates at their original execution: one Moderate zlib per app/data image and zero findings in patched Nginx/Certbot. They expired **2026-10-08 11:08:55 Tehran**. Fresh empty mirror/GHCR downloads still return the expired advisory update; current activation is blocked. Gitleaks remains zero. |
+| Private data    | PG `.20`, Redis `.21`; no published ports. Actual TLS 1.3 verifies chains/SANs; wrong CA/SAN/password/plaintext denied. API/Worker separate credentials, DDL/foreign DB grants and out-of-namespace/dangerous Redis commands denied; health only PING and default Redis user disabled.                                                                   |
+| Migration       | 13 reviewed migration and 11 contract fingerprints plus grants match; separate migrator deploy/grants and repeat deploy pass on the empty new PG18 cluster. Lock/statement limits 5s/60s. No active durable pins/retained jobs existed. No reset/down migration.                                                                                         |
+| Firewall        | Owned IPv4/IPv6 chains, Docker forwarding and actual bridge peer controls applied; independent second key-authenticated SSH passed before cancelling the owned rollback timer. Boot unit retains filtering. External private ports and Web-peer data access denied.                                                                                      |
+| Public TLS      | One Let's Encrypt HTTP-01 SAN certificate for all three approved hosts, valid to `2027-01-06T06:11:04Z`. Both local/VPS trust/hostname/TLS/503 checks pass. Hold-only maintenance command and owner-route parser pass.                                                                                                                                   |
+| Renewal         | Actual fresh-scan dry-run and normal no-due renewal pass. Daily 03:00 UTC plus ≤15-minute systemd scheduling jitter; fixed safe journal outcomes, no raw Docker logs, ≤7 safe scan records and bounded private ACME logs. Scan failure/staleness blocks ACME. Certbot's own random sleep is replaced by the bounded timer jitter.                        |
+| Web             | 64 unit tests, typecheck/build, 26 browser/privacy tests and exact final production-artifact account/logout/no-realtime/no-invite browser smoke pass. Synthetic browser transport does not count as native Telegram or actual owner admission acceptance.                                                                                                |
+| New preparation | Actual owner enrollment, four real mode-0600 role files, config bounds, private TLS references and exact candidate identities pass. Real `prepare.mjs` rejects expired scan evidence; no new prepared output or application is started.                                                                                                                  |
 
 Private execution/evidence is under
 `/opt/hambazi-staging/private/execution-20261008`, mirrored safely in the laptop's
@@ -45,15 +46,47 @@ scanned previous owner-scoped release pair exists; hold containment is not versi
 rollback acceptance. Full 7C/game/Room/Main invitation and native-client gates
 remain explicitly deferred.
 
-**Exact next executable action:** match the owner's original private nonce message
-using read-only `getUpdates` without `offset`, privately create exactly one actual
-owner-ID policy, and transfer it exclusively to
-`/opt/hambazi-staging/private/execution-20261008/owner-admission.json` (0600,
-UID 1000). No fixture, Bot ID, first visitor or arbitrary backlog sender is valid.
-Then, from `runner-current`, execute the existing CLI against
-`execution-20261008/owner-inputs.json` and a new
-`/opt/hambazi-staging/private/prepared-20261008-owner-01`. Recheck freshness first.
-Do not overwrite historical preparation or record token/environment hashes.
+**Owner enrollment follow-up, 2026-10-08:** the original private nonce message
+matched exactly one human sender in the same private chat. Read-only `getUpdates`
+used no `offset`; no backlog was acknowledged or raw response persisted. The
+exclusive regular policy is now at
+`/opt/hambazi-staging/private/execution-20261008/owner-admission.json`, 0600,
+UID/GID 1000. No personal ID, token, raw launch or policy-content hash enters this
+binding or telemetry. Four role files, config bounds, private leaf/key/IP SANs,
+exact target image source/build/UID identities and migration/contract fingerprints
+were revalidated. The old preparation stays unchanged.
+
+At 07:56 UTC, 56 local/VPS parent, authority and public checks pass, including all
+12 Cloudflare/Google A answers. At 07:57 UTC, both data services still verify TLS
+1.3 with no published ports; all 13 reviewed migrations and three separate
+non-superuser roles remain present. The three trusted public TLS endpoints still
+return 503. Zero application containers run.
+
+**Actual blocker:** ordinary Trivy download retained the recently downloaded
+cache despite expiry; [Trivy 0.74.0's update logic](https://github.com/aquasecurity/trivy/blob/v0.74.0/pkg/db/db.go)
+has a one-hour download guard. Preserved that cache, then separately downloaded
+into empty private caches from the default mirror and direct official GHCR. Both
+successful downloads still contain `UpdatedAt=2026-10-07T07:38:55.515026687Z`.
+The unchanged 24-hour gate therefore rejects them. Fresh download timestamps do
+not extend the advisory update age. The official
+[06:10 UTC DB workflow](https://github.com/aquasecurity/trivy-db/actions/runs/37736159029)
+and its preceding 00:15 UTC run failed; the latest failed step is `Login to Docker
+Hub`, with an expired upstream organization access token. This is upstream
+publication failure, not a staging credential, DNS or download timeout. No
+metadata rewrite, suppression, skip or policy exception was used. The attempted
+new application scan did not reach image scanning and does not count as fresh
+successful evidence. A direct call to the real `prepare` implementation also
+rejects the retained expired report before creating any output.
+
+**Exact next executable action:** obtain an actually fresh official advisory
+update, scan the unchanged exact four app images plus PostgreSQL/Redis and
+Nginx/Certbot on the verified target daemon, and retain new successful evidence in
+an exclusive private release directory. Preserve all old/failed reports; update
+`execution-20261008/owner-inputs.json` only to bind successful new evidence. Then,
+from `runner-current`, execute
+`node infra/release/prepare.mjs /opt/hambazi-staging/private/execution-20261008/owner-inputs.json /opt/hambazi-staging/private/prepared-20261008-owner-01`.
+No additional owner enrollment or policy decision is missing for this bounded
+Web/Auth preparation. The upstream freshness blocker must clear first.
 
 After successful preparation, continue API → Worker → Bot → Web with actual
 readiness, real private privileged TLS and manual observer checks. Keep public

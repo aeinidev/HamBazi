@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "maintenance-only-owner-enrollment-blocked",
+  "status": "maintenance-only-advisory-freshness-blocked",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -64,7 +64,15 @@
     "earliestEvidenceExpiryUTC": "2026-10-08T07:38:55.515Z",
     "expiryAsiaTehran": "2026-10-08 11:08:55",
     "blocking": ["high", "critical", "unknown"],
-    "secretFindingsAllowed": 0
+    "secretFindingsAllowed": 0,
+    "currentEvidenceFresh": false,
+    "activationScanPassed": false,
+    "refreshCheckedAtUTC": "2026-10-08T07:53:43.238Z",
+    "latestRetrievedUpdatedAtUTC": "2026-10-07T07:38:55.515026687Z",
+    "refreshStatus": "blocked-official-upstream-database-stale",
+    "retrievalSources": ["mirror.gcr.io/aquasec/trivy-db:2", "ghcr.io/aquasecurity/trivy-db:2"],
+    "upstreamFailedWorkflow": "https://github.com/aquasecurity/trivy-db/actions/runs/37736159029",
+    "upstreamFailedStep": "Login to Docker Hub"
   },
   "acceptedObservations": {
     "privateDataTLS": true,
@@ -83,7 +91,14 @@
     "ownerRouteParserVerified": true,
     "renewalDryRunPassed": true,
     "renewalSystemdServicePassed": true,
-    "runnerSourceCommit": "b9448d2fd81c0394be679d980f1913c7197aee46"
+    "runnerSourceCommit": "b9448d2fd81c0394be679d980f1913c7197aee46",
+    "ownerEnrollmentVerified": true,
+    "privateOwnerConfigurationValidated": true,
+    "candidateIdentityRechecked": true,
+    "dnsRecheckedAtUTC": "2026-10-08T07:56:08.270Z",
+    "dnsChecksPassed": 56,
+    "publicDNSAnswersExpected": 12,
+    "infrastructureRecheckedAtUTC": "2026-10-08T07:57:55.423Z"
   },
   "assets": {
     "infra/docker/staging/bootstrap.routes.conf": "6000763dfc76baf809c5d05d35163245d90ffff3593174156a1c6175b2ebf740",
@@ -98,5 +113,26 @@
     "infra/docker/staging/postgresql.proposed.conf": "12bfbeb055e9cc32a308ca3fff68e74295220b00febea21bccd14f08bae7b1fd",
     "infra/docker/staging/redis.proposed.conf": "d1d9dd79800c5442e294fbf7dff087dfaa3ef50f7f62f11cdfba73f652b9b06c",
     "infra/docker/staging/start-redis-tls.sh": "3acb5285aacf1203615c6847e12ee407e60ad5843e80d6df75e3d4132555430c"
-  }
+  },
+  "ownerEnrollment": {
+    "verifiedPrivately": true,
+    "policyFile": "/opt/hambazi-staging/private/execution-20261008/owner-admission.json",
+    "ownerCount": 1,
+    "mode": "0600",
+    "uid": 1000,
+    "rawUpdatesPersisted": false,
+    "updatesAcknowledged": false,
+    "telegramSettingsChanged": false
+  },
+  "currentBlocker": {
+    "code": "ADVISORY_DATABASE_OVER_24_HOURS",
+    "preparedOutputCreated": false,
+    "nextAction": "Retrieve actually fresh official advisory database; rescan the exact four applications, PostgreSQL, Redis, ingress and ACME; bind successful new evidence and run prepare.mjs into a new private directory."
+  },
+  "privateEvidence": [
+    "/opt/hambazi-staging/private/execution-20261008/evidence/owner-enrollment-preflight-20261008-0754.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/owner-config-validation-20261008-0756.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/scanner-upstream-failure-20261008-0757.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/infrastructure-owner-20261008-0758.json"
+  ]
 }
