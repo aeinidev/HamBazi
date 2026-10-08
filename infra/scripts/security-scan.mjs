@@ -17,6 +17,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { parse } from "yaml";
+import { validateStagingFreshnessContext } from "../release/staging-freshness.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const policy = JSON.parse(
@@ -114,18 +115,29 @@ export function assessImage(report, image) {
   };
 }
 
-export function assertFreshDatabase(metadata, now = Date.now()) {
+export function assertFreshDatabase(metadata, now = Date.now(), stagingContext) {
   if (metadata?.Version !== 2 || !Number.isFinite(now)) invalid();
+  const exception = stagingContext
+    ? validateStagingFreshnessContext(stagingContext, now)
+    : undefined;
+  const maximumAgeHours = exception?.maximumAgeHours ?? policy.databaseMaxAgeHours;
   for (const field of ["UpdatedAt", "DownloadedAt"]) {
     const time = typeof metadata[field] === "string" ? Date.parse(metadata[field]) : NaN;
-    if (
-      !Number.isFinite(time) ||
-      time > now + 300000 ||
-      now - time > policy.databaseMaxAgeHours * 3600000
-    )
+    if (!Number.isFinite(time) || time > now + 300000 || now - time > maximumAgeHours * 3600000)
       invalid();
   }
-  return { updatedAt: metadata.UpdatedAt, downloadedAt: metadata.DownloadedAt };
+  return {
+    updatedAt: metadata.UpdatedAt,
+    downloadedAt: metadata.DownloadedAt,
+    ...(exception
+      ? {
+          freshnessException: exception,
+          standard24HourGatePassed: [metadata.UpdatedAt, metadata.DownloadedAt].every(
+            (t) => now - Date.parse(t) <= policy.databaseMaxAgeHours * 3600000,
+          ),
+        }
+      : {}),
+  };
 }
 
 // Do not inherit scanner suppression, debug, credential or application variables.

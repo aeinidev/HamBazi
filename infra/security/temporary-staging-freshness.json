@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "profile": "personal-owner-staging-48h-20261008",
+  "status": "accepted-by-owner",
+  "approvedAt": "2026-10-08",
+  "expiresAt": "2026-10-09T07:38:55.515Z",
+  "maximumAgeHours": 48,
+  "targetAddress": "185.110.191.104",
+  "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
+  "ownerAdmissionProfile": "telegram-owner-only-v1",
+  "reason": "Official Trivy DB publication failed; temporary personal staging only. Retry official downloads, retain actual timestamps, enforce all severity and secret gates."
+}

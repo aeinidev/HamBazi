@@ -11,6 +11,7 @@ const invalid = () => {
 export async function scanApplications(
   manifestPath,
   scannerDirectory = process.env.SECURITY_SCANNER_DIR,
+  stagingContext,
 ) {
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   if (
@@ -57,6 +58,8 @@ export async function scanApplications(
     );
     const database = assertFreshDatabase(
       JSON.parse(await readFile(join(cache, "db/metadata.json"), "utf8")),
+      Date.now(),
+      stagingContext,
     );
     const images = [];
     for (const [index, role] of ["api", "bot", "worker", "web"].entries()) {

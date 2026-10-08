@@ -8,7 +8,7 @@ const invalid = () => {
 const count = (value) => Number.isSafeInteger(value) && value >= 0;
 
 /** Reuse scanner validators; project only public finding identities and numeric evidence. */
-export function projectScan(report, kind) {
+export function projectScan(report, kind, stagingContext) {
   if (
     !scannerStages.has(kind) ||
     report?.schemaVersion !== 1 ||
@@ -61,11 +61,15 @@ export function projectScan(report, kind) {
       typeof report.sourceDirty !== "boolean")
   )
     invalid();
-  const database = assertFreshDatabase({
-    Version: 2,
-    UpdatedAt: report.database?.updatedAt,
-    DownloadedAt: report.database?.downloadedAt,
-  });
+  const database = assertFreshDatabase(
+    {
+      Version: 2,
+      UpdatedAt: report.database?.updatedAt,
+      DownloadedAt: report.database?.downloadedAt,
+    },
+    Date.now(),
+    stagingContext,
+  );
   const images = report.images.map((image, index) => {
     const role = applications ? ["api", "bot", "worker", "web"][index] : undefined;
     if (

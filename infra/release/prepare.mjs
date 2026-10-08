@@ -11,6 +11,7 @@ import { runGate } from "../ci/gates.mjs";
 import { verifyBrowserPolicyArtifact } from "../../apps/web/security/browser-policy.ts";
 import { telegramSdkIntegrity } from "../../apps/web/src/platform/telegram-sdk.ts";
 import { operatorProfile, operatorLogging } from "./monitoring.mjs";
+import { stagingFreshnessContext } from "./staging-freshness.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const invalid = () => {
@@ -143,7 +144,7 @@ export function parseRoleFile(text, role) {
   return env;
 }
 
-export function validateInventory(manifest, report) {
+export function validateInventory(manifest, report, stagingContext) {
   verifyBrowserPolicyArtifact(manifest?.browserPolicy, telegramSdkIntegrity);
   if (
     manifest?.schemaVersion !== 1 ||
@@ -159,7 +160,7 @@ export function validateInventory(manifest, report) {
     manifest.images.length !== 4
   )
     invalid();
-  const scan = projectScan(report, "application-images");
+  const scan = projectScan(report, "application-images", stagingContext);
   for (const key of ["sourceCommit", "sourceDirty", "sourceSnapshotSha256", "buildInputSha256"])
     if (scan[key] !== manifest[key]) invalid();
   for (const [index, role] of roles.entries()) {
@@ -357,6 +358,7 @@ export async function prepare(inputsPath, output) {
     "stopGraceSeconds",
     ...(Object.hasOwn(inputs, "operatorMonitoring") ? ["operatorMonitoring"] : []),
     ...(Object.hasOwn(inputs, "ownerAdmissionFile") ? ["ownerAdmissionFile"] : []),
+    ...(Object.hasOwn(inputs, "temporaryStagingFreshness") ? ["temporaryStagingFreshness"] : []),
   ]);
   for (const field of ["roleEnvFiles", "privateAddresses", "stopGraceSeconds"])
     exact(inputs[field], roles);
@@ -389,7 +391,15 @@ export async function prepare(inputsPath, output) {
   const inventoryBytes = await privateFile(inputs.inventory),
     manifest = JSON.parse(inventoryBytes);
   const scanBytes = await privateFile(`${inputs.inventory}.scan.json`);
-  validateInventory(manifest, JSON.parse(scanBytes));
+  if (
+    inputs.temporaryStagingFreshness &&
+    (!inputs.ownerAdmissionFile || manifest.sourceDirty !== false)
+  )
+    invalid();
+  const freshness = inputs.temporaryStagingFreshness
+    ? await stagingFreshnessContext(inputs.temporaryStagingFreshness)
+    : undefined;
+  const verifiedScan = validateInventory(manifest, JSON.parse(scanBytes), freshness);
   const privateNetwork = JSON.parse(
     await runGate("deployment-private-network", "docker", [
       "network",
@@ -534,6 +544,7 @@ export async function prepare(inputsPath, output) {
       inventorySha256: hash(inventoryBytes),
       scanSha256: hash(scanBytes),
       composeSha256: hash(compose),
+      ...(freshness ? { advisoryFreshness: verifiedScan.database } : {}),
       ...(inputs.ownerAdmissionFile
         ? {
             ownerAdmission: {
