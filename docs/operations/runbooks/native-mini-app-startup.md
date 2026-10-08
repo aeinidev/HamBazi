@@ -4,6 +4,11 @@ Scope: owner-only personal staging; ADR-055. Native acceptance remains failed at
 the owner's reported missing-launch screen until the owner verifies the fix on
 their actual iPhone. Synthetic browser results are separate evidence.
 
+The replacement is deployed from `a8b97f8`, using
+`/opt/hambazi-staging/private/prepared-20261008-native-02`. Six actual-network
+Chromium/WebKit query/fragment/owner/non-owner startup scenarios pass; this does
+not substitute for the iPhone result. See the [current binding](../../../infra/docker/staging/execution-current.json).
+
 ## Mobile retest
 
 1. Close the Mini App with its close control, rather than minimizing it. Close and
@@ -16,7 +21,7 @@ their actual iPhone. Synthetic browser results are separate evidence.
    `SDK: present`, `Launch data: present`, `Initialization: ready`,
    `Authentication: not-requested`.
 4. Tap **Continue with Telegram**. Expected: `Authentication: authenticated` and
-   the **Temporary owner staging** screen. If an owner account has not yet been
+   the **Temporary owner staging** screen with **Personal Coup test**. If an owner account has not yet been
    created, use the existing account-creation form; backend owner admission still
    applies before any durable account write.
 5. Only after sign-in succeeds, optionally use **Start game with bot**. Report

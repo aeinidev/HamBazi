@@ -1,8 +1,8 @@
 # Phase 18B3 operating-decision worksheet
 
-**Prepared:** 2026-10-04. **Updated:** 2026-10-08. **Status:** Temporary owner-only
+**Prepared:** 2026-10-04. **Updated:** 2026-10-09 Tehran. **Status:** Temporary owner-only
 Web/Auth/personal Coup are deployed and browser-accepted. **Phase 18B3:** In Progress,
-with native Telegram and full operational acceptance unpassed. ADR-052/053/054 and
+with the native startup fix deployed and actual iPhone retest pending. ADR-052/053/054/055 and
 the supplied owner authorization supersede preparation-only restrictions for this
 bounded personal deployment. The ordinary product/Admin/Room paths remain disabled.
 The [current execution checkpoint](staging-execution-plan.md) and
@@ -567,41 +567,54 @@ Use dated restricted evidence references and safe scalar results/hashes; no raw
 DB rows/dumps, chat, cards/decks/hidden state, RNG material or error/trace payloads
 may be attached to this worksheet or public CI artifacts.
 
-| Acceptance item                                                                                                          | Evidence reference / result                                                                                                                       |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052/053/054 accepted scope; real owner enrollment, exclusive preparation and personal acceptance pass                             |
-| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean d28d4b0 images/daemon/provenance and eight scans pass under explicit 48h exception; ordinary 24h fails; rollback/hosted protection unpassed |
-| Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual data/application TLS/grants/negative/peer/firewall isolation passes; full secret-rotation drill unperformed                                |
-| Compatible migration/redeploy, active Match pins and retained job-handler review                                         | 14 additive migrations/grants/repeat and unchanged final-release fingerprints pass; pinned personal engine/jobs and same-version restart pass     |
-| Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted HTTPS/WSS/current SDK/public full-game/privacy and real-network owner smoke pass; actual native Telegram unperformed                      |
-| Supervisor/ingress drain with accepted-work settlement, retry/reconnect and durable reconciliation                       | Nine HTTP and 15 accepted WSS drain checks pass: readiness closes, accepted work settles, same-version restart/retry/reconnect preserve receipts  |
-| Actual candidate-to-previous staging rollback preserving schema/history/receipts                                         | Unaccepted; previous SDK pin is obsolete; containment/same-version restart do not prove version rollback                                          |
-| Selected backup/PITR isolated restore, measured recovery point/time against approved RPO/RTO and reconciled durable data | Excluded by ADR-050 for personal disposable staging — not performed, not passed; production gate retained                                         |
-| Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Private manual logs/health/metrics/retention pass; production alert/aggregation/load/soak/SLO evidence remains unperformed                        |
+| Acceptance item                                                                                                          | Evidence reference / result                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Approved OD-002/006/007, origins/access/OPS and bounded execution authorization                                          | ADR-049/050/051/052/053/054 accepted scope; real owner enrollment, exclusive preparation and personal acceptance pass                                                                         |
+| Exact clean source/current and rollback image identities, fresh scans, hosted protected CI and provenance                | Clean a8b97f8 apps/d6eb25b components and eight exact target scans pass normal 24h freshness; release-pair rollback/hosted protection unpassed                                                |
+| Private data DNS/network/TLS, real role grants/denials, ingress/egress and secret rotation/trust                         | Actual data/application TLS/grants/negative/peer/firewall isolation passes; full secret-rotation drill unperformed                                                                            |
+| Compatible migration/redeploy, active Match pins and retained job-handler review                                         | 14 additive migrations/grants/repeat and unchanged final-release fingerprints pass; pinned personal engine/jobs and same-version restart pass                                                 |
+| Actual HTTPS/WSS health, browser headers/origins, Telegram SDK/mobile WebView and authorized product smoke               | Trusted HTTPS/WSS/bundled SDK and six current public-network startup/auth scenarios pass; current real private full game passes; original iPhone failure recorded, replacement retest pending |
+| Supervisor/ingress drain with accepted-work settlement, retry/reconnect and durable reconciliation                       | Nine HTTP and 15 accepted WSS drain checks pass: readiness closes, accepted work settles, same-version restart/retry/reconnect preserve receipts                                              |
+| Actual candidate-to-previous staging rollback preserving schema/history/receipts                                         | Unaccepted; no compatible scanned previous pair; historical ingress has a new High tiff finding; containment/same-version restart do not prove version rollback                               |
+| Selected backup/PITR isolated restore, measured recovery point/time against approved RPO/RTO and reconciled durable data | Excluded by ADR-050 for personal disposable staging — not performed, not passed; production gate retained                                                                                     |
+| Approved SLO definitions/signals, monitoring freshness/aggregation and notification drill                                | Private manual logs/health/metrics/retention pass; production alert/aggregation/load/soak/SLO evidence remains unperformed                                                                    |
 
 Local 18B1/18B2 implementation and rehearsal evidence remains recorded in the
 plan; it cannot fill these staging rows. MVP 17C completion satisfies the
-sequencing condition, so 18B3 was assessed immediately. Personal traffic is open under the bounded advisory exception; remaining full
+sequencing condition, so 18B3 was assessed immediately. Personal traffic is open with fresh normal-policy scans; remaining full
 acceptance gates are recorded separately and do not imply public-launch readiness. Phase 19 remains
 the separate final-readiness review; neither phase supplies launch approval.
 
-**Current outcome (2026-10-08):** no additional owner policy/private reference
-is missing for the personal flow. Final `d28d4b0` release and exclusive
-`prepared-20261008-personal-02` are deployed; all eight scans pass under ADR-053
-(normal 24-hour freshness fails). Four READY apps, fourteen unchanged compatible
-migrations/grants, 35 Auth/37 full-game/nine HTTP/15 accepted WSS drain checks,
-13 full browser checks and 13 real-network SDK owner checks pass. Private
-observability/retention is verified. The changed official SDK was reviewed,
-repinned and tested with current matching laptop/VPS bytes; no integrity bypass.
-Exact hashes/restricted evidence are in
+**Current outcome (2026-10-09 Tehran):** no additional owner policy/private
+reference is missing for the personal flow. Clean `a8b97f8` apps and exclusive
+`prepared-20261008-native-02` are deployed, with separately patched `d6eb25b`
+ingress/ACME. Fresh official advisory DB restores normal 24-hour acceptance for
+all eight exact images; High/Critical/Unknown remain zero. No historical 48-hour
+exception is extended. Signed pinned tiff 4.7.2-r0 fixes the newly detected High
+ingress finding. Normal evidence expires Oct 9 at 22:35:21 Tehran; the installed
+owned timer then applies maintenance/app stop, with future execution unperformed.
+
+Four READY apps, 14 unchanged compatible migrations/grants, private verified TLS/
+role separation/no public data ports, 35 Auth, 37 full-game (15 owner commands,
+27 turns), nine HTTP and 15 accepted WSS drain checks pass. Six real public-network
+Chromium/WebKit startup scenarios pass query/fragment SDK initialization, owner
+200/non-owner 401, safe diagnostics, logout/URL cleanup/no stored credentials.
+No external SDK dependency, transport interception, proxy or integrity bypass is
+used. Signature/freshness/constant-time checks and exact owner policy are retained.
+Private observability/retention and six public isolation checks pass. Two manually
+confirmed host reboots interrupted transfer/tests; exact Worker/Web image reload
+and four-role `/app` fingerprints after repair/second boot verify their content.
+No OS-layer fingerprint, old graceful drain or automatic reboot recovery is claimed.
+Exact hashes/restricted evidence and historical bindings are in
 [execution-current.json](../../infra/docker/staging/execution-current.json).
 
-Actual native Telegram remains unperformed; Telegram Web frames and ordinary
-Admin/catalog/Room/invitations/chat/matchmaking/stats remain disabled. Personal
-outbox fanout is deferred. Full version rollback is unaccepted (previous SDK is
-obsolete), recovery is excluded/unperformed, and production-like load/soak/SLO/
-protected publication remain unpassed. These are acceptance/functional gaps with
-consequences in the [execution plan](staging-execution-plan.md), not unanswered
-owner decisions. The exception ends Oct 9 at 11:08:55 Tehran, with installed timed
-maintenance/app stop; future timer execution remains unperformed. No Telegram
-setting, production/destructive action or later phase occurs; full 18B3 is incomplete.
+Actual iPhone acceptance is pending the owner's retest after the recorded original
+failure; see [mobile steps](runbooks/native-mini-app-startup.md). Telegram Web
+frames and ordinary Admin/catalog/Room/invitations/chat/matchmaking/stats remain
+disabled. Personal outbox fanout, full secret rotation and version rollback remain
+unaccepted; recovery is excluded/unperformed. One WebKit permission-policy
+introspection check is skipped and Chromium denial assertions pass. Production-like
+load/soak/SLO/protected publication remain unpassed. These are acceptance/functional
+gaps with consequences in the [execution plan](staging-execution-plan.md), not
+unanswered owner decisions. No Telegram setting, production/destructive action
+or later phase occurs; full 18B3 is incomplete.

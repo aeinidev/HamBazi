@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "owner-gameplay-open-native-startup-blocker-under-remediation",
+  "status": "owner-gameplay-open-native-startup-fix-deployed-real-iphone-retest-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,83 +10,70 @@
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-02",
   "historicalPreparedComposeSha256": "fa51354d1c1e78a6fe919bd2d2c4840b4b7d9578e9ac4f242435c7c0712e4780",
   "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008",
-  "nextInputs": "/opt/hambazi-staging/private/execution-20261008/personal-inputs-03.json",
-  "nextPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-02",
+  "nextInputs": "/opt/hambazi-staging/private/execution-20261008/personal-inputs-native-02.json",
+  "nextPreparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-native-02",
   "newPreparationPassed": true,
   "applicationsStarted": true,
   "ownerTrafficOpened": true,
   "application": {
-    "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
+    "sourceCommit": "a8b97f8dc57014f130aaedee604faf95e91da593",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "cbfc1eeab43a68fd281cf1fa85e8aa64f6584a2c83627a728d5f2a93a4a2c883",
-    "buildInputSha256": "fd6d159d9a682e1a730f3fc97caa3accf0f19528d7d3e0748d2b1dbefb46716b",
+    "sourceSnapshotSha256": "dcbffe1240c1c1031acce5a92f203e5dd2a99736c69f201de3e5f0f85eb6a786",
+    "buildInputSha256": "825f4886581e10dde2ab7382acceba3e771f10faaf85cb32309e77f5fad870f7",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b88cd1d392ac1d2a04f3d2ad13fa43f24c98056b3ece774a2aedbc1623666af4"
+        "image": "hambazi-candidate/api:a8b97f8dc57014f130aaedee604faf95e91da593-825f4886581e10dd@sha256:67ccc732591d4a46a7ee8395240bf7258cfd9753bb73c1e730c1bcbaca5bd2ea"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:745c963e1db10c31b77bf37ff9d28575701a64c94ba644f88314fca6b51b627a"
+        "image": "hambazi-candidate/bot:a8b97f8dc57014f130aaedee604faf95e91da593-825f4886581e10dd@sha256:7fd65c4c726a2c653f76837573c47e6b497ea700580e6e03bec748f70e7f7121"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:68c0999be0144760776568ec8ded39d9382582de69317e65bb82cfefd4264915"
+        "image": "hambazi-candidate/worker:a8b97f8dc57014f130aaedee604faf95e91da593-825f4886581e10dd@sha256:490688fd3b45906ecf00fcd2ac9de07d35e76078d368fa1c68d430f6040bd32a"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b1d5f213663aa48036601fb3a0779515adad941603ec395b912ff28b8731ab43"
+        "image": "hambazi-candidate/web:a8b97f8dc57014f130aaedee604faf95e91da593-825f4886581e10dd@sha256:4409cbf8bbf575a67033ff512e4612248d23baa00dab5f4e7eae6b663c97433b"
       }
     ],
-    "composeSha256": "d892bebda5c238db8a7d4946e75c5638eadb12ef1d75d773878bdfcdf49da312",
-    "inventorySha256": "8e7cf488d0adab04493246b60e029768dba2d23beaa965f33ebf643830a946fc",
-    "scanSha256": "12046d82e83787afad721f4e7aa33191bb74e56814c0e5b722f1e9a63f9dcde6",
-    "preparationSha256": "5103b756b61cf343d79ef16fd760fabaa6eebbf32c63e34915533cc7ada0c873"
+    "composeSha256": "669bc5eb8f230f3a3115ed76b040bfcde7fb2900d2f3506b7bffac97abe432af",
+    "inventorySha256": "d9685d8e46f441225c7e10ceb63d4e053528de539f98b2e1adc99d33ee694874",
+    "scanSha256": "2ca925bffb6d63d6341c03710dc84e34de77b8484b71b2fcce66ecd51f16bb37",
+    "preparationSha256": "13b06211c2ef84c6cf537fc4292a0178c36fc5e5a8410eeea4edef32daa4e061"
   },
   "components": {
-    "sourceCommit": "fcfac0a0eb08739f60f6c8a9e38c797bf581c772",
-    "lockSha256": "c3d08af8baa3af5ef5877f88d926457028a6c1ca791057becd9da3ef6d3c3f14",
-    "inventorySha256": "888de0521a3e2fb1055304f51d1fd2c47f740348c351c8cb4c2313380feec152",
-    "scanSha256": "db56e49e44650d8ca2b1f2e6913b7b9f607336a96fde8a0eb5dc79b5b0b95ede",
+    "sourceCommit": "d6eb25b049d251bd6e2f82bf428396b37486b6fa",
+    "lockSha256": "668376dd098d893d970a945f2995bbdce2b3242121e7b9060629ef82325a3b3e",
     "images": [
       {
         "role": "ingress",
-        "image": "hambazi-staging/ingress:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-5d569d0ba9eca3e4@sha256:c2ad9ad7678c022eeb50784bf1a9dc68eb45735c5881d3f90c9cc2bb1ca6b57b",
-        "buildInputSha256": "5d569d0ba9eca3e4cb32ff742b5557230ebb1e85aaaf9c9716e6f853bd88c48a"
+        "image": "hambazi-staging/ingress:d6eb25b049d251bd6e2f82bf428396b37486b6fa-f59e015968b3b4f9@sha256:d82fb564f36c55dce03ceb11c7329882b2588a3508058746c8e1aa8b4ae6bbcb",
+        "buildInputSha256": "f59e015968b3b4f96b8320f489cac1abfa6ec8f6e9356d1b8d8676cb640fcf16"
       },
       {
         "role": "acme",
-        "image": "hambazi-staging/acme:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-7793e071a2a421b6@sha256:c91a2b4547cd45dec7cfe020971197d9c2e75938d04637409143bdc5d2c5abd7",
-        "buildInputSha256": "7793e071a2a421b67af479deba7ca05c40a8c1040ca192c67e043c40d413b6dd"
+        "image": "hambazi-staging/acme:d6eb25b049d251bd6e2f82bf428396b37486b6fa-d3c96782567cef7b@sha256:244702eb791f385a35cc75203cd05439c9ade499bf739f97db716369d8557c9d",
+        "buildInputSha256": "d3c96782567cef7b2b1616873183db56c46bf48b90df1f22da19516ee8513fd9"
       }
-    ]
+    ],
+    "inventorySha256": "c0a8faf84577ff25614510965ae656a71ce0253c265bf994b96570c0241e0471",
+    "scanSha256": "b1e6719b5516e0fbce72ad0837fa95bf2ac9ca289eaded6558f7daabf3d73ed5"
   },
   "scanner": {
     "databaseMaximumAgeHours": 24,
-    "earliestEvidenceExpiryUTC": "2026-10-09T07:38:55.515Z",
-    "expiryAsiaTehran": "2026-10-09 11:08:55",
+    "earliestEvidenceExpiryUTC": "2026-10-09T19:05:21.721409+00:00",
+    "expiryAsiaTehran": "2026-10-09 22:35:21",
     "blocking": ["high", "critical", "unknown"],
     "secretFindingsAllowed": 0,
     "currentEvidenceFresh": true,
     "activationScanPassed": true,
-    "refreshCheckedAtUTC": "2026-10-08T13:10:03.325672316Z",
-    "latestRetrievedUpdatedAtUTC": "2026-10-07T07:38:55.515026687Z",
-    "refreshStatus": "actual-eight-image-scans-passed-under-explicit-ADR-053-only",
-    "retrievalSources": ["mirror.gcr.io/aquasec/trivy-db:2", "ghcr.io/aquasecurity/trivy-db:2"],
-    "upstreamFailedWorkflow": "https://github.com/aquasecurity/trivy-db/actions/runs/37736159029",
-    "upstreamFailedStep": "Login to Docker Hub",
-    "temporaryMaximumAgeHours": 48,
-    "standard24HourGatePassed": false,
-    "downloadedAtUTC": "2026-10-08T13:10:03.325672316Z",
-    "exception": {
-      "profile": "personal-owner-staging-48h-20261008",
-      "maximumAgeHours": 48,
-      "expiresAt": "2026-10-09T07:38:55.515Z",
-      "targetAddress": "185.110.191.104",
-      "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
-      "ownerAdmissionProfile": "telegram-owner-only-v1",
-      "approvalSha256": "6e9b721147f84bd56cce3acc4a0ed24db45e920e5309a922c3ef0213c52d03a2"
-    }
+    "standard24HourGatePassed": true,
+    "refreshStatus": "fresh-official-database-all-eight-exact-target-images-pass-normal-policy",
+    "latestRetrievedUpdatedAtUTC": "2026-10-08T19:05:21.721409049Z",
+    "downloadedAtUTC": "2026-10-08T22:19:19.038829328Z",
+    "historical48HourExceptionExtended": false
   },
   "acceptedObservations": {
     "privateDataTLS": true,
@@ -105,7 +92,7 @@
     "ownerRouteParserVerified": true,
     "renewalDryRunPassed": true,
     "renewalSystemdServicePassed": true,
-    "runnerSourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
+    "runnerSourceCommit": "a8b97f8dc57014f130aaedee604faf95e91da593",
     "ownerEnrollmentVerified": true,
     "privateOwnerConfigurationValidated": true,
     "candidateIdentityRechecked": true,
@@ -116,24 +103,27 @@
     "contractFingerprints": 12,
     "ownerNonOwnerProtocolChecks": 35,
     "actualPersonalGameChecks": 37,
-    "actualPersonalGameHumanCommands": 12,
-    "actualPersonalGameMaximumTurn": 12,
+    "actualPersonalGameHumanCommands": 15,
+    "actualPersonalGameMaximumTurn": 27,
     "httpDrainContainmentChecks": 9,
     "acceptedWssDrainChecks": 15,
-    "publicOwnerTrafficOpenedAtUTC": "2026-10-08T13:16:56.714Z",
+    "publicOwnerTrafficOpenedAtUTC": "2026-10-08T22:57:18.295Z",
     "publicOwnerBrowserAccepted": true,
     "trustedPublicTLS": true,
     "advisoryExpiryTimerEnabled": true,
     "advisoryExpiryFutureExecutionVerified": false,
-    "publicOwnerBrowserChecks": 13,
-    "publicOwnerBrowserCommands": 15,
-    "publicOwnerBrowserScope": "public-TLS-real-Web-API-WSS-Worker-signed-synthetic-owner-with-reviewed-official-SDK",
-    "realNetworkSdkOwnerChecks": 13,
-    "realNetworkSdkOwnerScope": "real-network-SDK-public-TLS-Web-API-WSS-owner-legal-move-close-logout-and-non-owner; no transport/SDK interception",
-    "officialNetworkSdkDeliveryVerified": true,
-    "laptopSdkProxyRequired": true,
+    "publicOwnerBrowserScope": "actual-network-current-public-Web-bundled-SDK-API-signed-synthetic-ios-launch-Chromium-WebKit",
+    "officialNetworkSdkDeliveryVerified": false,
     "finalPrivateOperatorVerified": true,
-    "finalPublicIsolationChecks": 6
+    "finalPublicIsolationChecks": 6,
+    "publicOwnerBrowserScenarios": 6,
+    "bundledSdkRealNetworkDeliveryVerified": true,
+    "laptopSdkProxyRequiredForCurrentRelease": false,
+    "currentApplicationContentMatchesLocalCandidate": true,
+    "currentApplicationContentScope": "all bytes/modes/paths/symlinks under /app for four roles; operating-system layers not fingerprinted",
+    "manualHostRebootsConfirmed": true,
+    "previousReleaseGracefulDrainAtNativeReplacementPassed": false,
+    "normal24HourAdvisoryExpiryTimerVerified": true
   },
   "assets": {
     "infra/docker/staging/bootstrap.routes.conf": "6000763dfc76baf809c5d05d35163245d90ffff3593174156a1c6175b2ebf740",
@@ -162,9 +152,9 @@
     "telegramSettingsChanged": false
   },
   "currentBlocker": {
-    "code": "OWNER_REPORTED_NATIVE_MISSING_LAUNCH",
+    "code": "ACTUAL_IPHONE_RETEST_PENDING",
     "preparedOutputCreated": true,
-    "nextAction": "Deploy ADR-055 checked/scanned startup fixes and collect native-01 safe observations from the actual owner iPhone; native acceptance remains pending."
+    "nextAction": "Owner relaunches configured Main Mini App in native iPhone Telegram, verifies native-01 marker and authenticated screen, or supplies only four fixed diagnostic lines."
   },
   "privateEvidence": [
     "/opt/hambazi-staging/private/execution-20261008/evidence/owner-enrollment-preflight-20261008-0754.json",
@@ -190,19 +180,313 @@
     "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-network-owner-evidence-01.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/sdk-network-browser-probe-evidence-03.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-final-operator-01.json",
-    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-final-public-01.json"
+    "/opt/hambazi-staging/private/execution-20261008/evidence/personal-sdk-final-public-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-compatibility-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-runtime-fingerprints-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-runtime-fingerprints-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-runtime-fingerprints-03.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-platform-restart-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-platform-restart-03.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/ordered-startup-native-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/ordered-startup-native-03.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-owner-access-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-game-acceptance-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-drain-containment-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-wss-drain-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-normal-expiry-timer-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-traffic-open-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-startup-live-evidence-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-final-operator-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-final-public-02.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-worker-role-denials-02.json"
   ],
-  "checkedAt": "2026-10-08T13:28:51.064486+00:00",
+  "checkedAt": "2026-10-08T22:58:37.888321+00:00",
   "personalGameplayEnabled": true,
   "fullPhase18B3Completed": false,
-  "dataScanSha256": "fafdb362f81167ca9f74f480f8ebcd3c9fcfd68957b963d1a3f6c3e8ddeb8901",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-02",
+  "dataScanSha256": "e0ebf23dcfd96ea2622963a4b401bc0d414f19594c6ef67b6d6e256ad8eea0f1",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-native-02",
   "runner": {
-    "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
-    "archiveSha256": "bf18953207ba6bc35d80dd944de59545ac7433a1ebbc6864d8d28bebca5b079b",
-    "directory": "/opt/hambazi-staging/private/runner-d28d4b0"
+    "sourceCommit": "a8b97f8dc57014f130aaedee604faf95e91da593",
+    "archiveSha256": "dec3989a9e348f9d8bd756512af756db4bf641fa4d4d6c542beecd25bd27d7df",
+    "directory": "/opt/hambazi-staging/private/runner-a8b97f8"
   },
   "currentEvidence": {
+    "native-compatibility-02.json": {
+      "sha256": "89e87ced51f257a863f9c710094a656607cc98d5a530e6ab8011650d0cbcad17",
+      "checkedAt": "2026-10-08T22:28:22.277936+00:00",
+      "scope": "unchanged 14 migrations/contracts/grants and quiescent prior apps; no new migration or prior graceful-drain acceptance",
+      "schemaDeployAndGrantsPassed": true,
+      "migrationCount": 14,
+      "newMigrationsExecuted": false,
+      "oldReleaseGracefulDrainPassed": false
+    },
+    "native-runtime-fingerprints-01.json": {
+      "sha256": "d80ca939eff89ba5b7ae2e32424d28ce68b1b3e3ee1564a8014da2ebfbde7dd5",
+      "checkedAt": "2026-10-08T22:35:32.408385+00:00",
+      "passed": false
+    },
+    "native-runtime-fingerprints-02.json": {
+      "sha256": "1befe6cb2e0262c0bb3ed3fc5a1aa952fef239f08b5bf15f0f469d0d90796627",
+      "checkedAt": "2026-10-08T22:42:03.071924+00:00",
+      "passed": true
+    },
+    "native-runtime-fingerprints-03.json": {
+      "sha256": "09f24d5c246249a77c0ee7293d9d5a7b6d935825dd051ae26c04224c0a87525e",
+      "checkedAt": "2026-10-08T22:50:26.146493+00:00",
+      "passed": true
+    },
+    "native-platform-restart-02.json": {
+      "sha256": "a7782f898c0cbbf294d33f2509dc13e06a32fb896cb2c0df73fb483843d37f57",
+      "checkedAt": "2026-10-08T22:27:54.641871+00:00",
+      "passed": true
+    },
+    "native-platform-restart-03.json": {
+      "sha256": "90372682dfb8de858900193876d25b2281357979c3ee91d3fca5673b210fe4e3",
+      "checkedAt": "2026-10-08T22:51:32.214688+00:00",
+      "passed": true
+    },
+    "ordered-startup-native-02.json": {
+      "sha256": "fb354244cd1767db79a8254c9f3129be1d81e7b22169deb50e2e5dd2ce16318c",
+      "checkedAt": "2026-10-08T22:43:01.693Z",
+      "applicationReadinessPassed": true
+    },
+    "ordered-startup-native-03.json": {
+      "sha256": "6469e62bb5bfd3bdec9544c8294402fef6c1052637c62d340b88d8938804222b",
+      "checkedAt": "2026-10-08T22:52:08.406Z",
+      "applicationReadinessPassed": true
+    },
+    "native-owner-access-02.json": {
+      "sha256": "8eab7ab1aba20ecd646dea369e689103146a9f67d6f2e2d55cd7d09f9c964da7",
+      "checkedAt": "2026-10-08T22:43:32.321130+00:00",
+      "passed": true
+    },
+    "native-game-acceptance-02.json": {
+      "sha256": "9134e7b76b7877c086999506a566e66dc64c7ee07b0981fb9bcfd49c943da8e1",
+      "checkedAt": "2026-10-08T22:44:29.707Z",
+      "passed": true
+    },
+    "native-drain-containment-02.json": {
+      "sha256": "caab48f66d49c8ddf63f4965b3931a135d123a50904d1b945cde4e10b7eb6d52",
+      "checkedAt": "2026-10-08T22:56:44.919Z",
+      "passed": true
+    },
+    "native-wss-drain-02.json": {
+      "sha256": "95ee135cbb0a0907a824949e33fe332ea3d204ffc5edad8ebce6c9f6fa9eb077",
+      "checkedAt": "2026-10-08T22:57:04.060Z",
+      "passed": true
+    },
+    "native-normal-expiry-timer-02.json": {
+      "sha256": "5ea718a627ff4db70a2f8e84a01c932705f029f15b5635ba99f1adc0c5c0e859",
+      "checkedAt": "2026-10-08T22:57:10.704577+00:00",
+      "passed": true
+    },
+    "native-traffic-open-02.json": {
+      "sha256": "8097761614632391aeb6048655d85723c7f6a508c9609a968a1912260d0af8ec",
+      "checkedAt": "2026-10-08T22:57:18.295Z",
+      "passed": true
+    },
+    "native-startup-live-evidence-02.json": {
+      "sha256": "39e9100cc5f1c8b820d8684741f9de3588c00da9404b1d7260c6eddde3e7a7a4",
+      "checkedAt": "2026-10-08T22:58:01.370Z",
+      "passed": true
+    },
+    "native-final-operator-02.json": {
+      "sha256": "1f7189cd91a11f5bd4e74fb35d35844ded797fff3743c29ce3964891e6679056",
+      "checkedAt": "2026-10-08T22:57:36.801Z",
+      "passed": true
+    },
+    "native-final-public-02.json": {
+      "sha256": "159ee4613316878b4b6263ccd4d4c941e352c4bc2075285baedb0a268c6f04ea",
+      "checkedAt": "2026-10-08T22:57:59.018353+00:00",
+      "passed": true
+    },
+    "native-worker-role-denials-02.json": {
+      "sha256": "d1d2e89ed0760fb483f7bad4026e2deff5f2e80ef377dc388feb882a63fa5ad1",
+      "checkedAt": "2026-10-08T22:58:37.886015+00:00",
+      "passed": true
+    }
+  },
+  "deferred": {
+    "nativeTelegramClient": "original owner iPhone missing-launch failure recorded; fixed artifact deployed and six actual-network browser startup/auth scenarios pass; actual iPhone retest remains pending",
+    "telegramWebFrames": "blocked by current frame-ancestors none",
+    "ordinaryAdminCatalogRoom": "disabled pending required controls/invitation implementation",
+    "competitiveStatsChatMatchmaking": "unavailable in personal profile",
+    "personalOutboxFanout": "pending wake-ups retained; 2-second acknowledged snapshots used",
+    "versionRollback": "unaccepted; no compatible scanned previous release pair has passed rollback; same-version drain/restart is separate. Previous d28 app uses same reviewed SDK SRI; historical ingress has a newly detected High tiff finding and is not eligible.",
+    "recovery": "excluded-unperformed-ADR-050",
+    "productionLoadSoakSloProtectedPublication": "unperformed; approved targets/thresholds unchanged",
+    "fullSecretRotationDrill": "unperformed; separate current credentials, trust and runtime identities pass, but rotation/recovery of every authority is not accepted",
+    "webkitFeaturePolicyIntrospection": "one scoped browser test skipped because WebKit lacks document.featurePolicy introspection; Chromium permission-denial assertions pass",
+    "automaticRebootRecovery": "manual boot recovery performed; restart=no policy retained. Abrupt manual reboots interrupted transfer/test and are not graceful-drain or automatic-availability evidence."
+  },
+  "nativeSdkRecheck": {
+    "bytes": 119731,
+    "matchingLaptopVpsSha384": "3f223aba4f0ede97d1465e3e09a7a9692fbe16ab446dca3f1da5778f3758978cbe53b1cc42f9f781655f2a18eecdfcc6",
+    "approvedPinRefreshInProgress": false,
+    "serverlessApiUsed": false,
+    "nativeClientVerified": false,
+    "approvedPinRefreshDeployed": true,
+    "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG",
+    "realNetworkDeliveryVerified": true,
+    "laptopDirectNetworkError": "ERR_CONNECTION_REFUSED",
+    "existingLaptopProxyDeliveryPassed": true,
+    "sameOriginSdkPath": "/telegram-sdk/telegram-web-app-3f223aba4f0ede97.js",
+    "sdkDistribution": "unmodified reviewed bytes bundled in immutable Web artifact",
+    "runtimeUIDReadabilityGatePassed": true,
+    "queryLaunchPreservationRegressionPassed": true,
+    "startupLiveScenarios": 6
+  },
+  "historicalPersonalBinding": {
+    "checkedAt": "2026-10-08T13:28:51.064486+00:00",
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-personal-02",
+    "application": {
+      "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "cbfc1eeab43a68fd281cf1fa85e8aa64f6584a2c83627a728d5f2a93a4a2c883",
+      "buildInputSha256": "fd6d159d9a682e1a730f3fc97caa3accf0f19528d7d3e0748d2b1dbefb46716b",
+      "images": [
+        {
+          "role": "api",
+          "image": "hambazi-candidate/api:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b88cd1d392ac1d2a04f3d2ad13fa43f24c98056b3ece774a2aedbc1623666af4"
+        },
+        {
+          "role": "bot",
+          "image": "hambazi-candidate/bot:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:745c963e1db10c31b77bf37ff9d28575701a64c94ba644f88314fca6b51b627a"
+        },
+        {
+          "role": "worker",
+          "image": "hambazi-candidate/worker:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:68c0999be0144760776568ec8ded39d9382582de69317e65bb82cfefd4264915"
+        },
+        {
+          "role": "web",
+          "image": "hambazi-candidate/web:d28d4b073199342ae7dc2d78c94f8522ad596db7-fd6d159d9a682e1a@sha256:b1d5f213663aa48036601fb3a0779515adad941603ec395b912ff28b8731ab43"
+        }
+      ],
+      "composeSha256": "d892bebda5c238db8a7d4946e75c5638eadb12ef1d75d773878bdfcdf49da312",
+      "inventorySha256": "8e7cf488d0adab04493246b60e029768dba2d23beaa965f33ebf643830a946fc",
+      "scanSha256": "12046d82e83787afad721f4e7aa33191bb74e56814c0e5b722f1e9a63f9dcde6",
+      "preparationSha256": "5103b756b61cf343d79ef16fd760fabaa6eebbf32c63e34915533cc7ada0c873"
+    },
+    "components": {
+      "sourceCommit": "fcfac0a0eb08739f60f6c8a9e38c797bf581c772",
+      "lockSha256": "c3d08af8baa3af5ef5877f88d926457028a6c1ca791057becd9da3ef6d3c3f14",
+      "inventorySha256": "888de0521a3e2fb1055304f51d1fd2c47f740348c351c8cb4c2313380feec152",
+      "scanSha256": "db56e49e44650d8ca2b1f2e6913b7b9f607336a96fde8a0eb5dc79b5b0b95ede",
+      "images": [
+        {
+          "role": "ingress",
+          "image": "hambazi-staging/ingress:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-5d569d0ba9eca3e4@sha256:c2ad9ad7678c022eeb50784bf1a9dc68eb45735c5881d3f90c9cc2bb1ca6b57b",
+          "buildInputSha256": "5d569d0ba9eca3e4cb32ff742b5557230ebb1e85aaaf9c9716e6f853bd88c48a"
+        },
+        {
+          "role": "acme",
+          "image": "hambazi-staging/acme:fcfac0a0eb08739f60f6c8a9e38c797bf581c772-7793e071a2a421b6@sha256:c91a2b4547cd45dec7cfe020971197d9c2e75938d04637409143bdc5d2c5abd7",
+          "buildInputSha256": "7793e071a2a421b67af479deba7ca05c40a8c1040ca192c67e043c40d413b6dd"
+        }
+      ]
+    },
+    "runner": {
+      "sourceCommit": "d28d4b073199342ae7dc2d78c94f8522ad596db7",
+      "archiveSha256": "bf18953207ba6bc35d80dd944de59545ac7433a1ebbc6864d8d28bebca5b079b",
+      "directory": "/opt/hambazi-staging/private/runner-d28d4b0"
+    },
+    "scanner": {
+      "databaseMaximumAgeHours": 24,
+      "earliestEvidenceExpiryUTC": "2026-10-09T07:38:55.515Z",
+      "expiryAsiaTehran": "2026-10-09 11:08:55",
+      "blocking": ["high", "critical", "unknown"],
+      "secretFindingsAllowed": 0,
+      "currentEvidenceFresh": true,
+      "activationScanPassed": true,
+      "refreshCheckedAtUTC": "2026-10-08T13:10:03.325672316Z",
+      "latestRetrievedUpdatedAtUTC": "2026-10-07T07:38:55.515026687Z",
+      "refreshStatus": "actual-eight-image-scans-passed-under-explicit-ADR-053-only",
+      "retrievalSources": ["mirror.gcr.io/aquasec/trivy-db:2", "ghcr.io/aquasecurity/trivy-db:2"],
+      "upstreamFailedWorkflow": "https://github.com/aquasecurity/trivy-db/actions/runs/37736159029",
+      "upstreamFailedStep": "Login to Docker Hub",
+      "temporaryMaximumAgeHours": 48,
+      "standard24HourGatePassed": false,
+      "downloadedAtUTC": "2026-10-08T13:10:03.325672316Z",
+      "exception": {
+        "profile": "personal-owner-staging-48h-20261008",
+        "maximumAgeHours": 48,
+        "expiresAt": "2026-10-09T07:38:55.515Z",
+        "targetAddress": "185.110.191.104",
+        "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
+        "ownerAdmissionProfile": "telegram-owner-only-v1",
+        "approvalSha256": "6e9b721147f84bd56cce3acc4a0ed24db45e920e5309a922c3ef0213c52d03a2"
+      }
+    },
+    "currentEvidence": {
+      "personal-sdk-compatibility-01.json": {
+        "sha256": "c8df62b31283f3b109a5d2ef92fdeb113894c61cce5bc570a26e9018a10e07c4",
+        "checkedAt": "2026-10-08T13:12:10.807443+00:00",
+        "passed": true
+      },
+      "ordered-startup-personal-sdk-01.json": {
+        "sha256": "732609367a144a09bed63d92e4fdf000d5f0da82a8aed0a2f5dc440a25024fb2",
+        "checkedAt": "2026-10-08T13:12:19.862Z",
+        "passed": true
+      },
+      "personal-sdk-owner-access-01.json": {
+        "sha256": "bff8580363147e7626477598385f0865d35d2f1654694e97f29bc896e41a1cd6",
+        "checkedAt": "2026-10-08T13:12:47.977620+00:00",
+        "passed": true
+      },
+      "personal-sdk-game-acceptance-01.json": {
+        "sha256": "1ca7745643fc3f5649dc353aa5be3659fb55d0b4eace8a7c272927584ff9b426",
+        "checkedAt": "2026-10-08T13:13:15.801Z",
+        "passed": true
+      },
+      "personal-sdk-drain-containment-01.json": {
+        "sha256": "4fff3448e52b2af374d03545c35f745301dcf505261701d03154f570920aaebc",
+        "checkedAt": "2026-10-08T13:13:20.123Z",
+        "passed": true
+      },
+      "personal-sdk-wss-drain-01.json": {
+        "sha256": "24736dc61ab254b055a6e705ff6ecde8f6c86c70a9229e8585108d042ca7fd27",
+        "checkedAt": "2026-10-08T13:14:49.609Z",
+        "passed": true
+      },
+      "personal-sdk-traffic-open-01.json": {
+        "sha256": "054a26f87c510ca6f834002888e4b0cf6b435f147e3c430deec78647ab0bc803",
+        "checkedAt": "2026-10-08T13:16:56.714Z",
+        "passed": true
+      },
+      "advisory-expiry-timer-01.json": {
+        "sha256": "b1bee1037771005f25e1ef87ce52107269aba346795aeadb5bfcf44bed29377f",
+        "checkedAt": "2026-10-08T12:26:46.593729+00:00",
+        "passed": true
+      },
+      "personal-sdk-browser-live-evidence-01.json": {
+        "sha256": "912b0a9ec9369274b4abc05aa130f7b6c058017db7f44f33f965483501d7f8b7",
+        "checkedAt": "2026-10-08T13:18:15.807Z",
+        "passed": true
+      },
+      "personal-sdk-network-owner-evidence-01.json": {
+        "sha256": "6f9d74d83bb55bae923700f6090d630ee580952b627dd99a4d6af7c37ee76dc4",
+        "checkedAt": "2026-10-08T13:21:44.282Z",
+        "passed": true
+      },
+      "sdk-network-browser-probe-evidence-03.json": {
+        "sha256": "d323b833c58c70f6258beb140f70a3f381a8409bbde501e65b83a673804a48fd",
+        "checkedAt": "2026-10-08T13:20:07.456Z",
+        "passed": true
+      },
+      "personal-sdk-final-operator-01.json": {
+        "sha256": "2903933ee69dfd3810024bf7f6373025ecb4c2c7ab8c172afd630f1dbbffcbe5",
+        "checkedAt": "2026-10-08T13:23:45.393Z",
+        "passed": true
+      },
+      "personal-sdk-final-public-01.json": {
+        "sha256": "dac26f49f3cd2e8bbe4742de8972f7638bdd6e891625bd5e375633a2b53b5201",
+        "checkedAt": "2026-10-08T13:28:51.064486+00:00",
+        "passed": true
+      }
+    },
+    "nativeClientAccepted": false
+  },
+  "historicalEvidence": {
     "personal-sdk-compatibility-01.json": {
       "sha256": "c8df62b31283f3b109a5d2ef92fdeb113894c61cce5bc570a26e9018a10e07c4",
       "checkedAt": "2026-10-08T13:12:10.807443+00:00",
@@ -268,29 +552,5 @@
       "checkedAt": "2026-10-08T13:28:51.064486+00:00",
       "passed": true
     }
-  },
-  "deferred": {
-    "normalAdvisoryFreshness": "failed 24-hour gate; bounded ADR-053 only until fixed expiry",
-    "nativeTelegramClient": "owner actual iPhone startup failed; ADR-055 replacement and real mobile retest pending; prior browser evidence remains separate",
-    "telegramWebFrames": "blocked by current frame-ancestors none",
-    "ordinaryAdminCatalogRoom": "disabled pending required controls/invitation implementation",
-    "competitiveStatsChatMatchmaking": "unavailable in personal profile",
-    "personalOutboxFanout": "pending wake-ups retained; 2-second acknowledged snapshots used",
-    "versionRollback": "unaccepted; previous gameplay release has obsolete live SDK SRI, and no full current/previous rollback acceptance was performed",
-    "recovery": "excluded-unperformed-ADR-050",
-    "productionLoadSoakSloProtectedPublication": "unperformed; approved targets/thresholds unchanged",
-    "fullSecretRotationDrill": "unperformed; separate current credentials, trust and runtime identities pass, but rotation/recovery of every authority is not accepted"
-  },
-  "nativeSdkRecheck": {
-    "bytes": 119731,
-    "matchingLaptopVpsSha384": "3f223aba4f0ede97d1465e3e09a7a9692fbe16ab446dca3f1da5778f3758978cbe53b1cc42f9f781655f2a18eecdfcc6",
-    "approvedPinRefreshInProgress": false,
-    "serverlessApiUsed": false,
-    "nativeClientVerified": false,
-    "approvedPinRefreshDeployed": true,
-    "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG",
-    "realNetworkDeliveryVerified": true,
-    "laptopDirectNetworkError": "ERR_CONNECTION_REFUSED",
-    "existingLaptopProxyDeliveryPassed": true
   }
 }
