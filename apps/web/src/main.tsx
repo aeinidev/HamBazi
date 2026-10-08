@@ -21,6 +21,13 @@ void loadTelegramSdk().then((app) => {
   const runtime = createRuntime(
     import.meta.env.VITE_API_ORIGIN || window.location.origin,
     telegram.initData,
+    fetch,
+    undefined,
+    import.meta.env.PROD &&
+      window.location.origin === "https://staging.hambazi.top" &&
+      import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top"
+      ? "owner-auth"
+      : "full",
   );
   const root = createRoot(document.getElementById("root")!);
   root.render(

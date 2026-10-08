@@ -44,7 +44,10 @@ are now authorized for this target. Preserve SSH and verify a second connection;
 start ingress in maintenance, validate containment and owner/non-owner boundaries
 before opening only Web/Auth. A private non-mutating profile read needed by the
 existing authenticated shell remains subject to the same owner session authority;
-no new product mutation/game/Admin route is enabled. Free ACME uses private account
+no new product mutation/game/Admin route is enabled. The immutable exact staging
+Web/API origins select a limited account screen and suppress realtime/invite
+startup and unavailable navigation; this presentation scope never grants identity
+or replaces backend admission. Other deployment origins keep the normal UI. Free ACME uses private account
 state and HTTP-01; scheduled renewal must refresh required scanner evidence and
 cannot run a failed/stale ACME artifact. Renewal does not alter DNS or Telegram.
 

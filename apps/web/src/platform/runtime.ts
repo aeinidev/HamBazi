@@ -28,6 +28,7 @@ export function createRuntime(
   initialInitData: string,
   fetcher: typeof fetch = fetch,
   realtimeFactory = createRealtime,
+  scope: "full" | "owner-auth" = "full",
 ) {
   const parsedOrigin = new URL(origin);
   if (
@@ -49,7 +50,7 @@ export function createRuntime(
     snapshot: null,
     resyncNeeded: false,
     realtimeError: null,
-    invite: startParam && parseRoomStartParam(startParam) ? startParam : null,
+    invite: scope === "full" && startParam && parseRoomStartParam(startParam) ? startParam : null,
     ticket: null,
   }));
   const query = new QueryClient({
@@ -100,6 +101,7 @@ export function createRuntime(
       () => clear(true),
       Math.min(2147483647, result.session.expiresAt * 1000 - Date.now()),
     );
+    if (scope === "owner-auth") return;
     realtime = realtimeFactory(origin, token, {
       state: (connection) => store.setState({ connection }),
       snapshot: (snapshot) =>
@@ -115,6 +117,7 @@ export function createRuntime(
     });
   }
   return {
+    scope,
     store,
     query,
     http,
@@ -130,7 +133,7 @@ export function createRuntime(
         false,
       );
       if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
-      if (result.startParam && parseRoomStartParam(result.startParam))
+      if (scope === "full" && result.startParam && parseRoomStartParam(result.startParam))
         store.setState({ invite: result.startParam });
     },
     async logout() {
