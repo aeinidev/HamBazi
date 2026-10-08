@@ -555,8 +555,8 @@ reference. Recovery cutover and production release require their own scope.
 | Accept proposed operating decisions                                                                                         | Temporary inputs, sole roles/disposable/no-backup/manual-monitoring and full reviewed public runtime profile accepted                   | Project owner, 2026-10-07/08; ADR-049/050/051                                                   |
 | Publish artifacts or change hosted CI/repository settings                                                                   | Not granted                                                                                                                             | Unrecorded                                                                                      |
 | Provision staging resources/domains/access                                                                                  | Host/DNS supplied; ADR-051 runner/networks/private certificates/files/image imports completed; real prepare validated; activation gated | Owner bounded preparation and follow-up, 2026-10-08; ADR-049/051                                |
-| Migrate/deploy/run staging drills or change Telegram settings                                                               | Not granted; fully deferred                                                                                                             | Unrecorded                                                                                      |
-| Enable live gameplay/admin controls                                                                                         | Not granted; 7C gate retained                                                                                                           | Unrecorded                                                                                      |
+| Migrate/deploy/run bounded staging drills or change Telegram settings                                                       | Bounded compatible personal staging deployment/drain authorized; Telegram settings excluded                                             | Unrecorded                                                                                      |
+| Enable live gameplay/admin controls                                                                                         | Owner-only bot gameplay authorized by ADR-054; ordinary Admin/catalog activation retains 7C                                             | Unrecorded                                                                                      |
 | Run local 17C tooling/smoke                                                                                                 | Authorized; actual evidence recorded                                                                                                    | Owner request, 2026-10-05; [capacity scope](../testing/capacity.md)                             |
 | Proceed to Phase 18B3 after actual 17C completion                                                                           | Authorized assessment performed; execution Blocked by independent prerequisites                                                         | Owner instructions, 2026-10-05 and 2026-10-07; [ADR-048](../adr/048-mvp-capacity-acceptance.md) |
 | Approve final production release                                                                                            | Not granted; separate phase gates retained                                                                                              | Unrecorded                                                                                      |
@@ -588,19 +588,23 @@ evidence and remaining acceptance gates block application
 opening; independent authorized infrastructure is already executed. Phase 19 remains
 the separate final-readiness review; neither phase supplies launch approval.
 
-**Current outcome (2026-10-08):** supplied temporary host/domains/owner/operator,
-disposable data, no-backup exception and manual monitoring decisions are settled.
-Actual private PG/Redis verified TLS/roles/grants, compatible migration/repeat,
-SSH-preserving persistent firewall, three-host trusted TLS/503 and scan-gated daily
-renewal are executed. Exact clean app/component identities and real role bounds
-pass. Actual private owner enrollment is verified and the admission policy exists
-with 0600 UID/GID-1000 access. The official advisory DB is over 24 hours old;
-independent empty mirror/GHCR downloads still return that expired update. Real
-new preparation fails closed and zero applications start. This is the current
-subset blocker, not a missing owner decision. Obtain actually fresh official
-advisories, rescan the exact eight images, and create a new prepared output,
-then start API → Worker → Bot → Web and collect real admission/no-effects/private
-TLS/observability/fault/drain/native evidence before opening Web/Auth. Recovery is
-excluded/unperformed, not passed; a compatible scanned rollback pair is absent.
-7C, gameplay, Room/Main invitations, Telegram Web framing and full staging
-acceptance remain gated. No Telegram setting, production or later phase occurs.
+**Current outcome (2026-10-08):** no additional owner policy value/private
+reference is missing for the implemented personal flow. ADR-053/054 record the
+explicit advisory exception and server bot opponents. Clean `7152992` apps and
+all eight target scans pass within that exception; normal 24-hour freshness
+remains failed. Real `prepared-20261008-personal-01`, the 14th additive migration/
+repeat/grants and API → Worker → Bot → Web readiness/private observability pass.
+35 actual Auth, 37 full-game, nine HTTP and 16 accepted WSS drain/restart controls
+pass. Owner Web/Auth/personal WSS opened at 12:42 UTC; public private endpoints,
+ordinary catalog/Admin/Room and bot webhook remain disabled. Current exact hashes,
+restricted evidence and deferred consequences are in
+[execution-current.json](../../infra/docker/staging/execution-current.json).
+Actual public browser/privacy/logout acceptance passes 13 checks with reviewed cached official SDK bytes. Independent live SDK fetches from laptop/VPS match each other but differ from the deployed SRI; pin refresh/revalidation/replacement is in progress. Native Telegram
+acceptance is unperformed, Telegram Web frames are blocked, and Room/Main invite
+support is incomplete. These are verification/functionality gaps, not requests to
+resupply settled owner, recovery or monitoring decisions. Version rollback remains
+unaccepted; recovery remains excluded/unperformed, and full production-like soak/
+SLO/protected publication is deferred. Normal thresholds/targets remain unchanged.
+The fixed exception ends tomorrow at 11:08:55 Tehran; an installed owned timer
+contains/stops applications then (future execution unperformed). No Telegram
+setting, production/destructive operation or later phase occurs; 18B3 is incomplete.

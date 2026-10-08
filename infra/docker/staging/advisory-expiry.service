@@ -1,0 +1,18 @@
+[Unit]
+Description=HamBazi personal staging advisory exception containment
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=DOCKER_HOST=unix:///var/run/docker.sock
+ExecStart=/usr/local/bin/node /opt/hambazi-staging/private/runner-current/infra/release/staging-maintenance.mjs
+ExecStart=/usr/bin/docker stop --time 45 hambazi-preparation-api-1 hambazi-preparation-worker-1 hambazi-preparation-bot-1 hambazi-preparation-web-1
+TimeoutStartSec=90
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/hambazi-staging/private/execution-20261008/nginx

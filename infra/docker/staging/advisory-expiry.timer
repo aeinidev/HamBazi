@@ -1,0 +1,12 @@
+[Unit]
+Description=Hard expiry of the approved HamBazi 48-hour personal staging exception
+
+[Timer]
+OnCalendar=2026-10-09 07:38:55 UTC
+AccuracySec=1s
+RandomizedDelaySec=0
+Persistent=true
+Unit=hambazi-staging-advisory-expiry.service
+
+[Install]
+WantedBy=timers.target

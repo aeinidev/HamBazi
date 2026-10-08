@@ -44,3 +44,20 @@ Local validation uses `node infra/release/test-definition-local.mjs` with a real
 private inventory path and `--operator-monitoring`. It starts only owned local
 fixtures, checks safe logs/private loopback metrics during a synthetic dependency
 failure, then cleans them. It is not staging activation or a DB/Telegram smoke.
+
+## Personal staging advisory exception expiry
+
+The owner-approved ADR-053 exception ends at 2026-10-09 11:08:55 Asia/Tehran.
+The reviewed [service](../../../infra/docker/staging/advisory-expiry.service) and
+[timer](../../../infra/docker/staging/advisory-expiry.timer) enforce containment
+at 07:38:55 UTC: canonical maintenance routes, then SIGTERM/45-second graceful
+application stop. Private PostgreSQL/Redis and durable history are preserved.
+This timer does not refresh scans or extend the exception; future execution is
+unperformed until its actual deadline. Inspect its enabled state and next trigger
+privately with `systemctl status hambazi-staging-advisory-expiry.timer`.
+
+After genuinely fresh official advisories and successful normal 24-hour scans of
+all exact active images, validate a new preparation and activation binding before
+replacing this containment schedule. Until that evidence exists, keep the timer.
+Do not alter advisory timestamps, severity thresholds or the approved deadline.
+A currently valid public certificate does not make stale security evidence valid.

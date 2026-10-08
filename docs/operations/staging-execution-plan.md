@@ -1,14 +1,54 @@
 # Temporary owner-only staging execution plan
 
-**Date:** 2026-10-08. **Status:** Bounded infrastructure executed; ingress remains
-503 and application activation is blocked by expired advisory evidence. Private
-owner enrollment is verified. **Phase:**
-18B3 is not complete. The latest owner request supersedes preparation-only limits
-for the explicit temporary staging subset in [ADR-052](../adr/052-temporary-owner-admission-and-execution.md).
-Telegram settings, gameplay/Admin/Room activation, production, destructive data
-operations and other phases remain outside that request.
+**Date:** 2026-10-08. **Status:** Owner-only Web/Auth and personal Coup gameplay
+are deployed; actual public browser accepts gameplay; native SDK SRI refresh is required. **Phase:** 18B3
+remains In Progress with unpassed full acceptance gates. ADR-053/054 and the owner's
+explicit bounded deployment instruction supersede the older preparation/gameplay
+restriction for this personal subset. Telegram settings, ordinary Admin/catalog/
+Room activation, production and destructive data operations remain outside scope.
 
-## Current execution checkpoint
+## Actual personal staging binding
+
+The current immutable app source is `71529920003174d037b9606f5fb82db71d1febd2`,
+build `29867f1267af3e3c8251d49af65f2197886cce3c5967fc9b2cdbe729f3e3444b`.
+Real preparation is `/opt/hambazi-staging/private/prepared-20261008-personal-01`,
+Compose SHA-256 `6c654aff5625ad7c7b4a1de13739c9b85bf09f5b2410287db4e6b95b755458f1`.
+The [current binding](../../infra/docker/staging/execution-current.json) contains
+all image, inventory, scan, runner and restricted evidence identities.
+
+All eight target scans pass under the accepted 48-hour exception; normal 24-hour
+freshness fails. The exception ends 2026-10-09 11:08:55 Tehran. An owned timer
+applies canonical maintenance and gracefully stops applications at that deadline;
+its installed state/next trigger pass, future execution remains unperformed.
+Original/failed scans and older prepared directories are preserved.
+
+Actual separate migrator expansion/repeat deploy and grants pass: 14 migrations,
+12 contracts, old data preserved, API bot-seat SELECT/INSERT only and Worker
+SELECT only. API → Worker → Bot → Web are READY; safe private logs/health/metrics
+and bounded retention remain enabled. Public data-service ports remain absent.
+35 real Auth controls, 37 full-game controls (15 owner commands, 27 turns), nine
+HTTP drain/containment and 16 accepted WSS drain/restart/receipt checks pass.
+Owner Web/Auth and `/v1/personal/socket.io` opened at 12:42 UTC. Existing trusted
+three-host TLS/firewall/SSH access remain intact; private endpoints, public bot
+webhook, ordinary catalog/Admin/Room remain 404. Main Mini App launch needs no
+invented short_name for this personal route; Room invitations remain disabled.
+
+The mounted personal ingress file separately binds SHA-256
+`07a8528b7dce63bb7d068c7291f170f9ef9ac7b0bf23008bae9c65ca6debde04`.
+Its WSS location explicitly retains Origin and trusted proxy headers because
+[Nginx local proxy headers replace inheritance](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_set_header).
+This configuration patch requires parser/real handshake validation, not rebuilding
+unchanged application/component binaries. Actual positive and negative handshakes
+passed. Actual public browser/UI smoke passes 13 checks using reviewed cached SDK bytes; independent live official SDK recheck detects a changed SRI and its reviewed refresh/replacement is in progress; native client proof
+is separate and unperformed. Version rollback is unaccepted; same-version restart
+and containment do not supply a compatible scanned previous gameplay release.
+Recovery is excluded/unperformed under ADR-050. Deferred full-launch controls and
+consequences are recorded in the binding; thresholds/targets remain unchanged.
+
+The following sections retain historical checkpoints and reviewed ordering.
+Their superseded restrictions/status do not override this actual personal binding.
+
+## Historical Web/Auth checkpoint (superseded)
 
 The immutable historical preparation at
 `/opt/hambazi-staging/private/prepared-20261008-02` is preserved. Its older images

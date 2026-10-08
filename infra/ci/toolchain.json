@@ -5,7 +5,7 @@
   "dockerVersion": "29.8.1",
   "telegramSdk": {
     "url": "https://telegram.org/js/telegram-web-app.js",
-    "integrity": "sha384-UIU2aXwkvBIU//NSd8KQvPQc3/EvwMoKj+m2qYgtQAtF1u3Vvhf5+pjstVoLvU3i"
+    "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG"
   },
   "actions": {
     "actions/checkout": "3d3c42e5aac5ba805825da76410c181273ba90b1",
