@@ -167,7 +167,8 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
     ok: true,
     value: { schemaVersion: 1, matchId: null },
   });
-  const started = parse(await port.start(owner, { schemaVersion: 1, commandId: randomUUID() }));
+  const closeStartId = randomUUID();
+  const started = parse(await port.start(owner, { schemaVersion: 1, commandId: closeStartId }));
   authorized = false;
   expect(
     (
@@ -181,13 +182,18 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
     ).ok,
   ).toBe(false);
   authorized = true;
-  const closed = await port.close(owner, {
+  const closeBody = {
     schemaVersion: 1,
     actionId: randomUUID(),
     matchId: started.matchId,
     expectedVersion: started.stateVersion,
-  });
+  };
+  const closed = await port.close(owner, closeBody);
   expect(closed.ok).toBe(true);
+  expect(await port.close(owner, closeBody)).toEqual(closed);
+  const sameClosed = parse(await port.start(owner, { schemaVersion: 1, commandId: closeStartId }));
+  expect(sameClosed.matchId).toBe(started.matchId);
+  expect(sameClosed.status).toBe("TERMINATED");
   expect(await port.current(owner)).toEqual({
     ok: true,
     value: { schemaVersion: 1, matchId: null },

@@ -29,7 +29,8 @@ export function createMatchResyncRepository(
             // The same row lock as writers keeps roster, role, checkpoint and event tail consistent.
             await db.lockMatch(matchId);
             const row = await db.match.findUnique({ where: { id: matchId } });
-            if (!row || row.status === "TERMINATED") throw new MatchFault("NOT_FOUND");
+            if (!row || (row.status === "TERMINATED" && !personal))
+              throw new MatchFault("NOT_FOUND");
             if ((row.matchType === personalMatchType) !== personal)
               throw new MatchFault("NOT_FOUND");
             const players = personal
