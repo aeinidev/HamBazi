@@ -1282,6 +1282,12 @@ is made. Remaining 17CQ performance work and proposed 17CT measurement work are
 explicitly deferred post-MVP. Numeric targets, budgets and runtime semantics stay
 unchanged. No further local performance tuning is in progress.
 
+The current native blocker is the owner's actual iPhone missing-launch report
+(2026-10-08). ADR-055 implements reviewed same-origin SDK delivery, guarded
+query-launch preservation and sanitized staging diagnostics. Current deployed
+browser acceptance does not pass native acceptance; the real mobile retest remains
+pending. See the [native startup runbook](operations/runbooks/native-mini-app-startup.md).
+
 The current authorized **18B3 is In Progress**. Temporary owner-only Web/Auth
 and owner-versus-server-bot Coup are deployed from clean `d28d4b0` using actual
 `prepared-20261008-personal-02`. Exact image/config/scan/evidence identities are

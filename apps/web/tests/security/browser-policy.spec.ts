@@ -1,6 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readTelegramSdk } from "../browser/telegram-sdk.js";
-import { telegramSdkUrl, telegramSdkIntegrity } from "../../src/platform/telegram-sdk.js";
+import {
+  telegramSdkUrl,
+  telegramSdkSourceUrl,
+  telegramSdkIntegrity,
+} from "../../src/platform/telegram-sdk.js";
 
 const appOrigin = "http://127.0.0.1:4173";
 const framedOrigin = "https://mini.example";
@@ -63,7 +67,6 @@ async function mirrorFramedApp(page: Page) {
 }
 
 test("built HTML enforces the generated headers and disables unused browser capabilities", async ({
-  page,
   request,
 }) => {
   const response = await request.get("/");
@@ -91,7 +94,17 @@ test("built HTML enforces the generated headers and disables unused browser capa
     ])
       expect(other.headers()[name]).toBe(response.headers()[name]);
   }
+});
+
+test("runtime capability introspection denies camera, microphone and geolocation", async ({
+  page,
+}) => {
   await open(page);
+  const supported = await page.evaluate(() => "featurePolicy" in document);
+  test.skip(
+    !supported,
+    "WebKit lacks featurePolicy introspection; exact Permissions-Policy headers remain verified separately, runtime capability proof unperformed",
+  );
   expect(
     await page.evaluate(() => {
       const policy = (
@@ -173,7 +186,11 @@ test("unapproved network, CSS/image, frames, forms, bases and workers are denied
   });
   await page.evaluate(() => {
     void fetch("https://untrusted.example/exfil").catch(() => {});
-    new WebSocket("wss://untrusted.example/socket").onerror = () => {};
+    try {
+      new WebSocket("wss://untrusted.example/socket").onerror = () => {};
+    } catch {
+      /* WebKit denies synchronously. */
+    }
     const image = document.createElement("img");
     image.src = "https://untrusted.example/image";
     document.body.appendChild(image);
@@ -190,7 +207,11 @@ test("unapproved network, CSS/image, frames, forms, bases and workers are denied
     const form = document.createElement("form");
     form.action = "https://untrusted.example/form";
     document.body.appendChild(form);
-    form.submit();
+    try {
+      form.submit();
+    } catch {
+      /* WebKit may deny synchronously. */
+    }
     const worker = URL.createObjectURL(
       new Blob(["postMessage('synthetic')"], { type: "application/javascript" }),
     );
@@ -274,7 +295,7 @@ test("an unapproved ancestor is blocked before SDK or application execution", as
     denied ||= message.text().includes("frame-ancestors");
   });
   page.on("request", (request) => {
-    sdkRequested ||= request.url() === telegramSdkUrl;
+    sdkRequested ||= request.url() === new URL(telegramSdkUrl, framedOrigin).href;
   });
   await page.route("https://untrusted.example/__policy-parent", (route) =>
     route.fulfill({
@@ -292,11 +313,11 @@ test("an external SDK tag without matching integrity metadata is blocked by CSP"
 }) => {
   await open(page);
   let fetched = false;
-  await page.route(telegramSdkUrl, (route) => {
+  await page.route(telegramSdkSourceUrl, (route) => {
     fetched = true;
     return route.abort();
   });
-  await expect(page.addScriptTag({ url: telegramSdkUrl })).rejects.toThrow();
+  await expect(page.addScriptTag({ url: telegramSdkSourceUrl })).rejects.toThrow();
   expect(fetched).toBe(false);
   await expect.poll(() => page.evaluate(() => window.__cspDirectives)).toContain("script-src-elem");
 });

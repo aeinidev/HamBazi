@@ -1,18 +1,21 @@
 import { readFile } from "node:fs/promises";
+import { verifyTelegramSdkAsset } from "../security/telegram-sdk-asset.js";
 import { resolve } from "node:path";
 import { loadEnv, type Plugin, type ResolvedConfig } from "vite";
 import { createBrowserPolicy, parseBrowserPolicyArtifact } from "../security/browser-policy.js";
-import { telegramSdkIntegrity } from "../src/platform/telegram-sdk.js";
+import { telegramSdkIntegrity, telegramSdkUrl } from "../src/platform/telegram-sdk.js";
 
 export function browserPolicyPlugin(): Plugin {
   let config: ResolvedConfig;
   let policy: ReturnType<typeof createBrowserPolicy>;
   return {
     name: "hambazi-browser-policy",
-    configResolved(resolved) {
+    async configResolved(resolved) {
       config = resolved;
       if (config.command !== "build") return;
       try {
+        const sdk = await readFile(resolve(config.root, "public", telegramSdkUrl.slice(1)));
+        verifyTelegramSdkAsset(sdk);
         const env = loadEnv(config.mode, config.envDir, "");
         const profile = env.HAMBAZI_WEB_POLICY_PROFILE ?? "production";
         if (profile !== "production" && profile !== "loopback-test") throw new Error();

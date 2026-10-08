@@ -7,6 +7,16 @@ actual native Telegram and full operational acceptance remain unpassed. ADR-053/
 restrictions only for this personal subset. Telegram settings, ordinary Admin/
 public catalog/Room, production and destructive data actions remain excluded.
 
+## Native owner report and bounded remediation
+
+The owner reports an actual native iPhone missing-launch screen. Native acceptance
+is failed at startup, not merely unperformed. ADR-055 fixes verified query-only
+launch loss and removes runtime external SDK delivery, adds fixed safe diagnostics,
+and requires the [actual mobile retest](runbooks/native-mini-app-startup.md).
+The precise iPhone failure boundary remains pending those observations; no download
+or synthetic browser result is accepted as native success. Existing deployed
+identity below stays authoritative until a newly scanned/prepared release replaces it.
+
 ## Actual final personal staging binding
 
 Immutable app source: `d28d4b073199342ae7dc2d78c94f8522ad596db7`.

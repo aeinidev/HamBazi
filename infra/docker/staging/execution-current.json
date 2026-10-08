@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "owner-only-personal-gameplay-deployed-and-accepted",
+  "status": "owner-gameplay-open-native-startup-blocker-under-remediation",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -162,9 +162,9 @@
     "telegramSettingsChanged": false
   },
   "currentBlocker": {
-    "code": null,
+    "code": "OWNER_REPORTED_NATIVE_MISSING_LAUNCH",
     "preparedOutputCreated": true,
-    "nextAction": "Owner opens the configured Main Mini App in their actual mobile Telegram account to record native acceptance. No additional deployment decision or secret input is missing."
+    "nextAction": "Deploy ADR-055 checked/scanned startup fixes and collect native-01 safe observations from the actual owner iPhone; native acceptance remains pending."
   },
   "privateEvidence": [
     "/opt/hambazi-staging/private/execution-20261008/evidence/owner-enrollment-preflight-20261008-0754.json",
@@ -271,7 +271,7 @@
   },
   "deferred": {
     "normalAdvisoryFreshness": "failed 24-hour gate; bounded ADR-053 only until fixed expiry",
-    "nativeTelegramClient": "actual mobile user verification unperformed; full real browser gameplay and real-network SDK owner smoke passed separately",
+    "nativeTelegramClient": "owner actual iPhone startup failed; ADR-055 replacement and real mobile retest pending; prior browser evidence remains separate",
     "telegramWebFrames": "blocked by current frame-ancestors none",
     "ordinaryAdminCatalogRoom": "disabled pending required controls/invitation implementation",
     "competitiveStatsChatMatchmaking": "unavailable in personal profile",

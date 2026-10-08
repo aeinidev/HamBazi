@@ -4,12 +4,20 @@ import { App } from "./app.js";
 import { createRuntime } from "./platform/runtime.js";
 import { bootstrapTelegram } from "./platform/telegram.js";
 import { loadTelegramSdk } from "./platform/telegram-loader.js";
+import {
+  hasTelegramLaunchData,
+  type TelegramLoaderState,
+} from "./platform/telegram-diagnostics.js";
 import "./styles.css";
+const launchDataPresent = hasTelegramLaunchData(window.location.href);
+let sdkState: TelegramLoaderState = "sdk-error";
 let disposed = false;
 let dispose = () => {
   disposed = true;
 };
-void loadTelegramSdk().then((app) => {
+void loadTelegramSdk((state) => {
+  sdkState = state;
+}).then((app) => {
   const telegram = bootstrapTelegram(app);
   if (disposed) {
     telegram.dispose();
@@ -28,6 +36,17 @@ void loadTelegramSdk().then((app) => {
       import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top"
       ? "owner-auth"
       : "full",
+    {
+      sdkPresent: !!app,
+      launchDataPresent: launchDataPresent || telegram.initData.length > 0,
+      initialization: app
+        ? telegram.initData.length > 0
+          ? "ready"
+          : "missing-launch"
+        : sdkState === "available"
+          ? "sdk-error"
+          : sdkState,
+    },
   );
   const root = createRoot(document.getElementById("root")!);
   root.render(

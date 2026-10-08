@@ -3,7 +3,12 @@ import { fileURLToPath } from "node:url";
 import { base, node, browser, architecture } from "@hambazi/eslint";
 
 export default defineConfig([
-  { ignores: ["packages/database/src/generated/**"] },
+  {
+    ignores: [
+      "packages/database/src/generated/**",
+      "apps/web/public/telegram-sdk/telegram-web-app-3f223aba4f0ede97.js",
+    ],
+  },
   base,
   architecture(fileURLToPath(new URL(".", import.meta.url))),
   {

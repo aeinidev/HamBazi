@@ -17,3 +17,6 @@ pnpm-lock.yaml
 packages/database/src/generated/
 .env
 .env.*
+
+# Reviewed official SDK bytes must remain identical to their SRI pin.
+apps/web/public/telegram-sdk/telegram-web-app-3f223aba4f0ede97.js

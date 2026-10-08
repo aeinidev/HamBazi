@@ -107,10 +107,12 @@ describe("guarded SDK loading", () => {
 
   it("discards SDK load errors without leaking the browser error or granting launch", async () => {
     const f = fixture();
-    const result = loadTelegramSdk();
+    const report = vi.fn();
+    const result = loadTelegramSdk(report);
     f.script.onerror!();
     expect(await result).toBeUndefined();
     expect(f.script.remove).toHaveBeenCalledOnce();
+    expect(report).toHaveBeenCalledWith("sdk-error");
   });
 
   it("bounds loading and ignores late completion", async () => {
@@ -138,6 +140,18 @@ describe("guarded SDK loading", () => {
 });
 
 describe("bootstrap credential cleanup", () => {
+  it("preserves query-only launch data in memory after a guarded SDK load", () => {
+    const f = fixture();
+    const queryApp = { ...app, initData: "" };
+    const result = bootstrapTelegram(queryApp);
+    expect(result.initData).toBe("SYNTHETIC_PRIVATE");
+    expect(f.host.history.replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "/?lang=en#/match/opaque-id",
+    );
+    expect(queryApp.initData).toBe("");
+  });
   it("cleans launch query/hash on failure without falling back to a rejected global bridge", () => {
     const f = fixture();
     f.host.Telegram = { WebApp: app };

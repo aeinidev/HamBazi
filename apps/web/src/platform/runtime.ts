@@ -12,8 +12,14 @@ import {
   type Ticket,
 } from "./contracts.js";
 import { ClientError } from "./errors.js";
+import {
+  diagnosticErrorCode,
+  type TelegramDiagnostics,
+  type TelegramStartup,
+} from "./telegram-diagnostics.js";
 import { publicSnapshot } from "../games/index.js";
 export interface State {
+  telegramDiagnostics: TelegramDiagnostics | null;
   session: Session | null;
   expired: boolean;
   connection: Connection;
@@ -29,6 +35,7 @@ export function createRuntime(
   fetcher: typeof fetch = fetch,
   realtimeFactory = createRealtime,
   scope: "full" | "owner-auth" = "full",
+  startup?: TelegramStartup,
 ) {
   const parsedOrigin = new URL(origin);
   if (
@@ -44,6 +51,9 @@ export function createRuntime(
   let generation = 0;
   const startParam = new URLSearchParams(initData).get("start_param");
   const store = createStore<State>(() => ({
+    telegramDiagnostics: startup
+      ? { ...startup, authentication: "not-requested", errorCode: null }
+      : null,
     session: null,
     expired: false,
     connection: "offline",
@@ -60,6 +70,7 @@ export function createRuntime(
     },
   });
   function clear(expired = false) {
+    if (expired) authDiagnostic("expired", "UNAUTHENTICATED");
     generation++;
     clearTimeout(timer);
     token = null;
@@ -83,38 +94,55 @@ export function createRuntime(
     () => clear(true),
     fetcher,
   );
+  function authDiagnostic(
+    authentication: TelegramDiagnostics["authentication"],
+    errorCode: string | null = null,
+  ) {
+    const current = store.getState().telegramDiagnostics;
+    if (current) store.setState({ telegramDiagnostics: { ...current, authentication, errorCode } });
+  }
   async function login(commandId: string) {
-    const epoch = generation;
-    const result = await http(
-      "/v1/auth/telegram-mini-app",
-      issuedSchema,
-      { schemaVersion: 1, commandId, initData },
-      "POST",
-      false,
-    );
-    if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
-    if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
-    clear();
-    token = result.accessToken;
-    store.setState({ session: result.session, expired: false });
-    timer = setTimeout(
-      () => clear(true),
-      Math.min(2147483647, result.session.expiresAt * 1000 - Date.now()),
-    );
-    if (scope === "owner-auth") return;
-    realtime = realtimeFactory(origin, token, {
-      state: (connection) => store.setState({ connection }),
-      snapshot: (snapshot) =>
-        store.setState({
-          snapshot:
-            snapshot && store.getState().session
-              ? publicSnapshot(snapshot, store.getState().session!.userId)
-              : null,
-        }),
-      resync: (resyncNeeded) => store.setState({ resyncNeeded }),
-      expired: () => clear(true),
-      error: (realtimeError) => store.setState({ realtimeError }),
-    });
+    authDiagnostic("pending");
+    try {
+      const epoch = generation;
+      const result = await http(
+        "/v1/auth/telegram-mini-app",
+        issuedSchema,
+        { schemaVersion: 1, commandId, initData },
+        "POST",
+        false,
+      );
+      if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
+      if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
+      clear();
+      token = result.accessToken;
+      store.setState({ session: result.session, expired: false });
+      authDiagnostic("authenticated");
+      timer = setTimeout(
+        () => clear(true),
+        Math.min(2147483647, result.session.expiresAt * 1000 - Date.now()),
+      );
+      if (scope === "owner-auth") return;
+      realtime = realtimeFactory(origin, token, {
+        state: (connection) => store.setState({ connection }),
+        snapshot: (snapshot) =>
+          store.setState({
+            snapshot:
+              snapshot && store.getState().session
+                ? publicSnapshot(snapshot, store.getState().session!.userId)
+                : null,
+          }),
+        resync: (resyncNeeded) => store.setState({ resyncNeeded }),
+        expired: () => clear(true),
+        error: (realtimeError) => store.setState({ realtimeError }),
+      });
+    } catch (error) {
+      authDiagnostic(
+        "failed",
+        diagnosticErrorCode(error instanceof ClientError ? error.code : undefined),
+      );
+      throw error;
+    }
   }
   return {
     scope,
@@ -124,17 +152,27 @@ export function createRuntime(
     login,
     hasLaunch: () => initData.length > 0,
     async createAccount(commandId: string, displayName: string) {
-      const epoch = generation;
-      const result = await http(
-        "/v1/auth/telegram-mini-app/account",
-        accountSchema,
-        { schemaVersion: 1, commandId, displayName, initData },
-        "POST",
-        false,
-      );
-      if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
-      if (scope === "full" && result.startParam && parseRoomStartParam(result.startParam))
-        store.setState({ invite: result.startParam });
+      authDiagnostic("pending");
+      try {
+        const epoch = generation;
+        const result = await http(
+          "/v1/auth/telegram-mini-app/account",
+          accountSchema,
+          { schemaVersion: 1, commandId, displayName, initData },
+          "POST",
+          false,
+        );
+        if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
+        if (scope === "full" && result.startParam && parseRoomStartParam(result.startParam))
+          store.setState({ invite: result.startParam });
+        authDiagnostic("not-requested");
+      } catch (error) {
+        authDiagnostic(
+          "failed",
+          diagnosticErrorCode(error instanceof ClientError ? error.code : undefined),
+        );
+        throw error;
+      }
     },
     async logout() {
       try {
@@ -146,6 +184,7 @@ export function createRuntime(
       } finally {
         clear();
         initData = "";
+        authDiagnostic("signed-out");
         store.setState({ invite: null });
       }
     },

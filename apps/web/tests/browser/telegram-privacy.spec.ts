@@ -211,7 +211,8 @@ test("an unmodifiable privacy boundary prevents the SDK from loading", async ({ 
   await page.addInitScript(() => Object.freeze(Storage.prototype));
   let sdkRequests = 0;
   page.on("request", (request) => {
-    if (request.url() === telegramSdkUrl) sdkRequests++;
+    if (request.url() === new URL(telegramSdkUrl, fixture.replace(":4174", ":4173")).href)
+      sdkRequests++;
   });
   await page.goto(`/#${launchHash}`);
   await expect(
@@ -273,4 +274,37 @@ test("SDK delivery failure removes launch parameters and grants no session", asy
   ).toHaveCount(0);
   expect(await page.evaluate(() => location.href.includes("tgWebAppData"))).toBe(false);
   await privateStorage(page);
+});
+
+test("query-only native launch uses the bundled SDK with external SDK network blocked", async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.unroute(telegramSdkUrl);
+  await page.route("https://telegram.org/**", (route) => route.abort());
+  let externalSdkRequested = false;
+  let privateConsole = false;
+  page.on("request", (request) => {
+    externalSdkRequested ||= request.url().startsWith("https://telegram.org/");
+  });
+  page.on("console", (message) => {
+    privateConsole ||= message.text().includes(canary);
+  });
+  await page.goto(`/?tgWebAppData=${encodeURIComponent(initData)}`);
+  await expect(
+    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => typeof window.Telegram?.WebApp?.ready === "function")).toBe(
+    true,
+  );
+  expect(await page.evaluate(() => location.href.includes("tgWebAppData"))).toBe(false);
+  const issued = page.waitForRequest((request) =>
+    request.url().endsWith("/v1/auth/telegram-mini-app"),
+  );
+  await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+  expect((await issued).postDataJSON().initData === initData).toBe(true);
+  await expect(page.getByRole("heading", { name: "You’re invited", exact: true })).toBeVisible();
+  await privateStorage(page);
+  expect(externalSdkRequested).toBe(false);
+  expect(privateConsole).toBe(false);
 });

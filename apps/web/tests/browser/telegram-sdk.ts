@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { telegramSdkIntegrity, telegramSdkUrl } from "../../src/platform/telegram-sdk.js";
+import { telegramSdkIntegrity, telegramSdkSourceUrl } from "../../src/platform/telegram-sdk.js";
 
 // Exercise unmodified official SDK bytes, never a synthetic substitute.
 // An offline provisioned file must pass the same production SRI digest.
@@ -10,7 +10,7 @@ export async function readTelegramSdk(): Promise<string> {
     if (process.env.TELEGRAM_SDK_FIXTURE_PATH) {
       bytes = await readFile(process.env.TELEGRAM_SDK_FIXTURE_PATH);
     } else {
-      const response = await fetch(telegramSdkUrl, {
+      const response = await fetch(telegramSdkSourceUrl, {
         redirect: "error",
         signal: AbortSignal.timeout(10000),
       });
