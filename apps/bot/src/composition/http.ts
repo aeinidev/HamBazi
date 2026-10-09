@@ -1,5 +1,6 @@
 import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import Fastify from "fastify";
+import { createBotTiming } from "../timing.js";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { TLSSocket } from "node:tls";
 import { createErrorEnvelope } from "@hambazi/contracts";
@@ -11,7 +12,7 @@ export function createBotHttp(options: {
   tls: { key: { reveal(): string }; cert: string };
   secret: { reveal(): string };
   backend: Backend;
-  handle(input: unknown, signal: AbortSignal): Promise<void>;
+  handle(input: unknown, signal: AbortSignal, receivedAt?: number): Promise<void>;
   timeoutMs: number;
   maxInFlight: number;
   logger: BotLogger;
@@ -33,10 +34,11 @@ export function createBotHttp(options: {
       maxHeaderSize: 8192,
     },
   });
+  const timing = createBotTiming(options.logger.telemetry);
   const expected = Buffer.from(options.secret.reveal());
   const inflight = new Map<
     string,
-    { controller: AbortController; timer: ReturnType<typeof setTimeout> }
+    { controller: AbortController; timer: ReturnType<typeof setTimeout>; receivedAt: number }
   >();
   let draining = false;
   const active = new Set<Promise<void>>();
@@ -44,6 +46,7 @@ export function createBotHttp(options: {
     withCorrelation(createCorrelation({ requestId: request.id }), done);
   });
   server.addHook("onRequest", async (req, reply) => {
+    const receivedAt = Date.now();
     reply
       .header("Cache-Control", "no-store")
       .header("X-Content-Type-Options", "nosniff")
@@ -75,10 +78,10 @@ export function createBotHttp(options: {
       return reply.header("Retry-After", "1").code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), options.timeoutMs);
-    inflight.set(req.id, { controller, timer });
+    inflight.set(req.id, { controller, timer, receivedAt });
     reply.raw.once("close", () => release(req.id));
     // Distributed admission runs before body parsing, including ignored update types.
-    await options.backend.admit(controller.signal);
+    await timing.measure("bot_admit", () => options.backend.admit(controller.signal));
     controller.signal.throwIfAborted();
   });
   const release = (id: string) => {
@@ -111,7 +114,7 @@ export function createBotHttp(options: {
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
     const state = inflight.get(req.id);
     if (!state) throw new RetryDelivery();
-    const work = options.handle(req.body, state.controller.signal);
+    const work = options.handle(req.body, state.controller.signal, state.receivedAt);
     active.add(work);
     try {
       await work;

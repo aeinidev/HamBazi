@@ -45,11 +45,25 @@ function fixture(testUser?: string) {
       s.leaseUntil = now + leaseMs;
       return { ...s, status: "CLAIMED" };
     },
-    async settle(id, _bot, version, outcome, messageId) {
+    async settle(id, _bot, version, outcome, messageId, continuation) {
       const s = submissions.get(id);
       if (!s || s.attemptVersion !== version) return false;
       s.status = outcome;
       s.deliveryMessageId = messageId ?? null;
+      if (continuation) {
+        const r = [...f.receipts.values()].find(
+          (r) =>
+            r.id === continuation.receiptId &&
+            r.replyData?.submissionId === id &&
+            r.version === continuation.version &&
+            r.reply === "SUPPORT_DISPATCH" &&
+            r.phase === "REPLY",
+        );
+        if (r) {
+          r.leaseUntil = continuation.now;
+          r.version++;
+        }
+      }
       return true;
     },
   };
@@ -231,11 +245,12 @@ describe("explicit Persian bot registration and support", () => {
           kind: "SUPPORT",
           submissionId: sent.delivery.submissionId,
           attemptVersion: sent.delivery.attemptVersion,
+          receiptClaim: { receiptId: sent.delivery.receiptId, version: sent.delivery.version },
           outcome,
           ...(outcome === "DELIVERED" ? { messageId: 900 } : {}),
         }),
       ).toMatchObject({ status: "DONE" });
-      f.clock.value += 5001;
+      // Confirmed settlement resumes immediately, without advancing the clock.
       const restarted = botOnboardingService(f.deps);
       const resumed = await restarted.process(botContext, input);
       expect(resumed).toMatchObject({

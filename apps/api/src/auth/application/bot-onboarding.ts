@@ -83,6 +83,13 @@ export const botOnboardingAckSchema = z.union([
       attemptVersion: z.number().int().positive(),
       outcome: z.enum(["DELIVERED", "FAILED", "UNKNOWN"]),
       messageId: messageId.optional(),
+      // Opt-in continuation; legacy acknowledgements keep their lease semantics.
+      receiptClaim: z
+        .strictObject({
+          receiptId: z.uuid(),
+          version: z.number().int().positive().max(2147483647),
+        })
+        .optional(),
     })
     .refine((v) => (v.outcome === "DELIVERED") === (v.messageId !== undefined)),
 ]);
@@ -319,6 +326,7 @@ export function botOnboardingService(deps: {
             ack.attemptVersion,
             ack.outcome,
             ack.messageId,
+            ack.receiptClaim ? { ...ack.receiptClaim, now: now() } : undefined,
           );
           return settled
             ? { ok: true as const, schemaVersion: 1 as const, status: "DONE" as const }

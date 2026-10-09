@@ -5,6 +5,7 @@ import { createFileOwnerAdmission } from "@hambazi/api/auth";
 import { createBackend } from "../backend.js";
 import { createTelegramSender } from "../telegram.js";
 import { createDeliveryHandler } from "../delivery.js";
+import { createBotTiming } from "../timing.js";
 import { createStagingTestResolution } from "./staging-test-resolution.js";
 import { createBotHttp } from "./http.js";
 import type { BotLogger } from "./logger.js";
@@ -66,6 +67,7 @@ export async function startBot(
     });
     const observeIdentity = createStagingTestResolution(env, config.botId, config.botUsername);
     const deliver = createDeliveryHandler({
+      timing: createBotTiming(logger.telemetry),
       ...(ownerAdmission ? { ownerAdmission } : {}),
       backend: backend.backend,
       sender,
@@ -76,11 +78,11 @@ export async function startBot(
       tls: { key: new SecretValue(key), cert },
       secret: config.webhookSecret,
       backend: backend.backend,
-      async handle(input, signal) {
+      async handle(input, signal, receivedAt) {
         signal.throwIfAborted();
         await observeIdentity?.(input);
         signal.throwIfAborted();
-        await deliver(input, signal);
+        await deliver(input, signal, receivedAt);
       },
       timeoutMs: config.requestTimeoutMs,
       maxInFlight: config.maxInFlight,

@@ -76,8 +76,26 @@ export function createSupportRepository(
         return row && acquired.count ? { ...row, status: "CLAIMED" } : row;
       });
     },
-    async settle(id, botId, version, outcome, messageId) {
+    async settle(id, botId, version, outcome, messageId, continuation) {
       return scope.transaction(async (db) => {
+        if (continuation) {
+          const submission = await db.botSupportSubmission.findFirst({
+            where: { id, botId: BigInt(botId) },
+          });
+          // An explicit retry can use another receipt, but only for this submission
+          // and this sender. No receipt/profile payload is exposed to telemetry.
+          const receipt =
+            submission &&
+            (await db.botUpdateReceipt.findFirst({
+              where: {
+                id: continuation.receiptId,
+                botId: BigInt(botId),
+                telegramUserId: submission.telegramUserId,
+                replyData: { path: ["submissionId"], equals: id },
+              },
+            }));
+          if (!receipt) return false;
+        }
         const changed = await db.botSupportSubmission.updateMany({
           where: {
             id,
@@ -87,17 +105,37 @@ export function createSupportRepository(
           },
           data: { status: outcome, deliveryMessageId: messageId ?? null },
         });
-        if (changed.count) return true;
-        const same = await db.botSupportSubmission.findFirst({
-          where: {
-            id,
-            botId: BigInt(botId),
-            attemptVersion: version,
-            status: outcome,
-            deliveryMessageId: messageId ?? null,
-          },
-        });
-        return !!same;
+        const same =
+          changed.count ||
+          (await db.botSupportSubmission.findFirst({
+            where: {
+              id,
+              botId: BigInt(botId),
+              attemptVersion: version,
+              status: outcome,
+              deliveryMessageId: messageId ?? null,
+            },
+          }));
+        if (!same) return false;
+        if (continuation) {
+          // Persist the exact attempt outcome and release only its current receipt
+          // claim atomically. A duplicate/late acknowledgement cannot steal a
+          // newer lease, finish a reply, or cause another administrator send.
+          await db.botUpdateReceipt.updateMany({
+            where: {
+              id: continuation.receiptId,
+              botId: BigInt(botId),
+              version: continuation.version,
+              phase: "REPLY",
+              reply: "SUPPORT_DISPATCH",
+              replyData: { path: ["submissionId"], equals: id },
+              expiresAt: { gt: new Date(continuation.now) },
+              leaseUntil: { gt: new Date(continuation.now) },
+            },
+            data: { leaseUntil: new Date(continuation.now), version: { increment: 1 } },
+          });
+        }
+        return true;
       });
     },
   };

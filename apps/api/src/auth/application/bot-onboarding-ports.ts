@@ -119,5 +119,6 @@ export interface SupportRepository {
     version: number,
     outcome: "DELIVERED" | "FAILED" | "UNKNOWN",
     messageId?: number,
+    continuation?: { receiptId: string; version: number; now: number },
   ): Promise<boolean>;
 }

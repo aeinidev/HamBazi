@@ -11,6 +11,8 @@ export const telemetryEvents = Object.freeze([
   "bot.stopped",
   "bot.failed",
   "bot.webhook_completed",
+  "bot.stage_completed",
+  "bot.handler_completed",
   "http.completed",
   "database.completed",
   "socket.completed",

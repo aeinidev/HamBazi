@@ -5,7 +5,7 @@ import { fixture, raw, delivery } from "./fixtures.js";
 import { SupportDeliveryError } from "../../src/telegram.js";
 describe("commit/send/ack orchestration", () => {
   it.each(["DELIVERED", "FAILED", "UNKNOWN"] as const)(
-    "persists %s support outcome without premature user confirmation",
+    "persists %s before same-request user confirmation",
     async (outcome) => {
       const f = fixture();
       const sendSupport = vi.fn(async () => {
@@ -21,12 +21,92 @@ describe("commit/send/ack orchestration", () => {
         adminChatId: "100",
         text: "Submitted text",
       };
+      const confirmation = {
+        ...delivery,
+        version: 2,
+        reply:
+          outcome === "DELIVERED"
+            ? ("SUPPORT_SENT" as const)
+            : outcome === "FAILED"
+              ? ("SUPPORT_FAILED" as const)
+              : ("SUPPORT_UNKNOWN" as const),
+      };
+      f.backend.process
+        .mockResolvedValueOnce({
+          ok: true,
+          schemaVersion: 1,
+          status: "SUPPORT",
+          delivery: support,
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          schemaVersion: 1,
+          status: "REPLY",
+          delivery: confirmation,
+        });
+      const ownerAdmission = {
+        telegramId: async () => "100",
+        admittedTelegramIds: async () => ["100"],
+        allowsTelegramId: async () => true,
+        allowsUserId: async () => true,
+      };
+      await expect(
+        createDeliveryHandler({ ...f, sender: { ...f.sender, sendSupport }, ownerAdmission })(
+          raw(),
+          AbortSignal.timeout(1000),
+        ),
+      ).resolves.toBeUndefined();
+      expect(f.sender.send).toHaveBeenCalledWith(confirmation, expect.any(AbortSignal));
+      expect(f.backend.process).toHaveBeenCalledTimes(2);
+      expect(f.backend.process.mock.calls[0]![0]).toEqual(f.backend.process.mock.calls[1]![0]);
+      expect(f.backend.acknowledge.mock.invocationCallOrder[0]!).toBeLessThan(
+        f.sender.send.mock.invocationCallOrder[0]!,
+      );
+      expect(sendSupport).toHaveBeenCalledOnce();
+      expect(f.backend.acknowledge).toHaveBeenCalledWith(
+        {
+          schemaVersion: 1,
+          kind: "SUPPORT",
+          submissionId: support.submissionId,
+          attemptVersion: 1,
+          receiptClaim: { receiptId: support.receiptId, version: support.version },
+          outcome,
+          ...(outcome === "DELIVERED" ? { messageId: 901 } : {}),
+        },
+        expect.any(AbortSignal),
+      );
+    },
+  );
+  it.each(["ack", "resume", "support-again"] as const)(
+    "does not blindly resend support when %s fails",
+    async (failure) => {
+      const f = fixture();
+      const support = {
+        ...delivery,
+        reply: "SUPPORT_DISPATCH" as const,
+        submissionId: delivery.receiptId,
+        attemptVersion: 1,
+        adminChatId: "100",
+        text: "private",
+        data: { submissionId: delivery.receiptId },
+      };
       f.backend.process.mockResolvedValue({
         ok: true,
         schemaVersion: 1,
         status: "SUPPORT",
         delivery: support,
       });
+      if (failure === "ack") f.backend.acknowledge.mockRejectedValueOnce(new RetryDelivery());
+      if (failure === "resume")
+        f.backend.process
+          .mockResolvedValueOnce({
+            ok: true,
+            schemaVersion: 1,
+            status: "SUPPORT",
+            delivery: support,
+          })
+          .mockRejectedValueOnce(new RetryDelivery());
+      const sendSupport = vi.fn(async () => 901);
       const ownerAdmission = {
         telegramId: async () => "100",
         admittedTelegramIds: async () => ["100"],
@@ -39,19 +119,8 @@ describe("commit/send/ack orchestration", () => {
           AbortSignal.timeout(1000),
         ),
       ).rejects.toThrow(RetryDelivery);
-      expect(f.sender.send).not.toHaveBeenCalled();
       expect(sendSupport).toHaveBeenCalledOnce();
-      expect(f.backend.acknowledge).toHaveBeenCalledWith(
-        {
-          schemaVersion: 1,
-          kind: "SUPPORT",
-          submissionId: support.submissionId,
-          attemptVersion: 1,
-          outcome,
-          ...(outcome === "DELIVERED" ? { messageId: 901 } : {}),
-        },
-        expect.any(AbortSignal),
-      );
+      expect(f.sender.send).not.toHaveBeenCalled();
     },
   );
   it("denies non-owner original senders before backend and Telegram effects", async () => {

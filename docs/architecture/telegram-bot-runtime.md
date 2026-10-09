@@ -181,3 +181,20 @@ database migration or wire-schema change is required by B3B.
 References: [Telegram webhook API](https://core.telegram.org/bots/api#setwebhook),
 [grammY API cancellation](https://grammy.dev/ref/core/api),
 [webhook reply limitations](https://grammy.dev/guide/deployment-types#webhook-reply).
+
+## Chat-button timing and settled support continuation
+
+See [ADR-059](../adr/059-inline-bot-support-confirmation.md). Bot replies run in
+the authenticated webhook, not in polling or a worker queue. The optional support
+acknowledgement receipt claim atomically settles delivery and releases that
+version's lease so the same verified update can continue once within its original
+deadline. Late/duplicate claims cannot release a newer reply lease. The original
+owner destination, explicit registration and numeric staging admission stay
+unchanged.
+
+Correlate `bot.stage_completed`, `bot.handler_completed`, `bot.webhook_completed`,
+`http.completed` and `database.completed` by trace ID. Fixed operation names
+distinguish admission, process, support/reply send and acknowledgement.
+`bot_ingress` is the elapsed Telegram message age at first HTTP receipt, with
+one-second timestamp precision; it is not the client's button-to-render latency.
+No message/identity/profile payload enters telemetry.

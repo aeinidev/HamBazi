@@ -6,13 +6,16 @@ never starts them. The owner is the sole operator/responder under ADR-050.
 
 The current restricted staging binding is
 [staging-test-user-current.json](../../../infra/docker/staging/staging-test-user-current.json).
-Its prepared directory is `/opt/hambazi-staging/private/prepared-staging-test-user-20261009`.
+Its prepared directory is `/opt/hambazi-staging/private/prepared-bot-latency-20261010`.
 The original owner remains sole operator; the separate numeric tester is an ordinary
 user only. See [retest and revocation](../staging-test-user.md). The new preparation
-runner is `runner-81476d2`; the generic containment runner `runner-6e63149` and the
-installed normal expiry timer are unchanged. The ADR-056 acceptance command below
+runner is `runner-8138d2a`; the generic containment runner `runner-6e63149` and the
+containment service are unchanged; the enabled timer follows fresh scan expiry. The ADR-056 acceptance command below
 is historical and cannot accept this two-human successor. Native owner functional
 acceptance and pending Description Picture confirmation retain their original scopes.
+The tester has separately reported functional success and a delay-free retest after
+the [Bot latency correction](../incidents/2026-10-10-bot-chat-latency.md). Fresh
+eight-image scans for that correction did not change the enabled containment deadline.
 
 Use the existing key-authenticated SSH context. On the VPS, invoke the reviewed
 runner checkout's CLI with the actual new prepared directory, a role and one of
@@ -59,16 +62,15 @@ failure, then cleans them. It is not staging activation or a DB/Telegram smoke.
 
 The historical owner-approved ADR-053 exception ended at 2026-10-09 11:08:55
 Asia/Tehran and was not extended. Fresh normal eight-image evidence superseded it.
-The **currently installed normal containment timer is 2026-10-09 22:35:21
-Asia/Tehran (19:05:21 UTC)**; inspect the actual next trigger, not the historical
-source-template deadline. The current binding and acceptance gate validate it.
-The reviewed [service](../../../infra/docker/staging/advisory-expiry.service) and
-[timer](../../../infra/docker/staging/advisory-expiry.timer) enforce containment
-at the installed deadline: canonical maintenance routes, then SIGTERM/45-second graceful
-application stop. Private PostgreSQL/Redis and durable history are preserved.
-This timer does not refresh scans or extend the exception; future execution is
-unperformed until its actual deadline. Inspect its enabled state and next trigger
-privately with `systemctl status hambazi-staging-advisory-expiry.timer`.
+The previous normal timer actually triggered at 2026-10-09 22:35:22 Asia/Tehran,
+applying maintenance and gracefully stopping all four applications. See the
+[verified outage and recovery](../incidents/2026-10-10-staging-scan-expiry.md).
+After genuine fresh eight-image scans, the **currently installed normal containment
+timer is 2026-10-10 22:36:47 Asia/Tehran (19:06:47 UTC)**. The same reviewed service
+and enabled persistent timer enforce canonical maintenance followed by a graceful
+application stop. PostgreSQL/Redis and durable history are preserved. Inspect the
+actual next trigger, not the historical source-template deadline, with
+`systemctl status hambazi-staging-advisory-expiry.timer`.
 
 After genuinely fresh official advisories and successful normal 24-hour scans of
 all exact active images, validate a new preparation and activation binding before

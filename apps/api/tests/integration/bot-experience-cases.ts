@@ -291,6 +291,91 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
         deliveryMessageId: 900,
       });
     });
+    it.each(["DELIVERED", "FAILED", "UNKNOWN"] as const)(
+      "atomically settles %s and resumes immediately; duplicate acknowledgements cannot steal a newer reply lease",
+      async (outcome) => {
+        const f = setup(true);
+        await acknowledge(f.service, await f.process("REGISTER", { displayName: "Synthetic" }));
+        await acknowledge(f.service, await f.process("SUPPORT"));
+        const update = f.command("TEXT", { text: "Isolated continuation fixture" });
+        const result = await f.service.process(botContext, update);
+        if (!result.ok || result.status !== "SUPPORT") throw Error("Expected support attempt");
+        const ack = {
+          schemaVersion: 1,
+          kind: "SUPPORT",
+          submissionId: result.delivery.submissionId,
+          attemptVersion: result.delivery.attemptVersion,
+          outcome,
+          ...(outcome === "DELIVERED" ? { messageId: 901 } : {}),
+          receiptClaim: { receiptId: result.delivery.receiptId, version: result.delivery.version },
+        };
+        expect(
+          await f.service.acknowledge(botContext, {
+            ...ack,
+            receiptClaim: { ...ack.receiptClaim, receiptId: randomUUID() },
+          }),
+        ).toMatchObject({ status: "RETRY" });
+        expect(
+          (await createSupportRepository(b).find(ack.submissionId, botContext.botId))?.status,
+        ).toBe("SENDING");
+        const settled = await Promise.all(
+          [f.service, f.make(b)].map((service) => service.acknowledge(botContext, ack)),
+        );
+        expect(settled.every((r) => r.ok && r.status === "DONE")).toBe(true);
+        const resumed = await f.make(b).process(botContext, update);
+        expect(resumed).toMatchObject({
+          status: "REPLY",
+          delivery: {
+            version: 3,
+            reply:
+              outcome === "DELIVERED"
+                ? "SUPPORT_SENT"
+                : outcome === "FAILED"
+                  ? "SUPPORT_FAILED"
+                  : "SUPPORT_UNKNOWN",
+          },
+        });
+        const readReceipt = () =>
+          admin
+            .forModule("auth")
+            .execute((db) =>
+              db.botUpdateReceipt.findUniqueOrThrow({ where: { id: ack.receiptClaim.receiptId } }),
+            );
+        const newer = await readReceipt();
+        expect(newer.leaseUntil.getTime()).toBeGreaterThan(f.clock.value);
+        expect(await f.service.acknowledge(botContext, ack)).toMatchObject({ status: "DONE" });
+        expect((await readReceipt()).leaseUntil).toEqual(newer.leaseUntil);
+        expect(await f.service.process(botContext, update)).toMatchObject({ status: "RETRY" });
+        await acknowledge(f.make(b), resumed);
+        expect(await f.service.acknowledge(botContext, ack)).toMatchObject({ status: "DONE" });
+        expect(await f.service.process(botContext, update)).toMatchObject({ status: "DONE" });
+        expect(
+          (await createSupportRepository(b).find(ack.submissionId, botContext.botId))
+            ?.attemptVersion,
+        ).toBe(1);
+        if (outcome === "FAILED") {
+          const retryUpdate = f.command("SUPPORT");
+          const retry = await f.service.process(botContext, retryUpdate);
+          if (!retry.ok || retry.status !== "SUPPORT") throw Error("Expected explicit retry");
+          expect(retry.delivery.attemptVersion).toBe(2);
+          expect(
+            await f.service.acknowledge(botContext, {
+              ...ack,
+              attemptVersion: 2,
+              outcome: "DELIVERED",
+              messageId: 902,
+              receiptClaim: {
+                receiptId: retry.delivery.receiptId,
+                version: retry.delivery.version,
+              },
+            }),
+          ).toMatchObject({ status: "DONE" });
+          expect(await f.make(b).process(botContext, retryUpdate)).toMatchObject({
+            delivery: { reply: "SUPPORT_SENT" },
+          });
+        }
+      },
+    );
     it("failure retains the original message, and an explicit retry claims it exactly once", async () => {
       const f = setup();
       await acknowledge(f.service, await f.process("REGISTER", { displayName: "Synthetic" }));

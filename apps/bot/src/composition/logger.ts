@@ -4,6 +4,7 @@ export function createBotLogger(destination?: DestinationStream, dsn?: { reveal(
   const { telemetry, metrics } = observation;
   return {
     metrics,
+    telemetry,
     close: observation.close,
     completed(requestId: string, durationMs: number, status: number) {
       telemetry.emit("bot.webhook_completed", {

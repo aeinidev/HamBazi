@@ -1,4 +1,5 @@
 import process from "node:process";
+import { performance } from "node:perf_hooks";
 import { randomUUID } from "node:crypto";
 import { request } from "node:https";
 import { beforeAll, afterAll, afterEach, describe, it, expect, vi } from "vitest";
@@ -15,6 +16,8 @@ import { internalHarness, testCertificate, bearer } from "../http/bot-internal-f
 import { createBackend } from "../../../bot/dist/backend.js";
 import { createDeliveryHandler } from "../../../bot/dist/delivery.js";
 import { createBotHttp, webhookPath } from "../../../bot/dist/composition/http.js";
+import { ownerAdmissionPolicy } from "../../src/auth/application/owner-admission.js";
+import { createBotTiming } from "../../../bot/dist/timing.js";
 import { createBotLogger } from "../../../bot/dist/composition/logger.js";
 if (
   process.env.TEST_DATABASE_CONFIRM !== "isolated-hambazi-test" ||
@@ -53,7 +56,9 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
     afterAll(async () => {
       await Promise.all([database.disconnect(), admin.disconnect()]);
     });
-    async function setup() {
+    async function setup(supportEnabled = false) {
+      const identity = ++sequence;
+      const ownerAdmission = ownerAdmissionPolicy({ readOwner: async () => String(identity) });
       const clock = {
         value: Date.now(),
         nowMs() {
@@ -75,6 +80,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         registration: createRegistrationPort(database, clock),
         clock,
         leaseMs: 15000,
+        ...(supportEnabled ? { ownerAdmission } : {}),
       });
       const api = await internalHarness({
         tls,
@@ -84,9 +90,11 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       });
       closes.push(() => api.app.close());
       let messageId = 900;
-      const sender = { send: vi.fn(async () => messageId++) };
+      const sender = {
+        send: vi.fn(async () => messageId++),
+        sendSupport: vi.fn(async () => messageId++),
+      };
       const outputs = [];
-      const identity = ++sequence;
       async function instance(failAck = false) {
         const client = createBackend({
           origin: `https://127.0.0.1:${api.port}`,
@@ -103,6 +111,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
               },
             }
           : client.backend;
+        const logger = createBotLogger({ write: (v) => outputs.push(v) });
         const bot = createBotHttp({
           tls,
           secret: { reveal: () => "w".repeat(40) },
@@ -112,10 +121,12 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
             sender,
             botId: "123",
             username: "hambazi_test_bot",
+            timing: createBotTiming(logger.telemetry),
+            ...(supportEnabled ? { ownerAdmission } : {}),
           }),
           timeoutMs: 10000,
           maxInFlight: 8,
-          logger: createBotLogger({ write: (v) => outputs.push(v) }),
+          logger,
         });
         await bot.server.listen({ host: "127.0.0.1", port: 0 });
         closes.push(bot.close);
@@ -171,6 +182,30 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           .execute((db) => db.user.count({ where: { telegramUserId: BigInt(identity) } }));
       return { clock, rate, sender, outputs, instance, update, count };
     }
+    it("confirms support through real private HTTPS/PostgreSQL in one webhook, then serves the profile without waiting for a worker/lease", async () => {
+      const f = await setup(true);
+      const bot = await f.instance();
+      expect(await bot.post(f.update("ایجاد حساب کاربری"))).toBe(200);
+      expect(await bot.post(f.update("ارتباط با پشتیبان"))).toBe(200);
+      const input = f.update("Isolated private support fixture");
+      const started = performance.now();
+      expect(await bot.post(input)).toBe(200);
+      const durationMs = performance.now() - started;
+      // Safety guard against introducing a 15-second lease/schedule wait again.
+      expect(durationMs).toBeLessThan(2000);
+      expect(f.sender.sendSupport).toHaveBeenCalledOnce();
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("SUPPORT_SENT");
+      expect(await bot.post(input)).toBe(200);
+      expect(f.sender.sendSupport).toHaveBeenCalledOnce();
+      expect(await bot.post(f.update("پروفایل من"))).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("PROFILE");
+      const stages = f.outputs
+        .map((v) => JSON.parse(v))
+        .filter((e) => e.event === "bot.stage_completed");
+      expect(stages.some((e) => e.operation === "bot_support_send")).toBe(true);
+      expect(stages.filter((e) => e.operation === "bot_support_send")).toHaveLength(1);
+      expect(f.outputs.join("")).not.toContain("Isolated private support fixture");
+    });
     it("registers only on explicit intent, suppresses duplicates and survives Bot restart", async () => {
       const f = await setup();
       const bot = await f.instance();
