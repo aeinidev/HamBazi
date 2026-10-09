@@ -1,10 +1,18 @@
 # Temporary owner-only staging execution plan
 
+> Current staging admits the unchanged owner and one verified ordinary tester
+> under [ADR-058](../adr/058-narrow-staging-regular-test-user.md). See the
+> [current binding](../../infra/docker/staging/staging-test-user-current.json) and
+> [operation/retest instructions](staging-test-user.md). Public admission remains
+> disabled; registration is required and support goes to the original owner.
+> Earlier onboarding/closure/native/rollback evidence below is historical and
+> applies only to its recorded source. Production remains HOLD.
+
 **Updated:** 2026-10-09 Tehran. **Status:** Owner-only Web/Auth/personal Coup are open,
 real iPhone native acceptance is recorded as user-reported, and the applicable
-bounded rollback/availability/renewal checks pass. **Phase:** 18B3 remains In Progress.
+bounded rollback/availability/renewal checks pass. **Phase:** 18B3 Completed for the applicable personal scope; Phase 19 review Completed, public release HOLD.
 ADR-050/052/053/054/055 and the owner's explicit deployment scope remain binding.
-No Telegram setting, production, paid resource, destructive operation or later phase.
+Phase 19 review is authorized and complete under ADR-056; no Telegram setting, production, paid resource or destructive operation.
 
 ## Current configuration and accepted native lineage
 
@@ -26,6 +34,31 @@ SRI, storage guard, query/fragment launch preservation and signature/freshness/
 constant-time exact owner admission unchanged. Its own six actual-network
 Chromium/WebKit launch/Auth/privacy cases pass separately; no new native owner
 retest is claimed or required merely for removing the display.
+
+## Scoped closure — 2026-10-09
+
+[ADR-056](../adr/056-personal-staging-closure-and-production-hold.md) defines the
+owner-authorized closeout and review. The real iPhone acceptance is reconfirmed,
+with its original native source binding preserved. The read-only owner-SSH gate
+passes ten exact private report hashes, normal eight-image freshness, four READY
+roles/private safe logs/metrics, eight current public TLS/isolation probes, and
+installed normal expiry. Source/adapter/input/output hashes are in the current
+binding. Existing real E2E, rollback, availability and native reports are reused.
+
+The gate found duplicate edge/upstream security headers missed by earlier
+first-value probes. The reviewed Web route hides the upstream duplicates and
+emits the full permission policy once. Actual Nginx parse/reload and all six exact
+single headers pass. Current route SHA-256:
+`b3a8c5367b4e5fb5537a6a9ffbd251401df4e0f6eecbc2b6fe8b777c382f5a4d`.
+The first immediate reload probe rolled back safely; the bounded second attempt
+observed old then new headers. Both are preserved; application images and owner
+admission/routes/game/schema/credentials are unchanged.
+
+18B3 and parent 18B are **Completed for approved personal staging**. Full broader
+production acceptance remains false. Phase 19's complete DoD/decision review
+recommends **HOLD** for public release; its explicit blocked rows do not reopen
+settled personal decisions. See the [plan's matrix](../implementation-plan.md#phase-19--final-definition-of-done-and-release-readiness-review)
+and [private operator command](runbooks/private-operator.md#exact-personal-staging-acceptance-gate).
 
 ## Applicable staging checks completed
 
@@ -83,7 +116,7 @@ applies canonical maintenance and a 45-second app stop at that expiry. Installed
 state passes; future execution is unperformed. Refresh scans before expiry, and
 never keep traffic open by extending the old exception without an explicit decision.
 
-## Exact remaining items and consequences
+## Retained production limitations and personal-profile consequences
 
 | Item                                                                  | Disposition and consequence                                                                                                                                                                                                                                        |
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -102,8 +135,7 @@ never keep traffic open by extending the old exception without an explicit decis
 
 No additional owner policy or private reference is missing for the implemented
 personal flow. No current deployment blocker remains. The next operating action
-is refreshing exact scan evidence before the normal expiry; full-phase evidence
-above is retained for review, without reopening settled decisions or starting Phase 19.
+is refreshing exact scan evidence before the normal expiry; production evidence above remains unperformed and is explicitly held in the completed Phase 19 review. No current personal-scope acceptance blocker remains.
 
 The following sections are historical and do not supersede this final binding.
 

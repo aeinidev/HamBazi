@@ -74,10 +74,16 @@ export function fixture() {
   };
   const users: UserIdentityPort = {
     async findActiveByTelegramId(id) {
-      return id === "42" ? { userId } : id === "43" ? { userId: otherUserId } : undefined;
+      return id === "42"
+        ? { userId, registrationCompleted: true }
+        : id === "43"
+          ? { userId: otherUserId, registrationCompleted: true }
+          : undefined;
     },
     async findActiveById(id) {
-      return [userId, otherUserId].includes(id) ? { userId: id } : undefined;
+      return [userId, otherUserId].includes(id)
+        ? { userId: id, registrationCompleted: true }
+        : undefined;
     },
   };
   const codec = createSessionCodec(signing);

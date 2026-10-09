@@ -26,7 +26,7 @@ async function setup(allowedPeers?: string) {
   const ip = vi.fn(async (): Promise<RateDecision> => ({ allowed: true }));
   const identity = vi.fn(async (): Promise<RateDecision> => ({ allowed: true }));
   const service = { ...f.service };
-  const process = vi.spyOn(service, "process");
+  const process = vi.spyOn(service, "processLegacy");
   const h = await internalHarness({
     tls,
     onboarding: service,

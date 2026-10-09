@@ -40,7 +40,7 @@ describe("temporary staging account scope", () => {
     await runtime.logout();
     expect(runtime.store.getState().session).toBeNull();
     expect(fetcher.mock.calls.map((c) => String(c[0]))).toEqual([
-      "https://api-staging.hambazi.top/v1/auth/telegram-mini-app",
+      "https://api-staging.hambazi.top/v1/auth/telegram-mini-app/registered-session",
       "https://api-staging.hambazi.top/v1/auth/logout",
     ]);
     runtime.dispose();

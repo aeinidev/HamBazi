@@ -34,6 +34,7 @@ import {
 import {
   createUserIdentityPort,
   createAccountCreationPort,
+  createRegistrationPort,
   createProfilePort,
   createProfileRate,
   createPublicNamesPort,
@@ -426,6 +427,17 @@ async function controlRequest(request) {
       displayName: `Release player ${id}`,
       initData: launch(id, input.startParam),
     };
+  }
+  if (request.method === "POST" && request.url === "/register") {
+    // Loopback-only disposable harness simulates the verified explicit Bot intent.
+    const input = await body(request);
+    if (!actors.has(input.telegramUserId)) throw new Error("Unknown synthetic actor");
+    const result = await createRegistrationPort(database, { nowMs: () => Date.now() }).complete(
+      String(input.telegramUserId),
+      `Release player ${input.telegramUserId}`,
+    );
+    if (!result.ok) throw new Error("Synthetic registration failed");
+    return { registered: true };
   }
   if (request.method === "POST" && request.url === "/worker/stop") {
     await stopWorker();

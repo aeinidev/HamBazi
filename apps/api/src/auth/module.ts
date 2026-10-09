@@ -1,3 +1,4 @@
+import { createSupportRepository } from "./infrastructure/repositories/bot-support.js";
 import type { TelegramVerifier } from "./application/telegram-verifier.js";
 import type { TelegramVerificationPolicy } from "./domain/telegram-identity.js";
 import { telegramHmacVerifier } from "./infrastructure/telegram-hmac.js";
@@ -13,8 +14,16 @@ import { botCleanupService } from "./application/bot-cleanup.js";
 import { ownerAdmissionPolicy, type OwnerAdmission } from "./application/owner-admission.js";
 import { ownerFileSource } from "./infrastructure/owner-file.js";
 
-export function createFileOwnerAdmission(file: string, users?: UserIdentityPort): OwnerAdmission {
-  return ownerAdmissionPolicy({ readOwner: ownerFileSource(file), ...(users ? { users } : {}) });
+export function createFileOwnerAdmission(
+  file: string,
+  users?: UserIdentityPort,
+  testFile?: string,
+): OwnerAdmission {
+  return ownerAdmissionPolicy({
+    readOwner: ownerFileSource(file),
+    ...(users ? { users } : {}),
+    ...(testFile ? { readTestUser: ownerFileSource(testFile, true) } : {}),
+  });
 }
 
 export function createBotOnboardingCleanup(
@@ -32,6 +41,7 @@ export function createBotOnboarding(
   return botOnboardingService({
     ...options,
     repository: createBotOnboardingRepository(options.database),
+    support: createSupportRepository(options.database),
     newId: randomUUID,
   });
 }

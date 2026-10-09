@@ -81,6 +81,7 @@ export function botFixture() {
         ...row,
         phase: next.phase,
         reply: next.reply,
+        replyData: next.replyData ?? row.replyData ?? null,
         flowId: next.flowId,
         promptVersion: next.promptVersion,
       };

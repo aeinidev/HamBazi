@@ -20,6 +20,7 @@ let state;
 function reset() {
   state = {
     playable: true,
+    registrationRequired: false,
     modes: [{ id: "server-choice", title: "Server choice" }],
     profileVersion: 0,
     statsFailure: false,
@@ -186,7 +187,17 @@ const http = createServer(async (req, res) => {
       },
       startParam: `room_${code}`,
     });
-  if (req.url === "/v1/auth/telegram-mini-app")
+  if (req.url === "/v1/auth/telegram-mini-app/registered-session" && state.registrationRequired) {
+    res.statusCode = 403;
+    return send({
+      ok: false,
+      error: { code: "REGISTRATION_REQUIRED", message: "Registration required", retryable: false },
+    });
+  }
+  if (
+    req.url === "/v1/auth/telegram-mini-app" ||
+    req.url === "/v1/auth/telegram-mini-app/registered-session"
+  )
     return send({
       schemaVersion: 1,
       tokenType: "Bearer",

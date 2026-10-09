@@ -10,6 +10,7 @@ const options = {
 describe("grammY bounded outbound messages", () => {
   it.each([
     "CREATE_ACCOUNT",
+    "WELCOME_REGISTERED",
     "PROMPT_NAME",
     "INVALID_NAME",
     "MENU",
@@ -23,6 +24,11 @@ describe("grammY bounded outbound messages", () => {
       .mockResolvedValue({ message_id: 900, chat: { id: 100, type: "private" } } as Awaited<
         ReturnType<Api["sendMessage"]>
       >);
+    const photo = vi
+      .spyOn(api, "sendPhoto")
+      .mockResolvedValue({ message_id: 900, chat: { id: 100, type: "private" } } as Awaited<
+        ReturnType<Api["sendPhoto"]>
+      >);
     expect(
       await createTelegramSender(options, api).send(
         { ...delivery, reply },
@@ -30,10 +36,26 @@ describe("grammY bounded outbound messages", () => {
       ),
     ).toBe(900);
     const payload = send.mock.calls[0]![2]!;
+    expect(photo).not.toHaveBeenCalled();
+    if (reply === "CREATE_ACCOUNT" || reply === "WELCOME_REGISTERED")
+      expect(send.mock.calls[0]![1]).toBe("برای ادامه، از دکمه‌های پایین استفاده کن.");
     expect(payload).not.toHaveProperty("parse_mode");
     if (reply === "PROMPT_NAME" || reply === "INVALID_NAME")
       expect(payload.reply_markup).toHaveProperty("force_reply", true);
-    if (reply === "MENU") expect(JSON.stringify(payload)).toContain(options.miniAppUrl);
+    if (reply === "MENU" || reply === "WELCOME_REGISTERED")
+      expect(payload.reply_markup).toEqual({
+        keyboard: [[{ text: "پروفایل من" }], [{ text: "ارتباط با پشتیبان" }]],
+        resize_keyboard: true,
+        is_persistent: true,
+        one_time_keyboard: false,
+      });
+    if (reply === "CREATE_ACCOUNT")
+      expect(payload.reply_markup).toEqual({
+        keyboard: [[{ text: "ایجاد حساب کاربری", style: "primary" }]],
+        resize_keyboard: true,
+        is_persistent: true,
+        one_time_keyboard: false,
+      });
   });
   it("sanitizes SDK errors that can include token/payload", async () => {
     const api = new Api(options.token.reveal());

@@ -14,33 +14,38 @@ import {
 export interface RoomsHttpDependencies {
   rooms: Pick<RoomsPort, "create" | "read"> &
     Partial<Pick<RoomsPort, "shareInvite" | "resolveInvite">>;
-  authenticate(
-    token: string,
-  ): Promise<
+  authenticate(token: string): Promise<
     | { ok: true; userId: string }
-    | { ok: false; error: { code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" } }
+    | {
+        ok: false;
+        error: {
+          code: "UNAUTHENTICATED" | "REGISTRATION_REQUIRED" | "INVALID_INPUT" | "INTERNAL_ERROR";
+        };
+      }
   >;
   rate: RoomsRate;
 }
 export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
-  function fail(reply: FastifyReply, code: RoomCode) {
+  function fail(reply: FastifyReply, code: RoomCode | "REGISTRATION_REQUIRED") {
     if (code === "RATE_LIMITED")
       return reply.header("Retry-After", 60).code(429).send(createErrorEnvelope(code));
     return reply
       .code(
-        code === "UNAUTHENTICATED"
+        code === "REGISTRATION_REQUIRED"
           ? 401
-          : code === "INVALID_INPUT"
-            ? 400
-            : code === "NOT_FOUND"
-              ? 404
-              : code === "FORBIDDEN"
-                ? 403
-                : code === "ROOM_CONFLICT" || code === "GAME_UNAVAILABLE"
-                  ? 409
-                  : 503,
+          : code === "UNAUTHENTICATED"
+            ? 401
+            : code === "INVALID_INPUT"
+              ? 400
+              : code === "NOT_FOUND"
+                ? 404
+                : code === "FORBIDDEN"
+                  ? 403
+                  : code === "ROOM_CONFLICT" || code === "GAME_UNAVAILABLE"
+                    ? 409
+                    : 503,
       )
-      .send(createErrorEnvelope(code));
+      .send(createErrorEnvelope(code === "REGISTRATION_REQUIRED" ? "UNAUTHENTICATED" : code));
   }
   async function handle(
     req: FastifyRequest,

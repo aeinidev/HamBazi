@@ -29,6 +29,40 @@ const lines = (env) =>
     .map(([key, value]) => `${key}=${value}\n`)
     .join("");
 
+it("pairs the regular tester reference across API/Bot without replacing owner admission or opening another origin", () => {
+  const { envs, inputs } = deploymentFixture();
+  inputs.ownerAdmissionFile = "/private/owner.json";
+  inputs.stagingTestAdmissionFile = "/private/tester.json";
+  for (const role of ["api", "bot"])
+    Object.assign(envs[role], {
+      AUTH_ADMISSION_POLICY: "telegram-owner-only-v1",
+      OWNER_ADMISSION_FILE: "/run/hambazi/owner-admission.json",
+      STAGING_TEST_ADMISSION_FILE: "/run/hambazi/staging-test-admission.json",
+    });
+  envs.api.ALLOWED_ORIGINS = "https://staging.hambazi.top";
+  envs.bot.BOT_MINI_APP_URL = "https://staging.hambazi.top/";
+  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+  for (const change of [
+    (e) => {
+      delete e.bot.STAGING_TEST_ADMISSION_FILE;
+    },
+    (e, i) => {
+      delete i.stagingTestAdmissionFile;
+    },
+    (e, i) => {
+      i.stagingTestAdmissionFile = i.ownerAdmissionFile;
+    },
+    (e) => {
+      e.api.ALLOWED_ORIGINS = "https://public.example";
+    },
+  ]) {
+    const e = structuredClone(envs),
+      i = structuredClone(inputs);
+    change(e, i);
+    expect(() => validateEnvironments(e, i)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
+  }
+});
+
 it("binds complete owner admission for API/Bot and denies partial or unknown profiles", () => {
   const { envs, inputs } = deploymentFixture();
   inputs.ownerAdmissionFile = "/private/owner-admission.json";
@@ -201,7 +235,7 @@ it("rejects readable secret files and symlinks including parent directory links"
 });
 it("records all current migrations and contract hashes without approving compatibility", async () => {
   const evidence = await compatibilityInputs();
-  expect(evidence.migrations).toHaveLength(14);
+  expect(evidence.migrations).toHaveLength(15);
   expect(evidence.contracts.length).toBeGreaterThan(10);
   expect(evidence.migrations.every((m) => /^[a-f0-9]{64}$/.test(m.sha256))).toBe(true);
   expect(evidence).toMatchObject({

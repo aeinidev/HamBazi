@@ -59,6 +59,7 @@ const errorSchema = z.strictObject({
 });
 export const authPaths = Object.freeze({
   issue: "/v1/auth/telegram-mini-app",
+  registeredSession: "/v1/auth/telegram-mini-app/registered-session",
   inspect: "/v1/auth/session",
   logout: "/v1/auth/logout",
   createAccount: "/v1/auth/telegram-mini-app/account",
@@ -93,6 +94,34 @@ export function authOpenApiDocument() {
       securitySchemes: { bearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
     },
     paths: {
+      [authPaths.registeredSession]: {
+        post: {
+          operationId: "issueRegisteredTelegramSession",
+          security: [],
+          requestBody: body(issuanceSchema),
+          responses: {
+            ...responses(issuedSchema),
+            "403": {
+              description:
+                "Registration is required after Telegram verification, or the shared HTTPS/origin boundary rejects the request. No session or account is created.",
+              content: {
+                "application/json": {
+                  schema: json(
+                    z.strictObject({
+                      ok: z.literal(false),
+                      error: z.strictObject({
+                        code: z.enum(["REGISTRATION_REQUIRED", "FORBIDDEN"]),
+                        message: z.string(),
+                        retryable: z.boolean(),
+                      }),
+                    }),
+                  ),
+                },
+              },
+            },
+          },
+        },
+      },
       [authPaths.issue]: {
         post: {
           operationId: "issueTelegramSession",

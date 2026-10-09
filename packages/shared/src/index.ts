@@ -2,6 +2,7 @@
 export const ERROR_CODES = Object.freeze([
   "INVALID_INPUT",
   "UNAUTHENTICATED",
+  "REGISTRATION_REQUIRED",
   "FORBIDDEN",
   "NOT_FOUND",
   "RATE_LIMITED",

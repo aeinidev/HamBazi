@@ -3,7 +3,9 @@ BEGIN;
 GRANT SELECT, INSERT ON sessions TO hambazi_api;
 GRANT UPDATE (revoked_at) ON sessions TO hambazi_api;
 GRANT SELECT, INSERT, DELETE ON bot_update_receipts, bot_onboarding_flows TO hambazi_api;
-GRANT UPDATE (phase, version, lease_until, reply, flow_id, prompt_version) ON bot_update_receipts TO hambazi_api;
+GRANT SELECT, INSERT ON bot_support_submissions TO hambazi_api;
+GRANT UPDATE (status, attempt_version, lease_until, delivery_message_id) ON bot_support_submissions TO hambazi_api;
+GRANT UPDATE (phase, version, lease_until, reply, reply_data, flow_id, prompt_version) ON bot_update_receipts TO hambazi_api;
 GRANT UPDATE (version, state, prompt_version, prompt_message_id, admitted_receipt_id) ON bot_onboarding_flows TO hambazi_api;
 -- Cleanup only: no sender, update, prompt, workflow or session metadata reads/writes.
 GRANT SELECT (id, expires_at), DELETE ON bot_update_receipts, bot_onboarding_flows TO hambazi_worker;

@@ -34,11 +34,15 @@ export function onboardingFixture() {
   // Sessions and onboarding deliberately share the same eligibility adapter in this fixture.
   f.users.findActiveByTelegramId = vi.fn(async (id) => {
     const row = accountsByTelegram.get(BigInt(id));
-    return row?.status === "ACTIVE" ? { userId: row.userId } : undefined;
+    return row?.status === "ACTIVE"
+      ? { userId: row.userId, registrationCompleted: true }
+      : undefined;
   });
   f.users.findActiveById = vi.fn(async (id) => {
     const row = [...accountsByTelegram.values()].find((row) => row.userId === id);
-    return row?.status === "ACTIVE" ? { userId: row.userId } : undefined;
+    return row?.status === "ACTIVE"
+      ? { userId: row.userId, registrationCompleted: true }
+      : undefined;
   });
   const accounts = {
     ...accountCreationService({ repository, newUserId: randomUUID, newHandleSuffix: () => 65022 }),

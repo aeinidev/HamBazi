@@ -4,6 +4,8 @@ export interface TelegramApp {
   viewportStableHeight?: number;
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  close?(): void;
+  openTelegramLink?(url: string): void;
   ready(): void;
   expand(): void;
   onEvent(name: string, callback: () => void): void;

@@ -10,6 +10,7 @@ export type { BotOnboarding } from "./application/bot-onboarding.js";
 export { createBotInternalHttpModule } from "./infrastructure/bot-http.js";
 export {
   botInternalPaths,
+  botExperiencePaths,
   botInternalOpenApiDocument,
   botAdmissionResultSchema,
   botProcessedSchema,

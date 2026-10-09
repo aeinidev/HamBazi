@@ -1,18 +1,30 @@
 # Phase 18B3 operating-decision worksheet
 
-**Prepared:** 2026-10-04. **Updated:** 2026-10-09 Tehran. **Status:** Temporary owner-only
-Web/Auth/personal Coup are deployed and browser-accepted. **Phase 18B3:** In Progress,
-with user-reported real iPhone acceptance and bounded rollback/availability checks passed. ADR-052/053/054/055 and
-the supplied owner authorization supersede preparation-only restrictions for this
-bounded personal deployment. The ordinary product/Admin/Room paths remain disabled.
-The [current execution checkpoint](staging-execution-plan.md) and
-[exact binding](../../infra/docker/staging/execution-current.json) distinguish
-actual personal acceptance from deferred full-phase evidence.
-No later phase or Telegram setting is authorized.
+> Current staging admits the unchanged owner and one verified ordinary tester
+> under [ADR-058](../adr/058-narrow-staging-regular-test-user.md). See the
+> [current binding](../../infra/docker/staging/staging-test-user-current.json) and
+> [operation/retest instructions](staging-test-user.md). Public admission remains
+> disabled; registration is required and support goes to the original owner.
+> Earlier onboarding/closure/native/rollback evidence below is historical and
+> applies only to its recorded source. Production remains HOLD.
 
-Continue the authorized 18B3 personal scope without routine approval requests;
-actual safety controls and acceptance evidence remain required. No later phase
-starts automatically.
+**Prepared:** 2026-10-04. **Updated:** 2026-10-09 Tehran. **Current result:**
+18B3 and parent 18B Completed for approved owner-only disposable personal staging;
+Phase 19 review Completed with public production release **HOLD**. The owner
+reconfirms successful real iPhone Telegram acceptance. [ADR-056](../adr/056-personal-staging-closure-and-production-hold.md)
+records applicable criteria and scope; no new exception or operating decision.
+ADR-048/050/052/053/054/055 and existing restrictions remain binding. Ordinary
+Admin/Room/catalog/product paths remain disabled. The [current execution checkpoint](staging-execution-plan.md)
+and [exact binding](../../infra/docker/staging/execution-current.json) preserve
+actual tests, failures, native lineage, excluded recovery and production limits.
+
+The current owner-SSH acceptance gate passes exact hashes/freshness/identities,
+current private monitoring/public isolation, six repaired single Web policy headers
+and installed expiry, reusing actual E2E/rollback/outage evidence. It does not
+claim hosted environment protection/publication. Latest supplied owner instructions
+supersede older preparation-only/no-later-phase cadence. Historical tables below
+retain their dates/scopes; this closeout and the plan's Phase 19 matrix define
+current status. No missing input remains for the completed personal scope/review.
 
 The owner has approved portable 18B1/18B2 work and preparation of this worksheet.
 Temporary ParsPack Germany hosting, the existing test VPS, staging domains and
@@ -527,16 +539,16 @@ this worksheet cannot trade them against a latency or availability target.
 
 ## Separate prerequisites and release gates
 
-| Item                                                        | Boundary retained                                                                                                                                                                              |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OD-001 — approved peak CCU, active Matches and commands/sec | Approved MVP: 1,000 concurrent users, 200 active Matches and 50 gameplay commands/sec; 2x stress is 2,000/400/100 under ADR-045.                                                               |
-| OD-003 — session lifecycle                                  | Already resolved by ADR-014; preserve it. This worksheet chooses no replacement session strategy.                                                                                              |
-| OD-004 — reclaim after Bot takeover                         | Existing MVP behavior stays unchanged; no reclaim decision is made here.                                                                                                                       |
-| OD-005 — final retention/moderation/age/privacy             | Separate owner policy; temporary chat/statistics baselines do not resolve it. Coordinate backup/audit retention without silently choosing product retention.                                   |
-| OD-008 — Coup rights                                        | Separate Product/Legal public-release decision; no clearance is supplied here.                                                                                                                 |
-| Phase 7C — secured live game configuration                  | Pending; implement/verify the separately approved controls and gameplay readiness before live activation.                                                                                      |
-| Phase 17C — capacity/reconnect/soak                         | Completed for MVP under ADR-048: mandatory local correctness/recovery gates pass; documented performance exceptions and strict measurement/optimization/staging/two-hour soak remain deferred. |
-| Phase 19 — final readiness review                           | Blocked / hold: independent staging/activation/operating/privacy/rights evidence is absent; this worksheet supplies no production launch approval.                                             |
+| Item                                                        | Boundary retained                                                                                                                                                                               |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OD-001 — approved peak CCU, active Matches and commands/sec | Approved MVP: 1,000 concurrent users, 200 active Matches and 50 gameplay commands/sec; 2x stress is 2,000/400/100 under ADR-045.                                                                |
+| OD-003 — session lifecycle                                  | Already resolved by ADR-014; preserve it. This worksheet chooses no replacement session strategy.                                                                                               |
+| OD-004 — reclaim after Bot takeover                         | Existing MVP behavior stays unchanged; no reclaim decision is made here.                                                                                                                        |
+| OD-005 — final retention/moderation/age/privacy             | Separate owner policy; temporary chat/statistics baselines do not resolve it. Coordinate backup/audit retention without silently choosing product retention.                                    |
+| OD-008 — Coup rights                                        | Separate Product/Legal public-release decision; no clearance is supplied here.                                                                                                                  |
+| Phase 7C — secured live game configuration                  | Pending; implement/verify the separately approved controls and gameplay readiness before live activation.                                                                                       |
+| Phase 17C — capacity/reconnect/soak                         | Completed for MVP under ADR-048: mandatory local correctness/recovery gates pass; documented performance exceptions and strict measurement/optimization/staging/two-hour soak remain deferred.  |
+| Phase 19 — final readiness review                           | Completed review under ADR-056; public launch HOLD. Current personal staging evidence passes; missing ordinary activation/production/privacy/rights evidence is explicitly Blocked in the plan. |
 
 ## Authorization record
 
@@ -589,6 +601,4 @@ acknowledged two-second snapshots work. Telegram Web frames stay blocked, and on
 WebKit permission-policy introspection case is skipped, not passed.
 
 These are implementation/evidence limits, not unanswered owner proposals.
-**18B3 remains In Progress**; no Phase 19, production, paid resource, destructive
-operation or Telegram setting is started. Next operating action: refresh exact
-scan evidence before the normal expiry. See the plan for each deferred consequence.
+**18B3 is Completed for the approved personal scope; Phase 19 review is Completed, public release HOLD.** The owner-protected acceptance gate and exact single-header ingress prerequisite pass. Broader publication/rotation/activation/recovery/performance limits stay unperformed; no production, paid resource, destructive operation or Telegram setting is authorized. Refresh exact scan evidence before normal expiry or let containment run. See ADR-056 and the plan for each production hold.

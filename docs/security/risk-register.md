@@ -1,6 +1,6 @@
 # Security risk register — Phase 17A
 
-Date: 2026-10-07 (MVP acceptance review; original scan evidence remains dated). No Critical/High vulnerability is accepted or suppressed.
+Date: 2026-10-09 (Phase 19 scoped review; original evidence remains dated). No Critical/High vulnerability is accepted or suppressed.
 “Closed locally” means the cited candidate checks passed, not that production is
 safe. Review remaining items at each owning phase and before public release.
 [Threat model](threat-model.md) · [scan policy](scanning.md).
@@ -86,3 +86,34 @@ and the configured HTTPS proxy passed the same hash/signature/digest gates. Full
 other platforms/builders, image signatures and production deployment remain
 unproven. 17A1/17A2 and the owner-resumed 17A3 have local evidence; parent 17A is
 complete locally with the external risks and 7C activation gate retained.
+
+## Phase 19 residual release holds
+
+[ADR-056](../adr/056-personal-staging-closure-and-production-hold.md) closes applicable
+personal 18B3 and completes the final review, with **public release HOLD**.
+A fresh full-lockfile audit and reachable-history/current-file secret scan have
+zero findings. Exact deployed eight-image scans retain zero High/Critical/Unknown
+and six allowed Moderate zlib findings; freshness is validated, not extended.
+Actual native acceptance is user-reported and preserves its original release.
+The new owner-SSH gate discovered duplicate Web security headers; reviewed ingress
+now emits each complete policy once. Actual parse/reload/single-header probes pass,
+with the initial failed immediate probe/rollback and bounded settlement preserved.
+No app image, rule, credential, schema or dependency is changed in this closeout.
+
+| Hold / consequence                                         | Current scoped disposition                                                                                                                          | Smallest action before broader/public use                                                                                                                  |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SR-006: unaudited ordinary availability/admin mutations    | Ordinary Admin/catalog/Room/multiplayer disabled; personal mode separately authorized                                                               | Supply operator identity/MFA/role/private access/audit inputs; implement and verify 7C owner-port controls. Never activate via SQL/player/Bot authority.   |
+| Main Room invitation and full live product                 | Main personal launch accepted; named-app helper/schema and native invitation/join evidence missing                                                  | Implement additive reviewed Main-link contract; run native invite/join and ordinary full-loop staged E2E after 7C.                                         |
+| SR-007/008: public safety/privacy and Coup rights          | Temporary ADR-029/030 and provisional rules do not resolve OD-005/008                                                                               | Owner/legal records final retention/report/mute/age and name/rules/assets clearance before beta/public release.                                            |
+| ADR-050 recovery exception ends with broader/real-data use | Personal backups/PITR/offsite/restore/RPO/RTO excluded, unperformed, never passed; all synthetic data may be lost                                   | Resolve production OD-006 and perform actual isolated/offsite restore against targets before adding real data/testers.                                     |
+| SR-009: workload/reconnect/soak/operating SLO              | MVP mandatory correctness passed; large failures and original targets retained, production unproven                                                 | Decide final production target/SLOs; validate normal/2x, reconnect storm, offered-load faults, full receipts and ≥2-hour soak.                             |
+| SR-012: hosted protection/publication/provenance           | Local CI and owner-SSH staged gate pass; no hosted/registry authority or acceptance                                                                 | Obtain separate publication/admin authority; verify hosted required checks/environment protection and immutable provenance.                                |
+| Full-authority rotation and broader failure recovery       | Separate current credentials/trust pass; full rotation, queue-loss/provider failover and automatic reboot recovery unperformed                      | Rehearse approved key overlap/revocation, credential/TLS rotation, queue reconstruction/provider recovery on authorized target; preserve old pins/history. |
+| Moderate zlib and advisory expiry                          | One allowed Moderate per app/data image; no finding suppression or fix claim                                                                        | Remediate through normal compatible image process; refresh exact scans before Oct 9 22:35:21 Tehran or let installed maintenance/app-stop contain traffic. |
+| Personal delivery/framing/monitoring limits                | Pending wake-ups, acknowledged two-second snapshots; Telegram Web frames blocked; manual single-owner observation; one WebKit introspection skipped | Implement/verify any broader fanout/frame/monitoring scope separately before relying on it. Native success does not certify these paths.                   |
+
+None is a missing input for recording this completed review or the accepted
+personal scope. They are concrete public-release limitations with defined next
+actions, not passed tests or silently approved decisions. Existing paid/destructive/
+public/Telegram restrictions remain. Graphics/theme work can follow the completed
+review; public rights clearance and launch gates remain independent.

@@ -2,6 +2,7 @@ import type { UserIdentityPort } from "../../users/index.js";
 
 export interface OwnerAdmission {
   telegramId(): Promise<string | undefined>;
+  admittedTelegramIds(): Promise<readonly string[]>;
   allowsTelegramId(id: string): Promise<boolean>;
   allowsUserId(id: string): Promise<boolean>;
 }
@@ -9,6 +10,7 @@ export interface OwnerAdmission {
 /** Auth owns admission. Storage failures, policy removal and unknown users deny. */
 export function ownerAdmissionPolicy(deps: {
   readOwner(): Promise<string | undefined>;
+  readTestUser?: () => Promise<string | undefined>;
   users?: UserIdentityPort;
 }): OwnerAdmission {
   async function telegramId() {
@@ -18,18 +20,33 @@ export function ownerAdmissionPolicy(deps: {
       return undefined;
     }
   }
+  async function admittedTelegramIds() {
+    const owner = await telegramId();
+    if (!owner) return [];
+    let test: string | undefined;
+    try {
+      test = await deps.readTestUser?.();
+    } catch {
+      /* A missing exception denies only the tester. */
+    }
+    if ((await telegramId()) !== owner) return [];
+    return test && test !== owner ? [owner, test] : [owner];
+  }
   return Object.freeze({
     telegramId,
+    admittedTelegramIds,
     async allowsTelegramId(id: string) {
-      const current = await telegramId();
-      return current !== undefined && current === id;
+      return (await admittedTelegramIds()).includes(id);
     },
     async allowsUserId(id: string) {
       try {
-        const current = await telegramId();
-        if (!current || !deps.users) return false;
-        const user = await deps.users.findActiveByTelegramId(current);
-        return user?.userId === id && (await telegramId()) === current;
+        if (!deps.users) return false;
+        for (const telegramId of await admittedTelegramIds()) {
+          const user = await deps.users.findActiveByTelegramId(telegramId);
+          if (user?.userId === id && (await admittedTelegramIds()).includes(telegramId))
+            return true;
+        }
+        return false;
       } catch {
         return false;
       }

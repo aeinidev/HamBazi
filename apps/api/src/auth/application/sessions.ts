@@ -73,7 +73,10 @@ export function sessionService(deps: {
         )
           return denied();
         const user = await users.findActiveByTelegramId(verified.identity.telegramUserId);
-        if (!user || !uuid.safeParse(user.userId).success) return denied();
+        if (!user) return createErrorEnvelope("REGISTRATION_REQUIRED");
+        if (!uuid.safeParse(user.userId).success) return denied();
+        if (user.registrationCompleted !== true)
+          return createErrorEnvelope("REGISTRATION_REQUIRED");
         const issuedAt = time().seconds;
         if (issuedAt < start.seconds) return failed();
         const expiresAt = issuedAt + lifetimeSeconds;
@@ -106,6 +109,7 @@ export function sessionService(deps: {
         if (
           end.seconds < start.seconds ||
           !eligible ||
+          eligible.registrationCompleted !== true ||
           eligible.userId !== record.userId ||
           !current ||
           !matches(current, record) ||
@@ -129,6 +133,8 @@ export function sessionService(deps: {
           return denied();
         const user = await users.findActiveById(claims.userId);
         if (!user || user.userId !== claims.userId) return denied();
+        if (user.registrationCompleted !== true)
+          return createErrorEnvelope("REGISTRATION_REQUIRED");
         const row = await repository.find(claims.id);
         const now = time().seconds;
         if (now < start || !row || !matches(row, claims) || !isLiveSession(row, now))

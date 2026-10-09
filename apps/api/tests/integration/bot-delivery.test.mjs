@@ -4,7 +4,11 @@ import { request } from "node:https";
 import { beforeAll, afterAll, afterEach, describe, it, expect, vi } from "vitest";
 import { createDatabase } from "@hambazi/database";
 import { createBotOnboarding, createRedisAuthRateLimiter } from "../../src/auth/index.js";
-import { createAccountCreationPort, createUserIdentityPort } from "../../src/users/index.js";
+import {
+  createAccountCreationPort,
+  createUserIdentityPort,
+  createRegistrationPort,
+} from "../../src/users/index.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { internalHarness, testCertificate, bearer } from "../http/bot-internal-fixture.js";
 // Test-only cross-process composition uses built Bot artifacts; no production API→Bot edge.
@@ -68,6 +72,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         database,
         accounts: createAccountCreationPort(database),
         users: createUserIdentityPort(database),
+        registration: createRegistrationPort(database, clock),
         clock,
         leaseMs: 15000,
       });
@@ -146,7 +151,7 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         update_id: ++sequence,
         message: {
           message_id: sequence,
-          from: { id: identity, is_bot: false },
+          from: { id: identity, is_bot: false, first_name: "Mehdi" },
           chat: { id: identity, type: "private" },
           text,
           ...(reply
@@ -166,11 +171,12 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
           .execute((db) => db.user.count({ where: { telegramUserId: BigInt(identity) } }));
       return { clock, rate, sender, outputs, instance, update, count };
     }
-    it("creates through ForceReply correlation, suppresses duplicates and survives Bot restart", async () => {
+    it("registers only on explicit intent, suppresses duplicates and survives Bot restart", async () => {
       const f = await setup();
       const bot = await f.instance();
-      expect(await bot.post(f.update("/create"))).toBe(200);
-      const name = f.update("  Mehdi  ", 900);
+      expect(await bot.post(f.update("/start"))).toBe(200);
+      expect(await f.count()).toBe(0);
+      const name = f.update("ایجاد حساب کاربری");
       expect(await bot.post(name)).toBe(200);
       expect(await f.count()).toBe(1);
       expect(f.sender.send).toHaveBeenCalledTimes(2);
@@ -195,8 +201,8 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
     it("recovers ambiguous send/ack interruption after restart without repeating account effects", async () => {
       const f = await setup();
       const good = await f.instance();
-      expect(await good.post(f.update("/create"))).toBe(200);
-      const name = f.update("Mehdi", 900);
+      expect(await good.post(f.update("/start"))).toBe(200);
+      const name = f.update("ایجاد حساب کاربری");
       const interrupted = await f.instance(true);
       expect(await interrupted.post(name)).toBe(503);
       expect(await f.count()).toBe(1);

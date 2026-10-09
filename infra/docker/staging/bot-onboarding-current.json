@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "purpose": "owner-only-bot-onboarding-deployment-binding",
+  "checkedAt": "2026-10-09T13:59:00.833084+00:00",
+  "status": "deployed-text-only-start-native-introduction-verified-description-picture-owner-step-pending",
+  "target": {
+    "ipv4": "185.110.191.104",
+    "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
+    "platform": "linux/amd64"
+  },
+  "botUsername": "Hambazidev_bot",
+  "miniAppUrl": "https://staging.hambazi.top/",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-onboarding-text-start-20261009",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009",
+  "application": {
+    "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "bde6966ac79526cb381ff43b673d6a93c41920e0896ad97ddcb2b30911aaf66c",
+    "buildInputSha256": "7520b22604ecd041ddc79bdd19918346e2084497a4f9453d895415a6ca7653b9",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:83caa80d2c24be7d9c2a5c15b515daca79575bcc-7520b22604ecd041@sha256:3269d6ded6dd790f6f6c7470a73bfa0cbd5adb0e5c696242437c34339e732c23"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:83caa80d2c24be7d9c2a5c15b515daca79575bcc-7520b22604ecd041@sha256:997423ef09defcfead2999f8cdef2ed9c848023a40018650d286d57e6d762892"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:83caa80d2c24be7d9c2a5c15b515daca79575bcc-7520b22604ecd041@sha256:5c7d9613f79fc55a24629296144cea92b36707655c2eeb7f47459d8001b0e883"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:83caa80d2c24be7d9c2a5c15b515daca79575bcc-7520b22604ecd041@sha256:07851080b5c14f7f0ed9a2012eeedcdea3d3a8dd67fb91c813bf493cd212d9f9"
+      }
+    ]
+  },
+  "composeSha256": "c204e417061fe26a35f6ecfb1807b6eb0d283a1233e130861728e3dbcb7ad016",
+  "inventorySha256": "e8db44f0a14b7a50d8c8848845912a754fcb3e9ccff82da12d949446001c2dde",
+  "scanSha256": "46099907727c2a568daa30059401f2ecd57bf91af8d09250ee69f4e73bd9f545",
+  "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
+  "migrations": 15,
+  "previousMigrationsUnchanged": true,
+  "contractBaselinesUnchanged": 12,
+  "registrationBackfilled": false,
+  "ownerOnlyAdmissionPreserved": true,
+  "supportDestination": "same-privately-verified-staging-owner",
+  "applicationsHealthy": ["api", "bot", "worker", "web"],
+  "telegram": {
+    "defaultAndOwnerMenuVerified": true,
+    "defaultAndPersianNativeDescriptionVerified": true,
+    "startReply": "برای ادامه، از دکمه‌های پایین استفاده کن.",
+    "initialAndRepeatedStartPhotoCalls": 0,
+    "webhookConfigured": true,
+    "pendingUpdates": 0,
+    "currentWebhookErrorObserved": false,
+    "historicalWebhookError": {
+      "epoch": 1791551047,
+      "httpStatus": 503,
+      "scope": "before-current-replacement; queue-empty"
+    },
+    "initialRealStartDelivered": true,
+    "initialExplicitRegistrationDelivered": true,
+    "backlogDropped": false,
+    "initialSupportNativeDeliveryAcceptedByOwner": true,
+    "focusedLayoutNativeAcceptance": "pending-description-picture-and-text-start-confirmation"
+  },
+  "securityScan": {
+    "normalMaximumAgeHours": 24,
+    "exactImagesPassed": 8,
+    "database": {
+      "updatedAt": "2026-10-08T19:05:21.721409049Z",
+      "downloadedAt": "2026-10-08T22:19:19.038829328Z"
+    },
+    "evidenceExpiresAtUTC": "2026-10-09T19:05:21.721409+00:00",
+    "expiryAsiaTehran": "2026-10-09 22:35:21",
+    "expiryContainmentTimerEnabled": true,
+    "freshnessExceptionUsed": false
+  },
+  "verification": {
+    "rootCheck": "passed after focused correction",
+    "apiUnitTests": 928,
+    "botUnitTests": 62,
+    "webUnitTests": 69,
+    "infraTests": 125,
+    "infraPreExistingSkippedTests": 1,
+    "realPostgresRedisIntegration": "passed",
+    "realProductionE2E": {
+      "passed": 6,
+      "scope": "isolated services, create/join/start/play/finish plus direct registration gate; native Telegram not simulated as acceptance"
+    },
+    "browserTests": 28,
+    "botHttpsTransportTests": 39,
+    "packagedSmokeChecks": 44,
+    "packagedSmokeBrowserCases": 2,
+    "finalPublicIsolationChecks": 6,
+    "packagedFocusedTextStart": "passed on actual deployed compiled sender with isolated transport; correct initial/repeated keyboards; zero photo calls",
+    "reusedLivePublicAuthChecks": 10,
+    "reusedRegisteredOwnerBrowser": "passed with actual public bundled SDK/API and personal-v1 socket; no game started"
+  },
+  "evidenceReuse": {
+    "initialDomainIntegrationAndProductionE2ESource": "6e63149142d49718f3673f7337f045a3859978b8",
+    "livePublicAuthAndRegisteredBrowserSource": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+    "unchangedGameUserRegistrationSessionAndSupportCodeReviewed": true,
+    "changedBotPresentationAndNativeDescriptionRetested": true,
+    "initialNativeFunctionalFlowOwnerReportSource": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+    "focusedDescriptionPictureNativeAcceptanceReused": false,
+    "oldExactPairRollbackAcceptanceReused": false
+  },
+  "operatorRunner": {
+    "directory": "/opt/hambazi-staging/private/runner-6e63149",
+    "sourceCommit": "6e63149142d49718f3673f7337f045a3859978b8",
+    "scope": "unchanged generic preparation/scan/startup/containment tools; menu configuration runs inside final Bot image"
+  },
+  "previousExecutionBinding": "infra/docker/staging/execution-current.json",
+  "nativeOwnerAcceptance": {
+    "passed": false,
+    "status": "focused-layout-pending-owner-BotFather-upload-and-native-confirmation",
+    "preservedFunctionalFlowsAccepted": true,
+    "initialAcceptedSourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+    "directlyObservedByAgent": false
+  },
+  "rollbackAcceptance": {
+    "passed": false,
+    "scope": "previous exact pair acceptance is historical; older pre-registration code must stay under maintenance if restored"
+  },
+  "productionReleaseApproved": false,
+  "productionReleaseRecommendation": "HOLD",
+  "privateEvidence": {
+    "images.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/images.json",
+      "sha256": "e8db44f0a14b7a50d8c8848845912a754fcb3e9ccff82da12d949446001c2dde",
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "images.json.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/images.json.scan.json",
+      "sha256": "46099907727c2a568daa30059401f2ecd57bf91af8d09250ee69f4e73bd9f545",
+      "ok": true,
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "components.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/components.scan.json",
+      "sha256": "b7f09d2c4b209f45cd3c3d44bb0dc9c507a94df2c7ce86723341163aec779906",
+      "scannedAt": "2026-10-09T13:40:48.424Z",
+      "ok": true
+    },
+    "data.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/data.scan.json",
+      "sha256": "f269e01352855a7dab144d53dba240963dbe3a90f54fe7aa48c8e9d0bcb09348",
+      "scannedAt": "2026-10-09T13:40:48.692Z",
+      "ok": true
+    },
+    "migration.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/migration.json",
+      "sha256": "06235a15dac299c372827470c5950d75f64abad5d24f1742ea7f0938c44d070e",
+      "checkedAt": "2026-10-09T13:43:03.031751+00:00",
+      "passed": true,
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "initial-migration.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/initial-migration.json",
+      "sha256": "86ee72712d0bf5976ae0c9afa17e4d5fa11b7f7e728c52400f21b8f7d325f568",
+      "checkedAt": "2026-10-09T12:31:34.113207+00:00",
+      "passed": true,
+      "sourceCommit": "6e63149142d49718f3673f7337f045a3859978b8"
+    },
+    "startup.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/startup.json",
+      "sha256": "e12f5a8f2fecae614e606d3c8c09f079af1a645049da8134fbff09d18af60542",
+      "checkedAt": "2026-10-09T13:44:30.026Z",
+      "passed": true,
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "traffic-open.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/traffic-open.json",
+      "sha256": "e437c309d9c594232a2b76b86b40005b4186042f0af3fbc75ee5196b03208c64",
+      "checkedAt": "2026-10-09T13:45:45.004Z",
+      "passed": true,
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "operational.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/operational.json",
+      "sha256": "2d8a82df0664c6ed3b2962723fa12c5f527a68a5f07e9e54bdb469bb6c7228d1",
+      "checkedAt": "2026-10-09T13:52:57.294108+00:00",
+      "passed": true,
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "preparation.json": {
+      "privatePath": "/opt/hambazi-staging/private/prepared-onboarding-text-start-20261009/preparation.json",
+      "sha256": "b9dab5e1f1ba0bc863ec278e571bf508ecef4a0c5cee1da1afdcd0a4ea8f8ce5",
+      "sourceCommit": "83caa80d2c24be7d9c2a5c15b515daca79575bcc"
+    },
+    "compose.yaml": {
+      "privatePath": "/opt/hambazi-staging/private/prepared-onboarding-text-start-20261009/compose.yaml",
+      "sha256": "c204e417061fe26a35f6ecfb1807b6eb0d283a1233e130861728e3dbcb7ad016"
+    },
+    "webhook.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-20261009/webhook.json",
+      "sha256": "707551a85019020111e0bb520d2a27a0b853a474ba443ccfa94c04467648648e",
+      "checkedAt": "2026-10-09T12:43:48.809360+00:00",
+      "passed": true
+    },
+    "receiving.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-20261009/receiving.json",
+      "sha256": "4fab1897bce37a2f6919838af99e1d3d9b0b3e9831f4e9b7c9f0dd4739dffabf",
+      "checkedAt": "2026-10-09T12:50:42.929586+00:00"
+    },
+    "local/public-final.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/public-final.json",
+      "sha256": "bf1fff5db6a837e7483326ed41a59598094d37a482657bf444e2428e83ea97df",
+      "checkedAt": "2026-10-09T13:02:19.329Z",
+      "passed": true,
+      "sourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+      "scope": "actual public HTTPS API/Web/Bot and unauthenticated WSS; signed synthetic protocol inputs"
+    },
+    "local/browser-registered-final.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/browser-registered-final.json",
+      "sha256": "633ee6fa71e9df88e83f764e3951a8d0337d7dc28c4f3b179b5315e7ffeab759",
+      "checkedAt": "2026-10-09T13:01:00.759Z",
+      "passed": true,
+      "sourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+      "scope": "actual public Web/API/bundled SDK; synthetic signed owner on Chromium"
+    },
+    "local/browser-live.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/browser-live.json",
+      "sha256": "71e75c9b42473687ead20554d71e7cf4a7c78e44a951fc40b9692530940ed314",
+      "checkedAt": "2026-10-09T12:37:17.964Z",
+      "passed": true,
+      "sourceCommit": "6e63149142d49718f3673f7337f045a3859978b8",
+      "scope": "actual public Web/API/bundled SDK; synthetic signed owner on Chromium"
+    },
+    "local/receiving.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/receiving.json",
+      "sha256": "846692d24bda2ae30b0ae3b2ca2f2cc49f91e5ca48a59681e5ced762eeaa750e",
+      "checkedAt": "2026-10-09T12:50:42.929586+00:00",
+      "passed": true,
+      "sourceCommit": null,
+      "scope": "real webhook receipts since configuration; aggregate metadata only"
+    },
+    "previous-onboarding/webhook.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-20261009/webhook.json",
+      "sha256": "707551a85019020111e0bb520d2a27a0b853a474ba443ccfa94c04467648648e",
+      "checkedAt": "2026-10-09T12:43:48.809360+00:00",
+      "passed": true
+    },
+    "previous-onboarding/receiving.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-20261009/receiving.json",
+      "sha256": "4fab1897bce37a2f6919838af99e1d3d9b0b3e9831f4e9b7c9f0dd4739dffabf",
+      "checkedAt": "2026-10-09T12:50:42.929586+00:00"
+    },
+    "owner-iphone-reported.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/owner-iphone-reported.json",
+      "sha256": "a0e4f3fcd277a3ea81ed55449c6d7801ab9cdf6861d7b76c12f2531c5684c115",
+      "recordedAtUTC": "2026-10-09T13:21:31.765365+00:00",
+      "passed": true,
+      "sourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba"
+    },
+    "native-description.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/onboarding-text-start-20261009/native-description.json",
+      "sha256": "817d9038b5f3c36b238a1a49f10633fe18d558276c2b8cef797d3c6470a94d6e",
+      "checkedAt": "2026-10-09T13:35:30.691944+00:00",
+      "passed": true
+    },
+    "local/runtime-text-start.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/runtime-text-start.json",
+      "sha256": "bda1579c2136ce0d97a976272989e566a0577049d6934c80a1eb479017767a1f",
+      "passed": true
+    },
+    "local/owner-iphone-reported.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/owner-iphone-reported.json",
+      "sha256": "a0e4f3fcd277a3ea81ed55449c6d7801ab9cdf6861d7b76c12f2531c5684c115",
+      "passed": true
+    },
+    "local/native-description.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/native-description.json",
+      "sha256": "817d9038b5f3c36b238a1a49f10633fe18d558276c2b8cef797d3c6470a94d6e",
+      "passed": true
+    },
+    "local/secrets-text-start.scan.json": {
+      "privatePath": "/home/mehdi/.cache/hambazi-onboarding-20261009/secrets-text-start.scan.json",
+      "sha256": "fc9b498bbcaebfc5eaf55823ebd45476caadc7e78415da9e164e0d1bec4736d1",
+      "passed": true
+    }
+  },
+  "previousOnboardingApplication": {
+    "sourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "d4562f5c11f788d8d997c82f91b343877f1056831de0d6351c9501cfbb669a4b",
+    "buildInputSha256": "93e6654a7253098190044b512c981808bf1fe760eb021b557bdc3816152fd81e",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:370bec56d46938e3722eea80a756bc4fd52e33ba-93e6654a72530981@sha256:5fb137336bf92291294144aee63497a33b6af0a067e7b78cc6d128484a033220"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:370bec56d46938e3722eea80a756bc4fd52e33ba-93e6654a72530981@sha256:079d5758844bf9e3d42f230f66f2f8e61047127b5aaa564923ff3a49a92512c0"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:370bec56d46938e3722eea80a756bc4fd52e33ba-93e6654a72530981@sha256:8f818ae5b63fa717dcdd8fe557118b233f020423726f4b4a73193a4d7d6ada98"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:370bec56d46938e3722eea80a756bc4fd52e33ba-93e6654a72530981@sha256:1f36e4f97bbb33ad956957fe43c974315910df07a7089b744ae503136de8f0a1"
+      }
+    ]
+  },
+  "descriptionPicture": {
+    "status": "pending-owner-BotFather-step",
+    "asset": "apps/bot/assets/description-picture.jpg",
+    "sha256": "af8b7827bff311212928f6e64bf2f9c40c5aecbd98e81754b2f95db16c26693c",
+    "bytes": 456083,
+    "setting": "BotFather /mybots > Hambazidev_bot > Edit Bot > Edit Description Picture",
+    "officialReference": "https://core.telegram.org/bots/features#about-text-description-and-profile-media"
+  },
+  "initialNativeFunctionalAcceptance": {
+    "schemaVersion": 1,
+    "recordedAtUTC": "2026-10-09T13:21:31.765365+00:00",
+    "passed": true,
+    "evidenceKind": "user-reported-real-native-acceptance",
+    "directlyObservedByAgent": false,
+    "device": "iPhone",
+    "client": "Telegram",
+    "clientVersion": "not-provided",
+    "sourceCommit": "370bec56d46938e3722eea80a756bc4fd52e33ba",
+    "scope": "user reports requested functional tests passed: registered start keyboard, profile, Open, support delivery, cancel and unsupported media",
+    "layoutCorrectionRequested": "native Description Picture before Start; text-only initial and repeated /start",
+    "newLayoutAccepted": false
+  },
+  "historicalBindingOnly": true,
+  "supersededBy": "infra/docker/staging/staging-test-user-current.json",
+  "supersededAtUTC": "2026-10-09T15:05:17.152376+00:00"
+}

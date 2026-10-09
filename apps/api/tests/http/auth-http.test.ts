@@ -61,6 +61,37 @@ async function setup(
   return { ...f, ...http, output, ip, identity, issue, authenticate, admissionIp, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it("exposes registration denial only on the additive entry and issues no credential", async () => {
+    const f = await setup();
+    f.issue.mockResolvedValue(createErrorEnvelope("REGISTRATION_REQUIRED"));
+    const response = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSession,
+      payload: f.payload,
+    });
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({ ok: false, error: { code: "REGISTRATION_REQUIRED" } });
+    expect(response.body).not.toContain("accessToken");
+    const forbidden = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSession,
+      headers: { origin: "https://unapproved.example" },
+      payload: f.payload,
+    });
+    expect(forbidden.statusCode).toBe(403);
+    expect(forbidden.json()).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const schema =
+      authOpenApiDocument().paths[authPaths.registeredSession].post.responses["403"].content[
+        "application/json"
+      ].schema;
+    const codes = JSON.parse(JSON.stringify(schema)).properties.error.properties.code.enum;
+    for (const denial of [response, forbidden]) expect(codes).toContain(denial.json().error.code);
+    expect((await f.post()).json()).toMatchObject({
+      ok: false,
+      error: { code: "UNAUTHENTICATED" },
+    });
+    expect((await f.post()).statusCode).toBe(401);
+  });
   it("does not expose operator mutations to unauthenticated, player or service-shaped credentials", async () => {
     const f = await setup();
     const token = (await f.post()).json().accessToken as string;
@@ -598,7 +629,7 @@ describe("Nest/Fastify authentication boundary", () => {
   it("generates a versioned contract from runtime DTO schemas", () => {
     const doc = authOpenApiDocument();
     expect(doc.openapi).toBe("3.1.0");
-    expect(Object.keys(doc.paths)).toEqual(Object.values(authPaths));
+    expect(Object.keys(doc.paths).sort()).toEqual(Object.values(authPaths).sort());
     expect(
       doc.paths[authPaths.issue]?.post.requestBody.content["application/json"].schema
         .additionalProperties,

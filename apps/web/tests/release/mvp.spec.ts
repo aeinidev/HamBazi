@@ -27,7 +27,10 @@ function observe(page: Page) {
     snapshots: 0,
   };
   page.on("response", (response) => {
-    if (response.url().endsWith("/v1/auth/telegram-mini-app") && response.status() === 200)
+    if (
+      response.url().endsWith("/v1/auth/telegram-mini-app/registered-session") &&
+      response.status() === 200
+    )
       void response
         .json()
         .then((value) => {
@@ -105,10 +108,8 @@ async function launch(page: Page, person: Actor) {
   await page.goto("/");
 }
 async function account(page: Page, person: Actor) {
+  await command(page.request, "/register", { telegramUserId: person.telegramUserId });
   await launch(page, person);
-  await page.getByRole("button", { name: "New here? Create an account" }).click();
-  await page.getByLabel("Display name").fill(person.displayName);
-  await page.getByRole("button", { name: "Create account & continue" }).click();
   await expect(page.getByText("Connected", { exact: true })).toBeVisible();
 }
 async function pair(browser: Browser, request: APIRequestContext) {
@@ -360,21 +361,37 @@ test("Account → Find → real Coup with offline catch-up → Finish → Stats"
   }
 });
 
-test("invalid signed Telegram launch cannot create an account", async ({ page, request }) => {
+test("invalid signed Telegram launch cannot issue a session or create an account", async ({
+  page,
+  request,
+}) => {
   const person = await actor(request);
   const fields = new URLSearchParams(person.initData);
   fields.set("user", JSON.stringify({ id: person.telegramUserId + 1, first_name: "Forged" }));
-  await launch(page, { ...person, initData: fields.toString() });
-  await page.getByRole("button", { name: "New here? Create an account" }).click();
-  await page.getByLabel("Display name").fill(person.displayName);
   const result = page.waitForResponse((response) =>
-    response.url().endsWith("/v1/auth/telegram-mini-app/account"),
+    response.url().endsWith("/v1/auth/telegram-mini-app/registered-session"),
   );
-  await page.getByRole("button", { name: "Create account & continue" }).click();
+  await launch(page, { ...person, initData: fields.toString() });
   expect((await result).status()).toBe(401);
   await expect(page.getByRole("alert")).toBeVisible();
   const saved = await (await request.get(`${control}/audit/actor/${person.telegramUserId}`)).json();
   expect(saved.userId).toBeNull();
+});
+
+test("direct production entry requires durable registration before gameplay", async ({
+  page,
+  request,
+}) => {
+  const person = await actor(request);
+  await launch(page, person);
+  await expect(
+    page.getByText("برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+  const saved = await (await request.get(`${control}/audit/actor/${person.telegramUserId}`)).json();
+  expect(saved.userId).toBeNull();
+  await account(page, person);
+  await expect(page.getByRole("heading", { name: "Games", exact: true })).toBeVisible();
 });
 
 test("lost create response retries one intent; node drain denies mutation and restart preserves room", async ({

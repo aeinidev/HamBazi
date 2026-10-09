@@ -7,11 +7,14 @@ import type { ProfileRate } from "./profile-rate.js";
 import { profileResponseSchema, profileAckSchema } from "./profile-contract.js";
 export interface ProfileHttpDependencies {
   profile: ProfilePort;
-  authenticate(
-    token: string,
-  ): Promise<
+  authenticate(token: string): Promise<
     | { ok: true; userId: string }
-    | { ok: false; error: { code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" } }
+    | {
+        ok: false;
+        error: {
+          code: "UNAUTHENTICATED" | "REGISTRATION_REQUIRED" | "INVALID_INPUT" | "INTERNAL_ERROR";
+        };
+      }
   >;
   rate: ProfileRate;
   degraded(requestId: string, kind: "read" | "write"): void;
@@ -19,19 +22,26 @@ export interface ProfileHttpDependencies {
 export function createProfileHttpModule(deps: ProfileHttpDependencies) {
   function fail(
     reply: FastifyReply,
-    code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" | "PROFILE_CONFLICT",
+    code:
+      | "UNAUTHENTICATED"
+      | "REGISTRATION_REQUIRED"
+      | "INVALID_INPUT"
+      | "INTERNAL_ERROR"
+      | "PROFILE_CONFLICT",
   ) {
     return reply
       .code(
-        code === "UNAUTHENTICATED"
+        code === "REGISTRATION_REQUIRED"
           ? 401
-          : code === "INVALID_INPUT"
-            ? 400
-            : code === "PROFILE_CONFLICT"
-              ? 409
-              : 503,
+          : code === "UNAUTHENTICATED"
+            ? 401
+            : code === "INVALID_INPUT"
+              ? 400
+              : code === "PROFILE_CONFLICT"
+                ? 409
+                : 503,
       )
-      .send(createErrorEnvelope(code));
+      .send(createErrorEnvelope(code === "REGISTRATION_REQUIRED" ? "UNAUTHENTICATED" : code));
   }
   async function identity(req: FastifyRequest, reply: FastifyReply, kind: "read" | "write") {
     let count = 0;

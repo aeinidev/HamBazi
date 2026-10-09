@@ -2,13 +2,18 @@ import { z } from "zod";
 import type { OnboardingUpdate } from "./backend.js";
 const id = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const messageId = z.number().int().positive().max(2147483647);
-const sender = z.object({ id, is_bot: z.boolean() });
+const sender = z.object({
+  id,
+  is_bot: z.boolean(),
+  first_name: z.string().max(256).optional(),
+  last_name: z.string().max(256).optional(),
+});
 const chat = z.object({ id, type: z.literal("private") });
 const message = z.object({
   message_id: messageId,
   from: sender,
   chat,
-  text: z.string().max(4096),
+  text: z.string().max(4096).optional(),
   reply_to_message: z.object({ message_id: messageId, from: sender, chat }).optional(),
   via_bot: z.unknown().optional(),
   forward_origin: z.unknown().optional(),
@@ -21,7 +26,7 @@ export const updateEnvelope = z.object({
 /** Map only original private text messages. Business rules and prompt eligibility remain in Auth. */
 export function mapUpdate(
   input: unknown,
-  botId: string,
+  _botId: string,
   username: string,
 ): OnboardingUpdate | undefined {
   const envelope = updateEnvelope.safeParse(input);
@@ -47,6 +52,7 @@ export function mapUpdate(
     chatType: "private" as const,
     messageId: m.message_id,
   };
+  if (m.text === undefined) return { ...base, action: "MEDIA" };
   const command =
     /^\/(start|create|cancel)(?:@([A-Za-z0-9_]+))?(?:\s+([A-Za-z0-9_-]{1,512}))?$/.exec(m.text);
   if (
@@ -54,22 +60,22 @@ export function mapUpdate(
     (!command[2] || command[2].toLowerCase() === username.toLowerCase()) &&
     (!command[3] || command[1] === "start")
   )
-    return {
-      ...base,
-      action: command[1] === "start" ? "START" : command[1] === "create" ? "CREATE" : "CANCEL",
-    };
+    return command[1] === "create"
+      ? { ...base, action: "REGISTER", displayName: telegramName(m.from) }
+      : { ...base, action: command[1] === "start" ? "START" : "CANCEL" };
   // Reply keyboard labels are intents, never user IDs or account attributes.
-  if (m.text === "Create Account") return { ...base, action: "CREATE" };
-  if (m.text === "Cancel") return { ...base, action: "CANCEL" };
-  const reply = m.reply_to_message;
-  if (
-    m.text.startsWith("/") ||
-    !reply ||
-    !reply.from.is_bot ||
-    String(reply.from.id) !== botId ||
-    reply.chat.id !== m.chat.id ||
-    m.text.length > 256
-  )
-    return;
-  return { ...base, action: "NAME", replyToMessageId: reply.message_id, displayName: m.text };
+  if (m.text === "ایجاد حساب کاربری" || m.text === "Create Account")
+    return { ...base, action: "REGISTER", displayName: telegramName(m.from) };
+  if (m.text === "پروفایل من" || /^\/profile(?:@[A-Za-z0-9_]+)?$/.test(m.text))
+    return { ...base, action: "PROFILE" };
+  if (m.text === "ارتباط با پشتیبان" || m.text === "/support")
+    return { ...base, action: "SUPPORT" };
+  if (m.text === "لغو" || m.text === "Cancel") return { ...base, action: "CANCEL" };
+  if (["Open", "Open HamBazi"].includes(m.text)) return { ...base, action: "NAVIGATION" };
+  if (m.text.startsWith("/")) return { ...base, action: "NAVIGATION" };
+  if (m.text.length === 0) return;
+  return { ...base, action: "TEXT", text: m.text };
+}
+function telegramName(sender: { first_name?: string | undefined; last_name?: string | undefined }) {
+  return [sender.first_name, sender.last_name].filter(Boolean).join(" ").slice(0, 256) || "بازیکن";
 }

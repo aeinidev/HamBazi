@@ -330,6 +330,55 @@ describe("private backend HTTPS client", () => {
       retryAfterSeconds: 7,
     });
   });
+  it("sends initial and repeated starts as text only with the correct bottom keyboard", async () => {
+    const received: { method: string; contentType: string; payload: Record<string, unknown> }[] =
+      [];
+    const origin = await backendServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      req.on("end", () => {
+        received.push({
+          method: req.url!.split("/").at(-1)!,
+          contentType: String(req.headers["content-type"]),
+          payload: JSON.parse(Buffer.concat(chunks).toString("utf8")),
+        });
+        res.setHeader("content-type", "application/json");
+        res.end(
+          JSON.stringify({
+            ok: true,
+            result: { message_id: 901, chat: { id: 100, type: "private" }, date: 1 },
+          }),
+        );
+      });
+    });
+    const agent = new Agent({ ca: tls.cert });
+    closes.push(async () => agent.destroy());
+    const api = new Api(`123:${"a".repeat(32)}`, {
+      apiRoot: origin,
+      baseFetchConfig: { agent },
+      timeoutSeconds: 2,
+    });
+    const sender = createTelegramSender(
+      { token: { reveal: () => "unused" }, miniAppUrl: "https://mini.example", timeoutMs: 2000 },
+      api,
+    );
+    for (const reply of ["CREATE_ACCOUNT", "WELCOME_REGISTERED", "WELCOME_REGISTERED"] as const)
+      expect(await sender.send({ ...delivery, reply }, AbortSignal.timeout(3000))).toBe(901);
+    for (const r of received) {
+      expect(r.method).toBe("sendMessage");
+      expect(r.contentType).toContain("application/json");
+      expect(r.payload.text).toBe("برای ادامه، از دکمه‌های پایین استفاده کن.");
+      expect(r.payload).not.toHaveProperty("photo");
+      expect(r.payload).not.toHaveProperty("caption");
+    }
+    expect(received[0]!.payload.reply_markup).toMatchObject({
+      keyboard: [[{ text: "ایجاد حساب کاربری", style: "primary" }]],
+    });
+    for (const r of received.slice(1))
+      expect(r.payload.reply_markup).toMatchObject({
+        keyboard: [[{ text: "پروفایل من" }], [{ text: "ارتباط با پشتیبان" }]],
+      });
+  });
   it("starts configured TLS runtime, probes only admission, and closes cleanly", async () => {
     await withCertificate(async (cert, files) => {
       const requests: string[] = [];

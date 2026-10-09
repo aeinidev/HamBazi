@@ -280,6 +280,7 @@ describe("stable, sanitized errors", () => {
     expect(ERROR_CODES).toEqual([
       "INVALID_INPUT",
       "UNAUTHENTICATED",
+      "REGISTRATION_REQUIRED",
       "FORBIDDEN",
       "NOT_FOUND",
       "RATE_LIMITED",

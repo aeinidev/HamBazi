@@ -1,3 +1,4 @@
+import { botExperienceIntegrationCases } from "./bot-experience-cases.js";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import { createServer } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -17,6 +18,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
   createUserIdentityPort,
+  createRegistrationPort,
   createAccountCreationPort,
   createProfileRate,
   createProfilePort,
@@ -268,6 +270,11 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       const b = await transport(namespace);
       try {
         const creation = accountPayload(7102);
+        // Session eligibility is explicit Bot registration, separate from account HTTP quotas.
+        await createRegistrationPort(admin, { nowMs: () => clock.value }).complete(
+          "7102",
+          "Synthetic",
+        );
         for (let i = 0; i < 6; i++) {
           const account = i % 2 === 0;
           const response = await (account ? a : b).server.inject({
@@ -912,6 +919,7 @@ beforeAll(async () => {
     await admin.forModule("users").execute((client) =>
       client.user.create({
         data: {
+          registrationCompletedAt: new Date(now * 1000),
           id,
           telegramUserId: BigInt(telegramId),
           displayName: "Synthetic",
@@ -934,8 +942,11 @@ async function issue(command = randomUUID(), app = auth) {
 
 describe("Auth and Users ports against PostgreSQL", () => {
   it("maps existing active identity without profile or persistence types", async () => {
-    expect(await users.findActiveByTelegramId("42")).toEqual({ userId });
-    expect(await users.findActiveById(userId)).toEqual({ userId });
+    expect(await users.findActiveByTelegramId("42")).toEqual({
+      userId,
+      registrationCompleted: true,
+    });
+    expect(await users.findActiveById(userId)).toEqual({ userId, registrationCompleted: true });
     expect(await users.findActiveByTelegramId("99")).toBeUndefined();
     expect((await auth.issue(initData(99), randomUUID())).ok).toBe(false);
   });
@@ -1073,3 +1084,5 @@ describe("Auth and Users ports against PostgreSQL", () => {
 accountIntegrationCases(admin);
 botOnboardingIntegrationCases(admin);
 botInternalIntegrationCases(admin);
+
+botExperienceIntegrationCases(admin);

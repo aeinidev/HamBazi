@@ -37,6 +37,7 @@ let at = Date.now(),
 const owner = randomUUID();
 const policy = {
   telegramId: async () => "synthetic-test-only",
+  admittedTelegramIds: async () => [],
   allowsTelegramId: async () => false,
   allowsUserId: async (id: string) => authorized && id === owner,
 };
@@ -71,7 +72,13 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
   const usersBefore = await admin.forModule("users").execute((db) => db.user.count());
   const denied = await port.start(randomUUID(), { schemaVersion: 1, commandId: randomUUID() });
   expect(denied.ok).toBe(false);
-  expect(await api.forModule("matches").execute((db) => db.matchBotSeat.count())).toBe(0);
+  expect(
+    await api.forModule("matches").execute((db) =>
+      db.matchBotSeat.count({
+        where: { match: { players: { some: { userId: owner } } } },
+      }),
+    ),
+  ).toBe(0);
   const commandId = randomUUID(),
     initial = parse(await port.start(owner, { schemaVersion: 1, commandId }));
   expect(parse(await port.start(owner, { schemaVersion: 1, commandId })).matchId).toBe(

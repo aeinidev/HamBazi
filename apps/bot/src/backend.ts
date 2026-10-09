@@ -4,6 +4,7 @@ import { z } from "zod";
 import { healthPaths } from "@hambazi/observability";
 import {
   botInternalPaths,
+  botExperiencePaths,
   botAdmissionResultSchema,
   botProcessedSchema,
   botAcknowledgedSchema,
@@ -12,6 +13,10 @@ import {
 } from "@hambazi/api/auth";
 export type OnboardingUpdate = z.infer<typeof botOnboardingUpdateSchema>;
 export type Delivery = Extract<z.infer<typeof botProcessedSchema>, { status: "REPLY" }>["delivery"];
+export type SupportDelivery = Extract<
+  z.infer<typeof botProcessedSchema>,
+  { status: "SUPPORT" }
+>["delivery"];
 export class RetryDelivery extends Error {
   constructor(readonly retryAfterSeconds = 1) {
     super("Bot delivery is incomplete");
@@ -105,7 +110,7 @@ export function createBackend(options: {
             res.on("aborted", () => reject(new RetryDelivery()));
             res.on("data", (chunk: Buffer) => {
               size += chunk.length;
-              if (size > 8192) {
+              if (size > 32768) {
                 res.destroy();
                 reject(new RetryDelivery());
               } else chunks.push(chunk);
@@ -133,12 +138,12 @@ export function createBackend(options: {
     async process(update, signal) {
       const parsed = botOnboardingUpdateSchema.safeParse(update);
       if (!parsed.success) throw new RetryDelivery();
-      return call(botInternalPaths.process, parsed.data, botProcessedSchema, signal);
+      return call(botExperiencePaths.process, parsed.data, botProcessedSchema, signal);
     },
     async acknowledge(ack, signal) {
       const parsed = botOnboardingAckSchema.safeParse(ack);
       if (!parsed.success) throw new RetryDelivery();
-      await call(botInternalPaths.acknowledge, parsed.data, botAcknowledgedSchema, signal);
+      await call(botExperiencePaths.acknowledge, parsed.data, botAcknowledgedSchema, signal);
     },
   };
   return {

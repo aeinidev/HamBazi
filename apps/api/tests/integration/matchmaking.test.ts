@@ -17,7 +17,11 @@ import {
   type Outcome,
   type Queue,
 } from "../../src/matchmaking/index.js";
-import { createAccountCreationPort, createUserIdentityPort } from "../../src/users/index.js";
+import {
+  createAccountCreationPort,
+  createUserIdentityPort,
+  createRegistrationPort,
+} from "../../src/users/index.js";
 import { createAuthSessions } from "../../src/auth/index.js";
 import type { CatalogPort } from "../../src/games/index.js";
 if (
@@ -154,6 +158,7 @@ async function fixture(count = 3, lease = 1000, limit = 100, durableLease = 10) 
       "Matchmaking fixture",
     );
     if (!created.ok) throw new Error("Account fixture failed");
+    await createRegistrationPort(a, clock).complete(telegram, "Matchmaking fixture");
     const issued = await sessions.issue(telegram, randomUUID());
     if (!issued.ok) throw new Error("Session fixture failed");
     actors.push({ userId: created.account.userId, token: issued.accessToken.reveal(), telegram });

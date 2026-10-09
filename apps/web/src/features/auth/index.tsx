@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Panel, go, useRuntime, useSession, useTask } from "../../ui/shared.js";
 export function AuthScreen({ localPreview = false }: { localPreview?: boolean }) {
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
+  const registrationRequired = useSession((s) => s.registrationRequired);
+  const attempted = useRef(false);
   const expired = useSession((s) => s.expired);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -20,6 +22,36 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
       go(runtime.store.getState().invite ? "/invite" : resume);
     });
   }
+  useEffect(() => {
+    if (
+      (import.meta.env.PROD || runtime.scope === "owner-auth") &&
+      !preview &&
+      available &&
+      !attempted.current
+    ) {
+      attempted.current = true;
+      submit();
+    }
+  }, [runtime, available, preview, task]);
+  if (registrationRequired)
+    return (
+      <div className="welcome" lang="fa" dir="rtl">
+        <Panel title="ثبت‌نام در هم‌بازی">
+          <p>برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.</p>
+          <p>به ربات برگرد و دکمهٔ «ایجاد حساب کاربری» را بزن.</p>
+          <button
+            onClick={() => {
+              const app = window.Telegram?.WebApp;
+              if (app?.openTelegramLink) app.openTelegramLink("https://t.me/Hambazidev_bot");
+              else window.location.assign("https://t.me/Hambazidev_bot");
+              app?.close?.();
+            }}
+          >
+            بازگشت به ربات
+          </button>
+        </Panel>
+      </div>
+    );
   return (
     <div className="welcome">
       <p className="eyebrow">YOUR NEXT GAME STARTS HERE</p>
@@ -73,14 +105,16 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
                     ? "Continue preview"
                     : "Continue with Telegram"}
             </button>
-            <button
-              type="button"
-              className="text-button"
-              disabled={task.blocked}
-              onClick={() => setCreating(!creating)}
-            >
-              {creating ? "I already have an account" : "New here? Create an account"}
-            </button>
+            {preview && (
+              <button
+                type="button"
+                className="text-button"
+                disabled={task.blocked}
+                onClick={() => setCreating(!creating)}
+              >
+                {creating ? "I already have an account" : "New here? Create an account"}
+              </button>
+            )}
           </form>
         )}
         {task.notice}

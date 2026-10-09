@@ -52,7 +52,12 @@ describe("database infrastructure boundary", () => {
   it("exposes only session and onboarding metadata to the Auth owner", async () => {
     const database = createDatabase(options);
     await database.forModule("auth").execute(async (db) => {
-      expect(Object.keys(db)).toEqual(["session", "botUpdateReceipt", "botOnboardingFlow"]);
+      expect(Object.keys(db)).toEqual([
+        "session",
+        "botUpdateReceipt",
+        "botOnboardingFlow",
+        "botSupportSubmission",
+      ]);
       expect("user" in db).toBe(false);
     });
     await database.disconnect();

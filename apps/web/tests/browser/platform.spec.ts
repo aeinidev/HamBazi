@@ -56,6 +56,28 @@ async function enterMatch(page: Page) {
 test.beforeEach(async ({ request }) => {
   await request.post(`${fixture}/__test/reset`);
 });
+test("direct game entry without registration renders the Persian return action without protected requests", async ({
+  page,
+  request,
+}) => {
+  await request.post(`${fixture}/__test/state`, { data: { registrationRequired: true } });
+  const protectedRequests: string[] = [];
+  page.on("request", (r) => {
+    if (/\/v1\/(games|rooms|matches|personal|me|socket)/.test(r.url()))
+      protectedRequests.push(r.url());
+  });
+  await launch(page);
+  await page.evaluate((id) => {
+    location.hash = `/match/${id}`;
+  }, matchId);
+  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await expect(
+    page.getByText("برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "New here? Create an account" })).toHaveCount(0);
+  expect(protectedRequests).toEqual([]);
+});
 test("Telegram-only entry is accessible and keeps a narrow viewport", async ({ page }, info) => {
   await page.route("https://telegram.org/**", (route) =>
     route.fulfill({ body: "", contentType: "text/javascript" }),
@@ -145,14 +167,13 @@ test("ambiguous room create retries with the same command and shows host/roster/
   await page.getByRole("button", { name: "Start match" }).click();
   await expect(page.getByText("Waiting for the server to start your match…")).toBeVisible();
 });
-test("invite survives account creation and grants membership only on explicit join", async ({
+test("invite survives registered login and grants membership only on explicit join", async ({
   page,
   request,
 }) => {
   await launch(page, true);
-  await page.getByRole("button", { name: "New here? Create an account" }).click();
-  await page.getByLabel("Display name").fill("مهدی");
-  await page.getByRole("button", { name: "Create account & continue" }).click();
+  await expect(page.getByRole("button", { name: "New here? Create an account" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Continue with Telegram" }).click();
   await expect(page.getByRole("heading", { name: "You’re invited" })).toBeVisible();
   expect(
     (await (await request.get(`${fixture}/__test/state`)).json()).commands.some(

@@ -12,6 +12,7 @@ export interface ErrorEnvelope<Code extends string = string> {
 
 const definitions = {
   INVALID_INPUT: { message: "Invalid input", retryable: false },
+  REGISTRATION_REQUIRED: { message: "Bot registration required", retryable: false },
   UNAUTHENTICATED: { message: "Authentication required", retryable: false },
   FORBIDDEN: { message: "Operation not permitted", retryable: false },
   NOT_FOUND: { message: "Resource not found", retryable: false },

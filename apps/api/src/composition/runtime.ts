@@ -1,3 +1,4 @@
+import { parseBotExperienceConfig } from "@hambazi/config";
 import { createPersonalMatchPort } from "../matches/index.js";
 import { createPersonalCoupGame } from "./personal-coup.js";
 import { parsePersonalGameplayConfig } from "@hambazi/config";
@@ -27,6 +28,7 @@ import {
 } from "../auth/index.js";
 import {
   createUserIdentityPort,
+  createRegistrationPort,
   createAccountCreationPort,
   createProfilePort,
   createProfileRate,
@@ -129,7 +131,11 @@ export async function startApi(
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
     const ownerAdmission = ownerConfig
-      ? createFileOwnerAdmission(ownerConfig.file, createUserIdentityPort(database))
+      ? createFileOwnerAdmission(
+          ownerConfig.file,
+          createUserIdentityPort(database),
+          ownerConfig.testFile,
+        )
       : undefined;
     if (ownerAdmission && !(await ownerAdmission.telegramId()))
       throw new Error("OWNER_ADMISSION_POLICY_INVALID");
@@ -288,6 +294,8 @@ export async function startApi(
           users: createUserIdentityPort(database),
           clock,
           leaseMs,
+          registration: createRegistrationPort(database, clock),
+          supportTimeoutMs: parseBotExperienceConfig(environment).supportTimeoutMs,
         }),
       health,
       probeTimeoutMs: operations.probeTimeoutMs,

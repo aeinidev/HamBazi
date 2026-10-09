@@ -1,3 +1,5 @@
+import { registrationService } from "./application/registration.js";
+import { createRegistrationRepository } from "./infrastructure/repositories/registration.js";
 import { randomInt, randomUUID } from "node:crypto";
 import { accountCreationService, type AccountCreationPort } from "./application/accounts.js";
 import { createAccountRepository } from "./infrastructure/repositories/accounts.js";
@@ -47,4 +49,15 @@ import { publicNamesService } from "./application/public-names.js";
 import { createPublicNamesRepository } from "./infrastructure/repositories/public-names.js";
 export function createPublicNamesPort(database: Parameters<typeof createPublicNamesRepository>[0]) {
   return publicNamesService(createPublicNamesRepository(database));
+}
+
+export function createRegistrationPort(
+  database: Parameters<typeof createRegistrationRepository>[0],
+  clock: { nowMs(): number },
+) {
+  return registrationService({
+    repository: createRegistrationRepository(database),
+    accounts: createAccountCreationPort(database),
+    clock,
+  });
 }

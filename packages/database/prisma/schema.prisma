@@ -11,27 +11,28 @@ datasource db {
 }
 
 model User {
-  id               String                   @id @db.Uuid
-  telegramUserId   BigInt                   @unique @map("telegram_user_id")
-  displayName      String                   @map("display_name")
-  publicHandle     String                   @unique @map("public_handle")
-  telegramUsername String?                  @map("telegram_username")
-  status           String
-  createdAt        DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
-  profileVersion   Int                      @default(0) @map("profile_version")
-  profileReceipts  ProfileMutationReceipt[]
-  settings         UserSettings?
-  hostedRooms      Room[]
-  roomMembers      RoomMember[]
-  matchAdmissions  MatchAdmission[]
-  matchPlayers     MatchPlayer[]
-  events           GameEvent[]
-  results          GameResult[]
-  stats            UserGameStats[]
-  messages         ChatMessage[]
-  commands         ProcessedCommand[]
-  sessions         Session[]
+  id                      String                   @id @db.Uuid
+  telegramUserId          BigInt                   @unique @map("telegram_user_id")
+  displayName             String                   @map("display_name")
+  publicHandle            String                   @unique @map("public_handle")
+  telegramUsername        String?                  @map("telegram_username")
+  status                  String
+  createdAt               DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+  registrationCompletedAt DateTime?                @map("registration_completed_at") @db.Timestamptz(3)
+  profileVersion          Int                      @default(0) @map("profile_version")
+  profileReceipts         ProfileMutationReceipt[]
+  settings                UserSettings?
+  hostedRooms             Room[]
+  roomMembers             RoomMember[]
+  matchAdmissions         MatchAdmission[]
+  matchPlayers            MatchPlayer[]
+  events                  GameEvent[]
+  results                 GameResult[]
+  stats                   UserGameStats[]
+  messages                ChatMessage[]
+  commands                ProcessedCommand[]
+  sessions                Session[]
 
   @@map("users")
 }
@@ -68,6 +69,7 @@ model BotUpdateReceipt {
   receivedAt       DateTime @map("received_at") @db.Timestamptz(3)
   expiresAt        DateTime @map("expires_at") @db.Timestamptz(3)
   leaseUntil       DateTime @map("lease_until") @db.Timestamptz(3)
+  replyData        Json?    @map("reply_data") @db.JsonB
   reply            String?
   flowId           String?  @map("flow_id") @db.Uuid
   promptVersion    Int?     @map("prompt_version")
@@ -495,9 +497,29 @@ model StatsValue {
 model MatchBotSeat {
   matchId String @map("match_id") @db.Uuid
   actorId String @map("actor_id") @db.Uuid
-  seat Int
-  match Match @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  seat    Int
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Restrict)
+
   @@id([matchId, actorId])
   @@unique([matchId, seat])
   @@map("match_bot_seats")
+}
+
+model BotSupportSubmission {
+  id                String   @id @db.Uuid
+  botId             BigInt   @map("bot_id")
+  telegramUserId    BigInt   @map("telegram_user_id")
+  receiptId         String   @unique @map("receipt_id") @db.Uuid
+  profileId         String   @map("profile_id") @db.Uuid
+  displayName       String   @map("display_name")
+  text              String
+  adminChatId       BigInt   @map("admin_chat_id")
+  status            String
+  attemptVersion    Int      @default(0) @map("attempt_version")
+  leaseUntil        DateTime @map("lease_until") @db.Timestamptz(3)
+  deliveryMessageId Int?     @map("delivery_message_id")
+  createdAt         DateTime @map("created_at") @db.Timestamptz(3)
+
+  @@index([botId, telegramUserId, status])
+  @@map("bot_support_submissions")
 }

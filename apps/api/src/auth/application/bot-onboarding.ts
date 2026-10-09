@@ -1,3 +1,6 @@
+import { botExperience } from "./bot-experience.js";
+import type { RegistrationPort } from "../../users/index.js";
+import type { SupportRepository } from "./bot-onboarding-ports.js";
 import { z } from "zod";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AccountCreationPort, UserIdentityPort } from "../../users/index.js";
@@ -28,8 +31,7 @@ const base = {
   chatType: z.literal("private"),
   messageId,
 };
-/** Internal operation DTOs, not raw Telegram update schemas or public HTTP routes. */
-export const botOnboardingUpdateSchema = z.discriminatedUnion("action", [
+export const legacyBotOnboardingUpdateSchema = z.discriminatedUnion("action", [
   z.strictObject({ ...base, action: z.literal("START") }),
   z.strictObject({ ...base, action: z.literal("CREATE") }),
   z.strictObject({ ...base, action: z.literal("CANCEL") }),
@@ -40,12 +42,50 @@ export const botOnboardingUpdateSchema = z.discriminatedUnion("action", [
     displayName: z.string().max(256),
   }),
 ]);
-export const botOnboardingAckSchema = z.strictObject({
+export const legacyBotOnboardingAckSchema = z.strictObject({
   schemaVersion: z.literal(1),
   receiptId: z.uuid(),
   version: z.number().int().positive().max(2147483647),
   messageId,
 });
+/** Internal operation DTOs, not raw Telegram update schemas or public HTTP routes. */
+export const botOnboardingUpdateSchema = z.discriminatedUnion("action", [
+  z.strictObject({ ...base, action: z.literal("START") }),
+  z.strictObject({ ...base, action: z.literal("CREATE") }),
+  z.strictObject({ ...base, action: z.literal("CANCEL") }),
+  z.strictObject({
+    ...base,
+    action: z.literal("REGISTER"),
+    displayName: z.string().min(1).max(256),
+  }),
+  z.strictObject({ ...base, action: z.enum(["PROFILE", "SUPPORT", "MEDIA", "NAVIGATION"]) }),
+  z.strictObject({ ...base, action: z.literal("TEXT"), text: z.string().min(1).max(4096) }),
+  z.strictObject({
+    ...base,
+    action: z.literal("NAME"),
+    replyToMessageId: messageId,
+    displayName: z.string().max(256),
+  }),
+]);
+const replyAckSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  receiptId: z.uuid(),
+  version: z.number().int().positive().max(2147483647),
+  messageId,
+});
+export const botOnboardingAckSchema = z.union([
+  replyAckSchema,
+  z
+    .strictObject({
+      schemaVersion: z.literal(1),
+      kind: z.literal("SUPPORT"),
+      submissionId: z.uuid(),
+      attemptVersion: z.number().int().positive(),
+      outcome: z.enum(["DELIVERED", "FAILED", "UNKNOWN"]),
+      messageId: messageId.optional(),
+    })
+    .refine((v) => (v.outcome === "DELIVERED") === (v.messageId !== undefined)),
+]);
 const contextSchema = z.strictObject({
   schemaVersion: z.literal(1),
   botId: z
@@ -89,6 +129,7 @@ function delivery(r: Receipt) {
       updateId: r.updateId,
       chatId: r.telegramUserId,
       reply: r.reply as BotReply,
+      ...(r.replyData ? { data: r.replyData } : {}),
     },
   };
 }
@@ -101,6 +142,9 @@ export function botOnboardingService(deps: {
   newId(): string;
   leaseMs: number;
   ownerAdmission?: OwnerAdmission;
+  registration?: RegistrationPort;
+  support?: SupportRepository;
+  supportTimeoutMs?: number;
 }) {
   if (!Number.isSafeInteger(deps.leaseMs) || deps.leaseMs < 1000 || deps.leaseMs > 60000)
     throw new Error("Invalid onboarding lease configuration");
@@ -111,6 +155,19 @@ export function botOnboardingService(deps: {
     return value;
   };
   return Object.freeze({
+    async processLegacy(context: BotServiceContext, input: unknown) {
+      const legacy = legacyBotOnboardingUpdateSchema.safeParse(input);
+      if (!legacy.success) return createErrorEnvelope("INVALID_INPUT");
+      return botOnboardingService({
+        repository: deps.repository,
+        accounts: deps.accounts,
+        users: deps.users,
+        clock: deps.clock,
+        newId: deps.newId,
+        leaseMs: deps.leaseMs,
+        ...(deps.ownerAdmission ? { ownerAdmission: deps.ownerAdmission } : {}),
+      }).process(context, legacy.data);
+    },
     /** Call only after service authentication and Bot verification of an original private update. */
     async process(context: BotServiceContext, input: unknown) {
       if (!contextSchema.safeParse(context).success) return createErrorEnvelope("UNAUTHENTICATED");
@@ -145,6 +202,15 @@ export function botOnboardingService(deps: {
         if (claim.status !== "CLAIMED")
           return { ok: true as const, schemaVersion: 1 as const, status: claim.status };
         const r = claim.receipt;
+        if (deps.registration && update.action !== "NAME" && update.action !== "CREATE") {
+          return await botExperience(
+            { ...deps, registration: deps.registration, now, delivery, reply },
+            context,
+            update,
+            r,
+          );
+        }
+        if (!["START", "CREATE", "CANCEL", "NAME"].includes(update.action)) return retry();
         if (r.phase === "REPLY") {
           const resumed = await deps.repository.transition(r, now, (receipt, flow, at) => {
             if (
@@ -196,7 +262,7 @@ export function botOnboardingService(deps: {
             };
             return { ...reply(receipt, "PROMPT_NAME", fresh), flowId, promptVersion: 1 };
           }
-          if (!flow || flow.promptMessageId !== update.replyToMessageId)
+          if (update.action !== "NAME" || !flow || flow.promptMessageId !== update.replyToMessageId)
             return reply(receipt, "EXPIRED");
           return {
             phase: "CREATING",
@@ -236,14 +302,38 @@ export function botOnboardingService(deps: {
       if (!parsed.success) return createErrorEnvelope("INVALID_INPUT");
       try {
         const ack = parsed.data;
-        const ownerId = deps.ownerAdmission ? await deps.ownerAdmission.telegramId() : undefined;
-        if (deps.ownerAdmission && !ownerId) return createErrorEnvelope("UNAUTHENTICATED");
+        if ("kind" in ack) {
+          if (!deps.support || !deps.ownerAdmission) return createErrorEnvelope("UNAUTHENTICATED");
+          const submission = await deps.support.find(ack.submissionId, context.botId);
+          const ownerId = await deps.ownerAdmission.telegramId();
+          if (
+            !submission ||
+            !ownerId ||
+            !(await deps.ownerAdmission.allowsTelegramId(submission.telegramUserId)) ||
+            submission.adminChatId !== ownerId
+          )
+            return createErrorEnvelope("UNAUTHENTICATED");
+          const settled = await deps.support.settle(
+            ack.submissionId,
+            context.botId,
+            ack.attemptVersion,
+            ack.outcome,
+            ack.messageId,
+          );
+          return settled
+            ? { ok: true as const, schemaVersion: 1 as const, status: "DONE" as const }
+            : retry();
+        }
+        const admittedIds = deps.ownerAdmission
+          ? await deps.ownerAdmission.admittedTelegramIds()
+          : undefined;
+        if (admittedIds && admittedIds.length === 0) return createErrorEnvelope("UNAUTHENTICATED");
         let deniedOwner = false;
         const result = await deps.repository.transition(
           { id: ack.receiptId, botId: context.botId, version: ack.version },
           now,
           (r, flow, at) => {
-            if (ownerId !== undefined && r.telegramUserId !== ownerId) {
+            if (admittedIds && !admittedIds.includes(r.telegramUserId)) {
               deniedOwner = true;
               return undefined;
             }
@@ -257,6 +347,7 @@ export function botOnboardingService(deps: {
             return {
               phase: "DONE",
               reply: r.reply as BotReply,
+              ...(r.replyData ? { data: r.replyData } : {}),
               flowId: r.flowId,
               promptVersion: r.promptVersion,
               ...(matches ? { flow: { ...flow, promptMessageId: ack.messageId } } : {}),

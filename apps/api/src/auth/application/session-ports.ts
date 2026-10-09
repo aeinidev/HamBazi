@@ -23,7 +23,9 @@ export interface SessionCodec {
 export interface SessionClock {
   nowMs(): number;
 }
-export type SessionFailure = ErrorEnvelope<"UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR">;
+export type SessionFailure = ErrorEnvelope<
+  "UNAUTHENTICATED" | "REGISTRATION_REQUIRED" | "INVALID_INPUT" | "INTERNAL_ERROR"
+>;
 export interface AuthSessions {
   issue(
     initData: unknown,

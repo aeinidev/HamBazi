@@ -47,6 +47,7 @@ const groups = {
     "PERSONAL_GAMEPLAY_PROFILE",
     "AUTH_ADMISSION_POLICY",
     "OWNER_ADMISSION_FILE",
+    "STAGING_TEST_ADMISSION_FILE",
     "NODE_EXTRA_CA_CERTS",
     "API_DATABASE_URL",
     "API_REDIS_URL",
@@ -76,6 +77,7 @@ const groups = {
     "BOT_INTERNAL_REQUEST_LIMIT",
     "BOT_INTERNAL_IDENTITY_LIMIT",
     "BOT_ONBOARDING_LEASE_MS",
+    "BOT_SUPPORT_TIMEOUT_MS",
     "BOT_SERVICE_ACTIVE_KEY_ID",
     "BOT_SERVICE_KEYS",
     "BOT_SERVICE_ALLOWED_PEERS",
@@ -94,6 +96,8 @@ const groups = {
   bot: [
     "AUTH_ADMISSION_POLICY",
     "OWNER_ADMISSION_FILE",
+    "STAGING_TEST_ADMISSION_FILE",
+    "STAGING_TEST_USER_RESOLUTION",
     "TELEGRAM_BOT_TOKEN",
     "TELEGRAM_BOT_USERNAME",
     "TELEGRAM_WEBHOOK_SECRET",
@@ -196,6 +200,16 @@ export function validateEnvironments(envs, inputs) {
     if (inputs.ownerAdmissionFile !== undefined || aOwner || bOwner) {
       if (!inputs.ownerAdmissionFile || !aOwner || !bOwner) invalid();
     }
+    if (inputs.stagingTestAdmissionFile !== undefined || aOwner?.testFile || bOwner?.testFile) {
+      if (
+        !inputs.stagingTestAdmissionFile ||
+        !aOwner?.testFile ||
+        !bOwner?.testFile ||
+        inputs.stagingTestAdmissionFile === inputs.ownerAdmissionFile
+      )
+        invalid();
+    }
+    config.parseStagingTestResolutionConfig(bot);
     if (
       api.NODE_EXTRA_CA_CERTS !== undefined ||
       worker.NODE_EXTRA_CA_CERTS !== undefined ||
@@ -213,6 +227,7 @@ export function validateEnvironments(envs, inputs) {
     config.parseRuntimeConfig(api, "api");
     config.parseRuntimeConfig(worker, "worker");
     config.parseAuthRuntimeConfig(api);
+    config.parseBotExperienceConfig(api);
     config.parseProfileConfig(api);
     config.parseCatalogConfig(api);
     config.parseTransportAdmissionConfig(api);
@@ -363,6 +378,7 @@ export async function prepare(inputsPath, output) {
     "stopGraceSeconds",
     ...(Object.hasOwn(inputs, "operatorMonitoring") ? ["operatorMonitoring"] : []),
     ...(Object.hasOwn(inputs, "ownerAdmissionFile") ? ["ownerAdmissionFile"] : []),
+    ...(Object.hasOwn(inputs, "stagingTestAdmissionFile") ? ["stagingTestAdmissionFile"] : []),
     ...(Object.hasOwn(inputs, "temporaryStagingFreshness") ? ["temporaryStagingFreshness"] : []),
   ]);
   for (const field of ["roleEnvFiles", "privateAddresses", "stopGraceSeconds"])
@@ -441,6 +457,23 @@ export async function prepare(inputsPath, output) {
   validateEnvironments(envs, inputs);
   if (inputs.ownerAdmissionFile)
     config.parseOwnerAdmissionPolicy((await privateFile(inputs.ownerAdmissionFile)).toString());
+  let testUserPresent = false;
+  if (inputs.stagingTestAdmissionFile) {
+    const tester = config
+      .parseStagingTestAdmissionPolicy(
+        (await privateFile(inputs.stagingTestAdmissionFile)).toString(),
+      )
+      .reveal();
+    if (
+      tester &&
+      tester ===
+        config
+          .parseOwnerAdmissionPolicy((await privateFile(inputs.ownerAdmissionFile)).toString())
+          .reveal()
+    )
+      invalid();
+    testUserPresent = Boolean(tester);
+  }
   const tls = {};
   for (const [name, path] of Object.entries(inputs.tlsFiles))
     tls[name] = await privateFile(path, name.endsWith("Key"));
@@ -515,6 +548,14 @@ export async function prepare(inputsPath, output) {
           read_only: true,
           bind: { create_host_path: false },
         });
+      if (inputs.stagingTestAdmissionFile && ["api", "bot"].includes(role))
+        (definition.services[role].volumes ??= []).push({
+          type: "bind",
+          source: inputs.stagingTestAdmissionFile,
+          target: config.stagingTestAdmissionPath,
+          read_only: true,
+          bind: { create_host_path: false },
+        });
     }
     delete definition["x-runtime"];
     compose = stringify(definition);
@@ -556,6 +597,18 @@ export async function prepare(inputsPath, output) {
               profile: config.ownerAdmissionProfile,
               privateFile: inputs.ownerAdmissionFile,
               memberCount: 1,
+              activationVerified: false,
+            },
+          }
+        : {}),
+      ...(inputs.stagingTestAdmissionFile
+        ? {
+            stagingTestAdmission: {
+              privateFile: inputs.stagingTestAdmissionFile,
+              memberCount: testUserPresent ? 1 : 0,
+              role: "regular-test-user",
+              grantsAdministrator: false,
+              registrationRequired: true,
               activationVerified: false,
             },
           }

@@ -5,6 +5,7 @@ import { createFileOwnerAdmission } from "@hambazi/api/auth";
 import { createBackend } from "../backend.js";
 import { createTelegramSender } from "../telegram.js";
 import { createDeliveryHandler } from "../delivery.js";
+import { createStagingTestResolution } from "./staging-test-resolution.js";
 import { createBotHttp } from "./http.js";
 import type { BotLogger } from "./logger.js";
 import { parseOperationsConfig, parseTelemetryConfig } from "@hambazi/config";
@@ -34,7 +35,9 @@ export async function startBot(
   try {
     const config = parseBotRuntimeConfig(env);
     const ownerConfig = parseOwnerAdmissionConfig(env);
-    const ownerAdmission = ownerConfig ? createFileOwnerAdmission(ownerConfig.file) : undefined;
+    const ownerAdmission = ownerConfig
+      ? createFileOwnerAdmission(ownerConfig.file, undefined, ownerConfig.testFile)
+      : undefined;
     if (ownerAdmission && !(await ownerAdmission.telegramId()))
       throw new Error("OWNER_ADMISSION_POLICY_INVALID");
     if (operations.port)
@@ -61,17 +64,24 @@ export async function startBot(
       miniAppUrl: config.miniAppUrl,
       timeoutMs: config.sendTimeoutMs,
     });
+    const observeIdentity = createStagingTestResolution(env, config.botId, config.botUsername);
+    const deliver = createDeliveryHandler({
+      ...(ownerAdmission ? { ownerAdmission } : {}),
+      backend: backend.backend,
+      sender,
+      botId: config.botId,
+      username: config.botUsername,
+    });
     http = createBotHttp({
       tls: { key: new SecretValue(key), cert },
       secret: config.webhookSecret,
       backend: backend.backend,
-      handle: createDeliveryHandler({
-        ...(ownerAdmission ? { ownerAdmission } : {}),
-        backend: backend.backend,
-        sender,
-        botId: config.botId,
-        username: config.botUsername,
-      }),
+      async handle(input, signal) {
+        signal.throwIfAborted();
+        await observeIdentity?.(input);
+        signal.throwIfAborted();
+        await deliver(input, signal);
+      },
       timeoutMs: config.requestTimeoutMs,
       maxInFlight: config.maxInFlight,
       logger,

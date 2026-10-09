@@ -4,7 +4,7 @@ import type { Prisma } from "./generated/prisma/client.js";
 import { Pool } from "pg";
 
 const ownership = {
-  auth: ["session", "botUpdateReceipt", "botOnboardingFlow"],
+  auth: ["session", "botUpdateReceipt", "botOnboardingFlow", "botSupportSubmission"],
   users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
   rooms: ["room", "roomMember", "roomCommandReceipt"],

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { createDatabase } from "@hambazi/database";
 import type {
   BotOnboardingRepository,
@@ -7,8 +8,15 @@ import type {
 
 type StoredReceipt = Omit<
   Receipt,
-  "botId" | "telegramUserId" | "receivedAt" | "expiresAt" | "leaseUntil"
-> & { botId: bigint; telegramUserId: bigint; receivedAt: Date; expiresAt: Date; leaseUntil: Date };
+  "replyData" | "botId" | "telegramUserId" | "receivedAt" | "expiresAt" | "leaseUntil"
+> & {
+  replyData?: unknown;
+  botId: bigint;
+  telegramUserId: bigint;
+  receivedAt: Date;
+  expiresAt: Date;
+  leaseUntil: Date;
+};
 type StoredFlow = Omit<OnboardingFlow, "botId" | "telegramUserId" | "createdAt" | "expiresAt"> & {
   botId: bigint;
   telegramUserId: bigint;
@@ -17,6 +25,17 @@ type StoredFlow = Omit<OnboardingFlow, "botId" | "telegramUserId" | "createdAt" 
 };
 const receiptView = (r: StoredReceipt): Receipt => ({
   ...r,
+  replyData:
+    r.replyData === null || r.replyData === undefined
+      ? null
+      : z
+          .object({
+            profile: z
+              .object({ userId: z.uuid(), displayName: z.string(), completed: z.boolean() })
+              .optional(),
+            submissionId: z.uuid().optional(),
+          })
+          .parse(r.replyData),
   botId: String(r.botId),
   telegramUserId: String(r.telegramUserId),
   receivedAt: r.receivedAt.getTime(),
@@ -171,6 +190,31 @@ export function createBotOnboardingRepository(
               });
             }
           }
+          if (next.submission) {
+            const s = next.submission;
+            await db.botSupportSubmission.create({
+              data: {
+                id: s.id,
+                receiptId: s.receiptId,
+                profileId: s.profileId,
+                displayName: s.displayName,
+                text: s.text,
+                status: s.status,
+                attemptVersion: s.attemptVersion,
+                deliveryMessageId: s.deliveryMessageId,
+                botId: BigInt(s.botId),
+                telegramUserId: BigInt(s.telegramUserId),
+                adminChatId: BigInt(s.adminChatId),
+                createdAt: new Date(s.createdAt),
+                leaseUntil: new Date(s.leaseUntil),
+              },
+            });
+          }
+          if (next.replyData)
+            await db.botUpdateReceipt.update({
+              where: { id: claim.id },
+              data: { replyData: next.replyData },
+            });
           const receipt = await db.botUpdateReceipt.update({
             where: { id: claim.id },
             data: {

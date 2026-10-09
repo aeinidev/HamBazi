@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "temporary-owner-staging-execution-binding",
-  "status": "owner-gameplay-open-native-report-recorded-exact-pair-rollback-passed",
+  "status": "historical-personal-staging-closure-superseded-by-bot-onboarding",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -135,7 +135,10 @@
     "publicDataPortsDenied": 2,
     "nativeOwnerAcceptedSourceCommit": "a8b97f8dc57014f130aaedee604faf95e91da593",
     "currentArtifactNativeRetestClaimed": false,
-    "httpWssAcceptedWorkDrainEvidenceScope": "previous a8b97f8: 9 HTTP / 15 WSS controls; unchanged drain/handler/config; current exact-pair idle stops/recovery separately passed"
+    "httpWssAcceptedWorkDrainEvidenceScope": "previous a8b97f8: 9 HTTP / 15 WSS controls; unchanged drain/handler/config; current exact-pair idle stops/recovery separately passed",
+    "singleValueWebPolicyHeadersVerified": true,
+    "ownerOnlyAcceptanceGatePassed": true,
+    "applicablePhaseCompletionApprovedScope": "ADR-056"
   },
   "assets": {
     "infra/docker/staging/bootstrap.routes.conf": "6000763dfc76baf809c5d05d35163245d90ffff3593174156a1c6175b2ebf740",
@@ -145,7 +148,7 @@
     "infra/docker/staging/hambazi-staging-renewal.timer": "e705d8a55ce00af81a69f3c412f3e266e58f1eb2aefa69aaf9aa036d1805fc39",
     "infra/docker/staging/hold.routes.conf": "c3de14340245b7be3a0ad8863486eace1d0778f5124b1076a4ba1bacea1240ba",
     "infra/docker/staging/nginx.conf": "3b308c6e5e4f8e21c2fcf575401406b312439cbf61d10e9e5a5725a9dfe8b1f7",
-    "infra/docker/staging/owner.routes.conf": "07a8528b7dce63bb7d068c7291f170f9ef9ac7b0bf23008bae9c65ca6debde04",
+    "infra/docker/staging/owner.routes.conf": "b3a8c5367b4e5fb5537a6a9ffbd251401df4e0f6eecbc2b6fe8b777c382f5a4d",
     "infra/docker/staging/pg_hba.proposed.conf": "cb5cf09ee3a24200cd9e9d70762cd9b00c0f04479bf3e5011a7a645286fe0c4b",
     "infra/docker/staging/postgresql.proposed.conf": "12bfbeb055e9cc32a308ca3fff68e74295220b00febea21bccd14f08bae7b1fd",
     "infra/docker/staging/redis.proposed.conf": "d1d9dd79800c5442e294fbf7dff087dfaa3ef50f7f62f11cdfba73f652b9b06c",
@@ -220,9 +223,12 @@
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-accepted-runner-02.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-startup-live-evidence-04.json",
     "/opt/hambazi-staging/private/execution-20261008/evidence/native-final-public-03.json",
-    "/opt/hambazi-staging/private/execution-20261008/evidence/native-renewal-disposition-05.json"
+    "/opt/hambazi-staging/private/execution-20261008/evidence/native-renewal-disposition-05.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/phase18b3-closeout-20261009-03.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/phase18b3-header-fix-20261009-01.json",
+    "/opt/hambazi-staging/private/execution-20261008/evidence/phase19-public-header-browser-20261009-01.json"
   ],
-  "checkedAt": "2026-10-08T23:54:53.371640+00:00",
+  "checkedAt": "2026-10-09T08:56:44.813Z",
   "personalGameplayEnabled": true,
   "fullPhase18B3Completed": false,
   "dataScanSha256": "e0ebf23dcfd96ea2622963a4b401bc0d414f19594c6ef67b6d6e256ad8eea0f1",
@@ -326,6 +332,25 @@
       "normalNoDuePathPassed": true,
       "actualDueRenewalTested": false,
       "sha256": "2dc8cf925340a417334db3a24c898458eabdaae5462b671b77b18f2a3b3fc073"
+    },
+    "phase18b3-header-fix-20261009-01.json": {
+      "checkedAt": "2026-10-09T08:55:12.989808+00:00",
+      "passed": true,
+      "sourceCommit": "48ff852ba6b732ae51d239f6cf875186d64d588a",
+      "sha256": "805660cf2087c2939fa4c5d336d0ee159f2ac397aa61c9e981b24c4e66079b9a"
+    },
+    "phase18b3-closeout-20261009-03.json": {
+      "checkedAt": "2026-10-09T08:56:44.813Z",
+      "passed": true,
+      "sourceCommit": "48ff852ba6b732ae51d239f6cf875186d64d588a",
+      "composeSha256": "b799cdbcd6336de8767df6a87d87f0343d2bf45ac5af00950b46f4a7fc7c5921",
+      "sha256": "e2eab66d9941f2cf63b5c6b699398e861f850f6dbeea6792d0be0da998ae93c4"
+    },
+    "phase19-public-header-browser-20261009-01.json": {
+      "checkedAt": "2026-10-09T09:09:36.861Z",
+      "passed": true,
+      "sourceCommit": "48ff852ba6b732ae51d239f6cf875186d64d588a",
+      "sha256": "559b859d2eab47279554437cb05f5847ad639670805b22438a959429b271f370"
     }
   },
   "deferred": {
@@ -609,7 +634,10 @@
     "preparedDirectory": "/opt/hambazi-staging/private/prepared-20261008-native-02",
     "composeSha256": "669bc5eb8f230f3a3115ed76b040bfcde7fb2900d2f3506b7bffac97abe432af",
     "previousFailurePreserved": true,
-    "exactOriginalIPhoneFailureCauseProven": false
+    "exactOriginalIPhoneFailureCauseProven": false,
+    "reconfirmedByCurrentOwnerRequest": true,
+    "reconfirmationDateAsiaTehran": "2026-10-09",
+    "newArtifactOrGameplayCountInferred": false
   },
   "historicalNativeBinding": {
     "checkedAt": "2026-10-08T22:58:37.888321+00:00",
@@ -811,7 +839,8 @@
     "limits": "Only this exact pair with current patched components and healthy data services. Previous a8b97f8 retains the Redis-stall availability defect; use maintenance, healthy Redis and readiness/auth checks before reopening. No arbitrary-version, destructive-schema or vulnerable-ingress rollback acceptance."
   },
   "acceptanceBlockers": {
-    "fullPhase": "remaining protected-publication, full rotation/recovery and broader activation/evidence are deferred or excluded, not passed"
+    "personalScope": null,
+    "productionRelease": "Explicit Phase 19 blocked DoD items/decisions; ordinary 7C/product activation, hosted protection/provenance, privacy/rights, final production operations/performance/recovery remain unpassed."
   },
   "supersededPreparation": {
     "sourceCommit": "0b32e6336c3468c2fcc373453b90548cfb46b31e",
@@ -819,5 +848,49 @@
     "preparationPassed": true,
     "activated": false,
     "reason": "actual a8 Redis-stall defect discovered before activation; successor 48ff852 contains tested deadline fix; old artifacts/evidence preserved"
-  }
+  },
+  "runtimeRoutesSha256": "b3a8c5367b4e5fb5537a6a9ffbd251401df4e0f6eecbc2b6fe8b777c382f5a4d",
+  "applicablePhase18B3Completed": true,
+  "phase19ReviewCompleted": true,
+  "productionReleaseApproved": false,
+  "productionReleaseRecommendation": "HOLD",
+  "completionScope": "approved owner-only disposable personal staging; ADR-048/050/052/054/055/056",
+  "historicalOwnerRoutesSha256": "07a8528b7dce63bb7d068c7291f170f9ef9ac7b0bf23008bae9c65ca6debde04",
+  "closeout": {
+    "adr": "ADR-056",
+    "toolDirectory": "/opt/hambazi-staging/private/acceptance-20261009-01",
+    "toolSourceSha256": "f110ae5e87f851826992afbc67200ab56d02cae823a3ab41daef4ad6399fa7c3",
+    "toolAdapterSha256": "2a2b6d1dd9922bd99b9104668464b4b908191e082cc0a10d634e9b72fc6efcc2",
+    "inputBindingSha256": "a012664932dd268bb86e3810f946764e09360abb7d6db591d0c1fabe79e39ff9",
+    "actualTargetGatePassed": true,
+    "reusedReports": 10,
+    "currentPublicChecks": 8,
+    "normalFreshImageGates": 8,
+    "currentRolesReady": 4,
+    "exactSingleWebPolicyHeaders": 6,
+    "backupRestore": "excluded-unperformed-ADR-050",
+    "hostedProtectionOrPublicationPassed": false,
+    "fullRotationOrProductionPerformancePassed": false,
+    "graphicsStarted": false
+  },
+  "phase19Validation": {
+    "focusedTestsPassed": 47,
+    "focusedTestsSkipped": 0,
+    "realGitleaksCanaryPassed": true,
+    "rootLintPassed": true,
+    "architectureWorkspaces": 14,
+    "architectureSources": 229,
+    "contractCompatibilityPassed": true,
+    "fullPipelineEvidenceReused": true,
+    "sourceReuseReviewPassed": true,
+    "publicBrowserHeaderAndPermissionChecks": 3,
+    "productionReleaseRecommendation": "HOLD",
+    "allGameModuleDoDItemsReviewed": 14,
+    "allMvpLaunchDoDItemsReviewed": 10,
+    "allOpenDecisionsReviewed": 8
+  },
+  "historicalBindingOnly": true,
+  "supersededBy": "infra/docker/staging/bot-onboarding-current.json",
+  "supersededAtUTC": "2026-10-09T13:03:32.893906+00:00",
+  "currentSuccessorBinding": "infra/docker/staging/staging-test-user-current.json"
 }

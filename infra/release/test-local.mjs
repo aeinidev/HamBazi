@@ -308,6 +308,30 @@ try {
   });
   assert(create.status === 201 || create.status === 200);
   const originalAccount = releaseRehearsal ? JSON.stringify(await create.json()) : undefined;
+  // Technical account creation does not make the synthetic actor registered.
+  const beforeRegistration = await fetch(origin + "/v1/auth/telegram-mini-app/registered-session", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...body, commandId: randomUUID() }),
+    signal: AbortSignal.timeout(5000),
+  });
+  assert(
+    beforeRegistration.status === 403 &&
+      (await beforeRegistration.json()).error.code === "REGISTRATION_REQUIRED",
+  );
+  await run("docker", [
+    "exec",
+    api,
+    "node",
+    "--input-type=module",
+    "-e",
+    `
+    import { createDatabase } from '@hambazi/database';
+    import { createRegistrationPort } from './dist/users/index.js';
+    const db = createDatabase({ databaseUrl: { reveal: () => process.env.API_DATABASE_URL }, poolMax: 2, connectionTimeoutMs: 2000, idleTimeoutMs: 1000, transactionMaxWaitMs: 5000, transactionTimeoutMs: 5000 });
+    try { const r = await createRegistrationPort(db, { nowMs: () => Date.now() }).complete('777000456', 'Packaging fixture'); if (!r.ok) process.exitCode = 1; } finally { await db.disconnect(); }
+  `,
+  ]);
   const issued = await fetch(origin + "/v1/auth/telegram-mini-app", {
     method: "POST",
     headers: { "content-type": "application/json" },

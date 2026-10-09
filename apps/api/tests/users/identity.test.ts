@@ -14,9 +14,15 @@ describe("Users authentication eligibility", () => {
   it("projects only an internal identity and normalizes UUID lookup", async () => {
     const find = vi.fn(async () => ({ userId: id, status: "ACTIVE", profile: "private" }));
     const port = identityService({ findById: find, findByTelegramId: find });
-    expect(await port.findActiveById(id.toUpperCase())).toEqual({ userId: id });
+    expect(await port.findActiveById(id.toUpperCase())).toEqual({
+      userId: id,
+      registrationCompleted: false,
+    });
     expect(find).toHaveBeenCalledWith(id);
-    expect(await port.findActiveByTelegramId("9007199254740993")).toEqual({ userId: id });
+    expect(await port.findActiveByTelegramId("9007199254740993")).toEqual({
+      userId: id,
+      registrationCompleted: false,
+    });
     expect(find).toHaveBeenCalledWith(9007199254740993n);
   });
   it.each(["", "0", "-1", "01", "1.5", "9223372036854775808", "NaN"])(

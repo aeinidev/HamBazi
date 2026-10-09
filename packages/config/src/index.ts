@@ -32,5 +32,10 @@ export {
   parseOwnerAdmissionPolicy,
   ownerAdmissionProfile,
   ownerAdmissionPath,
+  stagingTestAdmissionPath,
+  parseStagingTestAdmissionPolicy,
+  parseStagingTestResolutionConfig,
 } from "./owner-admission.js";
 export { parsePersonalGameplayConfig } from "./personal-gameplay.js";
+
+export { parseBotExperienceConfig } from "./bot-experience.js";

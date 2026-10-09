@@ -25,10 +25,21 @@ export function sendRateDecision(reply: FastifyReply, decision: RateDecision): b
   } else reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
   return true;
 }
-function failure(reply: FastifyReply, result: SessionFailure) {
-  const code = result.error.code;
+function failure(reply: FastifyReply, result: SessionFailure, registeredEntry = false) {
+  const code =
+    result.error.code === "REGISTRATION_REQUIRED" && !registeredEntry
+      ? "UNAUTHENTICATED"
+      : result.error.code;
   return reply
-    .code(code === "UNAUTHENTICATED" ? 401 : code === "INVALID_INPUT" ? 400 : 503)
+    .code(
+      code === "UNAUTHENTICATED"
+        ? 401
+        : code === "REGISTRATION_REQUIRED"
+          ? 403
+          : code === "INVALID_INPUT"
+            ? 400
+            : 503,
+    )
     .send(createErrorEnvelope(code));
 }
 function bearer(request: FastifyRequest): string | undefined {
@@ -79,8 +90,16 @@ export function createAuthHttpModule(deps: {
       if (!response.success) return reply.code(500).send(createErrorEnvelope("INTERNAL_ERROR"));
       return reply.code(200).send(response.data);
     }
+    @Post("telegram-mini-app/registered-session")
+    async registeredSession(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+      return this.issue(request, reply, true);
+    }
     @Post("telegram-mini-app")
-    async issue(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+    async issue(
+      @Req() request: FastifyRequest,
+      @Res() reply: FastifyReply,
+      registeredEntry = false,
+    ) {
       const parsed = issuanceSchema.safeParse(request.body);
       if (!parsed.success || Buffer.byteLength(parsed.data.initData, "utf8") > 16384)
         return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
@@ -94,7 +113,7 @@ export function createAuthHttpModule(deps: {
       )
         return;
       const result = await deps.sessions.issue(parsed.data.initData, parsed.data.commandId);
-      if (!result.ok) return failure(reply, result);
+      if (!result.ok) return failure(reply, result, registeredEntry);
       // The sole credential reveal into a successful response. Never attach this to telemetry.
       const response = issuedSchema.safeParse({
         schemaVersion: 1,

@@ -24,6 +24,7 @@ export function failure(value: unknown): ClientError | undefined {
 export function errorMessage(error: unknown) {
   const code = error instanceof ClientError ? error.code : "INTERNAL_ERROR";
   const messages: Record<string, string> = {
+    REGISTRATION_REQUIRED: "برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.",
     UNAUTHENTICATED: "Your session ended. Reopen this app from Telegram to sign in again.",
     NOT_FOUND: "This account, invitation or room is not available.",
     FORBIDDEN: "This action is not available to your account.",

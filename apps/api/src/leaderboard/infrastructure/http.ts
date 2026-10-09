@@ -5,11 +5,14 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import type { StatisticsPort } from "../application/service.js";
 export interface StatisticsHttpDependencies {
   statistics: StatisticsPort;
-  authenticate(
-    token: string,
-  ): Promise<
+  authenticate(token: string): Promise<
     | { ok: true; userId: string }
-    | { ok: false; error: { code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" } }
+    | {
+        ok: false;
+        error: {
+          code: "UNAUTHENTICATED" | "REGISTRATION_REQUIRED" | "INVALID_INPUT" | "INTERNAL_ERROR";
+        };
+      }
   >;
   rate(
     userId: string,
@@ -22,19 +25,26 @@ export interface StatisticsHttpDependencies {
 export function createStatisticsHttpModule(deps: StatisticsHttpDependencies) {
   function fail(
     reply: FastifyReply,
-    code: "UNAUTHENTICATED" | "INVALID_INPUT" | "NOT_FOUND" | "INTERNAL_ERROR",
+    code:
+      | "UNAUTHENTICATED"
+      | "REGISTRATION_REQUIRED"
+      | "INVALID_INPUT"
+      | "NOT_FOUND"
+      | "INTERNAL_ERROR",
   ) {
     return reply
       .code(
-        code === "UNAUTHENTICATED"
+        code === "REGISTRATION_REQUIRED"
           ? 401
-          : code === "INVALID_INPUT"
-            ? 400
-            : code === "NOT_FOUND"
-              ? 404
-              : 503,
+          : code === "UNAUTHENTICATED"
+            ? 401
+            : code === "INVALID_INPUT"
+              ? 400
+              : code === "NOT_FOUND"
+                ? 404
+                : 503,
       )
-      .send(createErrorEnvelope(code));
+      .send(createErrorEnvelope(code === "REGISTRATION_REQUIRED" ? "UNAUTHENTICATED" : code));
   }
   async function actor(req: FastifyRequest, reply: FastifyReply) {
     let count = 0;

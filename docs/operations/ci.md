@@ -116,13 +116,17 @@ Resolve the applicable owner decisions, including provider/final SLO/backup poli
 the production performance targets passed. OD-001's peaks are already approved.
 Phase 19 must hold release if any of these gates lacks accepted evidence.
 
-Phase 18B1 supplies only portable local image candidates and actual image
-build/scan/smoke gates; see [packaging](packaging.md). No staging deployment/E2E
-workflow exists because provider, URLs, access and operating decisions remain
-unapproved. The owner explicitly defers that provisioning/activation. The five built
-local release browser cases run in 18A; they do not certify TLS ingress, Telegram
-mobile WebViews or staging. Add an environment-protected staged E2E gate during
-authorized 18B work; do not add a passing placeholder now.
+Phase 18B1 supplies portable local image candidates and actual CI build/scan/smoke
+gates. Hosted staged E2E/environment protection/publication remains unperformed
+and outside this task's external authority. Approved personal 18B3 now has a real
+[owner-SSH acceptance gate](runbooks/private-operator.md#exact-personal-staging-acceptance-gate):
+ten hash-bound native/E2E/rollback/availability/header reports, normal fresh eight
+image gates and current private/public probes. This is protected by owner SSH,
+not a claim of hosted environment approval rules. No CI secret or production
+credential is added. Local five-case ordinary MVP browser evidence and actual
+personal staging evidence retain different scopes. Phase 19 review is Completed
+with **HOLD**; even Completed phase statuses cannot grant production release.
+ADR-041 and the normal hosted release requirements above remain enforced.
 
 ## Local verification
 

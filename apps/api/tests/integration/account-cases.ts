@@ -53,6 +53,7 @@ export function accountIntegrationCases(admin: ReturnType<typeof createDatabase>
       expect(result.account.userId).toMatch(/^[0-9a-f-]{36}$/);
       expect(await createUserIdentityPort(b).findActiveByTelegramId("6001")).toEqual({
         userId: result.account.userId,
+        registrationCompleted: false,
       });
       const row = await admin
         .forModule("users")

@@ -17,6 +17,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import {
   createBotInternalHttpModule,
+  botExperiencePaths,
   sendRateDecision,
   type BotServiceAuthenticator,
   type BotServiceContext,
@@ -53,6 +54,10 @@ export async function createBotInternalHttpApplication(options: {
     },
   });
   const server = adapter.getInstance();
+  server.addHook("onRoute", (route) => {
+    if ((Object.values(botExperiencePaths) as readonly string[]).includes(route.url))
+      route.bodyLimit = 32768;
+  });
   const settled = trackHttpWork(server);
   server.server.headersTimeout = 10000;
   const contexts = new WeakMap<FastifyRequest, BotServiceContext>();

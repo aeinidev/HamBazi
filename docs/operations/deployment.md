@@ -1,5 +1,13 @@
 # Portable deployment preparation
 
+> Current staging admits the unchanged owner and one verified ordinary tester
+> under [ADR-058](../adr/058-narrow-staging-regular-test-user.md). See the
+> [current binding](../../infra/docker/staging/staging-test-user-current.json) and
+> [operation/retest instructions](staging-test-user.md). Public admission remains
+> disabled; registration is required and support goes to the original owner.
+> Earlier onboarding/closure/native/rollback evidence below is historical and
+> applies only to its recorded source. Production remains HOLD.
+
 [ADR-043](../adr/043-portable-deployment-preparation.md) covers Phase 18B2.
 This prepares application assets and local evidence. It does not approve a
 provider, region, domain, access model, backup/PITR, recovery objective, retention
@@ -19,6 +27,22 @@ not passed. Production recovery requirements and all other release gates remain.
 The worksheet now distinguishes these supplied decisions from actual missing
 `prepare.mjs` values and private references. No Mini App short name is required
 by the portable input schema or Bot HTTPS Web-URL configuration.
+
+## Current approved personal result
+
+Under [ADR-056](../adr/056-personal-staging-closure-and-production-hold.md), actual
+18B3/parent 18B acceptance is Completed for the owner-only disposable target,
+and Phase 19 review is Completed with public release **HOLD**. Real iPhone
+acceptance, actual compatible migration/rollback/PG/Redis drills and current
+health/TLS/headers/isolation pass. The private read-only acceptance CLI binds exact
+reports/images/configuration and reuses valid unchanged evidence; it does not
+prove hosted CI protection. The Web-header duplicate repair passed actual Nginx
+parse/reload and six exact single-value headers without rebuilding applications.
+Backup remains excluded/unperformed/not passed; normal eight-image scan expiry
+is **2026-10-09 22:35:21 Tehran**. Refresh scans or retain automatic containment.
+Broader public activation/production/paid/destructive/Telegram restrictions stand.
+See the [Phase 19 matrix](../implementation-plan.md#phase-19--final-definition-of-done-and-release-readiness-review)
+and [actual binding](../../infra/docker/staging/execution-current.json).
 
 ## Inputs and validation
 
@@ -204,7 +228,7 @@ approved decisions and distinguishes passed evidence from remaining full rotatio
 protected hosted CI/publication/E2E, production-like validation and broader recovery.
 ADR-050 backup/PITR recovery is excluded/unperformed, never passed. Ordinary Admin/
 Room/Main invitations/Telegram Web and later phases remain gated. Normal fresh
-scans are required before expiry (Oct 9 22:35:21 Tehran); full 18B3 is incomplete.
+scans are required before expiry (Oct 9 22:35:21 Tehran). Applicable personal 18B3 is now Completed under ADR-056; broader production acceptance remains unperformed.
 
 - OD-002 provider/region and explicit domains/access/provisioning authorization.
 - OD-006 backup/PITR, RPO/RTO, retention, secure archive access and actual recovery
@@ -221,5 +245,4 @@ scans are required before expiry (Oct 9 22:35:21 Tehran); full 18B3 is incomplet
   reconnect storm, at least two-hour soak and complete durable reconciliation
   remain deferred validation; no production performance acceptance is claimed.
 
-Parent 18B cannot complete on these local results. No provider-specific staging
-provisioning/activation is authorized by a successful preparation file.
+These local preparation results alone do not complete staging. Later actual personal staging acceptance closes parent 18B only in the approved ADR-056 scope. A successful preparation file still never authorizes provisioning/activation or production release.

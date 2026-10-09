@@ -2,11 +2,63 @@ import { describe, it, expect, vi } from "vitest";
 import { createDeliveryHandler } from "../../src/delivery.js";
 import { RetryDelivery } from "../../src/backend.js";
 import { fixture, raw, delivery } from "./fixtures.js";
+import { SupportDeliveryError } from "../../src/telegram.js";
 describe("commit/send/ack orchestration", () => {
+  it.each(["DELIVERED", "FAILED", "UNKNOWN"] as const)(
+    "persists %s support outcome without premature user confirmation",
+    async (outcome) => {
+      const f = fixture();
+      const sendSupport = vi.fn(async () => {
+        if (outcome !== "DELIVERED") throw new SupportDeliveryError(outcome);
+        return 901;
+      });
+      const support = {
+        ...delivery,
+        data: { submissionId: delivery.receiptId },
+        reply: "SUPPORT_DISPATCH" as const,
+        submissionId: delivery.receiptId,
+        attemptVersion: 1,
+        adminChatId: "100",
+        text: "Submitted text",
+      };
+      f.backend.process.mockResolvedValue({
+        ok: true,
+        schemaVersion: 1,
+        status: "SUPPORT",
+        delivery: support,
+      });
+      const ownerAdmission = {
+        telegramId: async () => "100",
+        admittedTelegramIds: async () => ["100"],
+        allowsTelegramId: async () => true,
+        allowsUserId: async () => true,
+      };
+      await expect(
+        createDeliveryHandler({ ...f, sender: { ...f.sender, sendSupport }, ownerAdmission })(
+          raw(),
+          AbortSignal.timeout(1000),
+        ),
+      ).rejects.toThrow(RetryDelivery);
+      expect(f.sender.send).not.toHaveBeenCalled();
+      expect(sendSupport).toHaveBeenCalledOnce();
+      expect(f.backend.acknowledge).toHaveBeenCalledWith(
+        {
+          schemaVersion: 1,
+          kind: "SUPPORT",
+          submissionId: support.submissionId,
+          attemptVersion: 1,
+          outcome,
+          ...(outcome === "DELIVERED" ? { messageId: 901 } : {}),
+        },
+        expect.any(AbortSignal),
+      );
+    },
+  );
   it("denies non-owner original senders before backend and Telegram effects", async () => {
     const f = fixture();
     const ownerAdmission = {
       telegramId: async () => "101",
+      admittedTelegramIds: async () => ["101"],
       allowsTelegramId: vi.fn(async () => false),
       allowsUserId: async () => false,
     };
@@ -19,6 +71,7 @@ describe("commit/send/ack orchestration", () => {
     const f = fixture();
     const ownerAdmission = {
       telegramId: async () => "100",
+      admittedTelegramIds: async () => ["100"],
       allowsTelegramId: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
       allowsUserId: async () => false,
     };

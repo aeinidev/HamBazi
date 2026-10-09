@@ -7,11 +7,14 @@ import type { CatalogRate } from "./catalog-rate.js";
 import { catalogResponseSchema, gameResponseSchema } from "./catalog-contract.js";
 export interface CatalogHttpDependencies {
   catalog: CatalogPort;
-  authenticate(
-    token: string,
-  ): Promise<
+  authenticate(token: string): Promise<
     | { ok: true; userId: string }
-    | { ok: false; error: { code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" } }
+    | {
+        ok: false;
+        error: {
+          code: "UNAUTHENTICATED" | "REGISTRATION_REQUIRED" | "INVALID_INPUT" | "INTERNAL_ERROR";
+        };
+      }
   >;
   rate: CatalogRate;
   degraded(requestId: string): void;
@@ -19,19 +22,26 @@ export interface CatalogHttpDependencies {
 export function createCatalogHttpModule(deps: CatalogHttpDependencies) {
   function fail(
     reply: FastifyReply,
-    code: "UNAUTHENTICATED" | "INVALID_INPUT" | "INTERNAL_ERROR" | "NOT_FOUND",
+    code:
+      | "UNAUTHENTICATED"
+      | "REGISTRATION_REQUIRED"
+      | "INVALID_INPUT"
+      | "INTERNAL_ERROR"
+      | "NOT_FOUND",
   ) {
     return reply
       .code(
-        code === "UNAUTHENTICATED"
+        code === "REGISTRATION_REQUIRED"
           ? 401
-          : code === "INVALID_INPUT"
-            ? 400
-            : code === "NOT_FOUND"
-              ? 404
-              : 503,
+          : code === "UNAUTHENTICATED"
+            ? 401
+            : code === "INVALID_INPUT"
+              ? 400
+              : code === "NOT_FOUND"
+                ? 404
+                : 503,
       )
-      .send(createErrorEnvelope(code));
+      .send(createErrorEnvelope(code === "REGISTRATION_REQUIRED" ? "UNAUTHENTICATED" : code));
   }
   async function read(req: FastifyRequest, reply: FastifyReply, detail: boolean) {
     try {

@@ -259,5 +259,5 @@ it("runtime packages explicitly include compiled exports while omitting tests an
     expect(
       JSON.parse(await readFile(new URL(`../../${path}/package.json`, import.meta.url), "utf8"))
         .files,
-    ).toEqual(["dist"]);
+    ).toEqual(path === "apps/bot" ? ["dist", "assets"] : ["dist"]);
 });

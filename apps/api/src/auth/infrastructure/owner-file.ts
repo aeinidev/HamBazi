@@ -1,10 +1,10 @@
 import { constants } from "node:fs";
 import { open } from "node:fs/promises";
 import { isAbsolute } from "node:path";
-import { parseOwnerAdmissionPolicy } from "@hambazi/config";
+import { parseOwnerAdmissionPolicy, parseStagingTestAdmissionPolicy } from "@hambazi/config";
 
 /** No cache: every authentication sees permission/content removal. Unlinked bind inodes deny. */
-export function ownerFileSource(path: string) {
+export function ownerFileSource(path: string, testUser = false) {
   if (!isAbsolute(path)) throw new Error("OWNER_ADMISSION_CONFIGURATION_INVALID");
   return async () => {
     const file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
@@ -22,7 +22,11 @@ export function ownerFileSource(path: string) {
       const current = await file.stat();
       if (current.nlink !== 1 || (current.mode & 0o077) !== 0 || current.size !== bytes.length)
         throw new Error("OWNER_ADMISSION_POLICY_INVALID");
-      return parseOwnerAdmissionPolicy(bytes.toString("utf8")).reveal();
+      return (
+        (testUser ? parseStagingTestAdmissionPolicy : parseOwnerAdmissionPolicy)(
+          bytes.toString("utf8"),
+        ).reveal() || undefined
+      );
     } finally {
       await file.close();
     }

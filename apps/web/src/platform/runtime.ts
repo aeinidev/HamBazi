@@ -22,6 +22,7 @@ export interface State {
   telegramDiagnostics: TelegramDiagnostics | null;
   session: Session | null;
   expired: boolean;
+  registrationRequired: boolean;
   connection: Connection;
   snapshot: Snapshot | null;
   resyncNeeded: boolean;
@@ -56,6 +57,7 @@ export function createRuntime(
       : null,
     session: null,
     expired: false,
+    registrationRequired: false,
     connection: "offline",
     snapshot: null,
     resyncNeeded: false,
@@ -106,7 +108,7 @@ export function createRuntime(
     try {
       const epoch = generation;
       const result = await http(
-        "/v1/auth/telegram-mini-app",
+        "/v1/auth/telegram-mini-app/registered-session",
         issuedSchema,
         { schemaVersion: 1, commandId, initData },
         "POST",
@@ -116,7 +118,7 @@ export function createRuntime(
       if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
       clear();
       token = result.accessToken;
-      store.setState({ session: result.session, expired: false });
+      store.setState({ session: result.session, expired: false, registrationRequired: false });
       authDiagnostic("authenticated");
       timer = setTimeout(
         () => clear(true),
@@ -137,6 +139,10 @@ export function createRuntime(
         error: (realtimeError) => store.setState({ realtimeError }),
       });
     } catch (error) {
+      if (error instanceof ClientError && error.code === "REGISTRATION_REQUIRED") {
+        clear();
+        store.setState({ registrationRequired: true });
+      }
       authDiagnostic(
         "failed",
         diagnosticErrorCode(error instanceof ClientError ? error.code : undefined),

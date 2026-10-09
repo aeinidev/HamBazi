@@ -11,3 +11,6 @@ export { profileOpenApiDocument } from "./infrastructure/profile-contract.js";
 
 export { createPublicNamesPort } from "./module.js";
 export type { PublicNamesPort } from "./application/public-names.js";
+
+export { createRegistrationPort } from "./module.js";
+export type { RegistrationPort, RegistrationProfile } from "./application/registration.js";

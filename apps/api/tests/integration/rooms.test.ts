@@ -7,7 +7,11 @@ import { initData, signing, telegram } from "../auth/session-fixtures.js";
 import { parseRoomStartParam } from "@hambazi/contracts";
 import { createRoomsPort, createRoomsRate } from "../../src/rooms/index.js";
 import { createRoomsRepository } from "../../src/rooms/infrastructure/repositories/rooms.js";
-import { createAccountCreationPort, createUserIdentityPort } from "../../src/users/index.js";
+import {
+  createAccountCreationPort,
+  createUserIdentityPort,
+  createRegistrationPort,
+} from "../../src/users/index.js";
 import { createCatalogPort, type CatalogPort } from "../../src/games/index.js";
 if (
   process.env.TEST_DATABASE_CONFIRM !== "isolated-hambazi-test" ||
@@ -907,11 +911,17 @@ it("preserves a signed invite through real account/session persistence and authe
   const startParam = new URL(f.invitation.invite.deepLink).searchParams.get("startapp")!;
   const signed = initData(++seq, f.clock.value / 1000, startParam);
   expect(await auth.issue(signed, randomUUID())).toMatchObject({
-    error: { code: "UNAUTHENTICATED" },
+    error: { code: "REGISTRATION_REQUIRED" },
   });
   const created = await onboarding.create(signed, randomUUID(), "Invite newcomer");
   if (!created.ok) throw new Error("Synthetic account failed");
   expect(created.startParam).toBe(startParam);
+  expect(await auth.issue(signed, randomUUID())).toMatchObject({
+    error: { code: "REGISTRATION_REQUIRED" },
+  });
+  expect(
+    await createRegistrationPort(a, f.clock).complete(String(seq), "Invite newcomer"),
+  ).toMatchObject({ ok: true });
   expect(await f.first.read(created.account.userId, f.roomId)).toMatchObject({
     error: { code: "NOT_FOUND" },
   });
