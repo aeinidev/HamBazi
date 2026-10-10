@@ -21,8 +21,25 @@ export function failure(value: unknown): ClientError | undefined {
     return new ClientError("INVALID_RESPONSE");
   return new ClientError(error.code, "retryable" in error && error.retryable === true);
 }
-export function errorMessage(error: unknown) {
+export function errorMessage(error: unknown, language?: "fa") {
   const code = error instanceof ClientError ? error.code : "INTERNAL_ERROR";
+  if (language === "fa") {
+    const persian: Record<string, string> = {
+      REGISTRATION_REQUIRED: "برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.",
+      UNAUTHENTICATED: "نشستت پایان یافته است. مینی‌اپ را دوباره از ربات باز کن.",
+      NOT_FOUND: "این بازی یا حساب در دسترس نیست.",
+      FORBIDDEN: "این کار برای حساب تو در دسترس نیست.",
+      INVALID_INPUT: "اطلاعات را بررسی کن و دوباره تلاش کن.",
+      RATE_LIMITED: "درخواست‌ها زیاد شده‌اند. کمی صبر کن و دوباره تلاش کن.",
+      PROFILE_CONFLICT: "پروفایل تغییر کرده است. پیش از ویرایش دوباره آن را بارگذاری کن.",
+      GAME_STATE_CONFLICT: "وضعیت بازی تغییر کرده است. میز را دوباره همگام کن.",
+      GAME_UNAVAILABLE: "این بازی فعلاً در دسترس نیست.",
+      NETWORK_ERROR: "ارتباط قطع شد. با تلاش دوباره، نتیجهٔ همان درخواست بررسی می‌شود.",
+      INVALID_RESPONSE: "پاسخ سرور قابل خواندن نبود. دوباره تلاش کن.",
+      INCOMPATIBLE_GAME_VERSION: "برای این بازی، نسخهٔ تازهٔ مینی‌اپ لازم است.",
+    };
+    return persian[code] ?? "سرویس فعلاً در دسترس نیست. کمی بعد دوباره تلاش کن.";
+  }
   const messages: Record<string, string> = {
     REGISTRATION_REQUIRED: "برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.",
     UNAUTHENTICATED: "Your session ended. Reopen this app from Telegram to sign in again.",

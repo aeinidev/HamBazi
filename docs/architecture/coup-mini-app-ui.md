@@ -1,5 +1,8 @@
 # Coup Mini App UI — Phase 14B
 
+The restricted personal-game scope now has a [Midnight lobby and entry](midnight-personal-lobby.md).
+Its static pages reuse this existing table; ordinary catalog activation remains gated.
+
 The Match screen passes the latest versioned server snapshot to the Coup UI.
 The game adapter validates the exact `coup-v1` / state schema 4 /
 `coup-provisional-complete-v1` / view schema 1 public projection and requires

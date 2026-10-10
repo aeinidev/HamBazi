@@ -9,6 +9,7 @@ import {
   type TelegramLoaderState,
 } from "./platform/telegram-diagnostics.js";
 import "./styles.css";
+import "./ui/midnight.css";
 const launchDataPresent = hasTelegramLaunchData(window.location.href);
 let sdkState: TelegramLoaderState = "sdk-error";
 let disposed = false;

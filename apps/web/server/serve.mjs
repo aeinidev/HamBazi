@@ -14,6 +14,7 @@ const mime = Object.freeze({
   png: "image/png",
   webp: "image/webp",
   woff2: "font/woff2",
+  ttf: "font/ttf",
 });
 const invalid = () => {
   throw new Error("WEB_STATIC_CONFIGURATION_INVALID");

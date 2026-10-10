@@ -23,13 +23,21 @@ export function Panel({ title, children }: { title: string; children: ReactNode 
     </section>
   );
 }
-export function ErrorNotice({ error, retry }: { error: unknown; retry?: () => void }) {
+export function ErrorNotice({
+  error,
+  retry,
+  language,
+}: {
+  error: unknown;
+  retry?: () => void;
+  language?: "fa" | undefined;
+}) {
   return (
     <div className="notice error" role="alert">
-      <p>{errorMessage(error)}</p>
+      <p>{errorMessage(error, language)}</p>
       {retry && (
         <button className="secondary" onClick={retry}>
-          Retry
+          {language === "fa" ? "تلاش دوباره" : "Retry"}
         </button>
       )}
     </div>
@@ -42,7 +50,7 @@ export function Loading() {
     </p>
   );
 }
-export function useTask() {
+export function useTask(language?: "fa") {
   const operation = useRef<(() => Promise<void>) | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -78,6 +86,7 @@ export function useTask() {
     notice: error ? (
       <ErrorNotice
         error={error}
+        language={language}
         {...(operation.current
           ? {
               retry: () => {

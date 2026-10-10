@@ -8,7 +8,7 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
   const expired = useSession((s) => s.expired);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
-  const task = useTask();
+  const task = useTask(runtime.scope === "owner-auth" ? "fa" : undefined);
   const available = runtime.hasLaunch() && !expired;
   function submit() {
     const commandId = crypto.randomUUID();
@@ -49,6 +49,28 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
           >
             بازگشت به ربات
           </button>
+        </Panel>
+      </div>
+    );
+  if (runtime.scope === "owner-auth")
+    return (
+      <div className="welcome" lang="fa" dir="rtl">
+        <Panel title="ورود به هم‌بازی">
+          {!available ? (
+            <p>
+              {expired
+                ? "نشستت پایان یافته است. مینی‌اپ را دوباره از ربات باز کن."
+                : "برای ورود، مینی‌اپ هم‌بازی را از ربات تلگرام باز کن."}
+            </p>
+          ) : (
+            <>
+              <p role="status">{task.pending ? "در حال ورود…" : "با حساب تلگرام خودت وارد شو."}</p>
+              <button disabled={task.blocked} onClick={submit}>
+                {task.pending ? "در حال ورود…" : "ورود با تلگرام"}
+              </button>
+            </>
+          )}
+          {task.notice}
         </Panel>
       </div>
     );

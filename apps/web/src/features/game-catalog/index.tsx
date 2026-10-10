@@ -203,3 +203,4 @@ export function LobbyScreen({ slug }: { slug: string }) {
     <Lobby key={query.data.game.id} game={query.data.game} />
   );
 }
+export { PersonalLobbyShell } from "./personal-shell.js";

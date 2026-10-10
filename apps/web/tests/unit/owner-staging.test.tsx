@@ -45,8 +45,8 @@ describe("temporary staging account scope", () => {
     ]);
     runtime.dispose();
   });
-  it("keeps public gameplay navigation closed and offers only personal bot tests", () => {
-    vi.stubGlobal("window", { location: { hash: `#/match/${id}` } });
+  it("opens the private lobby without public gameplay navigation or realtime", () => {
+    vi.stubGlobal("window", { location: { hash: "" } });
     const runtime = createRuntime(
       "https://api-staging.hambazi.top",
       "",
@@ -63,14 +63,39 @@ describe("temporary staging account scope", () => {
     });
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
-    expect(html).toContain("Synthetic owner");
-    expect(html).toContain("Invitations are unavailable");
-    expect(html).toContain("Start game with bot");
-    expect(html).toContain("Personal test results do not enter leaderboards");
-    expect(html).toContain("Sign out");
+    expect(html).toContain("بازی‌ها");
+    expect(html).toContain("کودتا، فعال");
+    expect(html).toContain("حکم، به‌زودی");
+    expect(html).toContain("منچ، به‌زودی");
+    expect(html.match(/disabled=""/g)).toHaveLength(2);
     expect(html).not.toContain('aria-label="Main navigation"');
     expect(html).not.toContain("Reconnect");
     expect(html).not.toContain("Match session");
     runtime.dispose();
   });
+  it.each(["/games", "/games/coup", "/games/coup/tutorial", "/games/coup/play", "/settings"])(
+    "guards direct route %s before registration without creating a profile",
+    (hash) => {
+      vi.stubGlobal("window", { location: { hash: `#${hash}` } });
+      const fetcher = vi.fn(),
+        factory = vi.fn();
+      const runtime = createRuntime(
+        "https://api-staging.hambazi.top",
+        "",
+        fetcher,
+        factory,
+        "owner-auth",
+      );
+      runtime.store.setState({ registrationRequired: true });
+      vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
+      const html = renderToStaticMarkup(<App runtime={runtime} />);
+      expect(html).toContain("بازگشت به ربات");
+      expect(html).not.toContain("coup-entry-options");
+      expect(html).not.toContain("midnight-catalog");
+      expect(html).not.toContain("midnight-personal-game");
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(factory).not.toHaveBeenCalled();
+      runtime.dispose();
+    },
+  );
 });

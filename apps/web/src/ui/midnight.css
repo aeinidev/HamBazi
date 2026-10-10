@@ -1,0 +1,529 @@
+@font-face {
+  font-family: "HamBazi Display";
+  src: url("/assets/midnight/HamBaziDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html:has(.midnight-shell) {
+  background: #020716;
+  color-scheme: dark;
+}
+.midnight-shell {
+  --bg: #030b20;
+  --panel: #07152c;
+  --ink: #edf1fa;
+  --muted: #c0cde0;
+  --line: #405273;
+  --accent: #edc46c;
+  --wash: #12233f;
+  --gold: #edc46c;
+  --display: "HamBazi Display", Tahoma, "Segoe UI", sans-serif;
+  position: relative;
+  isolation: isolate;
+  max-width: 600px;
+  min-height: var(--telegram-height, 100dvh);
+  padding: max(0.35rem, var(--telegram-top, 0px), env(safe-area-inset-top))
+    max(0.9rem, var(--telegram-right, 0px), env(safe-area-inset-right))
+    max(1.6rem, var(--telegram-bottom, 0px), env(safe-area-inset-bottom))
+    max(0.9rem, var(--telegram-left, 0px), env(safe-area-inset-left));
+  color: var(--ink);
+  background: radial-gradient(ellipse at 50% 5%, #102b58 0, #050f29 44%, #020817 100%);
+}
+.midnight-shell::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 65px 0 0;
+  opacity: 0.28;
+  background:
+    linear-gradient(#030b20aa, #030b20f5 68%),
+    url("/assets/midnight/coup-art.webp") center top / auto 610px no-repeat;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.midnight-shell main {
+  padding: 0;
+}
+.midnight-shell main:focus {
+  outline: none;
+}
+.midnight-shell h1,
+.midnight-shell h2,
+.midnight-shell .tile-title,
+.midnight-shell .tile-badge,
+.midnight-shell button {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.midnight-shell h1 {
+  line-height: 1.6;
+}
+.midnight-shell h2 {
+  line-height: 1.65;
+  font-size: 1.6rem;
+}
+.midnight-shell :focus-visible {
+  outline: 3px solid #fff3ba;
+  outline-offset: 4px;
+}
+.midnight-header {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  direction: ltr;
+  align-items: center;
+  gap: 8px;
+  padding: 0.3rem 0 0.8rem;
+  margin-bottom: 12px;
+  position: relative;
+}
+.midnight-header::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #c48b33 15%,
+    #ffe4a0 50%,
+    #c48b33 85%,
+    transparent
+  );
+}
+.midnight-brand {
+  font-family: var(--display);
+  font-size: clamp(27px, 8vw, 43px);
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: none;
+  color: #ffe3a0;
+  background: linear-gradient(#fff1bb, #f0c36b 60%, #d49b3e);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 8px #03081a60;
+}
+.midnight-square {
+  min-height: 44px;
+  width: 44px;
+  padding: 8px;
+  border: 1px solid #e1b665;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #111a2a, #020817);
+  color: #ffe2a2;
+  box-shadow:
+    inset 0 0 0 2px #000a,
+    0 2px 6px #0005;
+}
+.midnight-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.midnight-square .midnight-icon {
+  width: 27px;
+  height: 27px;
+}
+.lobby-intro {
+  text-align: center;
+  padding: 8px 0 14px;
+}
+.display-title {
+  color: #ffe4a1;
+  font-size: clamp(36px, 10vw, 58px);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.display-title::before,
+.display-title::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, #edc46c);
+}
+.display-title::after {
+  transform: rotate(180deg);
+}
+.gold-divider {
+  color: #edc46c;
+  font-size: 22px;
+  line-height: 1;
+  width: 60%;
+  margin: -2px auto 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.gold-divider::before,
+.gold-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #dcb054);
+}
+.gold-divider::after {
+  transform: rotate(180deg);
+}
+.lobby-intro p {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(20px, 5.5vw, 29px);
+  margin: 5px 0 0;
+  color: #e1e9f6;
+}
+.midnight-catalog {
+  display: grid;
+  gap: 16px;
+}
+.midnight-game-tile {
+  display: block;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border: 0;
+  border-radius: 21px;
+  color: var(--gold);
+  overflow: visible;
+}
+.ornate-frame {
+  position: relative;
+  border: 2px solid currentColor;
+  border-radius: 21px;
+  background: #06112a;
+  box-shadow:
+    inset 0 0 0 2px #08142c,
+    inset 0 0 0 3px currentColor,
+    0 0 10px #e3b96235;
+}
+.midnight-game-tile .ornate-frame {
+  overflow: hidden;
+}
+.filigree {
+  width: 34px;
+  height: 34px;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  pointer-events: none;
+}
+.corner {
+  position: absolute;
+  z-index: 2;
+}
+.top-left {
+  left: 5px;
+  top: 5px;
+}
+.top-right {
+  right: 5px;
+  top: 5px;
+  transform: rotate(90deg);
+}
+.bottom-right {
+  right: 5px;
+  bottom: 5px;
+  transform: rotate(180deg);
+}
+.bottom-left {
+  left: 5px;
+  bottom: 5px;
+  transform: rotate(270deg);
+}
+.midnight-game-tile img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.featured img {
+  aspect-ratio: 1.6;
+  object-fit: cover;
+  object-position: 50% 54%;
+}
+.tile-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.featured .tile-caption {
+  direction: ltr;
+  position: relative;
+  padding: 1px 22px 4px;
+  min-height: 60px;
+  gap: 12px;
+  border-top: 1px solid #bb8d33;
+  background: linear-gradient(105deg, #030b20, #0c2045, #030b20);
+}
+.tile-title {
+  line-height: 1.4;
+  font-size: clamp(34px, 10vw, 52px);
+  color: #ffe2a0;
+}
+.featured .tile-title {
+  flex: 1;
+  padding-left: 42px;
+}
+.tile-badge {
+  display: inline-flex;
+  direction: rtl;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 0 14px;
+  border: 1px solid #e1bb62;
+  border-radius: 30px;
+  color: #f4f2dc;
+  background: #0a2442;
+  font-size: clamp(17px, 4.8vw, 24px);
+  line-height: 1.7;
+}
+.tile-arrow {
+  display: flex;
+  transform: rotate(180deg);
+}
+.tile-arrow .midnight-icon {
+  width: 21px;
+  height: 28px;
+  stroke-width: 3;
+}
+.midnight-game-tile:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  color: #bacbe2;
+}
+.coming-soon .ornate-frame {
+  box-shadow:
+    inset 0 0 0 2px #071429,
+    inset 0 0 0 3px #7686a4,
+    0 2px 7px #0009;
+  border-color: #b9c9de;
+  border-radius: 18px;
+}
+.coming-soon img {
+  aspect-ratio: 2.95;
+  object-fit: cover;
+  filter: saturate(0.12) brightness(0.79);
+}
+.coming-soon .tile-caption {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 42%;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 10px 7px;
+  background: linear-gradient(90deg, transparent, #05122baa 18%, #07142aca);
+}
+.coming-soon .tile-title {
+  color: #dce6f4;
+  font-size: clamp(32px, 9vw, 48px);
+}
+.coming-soon .tile-badge {
+  border-color: #c3cee3;
+  color: #dce6f4;
+  background: #040d21;
+  font-size: clamp(16px, 4.5vw, 23px);
+  padding: 0 9px;
+}
+.coming-soon .tile-badge .midnight-icon {
+  width: 16px;
+  height: 16px;
+}
+.midnight-coup-entry {
+  padding-top: 10px;
+}
+.coup-hero {
+  margin: 9px 2px 28px;
+  color: #f1cb79;
+}
+.coup-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px 18px 13px 13px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.hero-plaque {
+  position: relative;
+  width: 78%;
+  margin: -19px auto -18px;
+  border: 2px solid #e8bf69;
+  border-radius: 30px 30px 40px 40px;
+  background: linear-gradient(90deg, #041026, #0c1e41, #041026);
+  box-shadow:
+    inset 0 0 0 2px #040b18,
+    inset 0 0 0 3px #a47730;
+}
+.hero-plaque h1 {
+  font-size: clamp(36px, 11vw, 60px);
+  color: #ffe3a0;
+  margin: 0;
+  line-height: 1.5;
+  text-align: center;
+}
+.coup-entry-options {
+  display: grid;
+  gap: 14px;
+  margin: 32px 6px 12px;
+}
+.midnight-action {
+  position: relative;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 18px;
+  border: 2px solid #e9bc67;
+  border-radius: 19px;
+  font-size: clamp(25px, 8vw, 41px);
+  line-height: 1.5;
+  display: flex;
+  direction: ltr;
+  gap: 21px;
+  box-shadow:
+    inset 0 0 0 2px #071127,
+    inset 0 0 0 3px #be8d39,
+    0 2px 8px #000b;
+}
+.midnight-action span {
+  direction: rtl;
+}
+.midnight-action .midnight-icon {
+  width: 34px;
+  height: 34px;
+}
+.midnight-action.outlined {
+  color: #fff0c6;
+  background: linear-gradient(135deg, #0b1e3e, #041027);
+}
+.midnight-action.outlined .midnight-icon {
+  color: #f7ce77;
+}
+.midnight-action.filled {
+  color: #031127;
+  background: linear-gradient(115deg, #c58d39, #ffe6a0 34%, #f1c368 60%, #d6a145);
+  border-color: #ffe2a1;
+}
+.midnight-action:disabled {
+  opacity: 0.65;
+}
+.midnight-tutorial {
+  padding: 10px 5px 20px;
+}
+.midnight-tutorial h1,
+.midnight-settings h1 {
+  font-size: clamp(29px, 8vw, 43px);
+  color: #ffe1a1;
+  margin: 4px 0 10px;
+  text-align: center;
+}
+.tutorial-lead {
+  color: #d6e2f3;
+  text-align: center;
+}
+.midnight-tutorial section {
+  background: #07152bd9;
+  border: 1px solid #b8873b80;
+  border-radius: 15px;
+  padding: 15px 17px;
+  margin: 16px 0;
+}
+.midnight-tutorial h2 {
+  color: #f0cd83;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+.midnight-tutorial p,
+.midnight-tutorial li,
+.midnight-tutorial dd {
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.95;
+}
+.midnight-tutorial ul {
+  padding-inline-start: 20px;
+  margin-bottom: 0;
+}
+.midnight-tutorial li {
+  margin-block: 8px;
+}
+.midnight-tutorial dl {
+  margin: 0;
+}
+.midnight-tutorial dt {
+  font-weight: 700;
+  color: #f9dfaa;
+}
+.midnight-tutorial dd {
+  margin: 3px 0 16px;
+}
+.midnight-tutorial dd:last-child {
+  margin-bottom: 0;
+}
+.midnight-settings,
+.midnight-personal-game {
+  padding-top: 7px;
+}
+.midnight-settings .panel,
+.midnight-personal-game .panel {
+  margin-top: 8px;
+}
+.midnight-shell .panel {
+  border-color: #b78b4980;
+  background: #07152be8;
+}
+.midnight-shell .skip {
+  background: #07152b;
+  color: #fff0bf;
+}
+.midnight-shell .existing-coup-table button {
+  font-family: Tahoma, "Segoe UI", sans-serif;
+}
+.midnight-shell .handle {
+  font-family: Tahoma, "Segoe UI", sans-serif;
+}
+@media (min-width: 700px) {
+  .midnight-shell main {
+    max-width: none;
+  }
+}
+@media (max-width: 350px) {
+  .midnight-shell {
+    padding-inline: max(
+      11px,
+      var(--telegram-left, 0px),
+      var(--telegram-right, 0px),
+      env(safe-area-inset-left),
+      env(safe-area-inset-right)
+    );
+  }
+  .midnight-header {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 3px;
+  }
+  .featured .tile-caption {
+    gap: 8px;
+    padding-inline: 15px;
+  }
+  .featured .tile-title {
+    padding-left: 20px;
+  }
+  .tile-badge {
+    padding-inline: 10px;
+  }
+  .coming-soon .tile-caption {
+    width: 43%;
+    padding-inline: 7px;
+  }
+  .midnight-action {
+    gap: 14px;
+  }
+}

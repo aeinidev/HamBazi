@@ -1,4 +1,3 @@
-import { PersonalGame } from "./features/personal-game/index.js";
 import { LeaderboardScreen } from "./features/leaderboard/index.js";
 import { useEffect, useState } from "react";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -6,21 +5,12 @@ import type { Runtime } from "./platform/runtime.js";
 import type { TelegramApp } from "./platform/telegram.js";
 import { AuthScreen } from "./features/auth/index.js";
 import { ProfileScreen } from "./features/profile/index.js";
-import { CatalogScreen, LobbyScreen } from "./features/game-catalog/index.js";
+import { CatalogScreen, LobbyScreen, PersonalLobbyShell } from "./features/game-catalog/index.js";
 import { InviteScreen, RoomScreen } from "./features/room/index.js";
 import { MatchmakingScreen } from "./features/matchmaking/index.js";
 import { MatchScreen } from "./platform/match-screen.js";
 import { DirectCoupPreview } from "./dev/coup-preview.js";
-import {
-  RuntimeContext,
-  go,
-  useRuntime,
-  useSession,
-  useTask,
-  Panel,
-  Loading,
-  ErrorNotice,
-} from "./ui/shared.js";
+import { RuntimeContext, go, useRuntime, useSession } from "./ui/shared.js";
 import { profileSchema } from "./platform/contracts.js";
 function Shell({
   telegram,
@@ -33,8 +23,6 @@ function Shell({
 }) {
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
-  const ownerAuthOnly = runtime.scope === "owner-auth";
-  const task = useTask();
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
   const directPreview =
     preview &&
@@ -62,11 +50,11 @@ function Shell({
   useEffect(() => {
     const back = () => go("/games");
     telegram?.BackButton?.onClick(back);
-    if (!ownerAuthOnly && route !== "/games" && session) telegram?.BackButton?.show();
+    if (route !== "/games" && session) telegram?.BackButton?.show();
     else telegram?.BackButton?.hide();
     document.querySelector<HTMLElement>("main")?.focus();
     return () => telegram?.BackButton?.offClick(back);
-  }, [route, session, telegram, ownerAuthOnly]);
+  }, [route, session, telegram]);
   let screen = <CatalogScreen />;
   const path = route.split("/");
   if (path[1] === "leaderboard" && path[2])
@@ -96,7 +84,7 @@ function Shell({
           </span>
           HamBazi
         </a>
-        {session && !ownerAuthOnly && (
+        {session && (
           <span className="connection" role="status">
             <span className={`dot ${connection === "connected" ? "online" : ""}`} />
             {connection === "connected"
@@ -113,7 +101,7 @@ function Shell({
           <a href="#/preview/coup">Open Coup table</a>
         </div>
       )}
-      {session && !ownerAuthOnly && connection !== "connected" && (
+      {session && connection !== "connected" && (
         <div className="notice" role="status">
           Live connection unavailable. Your server session is preserved.{" "}
           <button className="text-button" onClick={() => runtime.realtime().retry()}>
@@ -124,38 +112,13 @@ function Shell({
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
         {directPreview ? (
           <DirectCoupPreview matchId={directCoupPreviewMatchId} />
-        ) : session && ownerAuthOnly ? (
-          <Panel title="Temporary owner staging">
-            <p className="notice">Owner access is enabled. Invitations are unavailable.</p>
-            {profile.isPending ? (
-              <Loading />
-            ) : profile.error ? (
-              <ErrorNotice
-                error={profile.error}
-                retry={() => {
-                  void profile.refetch();
-                }}
-              />
-            ) : (
-              <p dir="auto">{profile.data.displayName}</p>
-            )}
-            <PersonalGame />
-            <button
-              className="secondary"
-              disabled={task.blocked}
-              onClick={() => task.run(() => runtime.logout())}
-            >
-              Sign out
-            </button>
-            {task.notice}
-          </Panel>
         ) : session ? (
           screen
         ) : (
           <AuthScreen localPreview={preview} />
         )}
       </main>
-      {session && !ownerAuthOnly && (
+      {session && (
         <nav aria-label="Main navigation">
           <a aria-current={route.startsWith("/games") ? "page" : undefined} href="#/games">
             Games
@@ -193,11 +156,15 @@ export function App({
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
-        <Shell
-          telegram={telegram}
-          localPreview={localPreview}
-          directCoupPreviewMatchId={directCoupPreviewMatchId}
-        />
+        {runtime.scope === "owner-auth" ? (
+          <PersonalLobbyShell telegram={telegram} />
+        ) : (
+          <Shell
+            telegram={telegram}
+            localPreview={localPreview}
+            directCoupPreviewMatchId={directCoupPreviewMatchId}
+          />
+        )}
       </QueryClientProvider>
     </RuntimeContext.Provider>
   );

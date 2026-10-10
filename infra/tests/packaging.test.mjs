@@ -55,6 +55,10 @@ async function fixture() {
 }
 it("serves immutable assets with the reviewed CSP, no-store, MIME and HEAD semantics", async () => {
   const { directory, policy, environment } = await fixture();
+  const font = await readFile(
+    new URL("../../apps/web/public/assets/midnight/HamBaziDisplay-Regular.ttf", import.meta.url),
+  );
+  await writeFile(join(directory, "assets/HamBaziDisplay-Regular.ttf"), font);
   servers.push(await startStaticWeb(environment, directory));
   const origin = `http://127.0.0.1:${environment.WEB_PORT}`;
   const response = await fetch(origin);
@@ -66,6 +70,12 @@ it("serves immutable assets with the reviewed CSP, no-store, MIME and HEAD seman
   const head = await fetch(origin + "/assets/app.js", { method: "HEAD" });
   expect(head.headers.get("content-type")).toContain("text/javascript");
   expect(await head.text()).toBe("");
+  const fontResponse = await fetch(origin + "/assets/HamBaziDisplay-Regular.ttf");
+  expect(fontResponse.headers.get("content-type")).toBe("font/ttf");
+  expect(fontResponse.headers.get("content-security-policy")).toBe(
+    policy.headers["Content-Security-Policy"],
+  );
+  expect(Buffer.from(await fontResponse.arrayBuffer())).toEqual(font);
   const health = await fetch(`http://127.0.0.1:${environment.WEB_HEALTH_PORT}/v1/health/ready`);
   expect(await health.json()).toEqual({ schemaVersion: 1, status: "READY" });
   expect((await fetch(origin + "/v1/health/ready")).status).toBe(404);
