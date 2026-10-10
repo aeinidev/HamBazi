@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-10T09:24:56.714240+00:00",
-  "status": "restricted-staging-telegram-launch-presentation-verified-native-iphone-acceptance-pending",
+  "checkedAt": "2026-10-10T21:41:53.070073+00:00",
+  "status": "restricted-staging-game-table-anarchist-verified-native-iphone-acceptance-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,34 +10,34 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-game-table-anarchist-20261010",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010",
   "application": {
-    "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
+    "sourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "3d56a372e53278c6fec7f97d6ed3beceb280a44de9e375369689ded4577b1bdb",
-    "buildInputSha256": "4daa3418adff69cd60d9c46c6fef0f47fd4f7545a5156f2887f09f8946849258",
+    "sourceSnapshotSha256": "33c491cd3daaf2f03161f789d38ab8602c5d10c8d85158f9acccc57c15870eec",
+    "buildInputSha256": "700c1ba5fe23978ea3ec26050f8321a7a1c8be3d470112133a67c74744b679e6",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:ca3fe8c4c928d8a42e50d2de9d77fc0af246502423129bed65532de9301ad7ad"
+        "image": "hambazi-candidate/api:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:03d8fc62089621a1c41118e0d308e4f953a891c2667dbc73c8065bd2b46b0b23"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a66b05821072856a64bbbb7112e9bbf485880da4aba985597cc35333988b7f00"
+        "image": "hambazi-candidate/bot:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:a45bf91801204040a9bbdbd211bc46d6ca646410a63beecd4065bb3c202b28e9"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a9f1203376b89f4f789d47c8e728bfd90e45cf93df33c5d361af341c4d95357f"
+        "image": "hambazi-candidate/worker:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:9c6194641131db2028e3e3da6fe14feb80a5a03f5df3e4bfaaac78fa538f0456"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a5708114d95f2013e7efdb0a46464c9bae0492f4ae850dae38626876515b15dd"
+        "image": "hambazi-candidate/web:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:68d8c76ea63f43308c6b4e1dff43b0fe153b7557d03e86f84fcd7f1abb325c31"
       }
     ]
   },
-  "composeSha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39",
-  "inventorySha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1",
+  "composeSha256": "1074c89086da22610bfb42344e6282101d5350529518046699bea674e429e57a",
+  "inventorySha256": "6c1eaa29a50b78814276e3c3b27060d2269f37524913801c1383e121c8773221",
   "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
   "admission": {
     "ownerCount": 1,
@@ -75,7 +75,7 @@
     "testerMenuUsesVerifiedDefault": true,
     "menuReference": "https://core.telegram.org/bots/api#menubutton",
     "defaultAndPersianNativeDescriptionVerified": false,
-    "startReply": "برای ادامه، از دکمه‌های پایین استفاده کن.",
+    "startReply": "\u0628\u0631\u0627\u06cc \u0627\u062f\u0627\u0645\u0647\u060c \u0627\u0632 \u062f\u06a9\u0645\u0647\u200c\u0647\u0627\u06cc \u067e\u0627\u06cc\u06cc\u0646 \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u06a9\u0646.",
     "startPhotoCalls": 0,
     "webhookConfigured": true,
     "pendingUpdates": 0,
@@ -110,7 +110,7 @@
         "action": "START",
         "phase": "DONE",
         "reply": "WELCOME_REGISTERED",
-        "count": 7
+        "count": 8
       },
       {
         "action": "SUPPORT",
@@ -142,216 +142,265 @@
       "fa": "829cbc54adb46f7e7ac2f21eff237695d010d913f1a593964a63f722372f4436"
     },
     "nativeDescriptionTextsMatch": false,
-    "nativeDescriptionsModified": false
+    "nativeDescriptionsModified": false,
+    "testSupportSubmissions": 2
   },
   "securityScan": {
     "normalMaximumAgeHours": 24,
     "exactImagesPassed": 8,
     "database": {
-      "updatedAt": "2026-10-09T19:06:47.421531537Z",
-      "downloadedAt": "2026-10-09T21:48:21.465817257Z"
+      "updatedAt": "2026-10-10T12:33:35.352381306Z",
+      "downloadedAt": "2026-10-10T19:17:49.240995842Z",
+      "nextUpdate": "2026-10-11T12:33:35.352381125Z"
     },
-    "expiryAsiaTehran": "2026-10-10 22:36:47",
-    "evidenceExpiresAtUTC": "2026-10-10T19:06:47+00:00",
+    "expiryAsiaTehran": "2026-10-11 16:03:35",
+    "evidenceExpiresAtUTC": "2026-10-11T12:33:35+00:00",
     "expiryContainmentTimerEnabled": true,
-    "expiryNextTrigger": "Sat 2026-10-10 19:06:47 UTC",
+    "expiryNextTrigger": "Sun 2026-10-11 12:33:35 UTC",
     "freshnessExceptionUsed": false,
     "containmentDisabled": false,
     "containmentServiceUnchanged": true,
-    "timerDropInSha256": "7a3606e523d75e0a74496761eb6fd7d4b69abb9e6bc9f693b2aec8415cd10c06",
+    "containmentServiceSha256": "ef990122e8d007966cd3fcb24811098cb46e8aee4673ad25a96b1edab884cdc6",
+    "timerDropInSha256": "e4f9c5fc0e00ab42f79618b0b78bd7abcfb41ad8d70eff5d9e6d86df1cd8c77f",
     "freshnessWindowHours": 24,
     "staleEvidenceDeadlineExtended": false,
-    "scheduleUnchangedForLatencyCorrection": true,
-    "scheduleUnchangedForMidnightAndRequestCorrection": true,
-    "scheduleUnchangedForUniformLobbyCorrection": true,
-    "scheduleUnchangedForTelegramPresentation": true
+    "normalFreshScanRenewal": true,
+    "previousExpiryContainmentActivatedAtUTC": "2026-10-10T19:06:47+00:00",
+    "previousFourRolesStoppedGracefully": true
   },
   "verification": {
     "frozenLockfileInstall": true,
-    "formatLintArchitectureAndWebTypecheck": true,
-    "webUnitTests": 85,
-    "midnightBrowserCases": 38,
-    "newTelegramPresentationBrowserCases": 8,
+    "fullRootCheckRerun": true,
+    "formatLintArchitectureTypecheckAndBuild": true,
+    "engineTests": 91,
+    "webUnitTests": 86,
+    "midnightBrowserCases": 68,
     "existingBrowserCases": 28,
     "midnightBrowserEngines": ["chromium", "webkit"],
+    "isolatedPostgresRedisPersonalIntegrationPassed": true,
+    "actualBullMqV2WorkerPassed": true,
+    "durableRestartAndIdempotencyPassed": true,
+    "legacyMatchPinsRetained": true,
     "packagedSmokeChecks": 44,
     "packagedSmokeBrowserCases": 2,
+    "jpegMimeInventoryRegressionPassed": true,
     "secretsHistoryAndFiles": true,
     "dependencyAudit": true,
-    "backendAndPolicyByteEqualityFiles": 444,
-    "preexistingInstructionAndDocumentFilesUnchanged": 125,
-    "backendIntegrationEvidence": "Prior 395c6e7 evidence retained with exact backend/policy/lock equality; not rerun for Telegram presentation",
-    "fullRootCheckRerun": false,
+    "preexistingInstructionAndDocumentFilesUnchanged": 152,
     "compiledApiAndBotNumericAdmission": true,
+    "compiledBothEnginePinsAndPrivateProjectionIsolation": true,
     "publicRouting": "web 200; admin/internal/private health/ordinary catalog 404",
-    "deployedWebIdentity": "HTML/JS/CSS/SDK/font/artwork match actual packaged bytes",
+    "deployedWebIdentity": "HTML/JS/CSS/SDK/font/five supplied JPEGs/Anarchist match actual packaged bytes",
     "deployedBrowser": {
       "passed": true,
-      "syntheticAuthResponseOnly": true,
+      "syntheticSessionAndPublicViewOnly": true,
       "realAccountMutationExecuted": false,
       "chromium": "direct HTTPS",
       "webkit": "TLS-verified request adapter; not native Telegram",
       "nativeLaunchRequestDispatch": true,
       "fullscreenExitNotRetried": true,
-      "safeAreaPadding": true
+      "safeAreaPadding": true,
+      "tableSixSeatsAndRoleDetails": true,
+      "actualFontAndPortraitLoading": true
     },
     "noMigrationOrBackfill": true,
+    "nativeGameTableAcceptance": false,
     "nativeTelegramPresentationAcceptance": false,
-    "agentObservedNativeUI": false
+    "agentObservedNativeUI": false,
+    "preexistingTrackedMarkdownFilesUnchanged": 124,
+    "documentationBaselineCommit": "fe6009a",
+    "additionalEliminatedTargetRejectionCasePassed": true,
+    "closeoutTestTypecheckLintAndSecretsPassed": true
   },
   "operatorRunner": {
-    "preparationDirectory": "/opt/hambazi-staging/private/runner-8a3d319",
-    "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
+    "preparationDirectory": "/opt/hambazi-staging/private/runner-4b154f1",
+    "sourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
-  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
+  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/previous-current-binding.json",
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
-    "images.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json",
-      "sha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1"
-    },
-    "images.json.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json.scan.json",
-      "sha256": "8bf962c182b17b6cff8e4350ae61bcf2cf4544dbdc5ca4a1eb2233f27868e3d3"
-    },
-    "components.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/components.scan.json",
-      "sha256": "2aa5a1362d6d03b97c22672eceae9f1aa71f1254eec2b0db44d901c26fcc9244"
-    },
-    "data.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/data.scan.json",
-      "sha256": "11a6a4d54a06cc4fa7b228d054bf4ab737c21e35dc447fafd358b330519c4c01"
-    },
-    "scan-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/scan-binding.json",
-      "sha256": "096b66e79f747fa701fb1c825552bf1421c9447a66e78997ce39ec77453c38ea"
-    },
-    "preflight.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preflight.json",
-      "sha256": "58ca05901c43c4d85f63fb38eefbd006df3a0fc6ab890e101568eb1700d1c3e9"
-    },
-    "preparation-guards.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preparation-guards.json",
-      "sha256": "07ff87aecfba92d0e75a945eb7c30eca97441a2fed7d56b57e017f8ca1d4cb5f"
-    },
-    "renewed-preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/renewed-preparation.json",
-      "sha256": "261b6e48f48d088d9b5895e3987396e55789d8428a54683056f4be3d6aaa493c"
-    },
-    "capacity-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity-recovery.json",
-      "sha256": "e4b874890788718ece193665585d1bca8aa72fd692dacb473b768465c0adce70"
-    },
-    "capacity.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity.json",
-      "sha256": "7909f2ea3276fc8ee72a04ccf0524e79969b2a79b0358bd960a4486ea341b240"
-    },
-    "validation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/validation.json",
-      "sha256": "a36309e1d596a93d427f853f1cf351e065cf19256c53ab9ef408b990682545ea"
-    },
-    "migration.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/migration.json",
-      "sha256": "3c8f9b53db41d99dceb26eab0b7acba649ddeee84e961d361341ed382d1cc2d8"
-    },
-    "startup.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/startup.json",
-      "sha256": "5911399f1ef360e5c58ff4b894d48937c3627bf0c3f623246d6b726f9d61d90b"
-    },
-    "traffic-open.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/traffic-open.json",
-      "sha256": "e10cb588aee8b2e35ba99f10fde1ebf4101687dd1f0a50ce4151acb7a76e04c2"
-    },
-    "compiled-admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/compiled-admission.json",
-      "sha256": "e2dad09d89b80c1440c16159e75c7b05da3e39310d0396bf64d8a2d510b1e880"
-    },
-    "operational-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/operational-final.json",
-      "sha256": "b63b80cc170e38cbcd925aab6443ed902a4afa15525ffd0282fc20a65ca4aa47"
-    },
-    "public-routing.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/public-routing.json",
-      "sha256": "b5e19292a716249a41b6bfb45f4b00a6034e7824fa51b5062fc07c22cd455c36"
-    },
     "deployed-browser.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployed-browser.json",
-      "sha256": "79a63fc22cdca2c35a4082f427e4bdaa9c13b9edc4152be2f1d153ff22319de7"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/deployed-browser.json",
+      "sha256": "933081bd8fc5e16c38c7041ac31efb0c82506e008b73a2b609455e375d71dea2"
     },
     "previous-current-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
-      "sha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/previous-current-binding.json",
+      "sha256": "b4bd6eb08975aa29e7dc308b80007ad33c85ffa140068cdc646a4d956892622d"
+    },
+    "images.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json",
+      "sha256": "6c1eaa29a50b78814276e3c3b27060d2269f37524913801c1383e121c8773221"
+    },
+    "images.json.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json.scan.json",
+      "sha256": "fd6676731e0f5fe32a56d6e8c7f3e7bc547e510f1fb8a6a8cab6d45beab76112"
+    },
+    "components.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/components.scan.json",
+      "sha256": "c7c03da745f4fd1e20e06a5bc5d1dfd0eb76e1077c2117d00274b52df7f9f663"
+    },
+    "data.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/data.scan.json",
+      "sha256": "fb2ea7aeabe749d006ba165fd5935d0e3ddb5590fbe96335d48d79bee9948934"
+    },
+    "scan-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/scan-binding.json",
+      "sha256": "342e8bea92eb48357de39429a98af3063d792549a2cfdda3f15fd8c3a653596f"
+    },
+    "preflight.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preflight.json",
+      "sha256": "c0d9bf25d8bb845697b74d5c847618d90d644a694b236024ed945b71fb93496b"
+    },
+    "preparation-guards.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preparation-guards.json",
+      "sha256": "55c8d486aa979f4745a5553e795fd9bdee461782c604d98e834c4d81fb29ed92"
+    },
+    "normal-containment-renewal.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/normal-containment-renewal.json",
+      "sha256": "ca0bbe617061a4ed1f5aec96c1a5061b2a54f7d007c17c257239a377e4497d7d"
+    },
+    "renewed-preparation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/renewed-preparation.json",
+      "sha256": "e4337b30909c1c9c4cd88e5e30086c645ffbcdbbeb07abc801c21d8a92e117f0"
+    },
+    "capacity-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery.json",
+      "sha256": "54455e44a2eeda9b8bf728e2a3c413b1fb06454a88c6c36d2d90e7e011921cc3"
+    },
+    "capacity-recovery-55.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery-55.json",
+      "sha256": "364eb9707f4c5c470eade57d9f293ab119e69857407658496ff1e71405cd9368"
+    },
+    "rejected-candidate-removal.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-removal.json",
+      "sha256": "cec7269240b389e9cd29c50d87ee3da82a53620c640a3832a06869277c2af779"
+    },
+    "failed-db-capacity.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/failed-db-capacity.json",
+      "sha256": "7c1d0e168232c50d55f2fdb739f9b1c7d3359f91bfd176abc27287348ff23144"
+    },
+    "capacity.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity.json",
+      "sha256": "b6e7b4b3a8675fafa59a4c406155a9ffd15542734d7468e26ec9b20c4596f99d"
+    },
+    "validation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/validation.json",
+      "sha256": "7dcf05103cad5b2259a9f800ffab8b3c34a99403b0819d903bdb186252b1171c"
+    },
+    "migration.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/migration.json",
+      "sha256": "c892ca7894c6c1f306d8efdd757ae5c43ecebcdcda2c529a472ae3449eea0335"
+    },
+    "startup.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/startup.json",
+      "sha256": "12c6f37ff03351537614cfc2d073c71be2bb9193e2abbef837d5e56e173a7dfb"
+    },
+    "traffic-open.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/traffic-open.json",
+      "sha256": "646d8feefad5f5d90a1b9f962e639c559d9fb88ba2f8ae767270eb0dd93fb426"
+    },
+    "compiled-admission.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-admission.json",
+      "sha256": "858427330de72f66331734ceb3782dc4d33c80dfb955198751af6f9f032f58d2"
+    },
+    "compiled-pins.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-pins.json",
+      "sha256": "ab0e0e29b8fad7bd31c4ff161101d42a013fff8415be35e2f521da13063ccb15"
+    },
+    "operational-final.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/operational-final.json",
+      "sha256": "dff2bd2143b3f1569ffcef7e2bf8c82e2306a209bda4f3762a17ceaaab902526"
+    },
+    "public-routing.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/public-routing.json",
+      "sha256": "fb03d84355b50a7ea8088c0619eb65b9d43d57b4dcc6e5c3a73a3a35072be3b0"
+    },
+    "download-proof.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/download-proof.json",
+      "sha256": "86e2ce5eae39252e684a76f8e7dea638f80826614d58dfb7fdc40812c6f2b009"
     },
     "historical-local-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/historical-local-recovery.json",
-      "sha256": "834046a322a8990f550bc80621e809e9120e08cfd0c81204c4674d8c2cfbcf84"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-local-recovery.json",
+      "sha256": "528367e4c81cfd6aa488ab4f6921c26ba7b25217bb9a1ff83ddd98d8c30cb855"
     },
-    "format.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/format.log",
-      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    "historical-55-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-55-recovery.json",
+      "sha256": "72ff2b0d366d732df8226d0dc09ed7a0f283da3009935e91bdda84c04bf6b0fe"
     },
-    "lint.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/lint.log",
-      "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
+    "rejected-candidate-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-recovery.json",
+      "sha256": "21495d4d06c0ea1ca06a669fa6974f29013f84282b361ac6ba5df51ca73ec40f"
     },
-    "architecture.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/architecture.log",
-      "sha256": "7f7b2d8994dca17c12b6d8b07388aa7ef04d1be701697735daab9d691c31a6ad"
+    "root-check.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/root-check.log",
+      "sha256": "40769681b3723385aef789367b191d182f718de333faa18567eb7df55f794df3"
     },
-    "typecheck-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/typecheck-final.log",
-      "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
+    "integration.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/integration.log",
+      "sha256": "3f210a6b677119f9589abc734f3011b73fde358f1448f764107689297d595bea"
     },
-    "web-unit.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/web-unit.log",
-      "sha256": "2492e470891098c79a1e1adb0e9c7d0320e5b5c93acc90ff43cc8edb40d7dba2"
-    },
-    "midnight-browser-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/midnight-browser-final.log",
-      "sha256": "e4d3467c14c2c568e17fd443ccb178f74024800e176d379b38243b2d08677f2e"
-    },
-    "presentation-browser-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/presentation-browser-final.log",
-      "sha256": "4527551566286f01039a0091073736e57907a82da2c7596359cba0446b5bbcec"
+    "midnight-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/midnight-browser.log",
+      "sha256": "180209f3f5082595152bc637e07f29342d44203dba3213ed38c0a33f304e66d3"
     },
     "existing-browser.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/existing-browser.log",
-      "sha256": "697d3b9d0eadab8a2600a04074ef9e4731a2c526b77ac93040c9ba28d5ff807f"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/existing-browser.log",
+      "sha256": "43b5c580ebc7b94c8b767d944067f3638f19b23854dcd4b4698de14a344c321a"
+    },
+    "jpeg-tests.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-tests.log",
+      "sha256": "0cb9ec0c062a52d8a540c4015aa5758ffa16bedd3964b17310b9c35509fbaade"
+    },
+    "jpeg-lint.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-lint.log",
+      "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
     },
     "packaged-smoke.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/packaged-smoke.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/packaged-smoke.log",
       "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
     },
     "secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/secrets.log",
-      "sha256": "587088bb95dc4df10aa2afcdc0ede6416aa5c51059214a19b146041f37c51ed7"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/secrets.log",
+      "sha256": "ca92320a35630a1377fb7b839b4ffe558e3db24b9062f3c903b2cb7be79543b3"
     },
     "dependencies.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/dependencies.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/dependencies.log",
       "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
     },
     "unchanged-controls.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/unchanged-controls.json",
-      "sha256": "190785107a6b36bb2c79e060e35fece08931cdaf977ec27eb942114d4ed9156a"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/unchanged-controls.json",
+      "sha256": "a63bdb544972e73d7c7e5d9a84232368210d03d05af10940edcfa3afc6b014dd"
     },
-    "instruction-files-before.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/instruction-files-before.json",
-      "sha256": "6acf687999f8980a8b0fa78d8c3079bd6afe0f75e9f99f97164c6a6a5c3661b1"
+    "engine-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/engine-final.log",
+      "sha256": "be232bb175984de6c2c89d89665d1d1efc80998da56fdf617d9b32307153930f"
     },
-    "preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/preparation.json",
-      "sha256": "1f5c7ee62513bd91d6415619102e2bb24e47721a2638d6c79dc29130acd505c2"
+    "final-test-format.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/final-test-format.log",
+      "sha256": "760dce810b9233eac5c6be696e1c7681f4e34ace4b05423366c8cd290e0bf5c4"
     },
-    "compose.yaml": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/compose.yaml",
-      "sha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39"
+    "evidence-index.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/evidence-index.json",
+      "sha256": "ae66636be117f26de69462cf51a0259338776c764b6ed9f7e0d8efe0fd846473"
     },
-    "deployment-evidence.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployment-evidence.json",
-      "sha256": "8be389f719f0ee08c5b10622b3a2b6be4d2478f974383b593a08d92d7dc5e920"
+    "closeout-secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-secrets.log",
+      "sha256": "c360752836cdd02cfd282202010280cb71eb60be2e2457766e48ba2453dcc6da"
+    },
+    "closeout-lint.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "closeout-typecheck.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-typecheck.log",
+      "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
+    },
+    "closeout-format-focused.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-format-focused.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
     }
   },
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
@@ -541,7 +590,7 @@
       "passed": true
     }
   },
-  "previousBindingSha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479",
+  "previousBindingSha256": "b4bd6eb08975aa29e7dc308b80007ad33c85ffa140068cdc646a4d956892622d",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
     "frozenLockfileInstall": "passed",
@@ -944,15 +993,21 @@
     "userReportedUIAndNavigationSuccess": true
   },
   "capacity": {
-    "allFourCandidateLayersMaterializedBeforeMaintenance": true,
+    "allFourCandidateLayersMaterialized": true,
     "probeContainersStarted": false,
     "probeContainersRemoved": true,
-    "freeDiskBytesAtFinalAutomatedReadback": 1465384960,
-    "selectedPrevious395ImagesAndPreparationPreserved": true,
-    "exactUnreferencedHistoricalImagesRemovedForCapacity": 4,
-    "historicalSourceRemoved": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
-    "historicalCopiesRecoverableLocally": true,
-    "dataVolumesSecretsScanCacheAndContainmentUnchanged": true
+    "freeDiskBytesAtCapacityReadback": 1148067840,
+    "selectedPrevious8aImagesAndPreparationPreserved": true,
+    "exactUnreferencedHistoricalSourcesRemoved": [
+      "395c6e737fa55743aa29896508aa75d0e6a75fca",
+      "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0"
+    ],
+    "exactHistoricalImagesRemoved": 8,
+    "rejectedA60CandidateImagesRemoved": 4,
+    "recoverableLocalArchivesVerified": true,
+    "incompleteNewScannerTemporaryFilesRemoved": true,
+    "existingValidScanCacheAndDataVolumesPreserved": true,
+    "noGlobalPrune": true
   },
   "previousPersonalRequestDeployment": {
     "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
@@ -987,7 +1042,7 @@
       "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
       "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
       "userReportedSuccessful": true,
-      "response": "اوکیه",
+      "response": "\u0627\u0648\u06a9\u06cc\u0647",
       "questionCovered": [
         "close and reopen with Open",
         "start/finish personal Coup with normal moves",
@@ -1009,14 +1064,16 @@
     },
     "retainedAsSelectedPrevious": true
   },
-  "selectedPreviousPreparedDirectory": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010",
+  "selectedPreviousPreparedDirectory": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010",
   "historicalRollbackAcceptance": {
     "passed": false,
     "scope": "previous compatible 4d7db58 artifacts preserved; no new current-to-previous rollback drill is claimed; older exact-pair acceptance retains its own binding"
   },
   "rollbackAcceptance": {
     "passed": null,
-    "scope": "No rollback executed for this adapter correction; exact compatible 395c6e7 images and preparation retained"
+    "scope": "No rollback executed. Retained 8a artifacts cannot serve v2 pinned state/jobs; require a validated compatible repair retaining both adapters. Draining active matches alone is insufficient.",
+    "previousArtifactSupportsNewPins": false,
+    "oldOrNewPersistentStateRewritten": false
   },
   "uniformLobbyFraming": {
     "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
@@ -1081,5 +1138,288 @@
     "nativeAcceptanceStatus": "pending-real-iphone-success",
     "operationReport": "docs/operations/telegram-mini-app-presentation.md",
     "officialReference": "https://core.telegram.org/bots/webapps#initializing-mini-apps"
+  },
+  "previousTelegramPresentationDeployment": {
+    "checkedAt": "2026-10-10T09:24:56.714240+00:00",
+    "application": {
+      "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "3d56a372e53278c6fec7f97d6ed3beceb280a44de9e375369689ded4577b1bdb",
+      "buildInputSha256": "4daa3418adff69cd60d9c46c6fef0f47fd4f7545a5156f2887f09f8946849258",
+      "images": [
+        {
+          "role": "api",
+          "image": "hambazi-candidate/api:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:ca3fe8c4c928d8a42e50d2de9d77fc0af246502423129bed65532de9301ad7ad"
+        },
+        {
+          "role": "bot",
+          "image": "hambazi-candidate/bot:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a66b05821072856a64bbbb7112e9bbf485880da4aba985597cc35333988b7f00"
+        },
+        {
+          "role": "worker",
+          "image": "hambazi-candidate/worker:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a9f1203376b89f4f789d47c8e728bfd90e45cf93df33c5d361af341c4d95357f"
+        },
+        {
+          "role": "web",
+          "image": "hambazi-candidate/web:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a5708114d95f2013e7efdb0a46464c9bae0492f4ae850dae38626876515b15dd"
+        }
+      ]
+    },
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010",
+    "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010",
+    "composeSha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39",
+    "inventorySha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1",
+    "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
+    "securityScan": {
+      "normalMaximumAgeHours": 24,
+      "exactImagesPassed": 8,
+      "database": {
+        "updatedAt": "2026-10-09T19:06:47.421531537Z",
+        "downloadedAt": "2026-10-09T21:48:21.465817257Z"
+      },
+      "expiryAsiaTehran": "2026-10-10 22:36:47",
+      "evidenceExpiresAtUTC": "2026-10-10T19:06:47+00:00",
+      "expiryContainmentTimerEnabled": true,
+      "expiryNextTrigger": "Sat 2026-10-10 19:06:47 UTC",
+      "freshnessExceptionUsed": false,
+      "containmentDisabled": false,
+      "containmentServiceUnchanged": true,
+      "timerDropInSha256": "7a3606e523d75e0a74496761eb6fd7d4b69abb9e6bc9f693b2aec8415cd10c06",
+      "freshnessWindowHours": 24,
+      "staleEvidenceDeadlineExtended": false,
+      "scheduleUnchangedForLatencyCorrection": true,
+      "scheduleUnchangedForMidnightAndRequestCorrection": true,
+      "scheduleUnchangedForUniformLobbyCorrection": true,
+      "scheduleUnchangedForTelegramPresentation": true
+    },
+    "verification": {
+      "frozenLockfileInstall": true,
+      "formatLintArchitectureAndWebTypecheck": true,
+      "webUnitTests": 85,
+      "midnightBrowserCases": 38,
+      "newTelegramPresentationBrowserCases": 8,
+      "existingBrowserCases": 28,
+      "midnightBrowserEngines": ["chromium", "webkit"],
+      "packagedSmokeChecks": 44,
+      "packagedSmokeBrowserCases": 2,
+      "secretsHistoryAndFiles": true,
+      "dependencyAudit": true,
+      "backendAndPolicyByteEqualityFiles": 444,
+      "preexistingInstructionAndDocumentFilesUnchanged": 125,
+      "backendIntegrationEvidence": "Prior 395c6e7 evidence retained with exact backend/policy/lock equality; not rerun for Telegram presentation",
+      "fullRootCheckRerun": false,
+      "compiledApiAndBotNumericAdmission": true,
+      "publicRouting": "web 200; admin/internal/private health/ordinary catalog 404",
+      "deployedWebIdentity": "HTML/JS/CSS/SDK/font/artwork match actual packaged bytes",
+      "deployedBrowser": {
+        "passed": true,
+        "syntheticAuthResponseOnly": true,
+        "realAccountMutationExecuted": false,
+        "chromium": "direct HTTPS",
+        "webkit": "TLS-verified request adapter; not native Telegram",
+        "nativeLaunchRequestDispatch": true,
+        "fullscreenExitNotRetried": true,
+        "safeAreaPadding": true
+      },
+      "noMigrationOrBackfill": true,
+      "nativeTelegramPresentationAcceptance": false,
+      "agentObservedNativeUI": false
+    },
+    "privateEvidence": {
+      "images.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json",
+        "sha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1"
+      },
+      "images.json.scan.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json.scan.json",
+        "sha256": "8bf962c182b17b6cff8e4350ae61bcf2cf4544dbdc5ca4a1eb2233f27868e3d3"
+      },
+      "components.scan.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/components.scan.json",
+        "sha256": "2aa5a1362d6d03b97c22672eceae9f1aa71f1254eec2b0db44d901c26fcc9244"
+      },
+      "data.scan.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/data.scan.json",
+        "sha256": "11a6a4d54a06cc4fa7b228d054bf4ab737c21e35dc447fafd358b330519c4c01"
+      },
+      "scan-binding.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/scan-binding.json",
+        "sha256": "096b66e79f747fa701fb1c825552bf1421c9447a66e78997ce39ec77453c38ea"
+      },
+      "preflight.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preflight.json",
+        "sha256": "58ca05901c43c4d85f63fb38eefbd006df3a0fc6ab890e101568eb1700d1c3e9"
+      },
+      "preparation-guards.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preparation-guards.json",
+        "sha256": "07ff87aecfba92d0e75a945eb7c30eca97441a2fed7d56b57e017f8ca1d4cb5f"
+      },
+      "renewed-preparation.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/renewed-preparation.json",
+        "sha256": "261b6e48f48d088d9b5895e3987396e55789d8428a54683056f4be3d6aaa493c"
+      },
+      "capacity-recovery.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity-recovery.json",
+        "sha256": "e4b874890788718ece193665585d1bca8aa72fd692dacb473b768465c0adce70"
+      },
+      "capacity.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity.json",
+        "sha256": "7909f2ea3276fc8ee72a04ccf0524e79969b2a79b0358bd960a4486ea341b240"
+      },
+      "validation.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/validation.json",
+        "sha256": "a36309e1d596a93d427f853f1cf351e065cf19256c53ab9ef408b990682545ea"
+      },
+      "migration.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/migration.json",
+        "sha256": "3c8f9b53db41d99dceb26eab0b7acba649ddeee84e961d361341ed382d1cc2d8"
+      },
+      "startup.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/startup.json",
+        "sha256": "5911399f1ef360e5c58ff4b894d48937c3627bf0c3f623246d6b726f9d61d90b"
+      },
+      "traffic-open.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/traffic-open.json",
+        "sha256": "e10cb588aee8b2e35ba99f10fde1ebf4101687dd1f0a50ce4151acb7a76e04c2"
+      },
+      "compiled-admission.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/compiled-admission.json",
+        "sha256": "e2dad09d89b80c1440c16159e75c7b05da3e39310d0396bf64d8a2d510b1e880"
+      },
+      "operational-final.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/operational-final.json",
+        "sha256": "b63b80cc170e38cbcd925aab6443ed902a4afa15525ffd0282fc20a65ca4aa47"
+      },
+      "public-routing.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/public-routing.json",
+        "sha256": "b5e19292a716249a41b6bfb45f4b00a6034e7824fa51b5062fc07c22cd455c36"
+      },
+      "deployed-browser.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployed-browser.json",
+        "sha256": "79a63fc22cdca2c35a4082f427e4bdaa9c13b9edc4152be2f1d153ff22319de7"
+      },
+      "previous-current-binding.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
+        "sha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479"
+      },
+      "historical-local-recovery.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/historical-local-recovery.json",
+        "sha256": "834046a322a8990f550bc80621e809e9120e08cfd0c81204c4674d8c2cfbcf84"
+      },
+      "format.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/format.log",
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      "lint.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/lint.log",
+        "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
+      },
+      "architecture.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/architecture.log",
+        "sha256": "7f7b2d8994dca17c12b6d8b07388aa7ef04d1be701697735daab9d691c31a6ad"
+      },
+      "typecheck-final.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/typecheck-final.log",
+        "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
+      },
+      "web-unit.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/web-unit.log",
+        "sha256": "2492e470891098c79a1e1adb0e9c7d0320e5b5c93acc90ff43cc8edb40d7dba2"
+      },
+      "midnight-browser-final.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/midnight-browser-final.log",
+        "sha256": "e4d3467c14c2c568e17fd443ccb178f74024800e176d379b38243b2d08677f2e"
+      },
+      "presentation-browser-final.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/presentation-browser-final.log",
+        "sha256": "4527551566286f01039a0091073736e57907a82da2c7596359cba0446b5bbcec"
+      },
+      "existing-browser.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/existing-browser.log",
+        "sha256": "697d3b9d0eadab8a2600a04074ef9e4731a2c526b77ac93040c9ba28d5ff807f"
+      },
+      "packaged-smoke.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/packaged-smoke.log",
+        "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
+      },
+      "secrets.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/secrets.log",
+        "sha256": "587088bb95dc4df10aa2afcdc0ede6416aa5c51059214a19b146041f37c51ed7"
+      },
+      "dependencies.log": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/dependencies.log",
+        "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
+      },
+      "unchanged-controls.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/unchanged-controls.json",
+        "sha256": "190785107a6b36bb2c79e060e35fece08931cdaf977ec27eb942114d4ed9156a"
+      },
+      "instruction-files-before.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/instruction-files-before.json",
+        "sha256": "6acf687999f8980a8b0fa78d8c3079bd6afe0f75e9f99f97164c6a6a5c3661b1"
+      },
+      "preparation.json": {
+        "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/preparation.json",
+        "sha256": "1f5c7ee62513bd91d6415619102e2bb24e47721a2638d6c79dc29130acd505c2"
+      },
+      "compose.yaml": {
+        "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/compose.yaml",
+        "sha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39"
+      },
+      "deployment-evidence.json": {
+        "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployment-evidence.json",
+        "sha256": "8be389f719f0ee08c5b10622b3a2b6be4d2478f974383b593a08d92d7dc5e920"
+      }
+    },
+    "capacity": {
+      "allFourCandidateLayersMaterializedBeforeMaintenance": true,
+      "probeContainersStarted": false,
+      "probeContainersRemoved": true,
+      "freeDiskBytesAtFinalAutomatedReadback": 1465384960,
+      "selectedPrevious395ImagesAndPreparationPreserved": true,
+      "exactUnreferencedHistoricalImagesRemovedForCapacity": 4,
+      "historicalSourceRemoved": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
+      "historicalCopiesRecoverableLocally": true,
+      "dataVolumesSecretsScanCacheAndContainmentUnchanged": true
+    },
+    "rollbackAcceptance": {
+      "passed": null,
+      "scope": "No rollback executed for this adapter correction; exact compatible 395c6e7 images and preparation retained"
+    }
+  },
+  "gameTableAnarchist": {
+    "sourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
+    "trafficOpenedAtUTC": "2026-10-10T20:13:44.705Z",
+    "trafficOpenedAtAsiaTehran": "2026-10-10T23:43:44.705000+03:30",
+    "oldEngineRetained": "coup-v1",
+    "newEngine": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "commandSchemaVersion": 4,
+    "eventSchemaVersion": 4,
+    "viewSchemaVersion": 2,
+    "newMatchesOnly": true,
+    "sharedActionNeverDealt": true,
+    "costCoins": 5,
+    "refundOnDefense": false,
+    "defenseRequiresActualLiveContessa": true,
+    "defenseAutomatic": true,
+    "defensePublicAnimationMilliseconds": 2000,
+    "replacementCommitsAtomicallyBeforeAnimation": true,
+    "privateReplacementNeverPublished": true,
+    "mandatoryCoupCoins": 10,
+    "legacyCoupCostCoins": 7,
+    "allExistingActionsAccessible": true,
+    "seatCountsVerified": [2, 3, 4, 5, 6],
+    "suppliedRolePortraitsByteIdentical": 5,
+    "suppliedFontByteIdentical": true,
+    "neonFramesRenderedInCode": true,
+    "publicNamesResolvedThroughUsersPortAfterAuthorizedRead": true,
+    "noOperatorRegistration": true,
+    "nativeAcceptance": false,
+    "nativeAcceptanceStatus": "pending-real-iphone-success",
+    "operationReport": "docs/operations/2026-10-11-game-table-anarchist-staging.md",
+    "decision": "docs/adr/061-shared-anarchist-and-retained-personal-pins.md",
+    "rejectedCandidateCause": "JPEG absent from packaged static MIME inventory; fixed and checked before traffic"
   }
 }

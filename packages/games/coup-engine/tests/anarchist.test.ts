@@ -155,6 +155,38 @@ describe("versioned shared Anarchist", () => {
         replacement: { card: "DUKE", deck: [...s.deck] },
       }),
     ).toThrow();
+    let dead = hand(initial(7, 3), ids[1]!, ["DUKE", "CAPTAIN"]);
+    dead = execute(dead, { type: "DECLARE_COUP", targetId: ids[1]! }).next;
+    dead = execute(
+      dead,
+      { type: "SELECT_CARD_TO_LOSE", windowId: dead.window!.id, cardIndex: 0 },
+      ids[1]!,
+    ).next;
+    dead = execute(dead, { type: "DECLARE_INCOME" }, ids[1]!).next;
+    dead = execute(dead, { type: "DECLARE_INCOME" }, ids[2]!).next;
+    dead = migrateCoupAnarchistState(
+      { ...dead, players: dead.players.map((p, i) => (i ? p : { ...p, coins: 5 })) },
+      5,
+    );
+    dead = execute(dead).next;
+    dead = execute(
+      dead,
+      { type: "SELECT_CARD_TO_LOSE", windowId: dead.window!.id, cardIndex: 0 },
+      ids[1]!,
+    ).next;
+    dead = execute(dead, { type: "DECLARE_INCOME" }, ids[2]!).next;
+    dead = migrateCoupAnarchistState(
+      { ...dead, players: dead.players.map((p, i) => (i ? p : { ...p, coins: 5 })) },
+      5,
+    );
+    expect(dead.turnPlayerId).toBe(ids[0]);
+    expect(dead.players[1]!.influence).toHaveLength(0);
+    expect(() => execute(dead)).toThrow();
+    expect(
+      module.engine
+        .getPlayerView(dead, ids[0]!)
+        .legalCommands.some((c) => c.type === "DECLARE_ANARCHIST" && c.targetId === ids[1]),
+    ).toBe(false);
   });
   it("uses existing guarded loss timeout and preserves deadline over reload", () => {
     const s = execute(hand(initial(), ids[1]!, ["DUKE", "CAPTAIN"])).next;
