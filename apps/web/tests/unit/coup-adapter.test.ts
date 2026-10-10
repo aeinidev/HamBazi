@@ -81,3 +81,36 @@ describe("Coup public view boundary", () => {
     expect(publicSnapshot({ ...snapshot(player, 0), gameId: "unknown" }, viewerId).view).toBeNull();
   });
 });
+
+it("accepts the retained v2 public projection and denies hidden role metadata and identity mismatch", () => {
+  const views = JSON.parse(
+    readFileSync(new URL("../midnight/anarchist-views.json", import.meta.url), "utf8"),
+  ) as Record<string, Record<string, unknown>>;
+  const view = views["2-5"]!;
+  const modern = {
+    ...snapshot(view, 1),
+    engineVersion: "coup-anarchist-v1",
+    stateSchemaVersion: 5,
+    rulesetVersion: "coup-anarchist-v1",
+  };
+  expect(toCoupView(modern, viewerId)?.stateSchemaVersion).toBe(5);
+  for (const field of ["deck", "replacement", "defenseAvailable"])
+    expect(
+      publicSnapshot({ ...modern, view: { ...view, [field]: true } as Snapshot["view"] }, viewerId)
+        .view,
+    ).toBeNull();
+  const players = view.players as Array<Record<string, unknown>>;
+  expect(
+    toCoupView(
+      {
+        ...modern,
+        view: {
+          ...view,
+          players: [{ ...players[0], hasContessa: true }, ...players.slice(1)],
+        } as Snapshot["view"],
+      },
+      viewerId,
+    ),
+  ).toBeNull();
+  expect(toCoupView(modern, "99999999-9999-4999-8999-999999999999")).toBeNull();
+});

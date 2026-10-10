@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { createDatabase, DatabaseError } from "@hambazi/database";
-import { createPersonalCoupGame } from "@hambazi/api";
+import { createPersonalAnarchistCoupGame } from "@hambazi/api";
 import {
   createPersonalMatchPort,
   createMatchAutomationPort,
@@ -40,7 +40,7 @@ afterAll(() => Promise.all([api.disconnect(), worker.disconnect(), admin.disconn
 it("uses real role-separated BullMQ automation for an admitted server seat and drains safely", async () => {
   const owner = randomUUID(),
     clock = { nowMs: () => Date.now() },
-    game = createPersonalCoupGame();
+    game = createPersonalAnarchistCoupGame();
   await admin.forModule("users").execute((db) =>
     db.user.create({
       data: {

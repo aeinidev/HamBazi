@@ -20,6 +20,8 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
   await request.post(`${fixtureOrigin}/__test/state`, { data: { viewerIndex } });
   const state = {
     current: null as string | null,
+    customView: null as Record<string, unknown> | null,
+    sentCommands: [] as Record<string, unknown>[],
     starts: [] as string[],
     events: [] as string[],
     http: [] as string[],
@@ -35,7 +37,7 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
     version: 2,
   };
   const snapshot = () => {
-    const view = goldens[state.phase]?.players[viewerIndex];
+    const view = state.customView ?? goldens[state.phase]?.players[viewerIndex];
     if (!view) throw new Error("Missing synthetic view");
     return {
       schemaVersion: 1,
@@ -45,10 +47,17 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
       status: state.phase === "GAME_OVER" ? "FINISHED" : "ACTIVE",
       role: "PLAYER",
       gameId: "coup",
-      engineVersion: "coup-v1",
-      stateSchemaVersion: 4,
-      rulesetVersion: "coup-provisional-complete-v1",
-      view: { ...view, deadlineAt: view.deadlineAt === null ? null : Date.now() + 30000 },
+      engineVersion: view.engineVersion,
+      stateSchemaVersion: view.stateSchemaVersion,
+      rulesetVersion: view.rulesetVersion,
+      view: {
+        ...view,
+        deadlineAt: state.customView
+          ? view.deadlineAt
+          : view.deadlineAt === null
+            ? null
+            : Date.now() + 30000,
+      },
     };
   };
   await page.route("https://staging.hambazi.top/**", async (route) => {
@@ -139,6 +148,7 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
         return reply();
       }
       if (event === "game:command" || event === "personal:close") {
+        state.sentCommands.push(input);
         state.version++;
         state.phase = "GAME_OVER";
         ok({
@@ -166,10 +176,16 @@ export async function launch(page: Page, path = "/games") {
   });
   await page.goto(`https://staging.hambazi.top/?${query}#${query}`);
   await expect(page.locator(".midnight-shell")).toBeVisible();
-  if (path !== "/games")
+  if (path !== "/games") {
+    await expect(
+      page
+        .getByRole("heading", { name: "بازی‌ها", exact: true })
+        .or(page.getByRole("button", { name: "بازگشت به ربات" })),
+    ).toBeVisible();
     await page.evaluate((path) => {
       location.hash = path;
     }, path);
+  }
 }
 export async function nativeEvent(page: Page, name: string, data: unknown = {}) {
   await page.evaluate(

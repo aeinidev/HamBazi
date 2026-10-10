@@ -20,6 +20,7 @@ export function createPersonalMatchRepository(
   database: ReturnType<typeof createDatabase>,
   options: {
     game: MatchGame & MatchViewGame;
+    retainedGames?: readonly (MatchGame & MatchViewGame)[];
     clock: { nowMs(): number };
     owner: { allowsUserId(id: string): Promise<boolean> };
   },
@@ -28,10 +29,14 @@ export function createPersonalMatchRepository(
     game = options.game;
   const writer = createMatchProcessingRepository(database, {
     clock: options.clock,
-    games: [game],
+    games: [game, ...(options.retainedGames ?? [])],
     personal: true,
   });
-  const views = createMatchResyncRepository(database, [game], true);
+  const views = createMatchResyncRepository(
+    database,
+    [game, ...(options.retainedGames ?? [])],
+    true,
+  );
   async function authorize(actor: string) {
     if (!z.uuid().safeParse(actor).success || !(await options.owner.allowsUserId(actor)))
       throw new MatchFault("FORBIDDEN");

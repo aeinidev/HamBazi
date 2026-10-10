@@ -1,13 +1,25 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { createDatabase, DatabaseError } from "@hambazi/database";
-import { coupModule, coupPlayerViewSchema } from "@hambazi/coup-engine";
+import {
+  coupAnarchistModule,
+  coupAnarchistStateSchema,
+  coupAnarchistPlayerViewSchema,
+  type CoupRole,
+  coupModule,
+  coupPlayerViewSchema,
+} from "@hambazi/coup-engine";
 import {
   createPersonalMatchPort,
   createMatchAutomationPort,
   createMatchResyncPort,
 } from "../../src/matches/index.js";
-import { createPersonalCoupGame } from "../../src/composition/personal-coup.js";
+import { withPersonalPublicNames } from "../../src/composition/personal-public-names.js";
+import { createPublicNamesPort } from "../../src/users/index.js";
+import {
+  createPersonalAnarchistCoupGame,
+  createPersonalCoupGame,
+} from "../../src/composition/personal-coup.js";
 if (
   process.env.TEST_DATABASE_CONFIRM !== "isolated-hambazi-test" ||
   !process.env.API_DATABASE_URL ||
@@ -219,4 +231,176 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
     value: { schemaVersion: 1, matchId: null },
   });
   expect(await admin.forModule("users").execute((db) => db.user.count())).toBe(usersBefore);
+}, 30000);
+
+it("persists v2 payment/defense atomically, deduplicates racing attacks, restores both pins and exposes public names only", async () => {
+  const actor = randomUUID();
+  await admin.forModule("users").execute((db) =>
+    db.user.create({
+      data: {
+        id: actor,
+        telegramUserId: BigInt(710000002),
+        publicHandle: "anarchist_fixture",
+        displayName: "بازیکن آزمایشی با نام فارسی طولانی",
+        status: "ACTIVE",
+      },
+    }),
+  );
+  const policy = { allowsUserId: async (id: string) => id === actor };
+  const newGame = createPersonalAnarchistCoupGame();
+  for (const defense of [false, true]) {
+    const fixtureGame = {
+      ...newGame,
+      initialize(ids: readonly string[], at: number) {
+        const s = coupAnarchistStateSchema.parse(newGame.initialize(ids, at));
+        s.players[0]!.coins = 7;
+        const target = s.players[1]!;
+        const desired: CoupRole[] = defense ? ["CONTESSA", "CAPTAIN"] : ["DUKE", "CAPTAIN"];
+        for (const [i, role] of desired.entries()) {
+          if (target.influence[i] === role) continue;
+          const j = s.deck.indexOf(role);
+          if (j >= 0) [target.influence[i], s.deck[j]] = [s.deck[j]!, target.influence[i]!];
+          else {
+            const other = s.players[0]!;
+            const k = other.influence.indexOf(role);
+            expect(k).toBeGreaterThanOrEqual(0);
+            [target.influence[i], other.influence[k]] = [other.influence[k]!, target.influence[i]!];
+          }
+        }
+        return newGame.restore(s, ids);
+      },
+    };
+    const port = withPersonalPublicNames(
+      createPersonalMatchPort(api, {
+        game: fixtureGame,
+        retainedGames: [game],
+        clock: { nowMs: () => at },
+        owner: policy,
+      }),
+      createPublicNamesPort(api),
+    );
+    const start = parse(await port.start(actor, { schemaVersion: 1, commandId: randomUUID() }));
+    const v = coupAnarchistPlayerViewSchema.parse(start.view);
+    expect(v.players[0]!.displayName).toBe("بازیکن آزمایشی با نام فارسی طولانی");
+    const targetId = v.players[1]!.id;
+    const body = {
+      schemaVersion: 1,
+      actionId: randomUUID(),
+      matchId: start.matchId,
+      expectedVersion: start.stateVersion,
+      command: { type: "DECLARE_ANARCHIST", targetId },
+    };
+    at++;
+    const results = await Promise.all([port.command(actor, body), port.command(actor, body)]);
+    expect(results[0]!.ok).toBe(true);
+    expect(results[1]).toEqual(results[0]);
+    const stored = await api
+      .forModule("matches")
+      .execute((db) => db.match.findUniqueOrThrow({ where: { id: start.matchId } }));
+    const internal = coupAnarchistStateSchema.parse(stored.stateJsonb);
+    expect(internal.players[0]!.coins).toBe(2);
+    expect(internal.phase).toBe(defense ? "WAITING_FOR_ACTION" : "LOSS");
+    expect(internal.lastAction?.outcome).toBe(defense ? "DEFENDED" : "DECLARED");
+    expect(
+      await api
+        .forModule("matches")
+        .execute((db) =>
+          db.processedCommand.count({ where: { matchId: start.matchId, actionId: body.actionId } }),
+        ),
+    ).toBe(1);
+    expect(
+      await api
+        .forModule("matches")
+        .execute((db) => db.gameEvent.count({ where: { matchId: start.matchId } })),
+    ).toBe(stored.lastEventSeq);
+    expect(
+      await api
+        .forModule("matches")
+        .execute((db) => db.outboxEvent.count({ where: { aggregateId: start.matchId } })),
+    ).toBe(2);
+    const restored = createPersonalMatchPort(api, {
+      game: newGame,
+      retainedGames: [game],
+      clock: { nowMs: () => at },
+      owner: policy,
+    });
+    const read = parse(await restored.read(actor, { schemaVersion: 1, matchId: start.matchId }));
+    const projection = coupAnarchistPlayerViewSchema.parse(read.view);
+    expect(JSON.stringify(projection)).not.toContain('"deck"');
+    expect(JSON.stringify(projection)).not.toContain('"replacement"');
+    expect(projection.players[1]!.revealed).toEqual([]);
+    expect((await restored.command(actor, { ...body, actionId: randomUUID() })).ok).toBe(false);
+    expect(
+      (await restored.read(randomUUID(), { schemaVersion: 1, matchId: start.matchId })).ok,
+    ).toBe(false);
+    const auto = createMatchAutomationPort(api, {
+      games: [newGame, game],
+      clock: { nowMs: () => at },
+      personal: true,
+    });
+    let finished = false;
+    for (let step = 0; step < 500; step++) {
+      const snapshot = parse(
+        await restored.read(actor, { schemaVersion: 1, matchId: start.matchId }),
+      );
+      if (snapshot.status === "FINISHED") {
+        finished = true;
+        break;
+      }
+      const choice = coupAnarchistModule.botPolicy.chooseCommand(
+        coupAnarchistPlayerViewSchema.parse(snapshot.view),
+      );
+      if (choice)
+        expect(
+          (
+            await restored.command(actor, {
+              schemaVersion: 1,
+              actionId: randomUUID(),
+              matchId: start.matchId,
+              expectedVersion: snapshot.stateVersion,
+              command: choice,
+            })
+          ).ok,
+        ).toBe(true);
+      const plan = await auto.plan(start.matchId);
+      if (plan?.intent) {
+        if (plan.intent.kind === "TIMER") at = Math.max(at, plan.intent.deadlineAt);
+        await auto.execute(plan.intent);
+      }
+      at++;
+    }
+    expect(finished).toBe(true);
+  }
+  const legacy = createPersonalMatchPort(api, { game, clock: { nowMs: () => at }, owner: policy });
+  const old = parse(await legacy.start(actor, { schemaVersion: 1, commandId: randomUUID() }));
+  const retained = createPersonalMatchPort(api, {
+    game: newGame,
+    retainedGames: [game],
+    clock: { nowMs: () => at },
+    owner: policy,
+  });
+  const oldView = parse(await retained.read(actor, { schemaVersion: 1, matchId: old.matchId }));
+  expect(coupPlayerViewSchema.parse(oldView.view).engineVersion).toBe("coup-v1");
+  expect(
+    (
+      await retained.command(actor, {
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId: old.matchId,
+        expectedVersion: old.stateVersion,
+        command: { type: "DECLARE_INCOME" },
+      })
+    ).ok,
+  ).toBe(true);
+  const final = parse(await retained.read(actor, { schemaVersion: 1, matchId: old.matchId }));
+  expect(
+    (
+      await retained.close(actor, {
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId: old.matchId,
+        expectedVersion: final.stateVersion,
+      })
+    ).ok,
+  ).toBe(true);
 }, 30000);

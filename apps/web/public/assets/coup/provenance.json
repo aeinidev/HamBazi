@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "roles": [
+    {
+      "role": "DUKE",
+      "path": "duke.jpeg",
+      "sha256": "64af1f57a1acfb23e7b1ee2736dcafb2de07a5dad2bc0693846d2c26abf99471",
+      "source": "User-supplied Duke.jpeg",
+      "rasterModified": false
+    },
+    {
+      "role": "ASSASSIN",
+      "path": "assassin.jpeg",
+      "sha256": "aac72e065bb31f8f04eacf6778583e23cdbddfc74904c752660b55f7ba248683",
+      "source": "User-supplied Assassin.jpeg",
+      "rasterModified": false
+    },
+    {
+      "role": "CAPTAIN",
+      "path": "captain.jpeg",
+      "sha256": "1d4e6159288236ea6449cde652b8f9491b25a07cebc98f5a0c4a10c56ea67cd0",
+      "source": "User-supplied Captain.jpeg",
+      "rasterModified": false
+    },
+    {
+      "role": "AMBASSADOR",
+      "path": "ambassador.jpeg",
+      "sha256": "0ec8014d440f862b40a74e7faff3c4db9f0cd364f078389ae6dc4cf5f48c2fdb",
+      "source": "User-supplied Ambassador.jpeg",
+      "rasterModified": false
+    },
+    {
+      "role": "CONTESSA",
+      "path": "contessa.jpeg",
+      "sha256": "7b8e49eb5d7ab043e4fb5a5a904e65ce69248f8e271f2766e015167f529f30ae",
+      "source": "User-supplied Contessa.jpeg",
+      "rasterModified": false
+    }
+  ],
+  "font": {
+    "path": "../midnight/HamBaziDisplay-Regular.ttf",
+    "sha256": "546c858e8c39315c409281c9ef7ab9e2d9225b37b3aedf0659776d5ac8239e2b"
+  },
+  "framing": "Code-rendered restrained cyan/violet illuminated frames and Persian labels; original portraits preserved.",
+  "anarchist": {
+    "path": "anarchist.png",
+    "sha256": "9b62421114ade4f6cfe26a8d0231818a50d75d9fbe0517f771269e50d5d6ed30",
+    "source": "Generated standalone illustration from owner-supplied gameplay reference, artwork only.",
+    "prompt": "Use case: identity-preserve. One standalone vertical 2:3 Anarchist shared-action portrait for HamBazi, artwork only. Recreate only the red hooded masked man on the small illuminated lower-right Anarchist card of the supplied screen. Preserve same face, dark focused eyes, black mask, red hood, black and gold leather costume and dark red/navy background. Premium realistic painted fantasy, restrained metallic gold and midnight palette. Full-frame centered portrait, no card border, baked labels, text, UI, lock, magnifier or coins. Not the gray disabled variant; application code applies disabled appearance."
+  }
+}

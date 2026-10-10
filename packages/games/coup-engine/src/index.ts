@@ -82,3 +82,27 @@ export {
   getCoupReconnectView,
   coupTimerPolicy,
 } from "./module.js";
+export {
+  coupAnarchistDescriptor,
+  coupAnarchistRulesSchema,
+  coupAnarchistStateSchema,
+  coupAnarchistCommandSchema,
+  coupAnarchistEventSchema,
+} from "./anarchist-model.js";
+export type {
+  CoupAnarchistState,
+  CoupAnarchistRules,
+  CoupAnarchistCommand,
+  CoupAnarchistEvent,
+} from "./anarchist-model.js";
+export {
+  coupAnarchistModule,
+  validateCoupAnarchistCommand,
+  migrateCoupAnarchistState,
+  applyCoupAnarchistEvent,
+  executeCoupAnarchistCommand,
+  getCoupAnarchistPlayerView,
+  getCoupAnarchistSpectatorView,
+  coupAnarchistPlayerViewSchema,
+  coupAnarchistSpectatorViewSchema,
+} from "./anarchist.js";

@@ -1,93 +1,162 @@
 import { useEffect, useState } from "react";
 import type { CoupView } from "../adapters/index.js";
-
+import { CardBack, CoinIcon, InfluenceCard } from "./cards.js";
+export const persianNumber = (n: number) => n.toLocaleString("fa-IR");
+export const actionNames = {
+  INCOME: "درآمد",
+  FOREIGN_AID: "کمک خارجی",
+  COUP: "کودتا",
+  TAX: "مالیات",
+  STEAL: "سرقت",
+  ASSASSINATION: "آدمکشی",
+  EXCHANGE: "تعویض",
+  ANARCHIST: "آنارشیست",
+};
 export function Countdown({ deadlineAt }: { deadlineAt: number | null }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
+    setNow(Date.now());
     if (deadlineAt === null) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
   }, [deadlineAt]);
-  if (deadlineAt === null) return null;
-  return (
-    <p className="coup-timer" role="timer">
-      Server deadline: {Math.max(0, Math.ceil((deadlineAt - now) / 1000))}s
-    </p>
+  return deadlineAt === null ? null : (
+    <span className="table-countdown" role="timer" aria-label="زمان باقی‌مانده">
+      {persianNumber(Math.max(0, Math.ceil((deadlineAt - now) / 1000)))}
+      <small>ثانیه</small>
+    </span>
   );
 }
-
-export function Table({ view }: { view: CoupView }) {
-  const name = (id: string) => {
-    const player = view.players.find((entry) => entry.id === id);
-    return player ? `Seat ${player.seat + 1}` : "Unknown seat";
-  };
+type Player = CoupView["players"][number];
+export function seatName(view: CoupView, id: string, personal = false) {
+  const p = view.players.find((p) => p.id === id);
+  if (p && "displayName" in p && typeof p.displayName === "string" && p.displayName)
+    return p.displayName;
+  if (view.kind === "PLAYER" && id === view.viewerId) return "شما";
+  if (personal && view.players.length === 2) return "ربات";
+  return p ? `بازیکن ${persianNumber(p.seat + 1)}` : "بازیکن";
+}
+function Seat({
+  player,
+  view,
+  personal,
+  defending,
+}: {
+  player: Player;
+  view: CoupView;
+  personal: boolean;
+  defending: string | null;
+}) {
+  const name = seatName(view, player.id, personal),
+    eliminated = player.cardsRemaining === 0;
   return (
-    <>
-      <div className="coup-table" aria-label="Coup table">
-        {view.players.map((player) => (
-          <section className="coup-seat" key={player.id} aria-label={`Seat ${player.seat + 1}`}>
-            <h3>
-              {name(player.id)}
-              {view.kind === "PLAYER" && player.id === view.viewerId ? " · You" : ""}
-            </h3>
-            <p>
-              {player.coins} coins · {player.cardsRemaining} cards
-            </p>
-            <div className="coup-cards" aria-label="Public cards">
-              {player.revealed.map((card, index) => (
-                <span className="coup-card revealed" key={index}>
-                  {card}
-                </span>
-              ))}
-              {Array.from({ length: player.cardsRemaining }, (_, index) => (
-                <span className="coup-card hidden" key={index} aria-label="Hidden card">
-                  ?
-                </span>
-              ))}
-            </div>
-          </section>
+    <section
+      className={`table-seat ${view.turnPlayerId === player.id ? "current-turn" : ""} ${eliminated ? "eliminated" : ""} ${view.pendingAction?.targetId === player.id ? "targeted" : ""}`}
+      aria-label={name}
+    >
+      <span className="seat-avatar" aria-hidden="true">
+        {"displayName" in player && typeof player.displayName === "string" && player.displayName
+          ? [...name][0]
+          : personal && view.players.length === 2
+            ? "◆"
+            : persianNumber(player.seat + 1)}
+      </span>
+      <span className="seat-name" title={name}>
+        {name}
+      </span>
+      <div className="seat-influences" role="group" aria-label="نفوذهای عمومی">
+        {Array.from({ length: player.cardsRemaining }, (_, i) => (
+          <CardBack key={i} />
+        ))}
+        {player.revealed.map((role, i) => (
+          <InfluenceCard key={`lost-${i}`} role={role} lost />
         ))}
       </div>
-      {view.kind === "PLAYER" && (
-        <section aria-label="Your cards" className="coup-hand">
-          <h3>Your cards</h3>
-          <div className="coup-cards">
-            {view.myCards.map((card, index) => (
-              <span className="coup-card" key={index}>
-                {card}
-              </span>
-            ))}
+      <span className="seat-coins">
+        <CoinIcon />
+        {persianNumber(player.coins)}
+      </span>
+      {eliminated && <span className="seat-state">حذف‌شده</span>}
+      {defending === player.id && (
+        <div className="defense-reveal" role="status">
+          <InfluenceCard role="CONTESSA" />
+          <span>دفاع شاه‌دخت</span>
+        </div>
+      )}
+    </section>
+  );
+}
+const phaseNames: Record<CoupView["phase"], string> = {
+  WAITING_FOR_ACTION: "نوبت اقدام",
+  CHALLENGE: "پاسخ به ادعا",
+  BLOCK: "فرصت مسدودسازی",
+  PROOF: "اثبات ادعا",
+  LOSS: "انتخاب نفوذ برای از دست دادن",
+  EXCHANGE: "انتخاب کارت‌های نگه‌داشتنی",
+  GAME_OVER: "بازی تمام شد",
+};
+export function Table({
+  view,
+  personal = false,
+  defending = null,
+}: {
+  view: CoupView;
+  personal?: boolean;
+  defending?: string | null;
+}) {
+  const opponents = view.players.filter((p) => view.kind !== "PLAYER" || p.id !== view.viewerId);
+  const sides = opponents.length >= 4 ? opponents.slice(-2) : [];
+  const top = opponents.slice(0, opponents.length - sides.length);
+  const action =
+    "lastAction" in view
+      ? view.lastAction
+      : view.pendingAction
+        ? { ...view.pendingAction, outcome: "DECLARED" }
+        : null;
+  const reaction =
+    view.window?.eligibleIds.filter((id) => !view.window!.passedIds.includes(id)) ?? [];
+  const acting =
+    view.phase === "WAITING_FOR_ACTION"
+      ? seatName(view, view.turnPlayerId, personal)
+      : reaction.map((id) => seatName(view, id, personal)).join("، ");
+  const publicText = action
+    ? `${seatName(view, action.actorId, personal)}: ${actionNames[action.kind]}${action.targetId ? ` ← ${seatName(view, action.targetId, personal)}` : ""}${action.outcome === "DEFENDED" ? "؛ دفاع شاه‌دخت" : ""}`
+    : "بازی آغاز شد";
+  return (
+    <div className="game-table-stage" data-player-count={view.players.length}>
+      <div className="opponents-top">
+        {top.map((p) => (
+          <Seat key={p.id} player={p} view={view} personal={personal} defending={defending} />
+        ))}
+      </div>
+      <div className={`table-middle ${sides.length ? "with-sides" : ""}`}>
+        {sides[0] && (
+          <Seat player={sides[0]} view={view} personal={personal} defending={defending} />
+        )}
+        <div className="oval-table" aria-hidden="true">
+          <div className="decorative-deck">
+            <CardBack />
+            <CardBack />
           </div>
-        </section>
-      )}
-      <p className="quiet" role="status">
-        Turn {view.turnNumber} · {name(view.turnPlayerId)} to act ·{" "}
-        {view.phase.toLowerCase().replaceAll("_", " ")}
+          <CoinIcon />
+        </div>
+        {sides[1] && (
+          <Seat player={sides[1]} view={view} personal={personal} defending={defending} />
+        )}
+      </div>
+      <p className="public-action-line" role="status" title={publicText}>
+        {publicText}
       </p>
-      {view.pendingAction && (
-        <p>
-          {name(view.pendingAction.actorId)}:{" "}
-          {view.pendingAction.kind.toLowerCase().replaceAll("_", " ")}
-          {view.pendingAction.targetId ? ` → ${name(view.pendingAction.targetId)}` : ""}
-        </p>
-      )}
-      {view.window?.claim && (
-        <p>
-          {name(view.window.claim.claimantId)} claims {view.window.claim.role}.
-        </p>
-      )}
-      {view.proof && <p>{name(view.proof.challengerId)} challenged the claim.</p>}
-      {view.loss && (
-        <p>
-          {name(view.loss.playerId)} must lose a card ({view.loss.reason.toLowerCase()}).
-        </p>
-      )}
-      {view.phase === "GAME_OVER" && (
-        <p role="status">
-          {view.winnerId ? `${name(view.winnerId)} won the match.` : "Match ended."}
-        </p>
-      )}
-      <Countdown deadlineAt={view.deadlineAt} />
-    </>
+      <div className="table-turn-status" role="status">
+        <span>
+          {view.phase === "GAME_OVER"
+            ? view.winnerId
+              ? `${seatName(view, view.winnerId, personal)} برنده شد`
+              : phaseNames.GAME_OVER
+            : `${acting} · ${phaseNames[view.phase]}`}
+        </span>
+        <Countdown deadlineAt={view.deadlineAt} />
+      </div>
+    </div>
   );
 }

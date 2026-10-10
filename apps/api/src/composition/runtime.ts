@@ -1,6 +1,7 @@
 import { parseBotExperienceConfig } from "@hambazi/config";
 import { createPersonalMatchPort } from "../matches/index.js";
-import { createPersonalCoupGame } from "./personal-coup.js";
+import { createPersonalCoupGame, createPersonalAnarchistCoupGame } from "./personal-coup.js";
+import { withPersonalPublicNames } from "./personal-public-names.js";
 import { parsePersonalGameplayConfig } from "@hambazi/config";
 import { hash } from "node:crypto";
 import { createStatisticsPort } from "../leaderboard/index.js";
@@ -197,11 +198,15 @@ export async function startApi(
       ...(personalConfig && ownerAdmission && admission && admissionPolicy
         ? {
             personal: {
-              matches: createPersonalMatchPort(database, {
-                clock,
-                game: createPersonalCoupGame(),
-                owner: ownerAdmission,
-              }),
+              matches: withPersonalPublicNames(
+                createPersonalMatchPort(database, {
+                  clock,
+                  game: createPersonalAnarchistCoupGame(),
+                  retainedGames: [createPersonalCoupGame()],
+                  owner: ownerAdmission,
+                }),
+                createPublicNamesPort(database),
+              ),
               sessions,
               rate: admission.rate,
               ip: admission.ip,

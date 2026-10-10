@@ -102,7 +102,7 @@ test("fullscreen exit/failure preserves scrolling, touch, safe areas and navigat
   await nativeEvent(page, "back_button_pressed");
   await expect(page).toHaveURL(/#\/games\/coup$/);
   await page.getByRole("button", { name: "شروع بازی", exact: true }).tap();
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   await safeArea();
   await nativeEvent(page, "back_button_pressed");
   await nativeEvent(page, "back_button_pressed");

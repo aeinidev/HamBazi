@@ -400,7 +400,10 @@ if (!bin) {
             );
             if (
               !matches.rows.some((r) => r.status === "FINISHED") ||
-              matches.rows.filter((r) => r.status === "TERMINATED").length !== 2
+              matches.rows.filter((r) => r.status === "TERMINATED").length < 2 ||
+              !matches.rows.some(
+                (r) => r.status === "FINISHED" && r.engine_version === "coup-anarchist-v1",
+              )
             )
               throw new Error();
             const bots = await client.query("SELECT * FROM match_bot_seats ORDER BY match_id,seat");

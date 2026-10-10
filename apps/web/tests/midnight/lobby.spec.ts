@@ -23,7 +23,7 @@ for (const viewerIndex of [0, 1])
     await expect(page.locator(".coup-entry-options button")).toHaveCount(2);
     await page.getByRole("button", { name: "آموزش بازی", exact: true }).click();
     await expect(page.getByRole("heading", { name: "آموزش بازی کودتا" })).toBeVisible();
-    await expect(page.getByText(/آنارشیست/)).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "آنارشیست · اقدام مشترک" })).toBeVisible();
     await nativeEvent(page, "back_button_pressed");
     await expect(page).toHaveURL(/#\/games\/coup$/);
     await nativeEvent(page, "back_button_pressed");
@@ -67,16 +67,16 @@ test("start is explicit, duplicate taps are bounded, back/reentry/reconnect resu
       el.click();
       el.click();
     });
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   expect(state.starts).toHaveLength(1);
   expect(state.current).toBe(matchId);
   await nativeEvent(page, "back_button_pressed");
   await expect(page).toHaveURL(/#\/games\/coup$/);
   await page.getByRole("button", { name: "شروع بازی", exact: true }).click();
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   await state.sockets.at(-1)!.close({ code: 1011, reason: "synthetic reconnect" });
   await expect.poll(() => state.sockets.length).toBe(2);
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   expect(state.starts).toHaveLength(1);
   expect(state.events).not.toContain("personal:close");
 });
@@ -93,7 +93,7 @@ for (const fail of ["before", "after"] as const)
     await page.getByRole("button", { name: "شروع بازی", exact: true }).click();
     await expect(page.getByRole("alert")).toContainText("ارتباط قطع شد");
     await page.getByRole("button", { name: "تلاش دوباره" }).click();
-    await expect(page.getByLabel("Coup table")).toBeVisible();
+    await expect(page.getByLabel("میز کودتا")).toBeVisible();
     expect(new Set(state.starts).size).toBe(1);
     expect(state.starts.length).toBe(fail === "before" ? 2 : 1);
   });
@@ -107,10 +107,10 @@ test("an existing personal match is resumed and its terminal view remains usable
   await launch(page);
   await page.getByRole("button", { name: "کودتا، فعال" }).click();
   await page.getByRole("button", { name: "شروع بازی", exact: true }).click();
-  await expect(page.getByLabel("Coup table")).toBeVisible();
-  const action = page.getByRole("button", { name: /income/ }).first();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
+  const action = page.getByRole("button", { name: /^درآمد/ }).first();
   await action.click();
-  await expect(page.getByText(/won the match|Match ended/).first()).toBeVisible();
+  await expect(page.getByText(/برنده شد|بازی تمام شد/).first()).toBeVisible();
   expect(state.starts).toEqual([]);
   expect(state.events).toContain("game:command");
 });
@@ -125,18 +125,18 @@ test("a move during a slow poll does not trip the personal gateway pending guard
   await launch(page);
   await page.getByRole("button", { name: "کودتا، فعال" }).click();
   await page.getByRole("button", { name: "شروع بازی", exact: true }).click();
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   state.holdNextCatchup = true;
   await expect.poll(() => state.releaseCatchup !== null).toBe(true);
   await page
-    .getByRole("button", { name: /income/ })
+    .getByRole("button", { name: /^درآمد/ })
     .first()
     .click();
   // The poll stays pending while the user submits a real table intent.
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect(state.events.filter((event) => event === "game:command")).toHaveLength(0);
   state.releaseCatchup!();
-  await expect(page.getByText(/won the match|Match ended/).first()).toBeVisible();
+  await expect(page.getByText(/برنده شد|بازی تمام شد/).first()).toBeVisible();
   expect(state.events.filter((event) => event === "game:command")).toHaveLength(1);
   expect(state.rateRejections).toBe(0);
   expect(state.maximumPending).toBe(1);
@@ -151,7 +151,7 @@ test("failed current lookup cannot fall through to match creation", async ({ pag
   await expect(page.getByRole("alert")).toContainText("ارتباط قطع شد");
   expect(state.starts).toEqual([]);
   await page.getByRole("button", { name: "تلاش دوباره" }).click();
-  await expect(page.getByLabel("Coup table")).toBeVisible();
+  await expect(page.getByLabel("میز کودتا")).toBeVisible();
   expect(state.starts).toHaveLength(1);
 });
 

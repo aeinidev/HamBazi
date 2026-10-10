@@ -92,14 +92,10 @@ export function PersonalGame({
           <button disabled={blocked} onClick={start}>
             {task.pending ? "در حال شروع…" : "شروع بازی با ربات"}
           </button>
-        ) : current ? (
-          <button className="secondary" disabled={blocked} onClick={close}>
-            پایان بازی
-          </button>
-        ) : null}
+        ) : current ? null : null}
         {current && (current.status === "ACTIVE" || current.status === "FINISHED") && (
-          <div className="existing-coup-table" dir="ltr">
-            <CoupMatch snapshot={current} />
+          <div className="existing-coup-table" dir="rtl">
+            <CoupMatch snapshot={current} onEnd={close} endBlocked={blocked} />
           </div>
         )}
         {lookup.notice}

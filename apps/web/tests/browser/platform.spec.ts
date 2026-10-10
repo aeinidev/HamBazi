@@ -247,32 +247,32 @@ test("Coup controls follow server legal commands through action, proof, exchange
 }, info) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await enterMatch(page);
-  await expect(page.getByRole("region", { name: "Your cards" })).toContainText("AMBASSADOR");
-  expect(
-    await page.getByRole("region", { name: "Seat 2" }).locator(".coup-card").allTextContents(),
-  ).toEqual(["?", "?"]);
-  await expect(
-    page.getByRole("region", { name: "Available actions" }).getByRole("button"),
-  ).toHaveCount(10);
+  await expect(page.getByRole("region", { name: "کارت‌های شما" })).toContainText("سفیر");
+  await expect(page.locator(".table-seat").first().locator(".influence-back")).toHaveCount(2);
+  await expect(page.locator(".primary-actions button")).toHaveCount(4);
+  await page.getByRole("button", { name: /سایر اقدام‌ها/ }).click();
+  await expect(page.getByRole("dialog").locator(".secondary-actions button")).toHaveCount(3);
+  await page.getByRole("button", { name: "بستن پنجره" }).click();
   expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("coup-action-mobile.png"), fullPage: true });
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "PROOF" } });
-  await page.getByRole("button", { name: "declare tax" }).click();
-  await expect(page.getByRole("button", { name: /prove claim/ })).toBeVisible();
+  await page.getByRole("button", { name: /^مالیات/ }).click();
+  await expect(page.getByRole("button", { name: /^اثبات با/ })).toBeVisible();
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "EXCHANGE" } });
-  await page.getByRole("button", { name: /prove claim/ }).click();
-  await expect(page.getByRole("group", { name: "Choose cards to keep" })).toBeVisible();
+  await page.getByRole("button", { name: /^اثبات با/ }).click();
+  await page.getByRole("button", { name: "انتخاب کارت‌های تعویض" }).click();
+  await expect(page.getByRole("dialog", { name: "انتخاب کارت‌های نگه‌داشتنی" })).toBeVisible();
   expect((await accessibility(page)).violations).toEqual([]);
   await page.screenshot({ path: info.outputPath("coup-exchange-mobile.png"), fullPage: true });
-  await page.getByRole("checkbox", { name: "Card 1: DUKE" }).check();
-  await page.getByRole("checkbox", { name: "Card 2: CAPTAIN" }).check();
+  await page.getByRole("checkbox", { name: "کارت ۱: بزرگ‌زاده" }).check();
+  await page.getByRole("checkbox", { name: "کارت ۲: کاپیتان" }).check();
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "BLOCK" } });
-  await page.getByRole("button", { name: "Keep selected cards" }).click();
-  await expect(page.getByRole("button", { name: /block ·/ })).toBeVisible();
+  await page.getByRole("button", { name: "نگه داشتن کارت‌های انتخاب‌شده" }).click();
+  await expect(page.getByRole("button", { name: /^مسدودسازی با/ })).toBeVisible();
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "GAME_OVER" } });
-  await page.getByRole("button", { name: /block ·/ }).click();
-  await expect(page.getByText(/won the match/)).toBeVisible();
-  await expect(page.getByRole("region", { name: "Available actions" })).toHaveCount(0);
+  await page.getByRole("button", { name: /^مسدودسازی با/ }).click();
+  await expect(page.getByText(/برنده شد/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "اقدام‌های بازی" })).toHaveCount(0);
   const state = await (await request.get(`${fixture}/__test/state`)).json();
   const commands = state.commands.filter(
     (entry: { event: string }) => entry.event === "game:command",
@@ -306,12 +306,12 @@ test("challenge and loss decisions come from the addressed player's projection",
     data: { viewerIndex: 1, coupPhase: "CHALLENGE", snapshotVersion: 1 },
   });
   await enterMatch(page);
-  await expect(page.getByRole("button", { name: "challenge", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "چالش ادعا", exact: true })).toBeVisible();
   await request.post(`${fixture}/__test/state`, { data: { nextPhase: "LOSS" } });
-  await page.getByRole("button", { name: "challenge", exact: true }).click();
-  await expect(page.getByRole("button", { name: /select card to lose/ })).toHaveCount(2);
+  await page.getByRole("button", { name: "چالش ادعا", exact: true }).click();
+  await expect(page.getByRole("button", { name: /^از دست دادن/ })).toHaveCount(2);
   await page
-    .getByRole("button", { name: /select card to lose/ })
+    .getByRole("button", { name: /^از دست دادن/ })
     .first()
     .click();
   const state = await (await request.get(`${fixture}/__test/state`)).json();
@@ -325,14 +325,14 @@ test("spectator, unsupported version and malformed view fail closed", async ({ p
   await request.post(`${fixture}/__test/state`, { data: { role: "SPECTATOR" } });
   await enterMatch(page);
   await expect(page.getByRole("heading", { name: "Watching the table" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Your cards" })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Available actions" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "کارت‌های شما" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "اقدام‌های بازی" })).toHaveCount(0);
   await request.post(`${fixture}/__test/state`, {
     data: { role: "PLAYER", rulesetVersion: "future", snapshotVersion: 3 },
   });
   await request.post(`${fixture}/__test/snapshot`);
-  await expect(page.getByRole("alert")).toContainText("newer version");
-  await expect(page.getByRole("region", { name: "Available actions" })).toHaveCount(0);
+  await expect(page.getByRole("alert")).toContainText("نسخهٔ جدیدتری");
+  await expect(page.getByRole("region", { name: "اقدام‌های بازی" })).toHaveCount(0);
 });
 
 test("Chat escapes markup, retries one committed send, supports history and clears on logout", async ({
@@ -372,7 +372,7 @@ test("Chat escapes markup, retries one committed send, supports history and clea
         .length;
     })
     .toBeGreaterThan(catchups);
-  await expect(page.getByRole("region", { name: "Available actions" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "اقدام‌های بازی" })).toBeVisible();
   await expect(page.getByRole("list", { name: "Chat messages" })).toContainText(text);
   const refreshed = await (await request.get(`${fixture}/__test/state`)).json();
   expect(

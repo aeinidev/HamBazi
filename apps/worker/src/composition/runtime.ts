@@ -1,4 +1,4 @@
-import { createPersonalCoupGame } from "@hambazi/api";
+import { createPersonalCoupGames } from "@hambazi/api";
 import { parsePersonalGameplayConfig } from "@hambazi/config";
 import { startStatisticsConsumer } from "../statistics.js";
 import { createStatisticsProjection } from "@hambazi/api/leaderboard";
@@ -64,7 +64,7 @@ export async function startWorker(
   if (personal && resilience) throw new Error("PERSONAL_GAMEPLAY_CONFIGURATION_INVALID");
   if (personal)
     resilience = {
-      games: [createPersonalCoupGame()],
+      games: createPersonalCoupGames(),
       policy: { schemaVersion: 1, graceMs: 30000, leaseMs: 30000, maxConnections: 1 },
       intervalMs: 500,
       batchSize: 10,

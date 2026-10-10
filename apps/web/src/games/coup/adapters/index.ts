@@ -5,7 +5,7 @@ const id = z.uuid();
 const role = z.enum(["DUKE", "ASSASSIN", "CAPTAIN", "AMBASSADOR", "CONTESSA"]);
 const count = z.number().int().nonnegative();
 const claim = z.strictObject({ kind: z.enum(["ACTION", "BLOCK"]), claimantId: id, role });
-const command = z.discriminatedUnion("type", [
+const legacyCommand = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("DECLARE_INCOME") }),
   z.strictObject({ type: z.literal("DECLARE_FOREIGN_AID") }),
   z.strictObject({ type: z.literal("DECLARE_TAX") }),
@@ -88,22 +88,101 @@ const player = z.strictObject({
   viewerId: id,
   myCards: z.array(role).max(3),
   exchangeChoices: z.array(role).min(3).max(5).nullable(),
+  legalCommands: z.array(legacyCommand).max(64),
+});
+const command = z.discriminatedUnion("type", [
+  ...legacyCommand.options,
+  z.strictObject({ type: z.literal("DECLARE_ANARCHIST"), targetId: id }),
+]);
+const actionKind = z.enum([
+  "INCOME",
+  "FOREIGN_AID",
+  "COUP",
+  "TAX",
+  "STEAL",
+  "ASSASSINATION",
+  "EXCHANGE",
+  "ANARCHIST",
+]);
+const modernBase = {
+  ...base,
+  players: z
+    .array(
+      base.players.element.extend({
+        displayName: z.string().min(1).max(256).nullable().default(null),
+      }),
+    )
+    .min(2)
+    .max(6),
+  engineVersion: z.literal("coup-anarchist-v1"),
+  stateSchemaVersion: z.literal(5),
+  rulesetVersion: z.literal("coup-anarchist-v1"),
+  viewSchemaVersion: z.literal(2),
+  pendingAction: z
+    .strictObject({ actorId: id, kind: actionKind, targetId: id.nullable() })
+    .nullable(),
+  loss: z
+    .strictObject({
+      playerId: id,
+      reason: z.enum(["COUP", "ASSASSINATION", "CHALLENGE", "ANARCHIST"]),
+    })
+    .nullable(),
+  lastAction: z
+    .strictObject({
+      revision: count.positive(),
+      occurredAt: count,
+      actorId: id,
+      targetId: id.nullable(),
+      kind: actionKind,
+      outcome: z.enum(["DECLARED", "RESOLVED", "DEFENDED"]),
+    })
+    .nullable(),
+  lastDefense: z
+    .strictObject({ revision: count.positive(), occurredAt: count, targetId: id })
+    .nullable(),
+  actionRules: z.strictObject({
+    incomeCoins: count,
+    foreignAidCoins: count,
+    taxCoins: count,
+    stealCoins: count,
+    assassinationCost: count,
+    coupCost: count,
+    mandatoryCoupAt: count,
+    anarchistCost: z.literal(5),
+  }),
+};
+const modernSpectator = z.strictObject({ ...modernBase, kind: z.literal("SPECTATOR") });
+const modernPlayer = z.strictObject({
+  ...modernBase,
+  kind: z.literal("PLAYER"),
+  viewerId: id,
+  myCards: z.array(role).max(3),
+  exchangeChoices: z.array(role).min(3).max(5).nullable(),
   legalCommands: z.array(command).max(64),
 });
-const viewSchema = z.discriminatedUnion("kind", [player, spectator]);
-export type CoupView = z.infer<typeof viewSchema>;
+const legacyView = z.discriminatedUnion("kind", [player, spectator]);
+const modernView = z.discriminatedUnion("kind", [modernPlayer, modernSpectator]);
+export type CoupView = z.infer<typeof legacyView> | z.infer<typeof modernView>;
 export type CoupCommand = z.infer<typeof command>;
+export type CoupRole = z.infer<typeof role>;
 
 // The wire snapshot accepts JSON. The game boundary accepts only this exact public projection.
 export function toCoupView(snapshot: Snapshot, viewerId: string): CoupView | null {
   if (
     snapshot.gameId !== "coup" ||
-    snapshot.engineVersion !== "coup-v1" ||
-    snapshot.stateSchemaVersion !== 4 ||
-    snapshot.rulesetVersion !== "coup-provisional-complete-v1"
+    !(
+      (snapshot.engineVersion === "coup-v1" &&
+        snapshot.stateSchemaVersion === 4 &&
+        snapshot.rulesetVersion === "coup-provisional-complete-v1") ||
+      (snapshot.engineVersion === "coup-anarchist-v1" &&
+        snapshot.stateSchemaVersion === 5 &&
+        snapshot.rulesetVersion === "coup-anarchist-v1")
+    )
   )
     return null;
-  const result = viewSchema.safeParse(snapshot.view);
+  const result = (snapshot.stateSchemaVersion === 5 ? modernView : legacyView).safeParse(
+    snapshot.view,
+  );
   if (!result.success) return null;
   const view = result.data;
   if (

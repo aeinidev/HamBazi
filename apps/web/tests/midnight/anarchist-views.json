@@ -1,0 +1,2062 @@
+{
+  "2-4": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 4,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      }
+    ]
+  },
+  "2-5": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 5,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      }
+    ]
+  },
+  "2-7": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      }
+    ]
+  },
+  "2-10": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 10,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      }
+    ]
+  },
+  "3-4": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 4,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      }
+    ]
+  },
+  "3-5": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 5,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      }
+    ]
+  },
+  "3-7": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      }
+    ]
+  },
+  "3-10": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 10,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      }
+    ]
+  },
+  "4-4": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 4,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      }
+    ]
+  },
+  "4-5": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 5,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      }
+    ]
+  },
+  "4-7": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      }
+    ]
+  },
+  "4-10": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 10,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      }
+    ]
+  },
+  "5-4": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 4,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      }
+    ]
+  },
+  "5-5": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 5,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      }
+    ]
+  },
+  "5-7": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      }
+    ]
+  },
+  "5-10": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 10,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      }
+    ]
+  },
+  "6-4": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 4,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+        "seat": 5,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      }
+    ]
+  },
+  "6-5": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 5,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+        "seat": 5,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      }
+    ]
+  },
+  "6-7": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 7,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+        "seat": 5,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_INCOME"
+      },
+      {
+        "type": "DECLARE_FOREIGN_AID"
+      },
+      {
+        "type": "DECLARE_TAX"
+      },
+      {
+        "type": "DECLARE_EXCHANGE"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_STEAL",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_ASSASSINATION",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_ANARCHIST",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      }
+    ]
+  },
+  "6-10": {
+    "engineVersion": "coup-anarchist-v1",
+    "stateSchemaVersion": 5,
+    "rulesetVersion": "coup-anarchist-v1",
+    "viewSchemaVersion": 2,
+    "kind": "PLAYER",
+    "revision": 0,
+    "phase": "WAITING_FOR_ACTION",
+    "turnNumber": 1,
+    "turnPlayerId": "00000000-0000-4000-8000-000000000000",
+    "winnerId": null,
+    "deadlineAt": 31000,
+    "pendingAction": null,
+    "window": null,
+    "proof": null,
+    "loss": null,
+    "players": [
+      {
+        "id": "00000000-0000-4000-8000-000000000000",
+        "seat": 0,
+        "coins": 10,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0",
+        "seat": 1,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+        "seat": 2,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+        "seat": 3,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
+        "seat": 4,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      },
+      {
+        "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+        "seat": 5,
+        "coins": 2,
+        "cardsRemaining": 2,
+        "revealed": []
+      }
+    ],
+    "lastAction": null,
+    "lastDefense": null,
+    "actionRules": {
+      "incomeCoins": 1,
+      "foreignAidCoins": 2,
+      "taxCoins": 3,
+      "stealCoins": 2,
+      "assassinationCost": 3,
+      "coupCost": 7,
+      "mandatoryCoupAt": 10,
+      "anarchistCost": 5
+    },
+    "viewerId": "00000000-0000-4000-8000-000000000000",
+    "myCards": ["DUKE", "DUKE"],
+    "exchangeChoices": null,
+    "legalCommands": [
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa0"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3"
+      },
+      {
+        "type": "DECLARE_COUP",
+        "targetId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4"
+      }
+    ]
+  }
+}
