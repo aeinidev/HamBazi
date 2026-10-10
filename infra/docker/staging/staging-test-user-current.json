@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-10T08:09:45.912193+00:00",
-  "status": "restricted-staging-midnight-and-personal-request-overlap-corrected-user-reported-focused-retest-success",
+  "checkedAt": "2026-10-10T08:44:15.871872+00:00",
+  "status": "restricted-staging-uniform-horizontal-lobby-tiles-verified-native-visual-acceptance-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,34 +10,34 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-personal-requests-20261010",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010",
   "application": {
-    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "06ecf89c236a99bc160bd2d838432eee09125d4d8badf32dcaaa9bd7ce504ed5",
-    "buildInputSha256": "e262bfc67a1b8943ae8d5bedda92e14acc235bc8b76a61e099999e23163f23af",
+    "sourceSnapshotSha256": "c5d9f4b92c51f2bfb72dd94139c23d6372bca9c58ff43a97a453713ced79867c",
+    "buildInputSha256": "36db2e94575d2e3eafde4f11c21c93e73b4b1746c74d362f4e0f5186b834baa2",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:361a8f77681be00cf8e6b10627110598edced64dcee11b64fd38ebbac02d8e8f"
+        "image": "hambazi-candidate/api:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:1c6ccb49e45bdacfec4d20007caf693e57fdaa237b44674dd09b314aa2f5c5c3"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:0592293f3f33d5cd5321c66523506a8eddcf13e886a0ec05ecaec6d51fb466ac"
+        "image": "hambazi-candidate/bot:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:3d9cf458f462d531e2b19be667db3698ef7e275141001ffea77f66bf7d14a871"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:772db4f0aa5b2676bfb0ead3c213c4c048d88771f970e6788af5fcf783aa3a27"
+        "image": "hambazi-candidate/worker:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:6126edc61223ff71723fd7b020a2c5e836fcf1fd19541ac31db103231ab63501"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:31104c46b61cab2a1da36dcb346a996e187345a3bcf376415508dc134d21c469"
+        "image": "hambazi-candidate/web:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:9b4f67dec0d00728ab588b874679db2cb2c4562d8d7128936a0d0048fe543310"
       }
     ]
   },
-  "composeSha256": "458e2d54170501abcfc4f245991ab8b33bd67b633d04466d350db8b586bffd5a",
-  "inventorySha256": "7b8c6b36498542541d71f9db59573cab55107575de3426b3729d845c5d103499",
+  "composeSha256": "dc7cb9547e0e9795c8ccc5f9f70078241030e04af5fd76f7567bedc0b9f7019e",
+  "inventorySha256": "d56fdee13ac9904576b8acdf06a5110e439d00429c8edc347bc92f9135566f05",
   "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
   "admission": {
     "ownerCount": 1,
@@ -162,257 +162,180 @@
     "freshnessWindowHours": 24,
     "staleEvidenceDeadlineExtended": false,
     "scheduleUnchangedForLatencyCorrection": true,
-    "scheduleUnchangedForMidnightAndRequestCorrection": true
+    "scheduleUnchangedForMidnightAndRequestCorrection": true,
+    "scheduleUnchangedForUniformLobbyCorrection": true
   },
   "verification": {
-    "frozenLockfileInstall": "passed",
-    "rootCheck": "passed",
-    "apiUnitTests": 931,
-    "botUnitTests": 81,
-    "configUnitTests": 246,
+    "frozenLockfileInstall": true,
+    "formatLintArchitectureAndWebTypecheck": true,
     "webUnitTests": 78,
-    "workerUnitTests": 36,
-    "infraTests": 126,
-    "infraPreExistingSkippedTests": 1,
     "midnightBrowserCases": 30,
     "midnightBrowserEngines": ["chromium", "webkit"],
-    "existingBrowserCases": 28,
     "packagedSmokeChecks": 44,
     "packagedSmokeBrowserCases": 2,
-    "secretsHistoryAndFiles": "zero findings",
-    "dependencyAudit": "zero findings",
-    "backendBotWorkerAndPolicyByteEqualityFiles": 529,
-    "realPostgresRedisPersonalHTTPIntegration": "4d7db58 evidence reused with unchanged API/Worker/config/infra bytes; not a new 55a4b19 integration run",
-    "fontMimeChecks": "4d7db58 evidence reused with unchanged static server/assets",
-    "compiledApiAndBotNumericAdmission": "original owner and regular numeric tester allowed; unrelated denied; resolver disabled",
-    "admin": "no role granted; public admin paths 404; Admin remains disabled",
-    "publicRouting": "Web 200; health/admin/internal/ordinary catalog 404",
-    "deployedWebIdentity": "actual packaged HTML/JS/CSS/SDK/font/artwork bytes match delivered assets",
-    "deployedBrowser": "Chromium direct HTTPS; WebKit TLS-verified HTTP response adapter; synthetic auth only, no live account mutation",
+    "secretsHistoryAndFiles": true,
+    "dependencyAudit": true,
+    "backendAndPolicyByteEqualityFiles": 444,
+    "backendIntegrationEvidence": "Prior 55a4b19 evidence retained with exact backend/policy/lock equality; not rerun for CSS framing",
+    "fullRootCheckRerun": false,
+    "compiledApiAndBotNumericAdmission": true,
+    "publicRouting": "web 200; admin/internal/private health/ordinary catalog 404",
+    "deployedWebIdentity": "HTML/JS/CSS/SDK/font/artwork match actual packaged bytes",
+    "deployedBrowser": {
+      "passed": true,
+      "syntheticAuthResponseOnly": true,
+      "realAccountMutationExecuted": false,
+      "chromium": "direct HTTPS",
+      "webkit": "TLS-verified request adapter; not direct native Telegram"
+    },
+    "uniformTileGeometryWidths": [320, 375, 390],
+    "coupEntryAndTutorialNavigation": true,
+    "hokmAndLudoDisabled": true,
     "noMigrationOrBackfill": true,
-    "contractBaselinesUnchanged": 12,
-    "nativeFocusedRetest": {
-      "schemaVersion": 1,
-      "recordedAt": "2026-10-10T08:05:17.871944+00:00",
-      "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
-      "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
-      "userReportedSuccessful": true,
-      "response": "اوکیه",
-      "questionCovered": [
-        "close and reopen with Open",
-        "start/finish personal Coup with normal moves",
-        "back and resume same match",
-        "close/reopen during gameplay",
-        "recurrence of Too many requests"
-      ],
-      "perStepAnswersSeparatelySupplied": false,
-      "clientVersion": null,
-      "iPhoneModel": null,
-      "agentDirectlyObservedNativeClient": false,
-      "newErrorReported": false,
-      "earlierMidnightResult": {
-        "sourceCommit": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
-        "userReportedUIAndNavigationWorked": true,
-        "intermittentGameplayManyRequestsReported": true
-      },
-      "administratorOrPublicReleaseAcceptance": false
-    },
-    "durableAfterCorrection": {
-      "owner": {
-        "matches": [
-          {
-            "status": "TERMINATED",
-            "engine_version": "coup-v1",
-            "state_schema_version": 4,
-            "ruleset_version": "coup-provisional-complete-v1",
-            "count": 2
-          }
-        ],
-        "humanCommands": 7
-      },
-      "regularTester": {
-        "matches": [],
-        "humanCommands": 0
-      }
-    },
-    "newNaturalCompleteGameIndependentlyVerified": false,
-    "newTesterGameCommandsAfterCorrection": 0,
-    "nativeAccountNotSeparatelyIdentifiedInReply": true,
-    "nativeClientVersion": null,
-    "nativeIPhoneModel": null,
-    "agentObservedNativeUI": false,
-    "closeoutInfraTests": 127,
-    "closeoutInfraSkippedTests": 0
+    "nativeUniformLobbyAcceptance": false,
+    "agentObservedNativeUI": false
   },
   "operatorRunner": {
-    "preparationDirectory": "/opt/hambazi-staging/private/runner-55a4b19",
-    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+    "preparationDirectory": "/opt/hambazi-staging/private/runner-395c6e7",
+    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
-  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010/previous-current-binding.json",
-  "rollbackAcceptance": {
-    "passed": false,
-    "scope": "previous compatible 4d7db58 artifacts preserved; no new current-to-previous rollback drill is claimed; older exact-pair acceptance retains its own binding"
-  },
+  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/previous-current-binding.json",
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
     "images.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/images.json",
-      "sha256": "7b8c6b36498542541d71f9db59573cab55107575de3426b3729d845c5d103499"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/images.json",
+      "sha256": "d56fdee13ac9904576b8acdf06a5110e439d00429c8edc347bc92f9135566f05"
     },
     "images.json.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/images.json.scan.json",
-      "sha256": "dcc26b44c3ea0402e697973100fd9dd1c8b523187e82bc91136bbc284ff8e782"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/images.json.scan.json",
+      "sha256": "4102f3fd5eb04fe4cf991f92c9999ec3050e15af050fbd44242c1f83af5e3703"
     },
     "components.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/components.scan.json",
-      "sha256": "f2b7cdb2568c1976793071dd0cdd370bc3337b6058b20f0f8911b6e26b71953b"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/components.scan.json",
+      "sha256": "c9eb420ee9f130bc6142ca180a60b3a0e17fc656180a362373f7ea5312fb858c"
     },
     "data.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/data.scan.json",
-      "sha256": "40bb2e2877a9e6a5ed5333cc090e790c4addea2897bed02a23cc1c00aed5d564"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/data.scan.json",
+      "sha256": "26bd1d21f8e794f9a6de04924714f16c79237a1ae727eccc4b93535c21376a63"
     },
     "scan-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/scan-binding.json",
-      "sha256": "1a552b47a290c958d3278b5bdd048a4cd550da11efd47adfc77773d044588d4e"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/scan-binding.json",
+      "sha256": "dc807766c1df45c53326a330017bc476ba9d8caa3c3f02d777288cd611f7c6fb"
     },
     "preflight.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/preflight.json",
-      "sha256": "1c27a70a478964dce4c9538478fc0490c4277f408005bbf4c7d413b35e4f08d6"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/preflight.json",
+      "sha256": "4b969dbab647fe48388f1cbbdc588ec21c0819622e3199e135fd652e223b5627"
     },
     "preparation-guards.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/preparation-guards.json",
-      "sha256": "4fc1b97f95800e97edf0d2ca90350d0be8ab9be99adb1ad9545067d31cef8983"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/preparation-guards.json",
+      "sha256": "d8b9aae4121ffab3661c0f466e6e90e12420958bcf82d8154d817a223f102260"
     },
     "renewed-preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/renewed-preparation.json",
-      "sha256": "8cc3006b7c6e01f202acba68814116a2e4ea878a502d36eb950ed1179474f7c1"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/renewed-preparation.json",
+      "sha256": "d8f0cf5ae702b15a9f01cb4fe88066e3bab67075f814d68b15166b36483034c6"
+    },
+    "capacity-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/capacity-recovery.json",
+      "sha256": "c119ed6573344073c53af73e909d3b1ee8fb8cc257ee7326efdb12dca331313c"
     },
     "capacity.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/capacity.json",
-      "sha256": "d9d2f9b1cf11dc90f6f2b8e65070025a1394369a6a5e5c326bc15ede17f2ae5e"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/capacity.json",
+      "sha256": "820021a93ea71035c3a1f4553cd90f16f0d91620bb87b3c673a03f994f8ff173"
     },
     "validation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/validation.json",
-      "sha256": "9e08a814add02558e0aee057b05b58e523f91bbc382923f1953e15a1756444c8"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/validation.json",
+      "sha256": "090b8779a85db19a71ba68dbf46e65232a525f6c6ee855f2a262dedee10b6b53"
     },
     "migration.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/migration.json",
-      "sha256": "e4a02a7499929b7e5de33cf533cad8728ba4d8065482bc2703f18078f3b4c2a2"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/migration.json",
+      "sha256": "72671e70c207665f3741374a9c6d7b63a6c906aca81d10df20c2c31417e6862e"
     },
     "startup.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/startup.json",
-      "sha256": "82a9c5d6f1c34485adece21237157eba86e11f325dd8b836378e73e0c4fb33b8"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/startup.json",
+      "sha256": "805d57fdb46088d136f2605735d4c66db4caa99a5e17da51cc29eafcb2a37c49"
     },
     "traffic-open.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/traffic-open.json",
-      "sha256": "5b1a8797ab1cd2a062256c19996bc1b7d7a969d183a3d4eaa5659dd39daeb600"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/traffic-open.json",
+      "sha256": "e2e38c86864871df2b4aa490630f43681d795d9a29051c401012c85897837f64"
     },
     "compiled-admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/compiled-admission.json",
-      "sha256": "1eb6fdddf5c0a65e1ddda7d618273a1e21b0fa00b561eb39b18c569da01f9bd1"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/compiled-admission.json",
+      "sha256": "4b2a3afb9fe36ab5f676436373f89790498b3d4fb4a414f7d195e0fd5895413d"
     },
     "operational-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/operational-final.json",
-      "sha256": "d38ed5453d57dc6c293819bb03c35c20a7e962fadeb12b08ebb156f6013dfe7e"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/operational-final.json",
+      "sha256": "ee971522a06a922d6bbd800d237e1f12e59f89a528e1547258b235d460ab75e2"
     },
     "public-routing.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/public-routing.json",
-      "sha256": "06ab542c91c6bab47b5501c164eabb912ed70d5cc587aa6f2f270b4c4921d7f1"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/public-routing.json",
+      "sha256": "57bfe4d68934b5c69c0d4a0386e6b23b0328b27ee3a523e87ba348e05c163e68"
     },
     "deployed-browser.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/deployed-browser.json",
-      "sha256": "41175736123f570a6666de5f06b98d412520f359f21eaa632a3b6c7b31d8e9ad"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/deployed-browser.json",
+      "sha256": "996c4004f1645f299fcdf9cf7d7fb7eb8afb3f7d0ab69732b5641d9b317f67a1"
     },
-    "overlap-investigation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/overlap-investigation.json",
-      "sha256": "a63860acdad68755ff743e1c0e6ad91e6e9a07d218413dae5975ce16e49a461a"
-    },
-    "previous-deployment-evidence.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/previous-deployment-evidence.json",
-      "sha256": "8e25c6803c8c6b888e5e456a16c4a05e7c892f283851167b5f4aa50aaae7c0f8"
+    "previous-current-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/previous-current-binding.json",
+      "sha256": "d0fe85f7aed5c53529bd6159535850b6f651b1f9a6ec21e5391f1b96788364ff"
     },
     "unchanged-controls.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/unchanged-controls.json",
-      "sha256": "194e7cec4350d81a16899dd8303ef8dc61828c3b5ca3fce2467d5be02c0982bf"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/unchanged-controls.json",
+      "sha256": "2a17a7c7ba6a33728e7eceb88c3424901534123f2bd92a5fdba44562f1151cc0"
     },
-    "root-check.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/root-check.log",
-      "sha256": "3d451409f980c670f8d039a6f674a33b0ae7f348186637715439b558c7969101"
+    "historical-local-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/historical-local-recovery.json",
+      "sha256": "13c063c9ee0dea5fa814b9edb8329e6785bbea660fad7bc2ab015004304dbd0f"
     },
-    "midnight-browser.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/midnight-browser.log",
-      "sha256": "0cd8e8a31c8970d4f15509ceefb0551c655086fff006cd3ed18c925ba44c7e49"
+    "format.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/format.log",
+      "sha256": "1d66faad74f5e8709353f7288592866bd3a9095da1174a916e7aa632949971e2"
     },
-    "existing-browser.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/existing-browser.log",
-      "sha256": "2b74a28a3a32f481e2d8bc76d2d13484d7cab159137926c1f4d37c2de0fd31bc"
+    "lint.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/lint.log",
+      "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
     },
-    "regression-before.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/regression-before.log",
-      "sha256": "ecbfde2c5bbbe344f4a7e5af574009a1d61d270b74bf7c92e9cc2c65359a2638"
+    "architecture.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/architecture.log",
+      "sha256": "7f7b2d8994dca17c12b6d8b07388aa7ef04d1be701697735daab9d691c31a6ad"
     },
     "typecheck.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/typecheck.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/typecheck.log",
       "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
     },
     "web-unit.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/web-unit.log",
-      "sha256": "23ffdd31f93f291572bb627b4ed9db39c55542f4d0602c53b37f62cd2848b50e"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/web-unit.log",
+      "sha256": "ac61e5a94cb70fb186b717cf7669681d0fa60ea444da75db73db2fdc99ed8ebd"
+    },
+    "midnight-browser-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/midnight-browser-final.log",
+      "sha256": "7775dcca3d9f437e18d8311b0ea1aed8c4fa9232de9fa8786176b8a0b4517e19"
     },
     "secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/secrets.log",
-      "sha256": "c8d3b7de6937a81f2b4099ef39be2d82c13e5133eb706ff7b3a58ce472d3ef5b"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/secrets.log",
+      "sha256": "24f8350324ae6d0bc978d7579df7152ba5bf267efb293f9e9279bf8fc5fd4822"
     },
     "dependencies.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/dependencies.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/dependencies.log",
       "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
     },
-    "packaged-smoke-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/packaged-smoke-final.log",
+    "packaged-smoke.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/packaged-smoke.log",
       "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
     },
-    "personal-http-03.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/personal-http-03.log",
-      "sha256": "2989b532d26e0ec2d726b59fb27975fe98b2786d0e23b46bb50e66ac7579f4d5"
-    },
-    "static-server-test.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/static-server-test.log",
-      "sha256": "8fa30e1df5c3d79a57ae3a19e175953feb0cc1fa7405feb2c1a7485e001822e5"
-    },
     "preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-personal-requests-20261010/preparation.json",
-      "sha256": "fc78b7fd78c383df2b78f44eb9d71cc71922f7ce4648873366161f3d9893f32a"
+      "privatePath": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010/preparation.json",
+      "sha256": "e884a9ac1469222906eb6ff3ae5af9424ad22ca033c1fb9dce4218f0bcb1d076"
     },
     "compose.yaml": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-personal-requests-20261010/compose.yaml",
-      "sha256": "458e2d54170501abcfc4f245991ab8b33bd67b633d04466d350db8b586bffd5a"
+      "privatePath": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010/compose.yaml",
+      "sha256": "dc7cb9547e0e9795c8ccc5f9f70078241030e04af5fd76f7567bedc0b9f7019e"
     },
     "deployment-evidence.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/deployment-evidence.json",
-      "sha256": "8eb42eec50e34d8c5d7ce92755f38f54f70add6f4e3d1a2a291cfe030e3993b3"
-    },
-    "native-retest.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-retest.json",
-      "sha256": "a7b3499b68c621185289c0e7e8e82e7f579bf3b4e15b7471ddec58278a975fdb"
-    },
-    "native-durable-metadata.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-durable-metadata.json",
-      "sha256": "f30d5547d6a1dcefaabaa18caa0c4a2fde03cbf1d501ba23167da00857b60df3"
-    },
-    "native-retest-closeout.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-retest-closeout.json",
-      "sha256": "70d7e21cbd93014b4024641f7fa9664d25942f7775c2ae88a5792bf3376c5504"
-    },
-    "closeout-infra.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/closeout-infra.log",
-      "sha256": "3b3887a361db385653707e6638e8a9582128e86a025786a111f5c86e3df7e393"
-    },
-    "closeout-secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/closeout-secrets.log",
-      "sha256": "24f8350324ae6d0bc978d7579df7152ba5bf267efb293f9e9279bf8fc5fd4822"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/deployment-evidence.json",
+      "sha256": "bcab784bea462a1f2e7a4e14ade026919f2e0edda4fc3166f380baabd146bc5d"
     }
   },
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
@@ -602,7 +525,7 @@
       "passed": true
     }
   },
-  "previousBindingSha256": "8c55b4ce7a0614f622f2da5715e4f4ac197229efd278e46011907cc86341bf05",
+  "previousBindingSha256": "d0fe85f7aed5c53529bd6159535850b6f651b1f9a6ec21e5391f1b96788364ff",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
     "frozenLockfileInstall": "passed",
@@ -1008,8 +931,88 @@
     "allFourCandidateLayersMaterializedBeforeMaintenance": true,
     "probeContainersStarted": false,
     "probeContainersRemoved": true,
-    "freeDiskBytesAtFinalAutomatedReadback": 1503125504,
+    "freeDiskBytesAtFinalAutomatedReadback": 1495863296,
+    "selectedPrevious55ImagesAndPreparationPreserved": true,
     "historicalInitialMidnightSpaceFailureAndRecoveryRetained": true,
-    "additionalCleanupForRequestCorrection": false
+    "exactUnreferencedHistoricalImagesRemovedForCapacity": 4,
+    "historicalSourceRemoved": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
+    "historicalCopiesRecoverableLocally": true,
+    "dataVolumesSecretsScanCacheAndContainmentUnchanged": true
+  },
+  "previousPersonalRequestDeployment": {
+    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-personal-requests-20261010",
+    "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:361a8f77681be00cf8e6b10627110598edced64dcee11b64fd38ebbac02d8e8f"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:0592293f3f33d5cd5321c66523506a8eddcf13e886a0ec05ecaec6d51fb466ac"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:772db4f0aa5b2676bfb0ead3c213c4c048d88771f970e6788af5fcf783aa3a27"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:31104c46b61cab2a1da36dcb346a996e187345a3bcf376415508dc134d21c469"
+      }
+    ],
+    "composeSha256": "458e2d54170501abcfc4f245991ab8b33bd67b633d04466d350db8b586bffd5a",
+    "inventorySha256": "7b8c6b36498542541d71f9db59573cab55107575de3426b3729d845c5d103499",
+    "repositoryBindingAt": "9f7c40cece402888f6b2a8d33654b27bade5dd1d:infra/docker/staging/staging-test-user-current.json",
+    "completePriorBindingPrivatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/previous-current-binding.json",
+    "completePriorBindingSha256": "d0fe85f7aed5c53529bd6159535850b6f651b1f9a6ec21e5391f1b96788364ff",
+    "nativeFocusedRetest": {
+      "schemaVersion": 1,
+      "recordedAt": "2026-10-10T08:05:17.871944+00:00",
+      "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+      "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
+      "userReportedSuccessful": true,
+      "response": "اوکیه",
+      "questionCovered": [
+        "close and reopen with Open",
+        "start/finish personal Coup with normal moves",
+        "back and resume same match",
+        "close/reopen during gameplay",
+        "recurrence of Too many requests"
+      ],
+      "perStepAnswersSeparatelySupplied": false,
+      "clientVersion": null,
+      "iPhoneModel": null,
+      "agentDirectlyObservedNativeClient": false,
+      "newErrorReported": false,
+      "earlierMidnightResult": {
+        "sourceCommit": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
+        "userReportedUIAndNavigationWorked": true,
+        "intermittentGameplayManyRequestsReported": true
+      },
+      "administratorOrPublicReleaseAcceptance": false
+    },
+    "retainedAsSelectedPrevious": true
+  },
+  "selectedPreviousPreparedDirectory": "/opt/hambazi-staging/private/prepared-personal-requests-20261010",
+  "historicalRollbackAcceptance": {
+    "passed": false,
+    "scope": "previous compatible 4d7db58 artifacts preserved; no new current-to-previous rollback drill is claimed; older exact-pair acceptance retains its own binding"
+  },
+  "rollbackAcceptance": {
+    "passed": null,
+    "scope": "No rollback executed for this visual correction; exact compatible 55a4b19 images and preparation retained"
+  },
+  "uniformLobbyFraming": {
+    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
+    "trafficOpenedAtUTC": "2026-10-10T08:42:29.998Z",
+    "trafficOpenedAtAsiaTehran": "2026-10-10T12:12:29.998000+03:30",
+    "sharedAspectRatio": 2.95,
+    "sharedFrameRadiusPx": 18,
+    "sharedTitleStatusColumn": "right",
+    "activeCoupGoldPreserved": true,
+    "disabledHokmLudoPreserved": true,
+    "entryGameplayBotControlsUnchanged": true,
+    "nativeAcceptance": false
   }
 }

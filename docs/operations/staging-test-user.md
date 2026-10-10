@@ -3,7 +3,9 @@
 The owner explicitly admits `@devtest98` as one ordinary staging tester under
 [ADR-058](../adr/058-narrow-staging-regular-test-user.md). The
 [current deployment binding](../../infra/docker/staging/staging-test-user-current.json)
-records clean source `55a4b19`, four exact application pins and private evidence.
+records clean source `395c6e7`, four exact application pins and private evidence.
+The [uniform lobby framing](uniform-lobby-framing.md) matches the Coup tile to
+Hokm/Ludo; its native visual acceptance remains pending.
 The [Midnight lobby/request correction](midnight-personal-lobby.md) records the
 new screens, focused user-reported retest and its evidence limits.
 The preceding onboarding and personal acceptance bindings remain historical.
@@ -18,7 +20,7 @@ reported functional success and a delay-free retest after the focused
 [Bot support latency correction](incidents/2026-10-10-bot-chat-latency.md).
 These are user-reported native results; the agent did not observe the Telegram UI
 and the client version was not provided. The current preparation is
-`prepared-personal-requests-20261010`; the normal expiry remains **2026-10-10 22:36:47
+`prepared-uniform-lobby-20261010`; the normal expiry remains **2026-10-10 22:36:47
 Asia/Tehran**. The containment timer remains enabled.
 
 ## Identity and registration
@@ -65,11 +67,11 @@ The native Description Picture procedure remains in [Bot onboarding](bot-onboard
 ## Operator and revocation
 
 The active preparation is
-`/opt/hambazi-staging/private/prepared-bot-latency-20261010`.
+`/opt/hambazi-staging/private/prepared-uniform-lobby-20261010`.
 Current deployment evidence is under
-`/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010`; the original
+`/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010`; the original
 separate tester policy remains under `staging-test-user-20261009`.
-The preparation runner is `runner-8138d2a`; the existing generic containment runner
+The preparation runner is `runner-395c6e7`; the existing generic containment runner
 and sole operator remain unchanged. No migration or backfill was performed;
 the existing fifteen migrations, grants and twelve contract baselines are retained.
 

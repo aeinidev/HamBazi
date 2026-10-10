@@ -1,7 +1,9 @@
 # Midnight lobby and personal request correction
 
-The restricted staging now serves clean app source `55a4b19`, with the Midnight
-lobby/Coup entry introduced in `4d7db58`. The supplied display font, live Persian
+The personal request correction was deployed as clean app source `55a4b19`, with
+the Midnight lobby/Coup entry introduced in `4d7db58`. Current source `395c6e7`
+adds the [uniform lobby framing correction](uniform-lobby-framing.md) and retains
+this request fix and its source-bound evidence. The supplied display font, live Persian
 controls and separate Coup/Hokm/Ludo artwork are deployed; Hokm and Ludo remain
 disabled. [Architecture](../architecture/midnight-personal-lobby.md),
 [asset provenance](../design/midnight-assets.md) and the

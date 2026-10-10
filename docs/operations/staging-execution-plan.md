@@ -7,6 +7,8 @@
 > disabled; registration is required and support goes to the original owner.
 > The current Midnight lobby and personal request correction are recorded in
 > [their deployment report](midnight-personal-lobby.md).
+> The current Coup tile framing correction is recorded in
+> [its deployment report](uniform-lobby-framing.md).
 > Earlier onboarding/closure/native/rollback evidence below is historical and
 > applies only to its recorded source. Production remains HOLD.
 
