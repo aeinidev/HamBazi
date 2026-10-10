@@ -3,7 +3,9 @@
 The owner explicitly admits `@devtest98` as one ordinary staging tester under
 [ADR-058](../adr/058-narrow-staging-regular-test-user.md). The
 [current deployment binding](../../infra/docker/staging/staging-test-user-current.json)
-records clean source `8138d2a`, four exact application pins and private evidence.
+records clean source `55a4b19`, four exact application pins and private evidence.
+The [Midnight lobby/request correction](midnight-personal-lobby.md) records the
+new screens, focused user-reported retest and its evidence limits.
 The preceding onboarding and personal acceptance bindings remain historical.
 Public admission and production release remain disabled.
 
@@ -16,7 +18,7 @@ reported functional success and a delay-free retest after the focused
 [Bot support latency correction](incidents/2026-10-10-bot-chat-latency.md).
 These are user-reported native results; the agent did not observe the Telegram UI
 and the client version was not provided. The current preparation is
-`prepared-bot-latency-20261010`; the normal expiry remains **2026-10-10 22:36:47
+`prepared-personal-requests-20261010`; the normal expiry remains **2026-10-10 22:36:47
 Asia/Tehran**. The containment timer remains enabled.
 
 ## Identity and registration

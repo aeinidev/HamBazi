@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-09T22:47:23.686214+00:00",
-  "status": "restricted-staging-bot-latency-corrected-user-reported-native-retest-passed",
+  "checkedAt": "2026-10-10T08:09:45.912193+00:00",
+  "status": "restricted-staging-midnight-and-personal-request-overlap-corrected-user-reported-focused-retest-success",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,34 +10,34 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-personal-requests-20261010",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010",
   "application": {
-    "sourceCommit": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
+    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "12bff1015b32159651f5f95a85b68f92bd43527f8fd7885f9ca12839c2c2d886",
-    "buildInputSha256": "60349e600d1cb06c73fdee9c29a529dabe0da6e89f33c0164d8b55cb335dbcd2",
+    "sourceSnapshotSha256": "06ecf89c236a99bc160bd2d838432eee09125d4d8badf32dcaaa9bd7ce504ed5",
+    "buildInputSha256": "e262bfc67a1b8943ae8d5bedda92e14acc235bc8b76a61e099999e23163f23af",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:8138d2a2fede95c5e0cd06bfe996eff6249771eb-60349e600d1cb06c@sha256:2164fb065a3ed58fb89e46be6d10c3c00fc51252b43f7a02319bbc196c137b3a"
+        "image": "hambazi-candidate/api:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:361a8f77681be00cf8e6b10627110598edced64dcee11b64fd38ebbac02d8e8f"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:8138d2a2fede95c5e0cd06bfe996eff6249771eb-60349e600d1cb06c@sha256:56dca6479d6d1d64c9698edefa94a5443800c69c555cd5194f3f8823ee805c59"
+        "image": "hambazi-candidate/bot:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:0592293f3f33d5cd5321c66523506a8eddcf13e886a0ec05ecaec6d51fb466ac"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:8138d2a2fede95c5e0cd06bfe996eff6249771eb-60349e600d1cb06c@sha256:4493e6df2c563750b08b53427bd9174127a4acfdb4e6b9a0e0e4c1c4da3f4245"
+        "image": "hambazi-candidate/worker:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:772db4f0aa5b2676bfb0ead3c213c4c048d88771f970e6788af5fcf783aa3a27"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:8138d2a2fede95c5e0cd06bfe996eff6249771eb-60349e600d1cb06c@sha256:7bf01bf13cac9fdc655bad9cc35f378b388a762e84fccfbab9710f9580eb96e5"
+        "image": "hambazi-candidate/web:55a4b19d96bc4f79aadb782dc2f356a7864d6dc0-e262bfc67a1b8943@sha256:31104c46b61cab2a1da36dcb346a996e187345a3bcf376415508dc134d21c469"
       }
     ]
   },
-  "composeSha256": "c4d1a53ba4aead2d505c29fbf8ca8f3e3d0c54e8d3a15b68fd5d094e370d40d3",
-  "inventorySha256": "415c3d581cccfcbbba83b1156b224f1142e13e735f9eb0728c34de4102956c3c",
+  "composeSha256": "458e2d54170501abcfc4f245991ab8b33bd67b633d04466d350db8b586bffd5a",
+  "inventorySha256": "7b8c6b36498542541d71f9db59573cab55107575de3426b3729d845c5d103499",
   "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
   "admission": {
     "ownerCount": 1,
@@ -74,7 +74,7 @@
     "defaultOwnerAndTesterOpenMenuVerified": true,
     "testerMenuUsesVerifiedDefault": true,
     "menuReference": "https://core.telegram.org/bots/api#menubutton",
-    "defaultAndPersianNativeDescriptionVerified": true,
+    "defaultAndPersianNativeDescriptionVerified": false,
     "startReply": "برای ادامه، از دکمه‌های پایین استفاده کن.",
     "startPhotoCalls": 0,
     "webhookConfigured": true,
@@ -86,19 +86,19 @@
         "action": "CANCEL",
         "phase": "DONE",
         "reply": "SUPPORT_CANCELLED",
-        "count": 1
+        "count": 3
       },
       {
         "action": "PROFILE",
         "phase": "DONE",
         "reply": "PROFILE",
-        "count": 3
+        "count": 5
       },
       {
         "action": "REGISTER",
         "phase": "DONE",
         "reply": "REGISTERED",
-        "count": 1
+        "count": 3
       },
       {
         "action": "START",
@@ -110,7 +110,7 @@
         "action": "START",
         "phase": "DONE",
         "reply": "WELCOME_REGISTERED",
-        "count": 3
+        "count": 7
       },
       {
         "action": "SUPPORT",
@@ -126,7 +126,8 @@
       }
     ],
     "testSupportDelivered": 2,
-    "nativeTesterAcceptance": {
+    "descriptionPicture": "existing owner BotFather step remains pending",
+    "historicalNativeBotTesterAcceptance": {
       "passed": true,
       "status": "account-holder-reported-functional-success-and-latest-latency-retest-without-delay",
       "source": "user-report",
@@ -135,7 +136,13 @@
       "newReleaseObservedActions": ["START", "SUPPORT", "TEXT", "PROFILE"],
       "ownerChatReceiptCountIndependentlyReported": false
     },
-    "descriptionPicture": "existing owner BotFather step remains pending"
+    "defaultAndPersianNativeDescriptionsNonemptyAndPreserved": true,
+    "nativeDescriptionReadbackSha256": {
+      "default": "b47bb1afded53d2616911d40a734b8281ea3c217612866beb904ace4e255acf6",
+      "fa": "829cbc54adb46f7e7ac2f21eff237695d010d913f1a593964a63f722372f4436"
+    },
+    "nativeDescriptionTextsMatch": false,
+    "nativeDescriptionsModified": false
   },
   "securityScan": {
     "normalMaximumAgeHours": 24,
@@ -154,7 +161,8 @@
     "timerDropInSha256": "7a3606e523d75e0a74496761eb6fd7d4b69abb9e6bc9f693b2aec8415cd10c06",
     "freshnessWindowHours": 24,
     "staleEvidenceDeadlineExtended": false,
-    "scheduleUnchangedForLatencyCorrection": true
+    "scheduleUnchangedForLatencyCorrection": true,
+    "scheduleUnchangedForMidnightAndRequestCorrection": true
   },
   "verification": {
     "frozenLockfileInstall": "passed",
@@ -162,58 +170,294 @@
     "apiUnitTests": 931,
     "botUnitTests": 81,
     "configUnitTests": 246,
-    "webUnitTests": 69,
+    "webUnitTests": 78,
     "workerUnitTests": 36,
-    "observabilityUnitTests": 32,
     "infraTests": 126,
     "infraPreExistingSkippedTests": 1,
-    "realPostgresRedisIntegration": "passed including immediate guarded support continuation, wrong/duplicate/stale receipt claims and explicit retry; full existing API/Worker integration suite",
-    "botHttpsTransportTests": 39,
+    "midnightBrowserCases": 30,
+    "midnightBrowserEngines": ["chromium", "webkit"],
+    "existingBrowserCases": 28,
     "packagedSmokeChecks": 44,
     "packagedSmokeBrowserCases": 2,
     "secretsHistoryAndFiles": "zero findings",
     "dependencyAudit": "zero findings",
-    "compiledApiAndBotNumericAdmission": "owner/tester allowed; unrelated denied; original owner unchanged; tester remains a regular user",
-    "publicRouting": "Web 200; private health/admin/internal paths 404",
-    "realIdentityResolution": "existing identity from original verified Telegram update; resolver disabled; no synthetic Telegram updates or operator registration",
-    "liveTestRegistration": "unchanged real explicit user REGISTER from prior release; no operator registration or profile mutation",
-    "admin": "no role granted; public admin paths 404; Admin remains unimplemented/disabled",
-    "nativeTesterAcceptance": true,
-    "nativeAcceptanceSource": "account-holder reports; server receipt metadata independently confirms completion",
-    "liveAdmissionProtocolChecks": "historical 81476d2 before/after registration fixtures remain in archived previous binding; not represented as newly rerun on 8138d2a",
+    "backendBotWorkerAndPolicyByteEqualityFiles": 529,
+    "realPostgresRedisPersonalHTTPIntegration": "4d7db58 evidence reused with unchanged API/Worker/config/infra bytes; not a new 55a4b19 integration run",
+    "fontMimeChecks": "4d7db58 evidence reused with unchanged static server/assets",
+    "compiledApiAndBotNumericAdmission": "original owner and regular numeric tester allowed; unrelated denied; resolver disabled",
+    "admin": "no role granted; public admin paths 404; Admin remains disabled",
+    "publicRouting": "Web 200; health/admin/internal/ordinary catalog 404",
+    "deployedWebIdentity": "actual packaged HTML/JS/CSS/SDK/font/artwork bytes match delivered assets",
+    "deployedBrowser": "Chromium direct HTTPS; WebKit TLS-verified HTTP response adapter; synthetic auth only, no live account mutation",
     "noMigrationOrBackfill": true,
     "contractBaselinesUnchanged": 12,
-    "webWorkerGameplaySourceUnchanged": true,
-    "unchangedControls": {
+    "nativeFocusedRetest": {
       "schemaVersion": 1,
-      "checkedAt": "2026-10-09T22:47:23.681220+00:00",
-      "sourceCommit": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
-      "passed": true,
-      "identityLimitPerMinute": 10,
-      "requestLimitPerMinute": 60,
-      "receiptLeaseMs": 15000,
-      "containmentServiceUnchanged": true,
-      "containmentScheduleUnchanged": true,
-      "postDeploymentWebhookCounts": {
-        "completed": 4,
-        "failed": 0
+      "recordedAt": "2026-10-10T08:05:17.871944+00:00",
+      "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+      "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
+      "userReportedSuccessful": true,
+      "response": "اوکیه",
+      "questionCovered": [
+        "close and reopen with Open",
+        "start/finish personal Coup with normal moves",
+        "back and resume same match",
+        "close/reopen during gameplay",
+        "recurrence of Too many requests"
+      ],
+      "perStepAnswersSeparatelySupplied": false,
+      "clientVersion": null,
+      "iPhoneModel": null,
+      "agentDirectlyObservedNativeClient": false,
+      "newErrorReported": false,
+      "earlierMidnightResult": {
+        "sourceCommit": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
+        "userReportedUIAndNavigationWorked": true,
+        "intermittentGameplayManyRequestsReported": true
+      },
+      "administratorOrPublicReleaseAcceptance": false
+    },
+    "durableAfterCorrection": {
+      "owner": {
+        "matches": [
+          {
+            "status": "TERMINATED",
+            "engine_version": "coup-v1",
+            "state_schema_version": 4,
+            "ruleset_version": "coup-provisional-complete-v1",
+            "count": 2
+          }
+        ],
+        "humanCommands": 7
+      },
+      "regularTester": {
+        "matches": [],
+        "humanCommands": 0
       }
-    }
+    },
+    "newNaturalCompleteGameIndependentlyVerified": false,
+    "newTesterGameCommandsAfterCorrection": 0,
+    "nativeAccountNotSeparatelyIdentifiedInReply": true,
+    "nativeClientVersion": null,
+    "nativeIPhoneModel": null,
+    "agentObservedNativeUI": false,
+    "closeoutInfraTests": 127,
+    "closeoutInfraSkippedTests": 0
   },
   "operatorRunner": {
-    "preparationDirectory": "/opt/hambazi-staging/private/runner-8138d2a",
-    "sourceCommit": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
+    "preparationDirectory": "/opt/hambazi-staging/private/runner-55a4b19",
+    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
   "previousBinding": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010/previous-current-binding.json",
   "rollbackAcceptance": {
     "passed": false,
-    "scope": "historical old exact-pair evidence is not successor acceptance; restore under maintenance only"
+    "scope": "previous compatible 4d7db58 artifacts preserved; no new current-to-previous rollback drill is claimed; older exact-pair acceptance retains its own binding"
   },
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
+    "images.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/images.json",
+      "sha256": "7b8c6b36498542541d71f9db59573cab55107575de3426b3729d845c5d103499"
+    },
+    "images.json.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/images.json.scan.json",
+      "sha256": "dcc26b44c3ea0402e697973100fd9dd1c8b523187e82bc91136bbc284ff8e782"
+    },
+    "components.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/components.scan.json",
+      "sha256": "f2b7cdb2568c1976793071dd0cdd370bc3337b6058b20f0f8911b6e26b71953b"
+    },
+    "data.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/data.scan.json",
+      "sha256": "40bb2e2877a9e6a5ed5333cc090e790c4addea2897bed02a23cc1c00aed5d564"
+    },
+    "scan-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/scan-binding.json",
+      "sha256": "1a552b47a290c958d3278b5bdd048a4cd550da11efd47adfc77773d044588d4e"
+    },
+    "preflight.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/preflight.json",
+      "sha256": "1c27a70a478964dce4c9538478fc0490c4277f408005bbf4c7d413b35e4f08d6"
+    },
+    "preparation-guards.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/preparation-guards.json",
+      "sha256": "4fc1b97f95800e97edf0d2ca90350d0be8ab9be99adb1ad9545067d31cef8983"
+    },
+    "renewed-preparation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/renewed-preparation.json",
+      "sha256": "8cc3006b7c6e01f202acba68814116a2e4ea878a502d36eb950ed1179474f7c1"
+    },
+    "capacity.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/capacity.json",
+      "sha256": "d9d2f9b1cf11dc90f6f2b8e65070025a1394369a6a5e5c326bc15ede17f2ae5e"
+    },
+    "validation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/validation.json",
+      "sha256": "9e08a814add02558e0aee057b05b58e523f91bbc382923f1953e15a1756444c8"
+    },
+    "migration.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/migration.json",
+      "sha256": "e4a02a7499929b7e5de33cf533cad8728ba4d8065482bc2703f18078f3b4c2a2"
+    },
+    "startup.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/startup.json",
+      "sha256": "82a9c5d6f1c34485adece21237157eba86e11f325dd8b836378e73e0c4fb33b8"
+    },
+    "traffic-open.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/traffic-open.json",
+      "sha256": "5b1a8797ab1cd2a062256c19996bc1b7d7a969d183a3d4eaa5659dd39daeb600"
+    },
+    "compiled-admission.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/compiled-admission.json",
+      "sha256": "1eb6fdddf5c0a65e1ddda7d618273a1e21b0fa00b561eb39b18c569da01f9bd1"
+    },
+    "operational-final.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/operational-final.json",
+      "sha256": "d38ed5453d57dc6c293819bb03c35c20a7e962fadeb12b08ebb156f6013dfe7e"
+    },
+    "public-routing.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/public-routing.json",
+      "sha256": "06ab542c91c6bab47b5501c164eabb912ed70d5cc587aa6f2f270b4c4921d7f1"
+    },
+    "deployed-browser.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/deployed-browser.json",
+      "sha256": "41175736123f570a6666de5f06b98d412520f359f21eaa632a3b6c7b31d8e9ad"
+    },
+    "overlap-investigation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/overlap-investigation.json",
+      "sha256": "a63860acdad68755ff743e1c0e6ad91e6e9a07d218413dae5975ce16e49a461a"
+    },
+    "previous-deployment-evidence.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/previous-deployment-evidence.json",
+      "sha256": "8e25c6803c8c6b888e5e456a16c4a05e7c892f283851167b5f4aa50aaae7c0f8"
+    },
+    "unchanged-controls.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/unchanged-controls.json",
+      "sha256": "194e7cec4350d81a16899dd8303ef8dc61828c3b5ca3fce2467d5be02c0982bf"
+    },
+    "root-check.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/root-check.log",
+      "sha256": "3d451409f980c670f8d039a6f674a33b0ae7f348186637715439b558c7969101"
+    },
+    "midnight-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/midnight-browser.log",
+      "sha256": "0cd8e8a31c8970d4f15509ceefb0551c655086fff006cd3ed18c925ba44c7e49"
+    },
+    "existing-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/existing-browser.log",
+      "sha256": "2b74a28a3a32f481e2d8bc76d2d13484d7cab159137926c1f4d37c2de0fd31bc"
+    },
+    "regression-before.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/regression-before.log",
+      "sha256": "ecbfde2c5bbbe344f4a7e5af574009a1d61d270b74bf7c92e9cc2c65359a2638"
+    },
+    "typecheck.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/typecheck.log",
+      "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
+    },
+    "web-unit.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/web-unit.log",
+      "sha256": "23ffdd31f93f291572bb627b4ed9db39c55542f4d0602c53b37f62cd2848b50e"
+    },
+    "secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/secrets.log",
+      "sha256": "c8d3b7de6937a81f2b4099ef39be2d82c13e5133eb706ff7b3a58ce472d3ef5b"
+    },
+    "dependencies.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/dependencies.log",
+      "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
+    },
+    "packaged-smoke-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/packaged-smoke-final.log",
+      "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
+    },
+    "personal-http-03.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/personal-http-03.log",
+      "sha256": "2989b532d26e0ec2d726b59fb27975fe98b2786d0e23b46bb50e66ac7579f4d5"
+    },
+    "static-server-test.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/static-server-test.log",
+      "sha256": "8fa30e1df5c3d79a57ae3a19e175953feb0cc1fa7405feb2c1a7485e001822e5"
+    },
+    "preparation.json": {
+      "privatePath": "/opt/hambazi-staging/private/prepared-personal-requests-20261010/preparation.json",
+      "sha256": "fc78b7fd78c383df2b78f44eb9d71cc71922f7ce4648873366161f3d9893f32a"
+    },
+    "compose.yaml": {
+      "privatePath": "/opt/hambazi-staging/private/prepared-personal-requests-20261010/compose.yaml",
+      "sha256": "458e2d54170501abcfc4f245991ab8b33bd67b633d04466d350db8b586bffd5a"
+    },
+    "deployment-evidence.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/deployment-evidence.json",
+      "sha256": "8eb42eec50e34d8c5d7ce92755f38f54f70add6f4e3d1a2a291cfe030e3993b3"
+    },
+    "native-retest.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-retest.json",
+      "sha256": "a7b3499b68c621185289c0e7e8e82e7f579bf3b4e15b7471ddec58278a975fdb"
+    },
+    "native-durable-metadata.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-durable-metadata.json",
+      "sha256": "f30d5547d6a1dcefaabaa18caa0c4a2fde03cbf1d501ba23167da00857b60df3"
+    },
+    "native-retest-closeout.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/native-retest-closeout.json",
+      "sha256": "70d7e21cbd93014b4024641f7fa9664d25942f7775c2ae88a5792bf3376c5504"
+    },
+    "closeout-infra.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/closeout-infra.log",
+      "sha256": "3b3887a361db385653707e6638e8a9582128e86a025786a111f5c86e3df7e393"
+    },
+    "closeout-secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/personal-requests-20261010/closeout-secrets.log",
+      "sha256": "24f8350324ae6d0bc978d7579df7152ba5bf267efb293f9e9279bf8fc5fd4822"
+    }
+  },
+  "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
+  "previousPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010",
+  "previousSecurityScan": {
+    "normalMaximumAgeHours": 24,
+    "exactImagesPassed": 8,
+    "database": {
+      "updatedAt": "2026-10-09T19:06:47.421531537Z",
+      "downloadedAt": "2026-10-09T21:48:21.465817257Z"
+    },
+    "expiryAsiaTehran": "2026-10-10 22:36:47",
+    "evidenceExpiresAtUTC": "2026-10-10T19:06:47+00:00",
+    "expiryContainmentTimerEnabled": true,
+    "expiryNextTrigger": "Sat 2026-10-10 19:06:47 UTC",
+    "freshnessExceptionUsed": false,
+    "containmentDisabled": false,
+    "containmentServiceUnchanged": true,
+    "timerDropInSha256": "7a3606e523d75e0a74496761eb6fd7d4b69abb9e6bc9f693b2aec8415cd10c06",
+    "freshnessWindowHours": 24,
+    "staleEvidenceDeadlineExtended": false,
+    "scheduleUnchangedForLatencyCorrection": true,
+    "scheduleUnchangedForMidnightAndRequestCorrection": true
+  },
+  "incident": {
+    "reportedAtAsiaTehran": "2026-10-10 01:14",
+    "reportedTimePrecision": "approximate-user-report",
+    "reportedFailure": "onboarding did not work; Mini App HTTP 503",
+    "nativeAcceptance": true,
+    "cause": "normal 24-hour advisory expiry activated canonical maintenance and gracefully stopped all four application services",
+    "containmentTriggeredAtUTC": "2026-10-09T19:05:22Z",
+    "containmentTriggeredAtAsiaTehran": "2026-10-09 22:35:22",
+    "generalOwnerAndTesterOutage": true,
+    "nginxConfigurationValid": true,
+    "dataServicesPreserved": true,
+    "crashOrOOMObserved": false,
+    "restoredTrafficAtUTC": "2026-10-09T21:51:33.116Z",
+    "restoredTrafficAtAsiaTehran": "2026-10-10 01:21:33",
+    "sameApplicationImagesAndConfiguration": true,
+    "migrationOrBackfillPerformed": false,
+    "nativeRetest": "account-holder-reported-functional-success-before-this-latency-correction; latest corrected-release retest also reported without delay",
+    "nativeAcceptanceAtRecovery": false,
+    "latencyFollowup": "docs/operations/incidents/2026-10-10-bot-chat-latency.md"
+  },
+  "previousDeploymentPrivateEvidence": {
     "before-existing.json": {
       "privatePath": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010/before-existing.json",
       "sha256": "be1b972833175000aba1b9ff2a18fa6c50ea2223bed78f3997b1beed5ed1b54e",
@@ -358,171 +602,51 @@
       "passed": true
     }
   },
-  "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-staging-test-user-20261009",
-  "previousPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/incident-20261010",
-  "previousSecurityScan": {
-    "normalMaximumAgeHours": 24,
-    "exactImagesPassed": 8,
-    "database": {
-      "updatedAt": "2026-10-09T19:06:47.421531537Z",
-      "downloadedAt": "2026-10-09T21:48:21.465817257Z"
-    },
-    "expiryAsiaTehran": "2026-10-10 22:36:47",
-    "evidenceExpiresAtUTC": "2026-10-10T19:06:47+00:00",
-    "expiryContainmentTimerEnabled": true,
-    "expiryNextTrigger": "Sat 2026-10-10 19:06:47 UTC",
-    "freshnessExceptionUsed": false,
-    "deadlineExtended": false,
-    "scheduleRenewedFromGenuinelyFreshNormalScans": true,
-    "containmentDisabled": false,
-    "containmentServiceUnchanged": true,
-    "timerDropInSha256": "7a3606e523d75e0a74496761eb6fd7d4b69abb9e6bc9f693b2aec8415cd10c06"
-  },
-  "incident": {
-    "reportedAtAsiaTehran": "2026-10-10 01:14",
-    "reportedTimePrecision": "approximate-user-report",
-    "reportedFailure": "onboarding did not work; Mini App HTTP 503",
-    "nativeAcceptance": true,
-    "cause": "normal 24-hour advisory expiry activated canonical maintenance and gracefully stopped all four application services",
-    "containmentTriggeredAtUTC": "2026-10-09T19:05:22Z",
-    "containmentTriggeredAtAsiaTehran": "2026-10-09 22:35:22",
-    "generalOwnerAndTesterOutage": true,
-    "nginxConfigurationValid": true,
-    "dataServicesPreserved": true,
-    "crashOrOOMObserved": false,
-    "restoredTrafficAtUTC": "2026-10-09T21:51:33.116Z",
-    "restoredTrafficAtAsiaTehran": "2026-10-10 01:21:33",
-    "sameApplicationImagesAndConfiguration": true,
-    "migrationOrBackfillPerformed": false,
-    "nativeRetest": "account-holder-reported-functional-success-before-this-latency-correction; latest corrected-release retest also reported without delay",
-    "nativeAcceptanceAtRecovery": false,
-    "latencyFollowup": "docs/operations/incidents/2026-10-10-bot-chat-latency.md"
-  },
-  "previousDeploymentPrivateEvidence": {
-    "images.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/images.json",
-      "sha256": "f8e9abcf032277f0a3a65e4b61c60d67f37a60f92064a1043655ecf2c7b3bfcf",
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "images.json.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/images.json.scan.json",
-      "sha256": "b5e9fc2015c6d437a04c20a64d0c9a256388b78070993c08d19a44e9c49f3e39",
-      "ok": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "components.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/components.scan.json",
-      "sha256": "cb599c13161b8fa0ca8b0b2291dc47d4304c95b078f693ada3cf54990e9e83ab",
-      "scannedAt": "2026-10-09T14:36:19.522Z",
-      "ok": true
-    },
-    "data.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/data.scan.json",
-      "sha256": "125594175525d6db0325e39622617be34001047a5ea3ae34305ccacffbd87d03",
-      "scannedAt": "2026-10-09T14:36:19.792Z",
-      "ok": true
-    },
-    "admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/admission.json",
-      "sha256": "3efbc93c4f86d6c1cbccc8c40180265d31df0743f50e834aa8d3ee3c6d2d99e9",
-      "checkedAt": "2026-10-09T14:51:23.669583+00:00",
-      "passed": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "startup-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/startup-final.json",
-      "sha256": "1c78f0f6bad8d2fd7d0770dcbe792330791e4eb6a2f7969686975234905cf5a8",
-      "checkedAt": "2026-10-09T14:54:13.711132+00:00",
-      "passed": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "traffic-open-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/traffic-open-final.json",
-      "sha256": "3118685ddd4e6007509e87fde0c4907b27976805f02846bf128726f89b3d681a",
-      "checkedAt": "2026-10-09T14:58:17.584Z",
-      "passed": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "migration.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/migration.json",
-      "sha256": "03fa2ab5cf2afbfdfa95fc1e6aeeb63b444025a10828c2f3d0f12d2d9e65099f",
-      "checkedAt": "2026-10-09T14:41:49.228566+00:00",
-      "passed": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "operational-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/operational-final.json",
-      "sha256": "71d6ad2ee5bb409e26cda23e51a13624db5f47a94cc4798a5921bd4880362080",
-      "checkedAt": "2026-10-09T15:03:21.051153+00:00",
-      "passed": true,
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "verified-test-identity.private.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/verified-test-identity.private.json",
-      "sha256": "146c452c43256ac31a3d253b9e7028d681046219131ed5d9942af6bdc54f3b57"
-    },
-    "staging-test-admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009/staging-test-admission.json",
-      "sha256": "4ad78882f119873a90e2f87c0b8559ee4c20b546988cc4949e164b9dad8d91c6"
-    },
-    "preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-staging-test-user-20261009/preparation.json",
-      "sha256": "be9c904d308e45bf64c8db20f1ff9574c8aa8b39e425f6ee8589374b0a249580",
-      "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f"
-    },
-    "compose.yaml": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-staging-test-user-20261009/compose.yaml",
-      "sha256": "9e085139f6ed2a38fe2d4e0c16ac52457d8dac123c88d60414ce716618a76253"
-    },
-    "local/public-admission-before-registration.json": {
-      "privatePath": "/home/mehdi/.cache/hambazi-staging-test-20261009/public-admission-before-registration.json",
-      "sha256": "bb640c93cbd0e9881da2b78b23ffbc9bf27dd86c57d601b32a6c0bab6eceaddb",
-      "passed": true
-    },
-    "local/secrets.scan.json": {
-      "privatePath": "/home/mehdi/.cache/hambazi-staging-test-20261009/secrets.scan.json",
-      "sha256": "fc9b498bbcaebfc5eaf55823ebd45476caadc7e78415da9e164e0d1bec4736d1",
-      "passed": true
-    },
-    "local/root-check.log": {
-      "privatePath": "/tmp/hambazi-staging-test-root-check-03.log",
-      "sha256": "5e9d5f21c0efe0fcd9998613954c69da689652ef7e4808f794af1609af189f0e",
-      "passed": true
-    },
-    "local/integration.log": {
-      "privatePath": "/tmp/hambazi-staging-test-integration-02.log",
-      "sha256": "bffaa3e8df52d433f655ecee8c33a83889689cc705d08afaea9155c80b61e54e",
-      "passed": true
-    },
-    "local/bot-https.log": {
-      "privatePath": "/tmp/hambazi-staging-test-bot-transports.log",
-      "sha256": "e2f4ff658d059983e24726cecf3b88582a47b8c724b3e36324f1ed9003162e04",
-      "passed": true
-    },
-    "local/packaged-smoke.log": {
-      "privatePath": "/tmp/hambazi-staging-test-packaged-smoke-04.log",
-      "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a",
-      "passed": true
-    },
-    "local/browser-unregistered-tester.json": {
-      "privatePath": "/home/mehdi/.cache/hambazi-staging-test-20261009/browser-unregistered-tester.json",
-      "sha256": "af6a27c1ccb479565d2262837363777493acb03c0641148b63332e0a12b2910d",
-      "passed": true
-    },
-    "local/source-equality.json": {
-      "privatePath": "/home/mehdi/.cache/hambazi-staging-test-20261009/source-equality.json",
-      "sha256": "66972241c8e3d0c326613528c71acbc14bf27e1bdca28f739ffa0ea740315c98",
-      "passed": true
-    }
-  },
-  "previousBindingSha256": "e46e95292c9e0adb462643371045c1f5713414522e964f4465f311a08a6d1ed7",
+  "previousBindingSha256": "8c55b4ce7a0614f622f2da5715e4f4ac197229efd278e46011907cc86341bf05",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
-    "sourceCommit": "81476d2eec55ed796acd52ca30a90c20ffd70a2f",
-    "checkedAt": "2026-10-09T21:59:23.485610+00:00",
-    "nativeAcceptanceWasPendingAtThatSnapshot": true,
-    "evidenceReference": "/opt/hambazi-staging/private/execution-20261008/bot-latency-20261010/previous-current-binding.json",
-    "evidenceSha256": "e46e95292c9e0adb462643371045c1f5713414522e964f4465f311a08a6d1ed7"
+    "frozenLockfileInstall": "passed",
+    "rootCheck": "passed",
+    "apiUnitTests": 931,
+    "botUnitTests": 81,
+    "configUnitTests": 246,
+    "webUnitTests": 69,
+    "workerUnitTests": 36,
+    "observabilityUnitTests": 32,
+    "infraTests": 126,
+    "infraPreExistingSkippedTests": 1,
+    "realPostgresRedisIntegration": "passed including immediate guarded support continuation, wrong/duplicate/stale receipt claims and explicit retry; full existing API/Worker integration suite",
+    "botHttpsTransportTests": 39,
+    "packagedSmokeChecks": 44,
+    "packagedSmokeBrowserCases": 2,
+    "secretsHistoryAndFiles": "zero findings",
+    "dependencyAudit": "zero findings",
+    "compiledApiAndBotNumericAdmission": "owner/tester allowed; unrelated denied; original owner unchanged; tester remains a regular user",
+    "publicRouting": "Web 200; private health/admin/internal paths 404",
+    "realIdentityResolution": "existing identity from original verified Telegram update; resolver disabled; no synthetic Telegram updates or operator registration",
+    "liveTestRegistration": "unchanged real explicit user REGISTER from prior release; no operator registration or profile mutation",
+    "admin": "no role granted; public admin paths 404; Admin remains unimplemented/disabled",
+    "nativeTesterAcceptance": true,
+    "nativeAcceptanceSource": "account-holder reports; server receipt metadata independently confirms completion",
+    "liveAdmissionProtocolChecks": "historical 81476d2 before/after registration fixtures remain in archived previous binding; not represented as newly rerun on 8138d2a",
+    "noMigrationOrBackfill": true,
+    "contractBaselinesUnchanged": 12,
+    "webWorkerGameplaySourceUnchanged": true,
+    "unchangedControls": {
+      "schemaVersion": 1,
+      "checkedAt": "2026-10-09T22:47:23.681220+00:00",
+      "sourceCommit": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
+      "passed": true,
+      "identityLimitPerMinute": 10,
+      "requestLimitPerMinute": 60,
+      "receiptLeaseMs": 15000,
+      "containmentServiceUnchanged": true,
+      "containmentScheduleUnchanged": true,
+      "postDeploymentWebhookCounts": {
+        "completed": 4,
+        "failed": 0
+      }
+    }
   },
   "botLatency": {
     "sourceBefore": "81476d2eec55ed796acd52ca30a90c20ffd70a2f",
@@ -808,5 +932,84 @@
     "noBroadMiniAppOrGameplayWork": true,
     "normalContainmentScheduleUnchanged": true,
     "productionReleaseApproved": false
+  },
+  "previousMidnightDeployment": {
+    "sourceCommit": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-midnight-lobby-20261010",
+    "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/midnight-lobby-20261010",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:4d7db5882ca7505286cbf6916060033cfa87b9dd-e1b4bf7e96c096e6@sha256:a31c2aa1e48a62c2fc7be77947d30d6e0d1d6138e67bc24349b944586b1866c6"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:4d7db5882ca7505286cbf6916060033cfa87b9dd-e1b4bf7e96c096e6@sha256:f5e72a1986bf5824b99ea34b232b3d14ec1e4d42249d80e57654492f1883bbad"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:4d7db5882ca7505286cbf6916060033cfa87b9dd-e1b4bf7e96c096e6@sha256:90624c0fcf5b2f4ff7e203994e8b8f6f2b839f0f5ae8e3d8db73ba9e8dc8e2ce"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:4d7db5882ca7505286cbf6916060033cfa87b9dd-e1b4bf7e96c096e6@sha256:ec793b2eab9ff2614dff714556d8b577901a63265b5c951f2f311295ddd710c8"
+      }
+    ],
+    "inventorySha256": "8e1f0f3faaf682174fcbc800c50a49bbcc82cb196018ad2c6a15280839a6f0d0",
+    "composeSha256": "0e0db8fd7ced5162bae3d4e25ae7ce423f2af7de489ae4284497f99bf8459d5c",
+    "evidenceIndexSha256": "8e25c6803c8c6b888e5e456a16c4a05e7c892f283851167b5f4aa50aaae7c0f8",
+    "userReportedScreensAndNavigationWorked": true,
+    "intermittentGameplayManyRequestsReported": true,
+    "originalCapacityFailureAndRecoveryRetained": true
+  },
+  "personalRequestOverlap": {
+    "schemaVersion": 1,
+    "checkedAt": "2026-10-10T07:58:34.685713+00:00",
+    "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
+    "nativeSymptom": "account holder reports intermittent Too many requests during personal game; UI/navigation otherwise successful",
+    "verifiedDefect": "personal polling and foreground requests could overlap; deployed personal gateway rejects a second pending request independently of Redis minute quota",
+    "deployedEventsPerMinute": 120,
+    "personalGatewayMaximumPending": 1,
+    "pollPeriodMsBeforeAndAfter": 2000,
+    "controlledRegression": {
+      "before": {
+        "maximumOnWire": 2,
+        "overlapRejections": 1
+      },
+      "after": {
+        "maximumOnWire": 1,
+        "overlapRejections": 0
+      },
+      "browserEngines": ["chromium", "webkit"],
+      "usesSyntheticTransportAndPlayerViews": true
+    },
+    "serverPolicyChanged": false,
+    "automaticallyRetriedRateRejections": false,
+    "queueMaximumAcceptedLocally": 4,
+    "staleConnectionIntentsTransmitted": false,
+    "historicalNativeDenialFingerprintAvailable": false,
+    "measurementLimit": "personal gateway has no per-event denial log, so the exact historical native error cannot be correlated retrospectively; native fix acceptance remains pending",
+    "nativeAcceptance": "focused user-reported success; not independent full-game or per-step proof",
+    "userReportedSuccessfulRetest": true,
+    "newErrorReported": false
+  },
+  "midnightLobby": {
+    "sourceIntroduced": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
+    "activeGame": "coup",
+    "disabledGames": ["hokm", "ludo"],
+    "defaultRoute": "/games",
+    "tutorialAndStartExplicit": true,
+    "registrationRequired": true,
+    "fontSha256": "546c858e8c39315c409281c9ef7ab9e2d9225b37b3aedf0659776d5ac8239e2b",
+    "assetProvenance": "docs/design/midnight-assets.md",
+    "userReportedUIAndNavigationSuccess": true
+  },
+  "capacity": {
+    "allFourCandidateLayersMaterializedBeforeMaintenance": true,
+    "probeContainersStarted": false,
+    "probeContainersRemoved": true,
+    "freeDiskBytesAtFinalAutomatedReadback": 1503125504,
+    "historicalInitialMidnightSpaceFailureAndRecoveryRetained": true,
+    "additionalCleanupForRequestCorrection": false
   }
 }

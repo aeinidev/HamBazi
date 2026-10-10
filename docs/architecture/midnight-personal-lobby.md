@@ -68,7 +68,9 @@ pnpm check
 
 Browser WebKit is not an iPhone Telegram WebView. The owner reported that the
 Midnight screens and navigation worked, with intermittent gameplay “many requests”
-errors. Full gameplay acceptance stays pending until a native retest of the
-transport correction; client version/model were not supplied. Prior Bot
+errors. After the transport correction, the user reported a successful focused
+retest with «اوکیه». Account, per-step results, client version/model were not
+separately supplied; see the [operation report](../operations/midnight-personal-lobby.md)
+for durable metadata and the retained full-game evidence limits. Prior Bot
 onboarding/support acceptance remains separate. This implementation does not
 resolve public launch, final asset rights or other open architectural decisions.

@@ -5,6 +5,8 @@
 > [current binding](../../infra/docker/staging/staging-test-user-current.json) and
 > [operation/retest instructions](staging-test-user.md). Public admission remains
 > disabled; registration is required and support goes to the original owner.
+> The current Midnight lobby and personal request correction are recorded in
+> [their deployment report](midnight-personal-lobby.md).
 > Earlier onboarding/closure/native/rollback evidence below is historical and
 > applies only to its recorded source. Production remains HOLD.
 
