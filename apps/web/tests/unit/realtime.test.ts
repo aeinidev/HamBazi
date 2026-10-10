@@ -16,7 +16,7 @@ const snapshot = (version = 2, role = "PLAYER") => ({
   rulesetVersion: "test-v1",
   view: null,
 });
-function fixture() {
+function fixture(personal = false) {
   const handlers = new Map<string, (...args: unknown[]) => void>();
   const emitted = vi.fn(async (event: string) =>
     event === "match:subscribe"
@@ -55,9 +55,116 @@ function fixture() {
     resync: vi.fn(),
   };
   const connect = vi.fn(() => socket) as unknown as typeof io;
-  const realtime = createRealtime("https://api.example", "synthetic", callbacks, connect);
+  const realtime = createRealtime("https://api.example", "synthetic", callbacks, connect, personal);
   return { socket, handlers, emitted, callbacks, realtime };
 }
+it("serializes personal commands with polling under the gateway's single pending request guard", async () => {
+  const f = fixture(true);
+  await f.realtime.subscribe(id);
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let pending = 0;
+  let maximum = 0;
+  let rejected = 0;
+  f.emitted.mockImplementation(async (event) => {
+    maximum = Math.max(maximum, ++pending);
+    if (pending > 1) {
+      pending--;
+      rejected++;
+      return { ok: false, error: { code: "RATE_LIMITED", retryable: true } } as never;
+    }
+    if (event === "match:catchup") await held;
+    pending--;
+    return {
+      ok: true,
+      value: { schemaVersion: 1, mode: "SNAPSHOT", events: [], snapshot: snapshot() },
+    };
+  });
+  const polling = f.realtime.sync();
+  await vi.waitFor(() => expect(pending).toBe(1));
+  const command = f.realtime.request(
+    "game:command",
+    { actionId: id, expectedVersion: 2 },
+    z.unknown(),
+  );
+  const outcome = command.then(
+    () => "accepted",
+    (error: unknown) => (error as { code: string }).code,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  release();
+  await polling;
+  expect(await outcome).toBe("accepted");
+  expect(maximum).toBe(1);
+  expect(rejected).toBe(0);
+  f.realtime.close();
+});
+it("drops personal intents queued on a previous connection without replaying them", async () => {
+  const f = fixture(true);
+  let release!: (value: never) => void;
+  f.emitted.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+  );
+  const read = f.realtime.request("personal:current", {}, z.unknown());
+  await vi.waitFor(() => expect(f.emitted).toHaveBeenCalledTimes(1));
+  const command = f.realtime.request("game:command", { actionId: id }, z.unknown());
+  const outcomes = Promise.allSettled([read, command]);
+  f.socket.disconnect();
+  f.socket.connect();
+  release({ ok: true } as never);
+  for (const result of await outcomes) {
+    expect(result.status).toBe("rejected");
+    if (result.status === "rejected")
+      expect(result.reason).toMatchObject({ code: "NETWORK_ERROR" });
+  }
+  expect(f.emitted).toHaveBeenCalledTimes(1);
+  f.realtime.close();
+});
+it("bounds the personal lane, releases it after errors and never retries real quota rejections", async () => {
+  const f = fixture(true);
+  let release!: (value: never) => void;
+  f.emitted.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+  );
+  const requests = Array.from({ length: 4 }, () =>
+    f.realtime.request("personal:current", {}, z.unknown()),
+  );
+  const outcomes = Promise.allSettled(requests);
+  await vi.waitFor(() => expect(f.emitted).toHaveBeenCalledTimes(1));
+  await expect(f.realtime.request("game:command", {}, z.unknown())).rejects.toMatchObject({
+    code: "RATE_LIMITED",
+  });
+  release({ ok: false, error: { code: "RATE_LIMITED", retryable: true } } as never);
+  expect((await outcomes).filter((result) => result.status === "rejected")).toHaveLength(1);
+  expect(f.emitted).toHaveBeenCalledTimes(4);
+  await f.realtime.request("personal:current", {}, z.unknown());
+  expect(f.emitted).toHaveBeenCalledTimes(5);
+  f.realtime.close();
+});
+it("leaves the ordinary namespace concurrent request policy unchanged", async () => {
+  const f = fixture();
+  let release!: (value: never) => void;
+  f.emitted.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+  );
+  const read = f.realtime.request("match:catchup", {}, z.unknown());
+  await f.realtime.request("game:command", {}, z.unknown());
+  expect(f.emitted).toHaveBeenCalledTimes(2);
+  release({ ok: true } as never);
+  await read;
+  f.realtime.close();
+});
 it("acknowledges snapshots, ignores stale/duplicate snapshots and applies spectator downgrade", async () => {
   const f = fixture();
   await f.realtime.subscribe(id);

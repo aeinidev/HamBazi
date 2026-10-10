@@ -115,6 +115,33 @@ test("an existing personal match is resumed and its terminal view remains usable
   expect(state.events).toContain("game:command");
 });
 
+test("a move during a slow poll does not trip the personal gateway pending guard", async ({
+  page,
+  request,
+}) => {
+  const state = await setup(page, request);
+  state.enforceSinglePending = true;
+  state.current = matchId;
+  await launch(page);
+  await page.getByRole("button", { name: "کودتا، فعال" }).click();
+  await page.getByRole("button", { name: "شروع بازی", exact: true }).click();
+  await expect(page.getByLabel("Coup table")).toBeVisible();
+  state.holdNextCatchup = true;
+  await expect.poll(() => state.releaseCatchup !== null).toBe(true);
+  await page
+    .getByRole("button", { name: /income/ })
+    .first()
+    .click();
+  // The poll stays pending while the user submits a real table intent.
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(state.events.filter((event) => event === "game:command")).toHaveLength(0);
+  state.releaseCatchup!();
+  await expect(page.getByText(/won the match|Match ended/).first()).toBeVisible();
+  expect(state.events.filter((event) => event === "game:command")).toHaveLength(1);
+  expect(state.rateRejections).toBe(0);
+  expect(state.maximumPending).toBe(1);
+});
+
 test("failed current lookup cannot fall through to match creation", async ({ page, request }) => {
   const state = await setup(page, request);
   state.failCurrent = true;

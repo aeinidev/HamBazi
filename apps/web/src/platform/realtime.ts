@@ -31,6 +31,10 @@ export function createRealtime(
   let sequence: ReturnType<typeof createMatchSequence> | undefined;
   let syncing = false;
   let generation = 0;
+  // The personal gateway permits one pending request per socket. Keep polling,
+  // reconnect lookups and foreground intents in the same bounded lane.
+  let personalTail = Promise.resolve();
+  let personalPending = 0;
   const socket: Socket = connect(`${origin}/${personal ? "personal-v1" : "v1"}`, {
     path: personal ? "/v1/personal/socket.io" : "/v1/socket.io",
     ...(personal ? { transports: ["websocket"] } : {}),
@@ -42,21 +46,42 @@ export function createRealtime(
   async function request<T>(event: string, payload: unknown, schema: z.ZodType<T>): Promise<T> {
     if (disposed || !socket.connected) throw new ClientError("NETWORK_ERROR", true);
     const epoch = generation;
-    let value: unknown;
+    async function send() {
+      // A queued intent belongs to its original connection. Never flush it on
+      // reconnect; a caller retry must retain its existing command/action ID.
+      if (disposed || !socket.connected || epoch !== generation)
+        throw new ClientError("NETWORK_ERROR", true);
+      let value: unknown;
+      try {
+        value = await socket.timeout(10000).emitWithAck(event, payload);
+      } catch {
+        throw new ClientError("NETWORK_ERROR", true);
+      }
+      if (disposed || epoch !== generation) throw new ClientError("NETWORK_ERROR", true);
+      const error = failure(value);
+      if (error) {
+        if (error.code === "UNAUTHENTICATED") callbacks.expired();
+        throw error;
+      }
+      const parsed = schema.safeParse(value);
+      if (!parsed.success) throw new ClientError("INVALID_RESPONSE");
+      return parsed.data;
+    }
+    if (!personal) return send();
+    if (personalPending >= 4) throw new ClientError("RATE_LIMITED", true);
+    personalPending++;
+    const preceding = personalTail;
+    let release!: () => void;
+    personalTail = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     try {
-      value = await socket.timeout(10000).emitWithAck(event, payload);
-    } catch {
-      throw new ClientError("NETWORK_ERROR", true);
+      await preceding;
+      return await send();
+    } finally {
+      personalPending--;
+      release();
     }
-    if (disposed || epoch !== generation) throw new ClientError("NETWORK_ERROR", true);
-    const error = failure(value);
-    if (error) {
-      if (error.code === "UNAUTHENTICATED") callbacks.expired();
-      throw error;
-    }
-    const parsed = schema.safeParse(value);
-    if (!parsed.success) throw new ClientError("INVALID_RESPONSE");
-    return parsed.data;
   }
   function apply(value: unknown) {
     const result = snapshotSchema.safeParse(value);

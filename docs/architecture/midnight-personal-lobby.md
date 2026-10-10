@@ -26,6 +26,19 @@ but ambiguously acknowledged start resumes the current durable match. The server
 remains authoritative for commands, deadlines, snapshots and active-match
 uniqueness. Gameplay layout and server rules are unchanged.
 
+The personal gateway accepts only one pending request per socket, independently
+of its Redis minute quota. Personal transport requests share a bounded lane
+(one on the wire, at most four accepted locally). Two-second catchup, reconnect
+lookups and game intents cannot race against that guard. A queued intent retains
+its original payload, action ID and expected version; a disconnected or replaced
+connection rejects it without transmitting it on the next connection. Quota
+rejections are still surfaced without automatic retry. Ordinary realtime transport,
+server quotas, pending guards, command validation and engine rules are unchanged.
+Unit regressions cover overlapping poll/move, queue bounds, failure recovery,
+disconnect and unchanged ordinary concurrency. The production-bundle browser
+fixture enforces the real single-pending guard and holds a poll while the user
+submits a table command in Chromium and WebKit.
+
 The display font is the supplied `HamBaziDisplay-Regular.ttf`, family `HamBazi
 Display`, Regular 400, with Arabic/Persian glyphs and GSUB/GPOS shaping tables.
 Its SHA-256 is `546c858e8c39315c409281c9ef7ab9e2d9225b37b3aedf0659776d5ac8239e2b`.
@@ -53,7 +66,9 @@ pnpm test:personal-http:local
 pnpm check
 ```
 
-Browser WebKit is not an iPhone Telegram WebView. New native visual/functional
-acceptance stays pending until the owner tests the deployed build. Prior Bot
+Browser WebKit is not an iPhone Telegram WebView. The owner reported that the
+Midnight screens and navigation worked, with intermittent gameplay “many requests”
+errors. Full gameplay acceptance stays pending until a native retest of the
+transport correction; client version/model were not supplied. Prior Bot
 onboarding/support acceptance remains separate. This implementation does not
 resolve public launch, final asset rights or other open architectural decisions.

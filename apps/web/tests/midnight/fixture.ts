@@ -26,6 +26,11 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
     sockets: [] as WebSocketRoute[],
     failStart: null as "before" | "after" | null,
     failCurrent: false,
+    enforceSinglePending: false,
+    holdNextCatchup: false,
+    releaseCatchup: null as (() => void) | null,
+    maximumPending: 0,
+    rateRejections: 0,
     phase: "WAITING_FOR_ACTION",
     version: 2,
   };
@@ -69,6 +74,7 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
     });
   });
   await page.routeWebSocket(/wss:\/\/api-staging\.hambazi\.top\/v1\/personal\/socket\.io/, (ws) => {
+    let pending = 0;
     state.sockets.push(ws);
     ws.send(
       '0{"sid":"synthetic-engine","upgrades":[],"pingInterval":25000,"pingTimeout":20000,"maxPayload":1000000}',
@@ -87,8 +93,18 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
       if (!packet) return;
       const [event, input] = JSON.parse(packet[2]!) as [string, Record<string, unknown>];
       state.events.push(event);
-      const ack = (value: unknown) =>
+      if (state.enforceSinglePending) {
+        pending++;
+        state.maximumPending = Math.max(state.maximumPending, pending);
+      }
+      const ack = (value: unknown) => {
+        if (state.enforceSinglePending) pending--;
         ws.send(`43/personal-v1,${packet[1]}${JSON.stringify([value])}`);
+      };
+      if (state.enforceSinglePending && pending > 1) {
+        state.rateRejections++;
+        return ack({ ok: false, error: { code: "RATE_LIMITED", retryable: true } });
+      }
       const ok = (value: unknown) => ack({ ok: true, value });
       const push = () =>
         ws.send(`42/personal-v1,${JSON.stringify(["match:snapshot", snapshot()])}`);
@@ -112,8 +128,16 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
         push();
         return;
       }
-      if (event === "match:catchup")
-        return ok({ schemaVersion: 1, mode: "SNAPSHOT", events: [], snapshot: snapshot() });
+      if (event === "match:catchup") {
+        const reply = () =>
+          ok({ schemaVersion: 1, mode: "SNAPSHOT", events: [], snapshot: snapshot() });
+        if (state.holdNextCatchup) {
+          state.holdNextCatchup = false;
+          state.releaseCatchup = reply;
+          return;
+        }
+        return reply();
+      }
       if (event === "game:command" || event === "personal:close") {
         state.version++;
         state.phase = "GAME_OVER";
