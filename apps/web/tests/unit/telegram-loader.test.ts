@@ -176,6 +176,6 @@ describe("bootstrap credential cleanup", () => {
     expect(app.ready).toHaveBeenCalledOnce();
     expect(app.expand).toHaveBeenCalledOnce();
     result.dispose();
-    expect(app.offEvent).toHaveBeenCalledTimes(4);
+    expect(app.offEvent).toHaveBeenCalledTimes(5);
   });
 });

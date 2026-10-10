@@ -2,6 +2,10 @@ export interface TelegramApp {
   initData: string;
   colorScheme?: string;
   viewportStableHeight?: number;
+  isFullscreen?: boolean;
+  isVersionAtLeast?(version: string): boolean;
+  requestFullscreen?(): void;
+  disableVerticalSwipes?(): void;
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
   close?(): void;
@@ -16,6 +20,24 @@ export interface TelegramApp {
     onClick(callback: () => void): void;
     offClick(callback: () => void): void;
   };
+}
+const presentationRequested = new WeakSet<TelegramApp>();
+
+function requestLaunchPresentation(app: TelegramApp | undefined) {
+  if (!app || presentationRequested.has(app)) return;
+  // One attempt per bridge/document, including failures and an already-fullscreen launch.
+  // Native exit, activation, viewport changes and route changes never retry it.
+  presentationRequested.add(app);
+  try {
+    if (app.isVersionAtLeast?.("7.7")) app.disableVerticalSwipes?.();
+  } catch {
+    // Optional native behavior must not interrupt authentication or scrolling.
+  }
+  try {
+    if (!app.isFullscreen && app.isVersionAtLeast?.("8.0")) app.requestFullscreen?.();
+  } catch {
+    // Older clients and native request failures keep the expanded app usable.
+  }
 }
 declare global {
   interface Window {
@@ -49,10 +71,17 @@ export function bootstrapTelegram(app: TelegramApp | undefined) {
     }
   };
   update();
-  const events = ["themeChanged", "viewportChanged", "safeAreaChanged", "contentSafeAreaChanged"];
+  const events = [
+    "themeChanged",
+    "viewportChanged",
+    "safeAreaChanged",
+    "contentSafeAreaChanged",
+    "fullscreenChanged",
+  ];
   for (const event of events) app?.onEvent(event, update);
   app?.ready();
   app?.expand();
+  requestLaunchPresentation(app);
   return {
     app,
     initData,
