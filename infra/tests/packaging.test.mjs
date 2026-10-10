@@ -271,3 +271,20 @@ it("runtime packages explicitly include compiled exports while omitting tests an
         .files,
     ).toEqual(path === "apps/bot" ? ["dist", "assets"] : ["dist"]);
 });
+
+it("serves supplied JPEG bytes with their correct MIME under the immutable inventory policy", async () => {
+  const { directory, environment } = await fixture();
+  const bytes = await readFile(
+    new URL("../../apps/web/public/assets/coup/duke.jpeg", import.meta.url),
+  );
+  await writeFile(join(directory, "assets/duke.jpeg"), bytes);
+  const server = await startStaticWeb(environment, directory);
+  try {
+    const response = await fetch(`http://127.0.0.1:${environment.WEB_PORT}/assets/duke.jpeg`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/jpeg");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+  } finally {
+    await server.close();
+  }
+});
