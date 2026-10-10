@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-10T08:44:15.871872+00:00",
-  "status": "restricted-staging-uniform-horizontal-lobby-tiles-verified-native-visual-acceptance-pending",
+  "checkedAt": "2026-10-10T09:24:56.714240+00:00",
+  "status": "restricted-staging-telegram-launch-presentation-verified-native-iphone-acceptance-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,34 +10,34 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010",
   "application": {
-    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
+    "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "c5d9f4b92c51f2bfb72dd94139c23d6372bca9c58ff43a97a453713ced79867c",
-    "buildInputSha256": "36db2e94575d2e3eafde4f11c21c93e73b4b1746c74d362f4e0f5186b834baa2",
+    "sourceSnapshotSha256": "3d56a372e53278c6fec7f97d6ed3beceb280a44de9e375369689ded4577b1bdb",
+    "buildInputSha256": "4daa3418adff69cd60d9c46c6fef0f47fd4f7545a5156f2887f09f8946849258",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:1c6ccb49e45bdacfec4d20007caf693e57fdaa237b44674dd09b314aa2f5c5c3"
+        "image": "hambazi-candidate/api:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:ca3fe8c4c928d8a42e50d2de9d77fc0af246502423129bed65532de9301ad7ad"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:3d9cf458f462d531e2b19be667db3698ef7e275141001ffea77f66bf7d14a871"
+        "image": "hambazi-candidate/bot:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a66b05821072856a64bbbb7112e9bbf485880da4aba985597cc35333988b7f00"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:6126edc61223ff71723fd7b020a2c5e836fcf1fd19541ac31db103231ab63501"
+        "image": "hambazi-candidate/worker:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a9f1203376b89f4f789d47c8e728bfd90e45cf93df33c5d361af341c4d95357f"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:9b4f67dec0d00728ab588b874679db2cb2c4562d8d7128936a0d0048fe543310"
+        "image": "hambazi-candidate/web:8a3d3197ea5c1976172e598d1e6e86a0e7e41c70-4daa3418adff69cd@sha256:a5708114d95f2013e7efdb0a46464c9bae0492f4ae850dae38626876515b15dd"
       }
     ]
   },
-  "composeSha256": "dc7cb9547e0e9795c8ccc5f9f70078241030e04af5fd76f7567bedc0b9f7019e",
-  "inventorySha256": "d56fdee13ac9904576b8acdf06a5110e439d00429c8edc347bc92f9135566f05",
+  "composeSha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39",
+  "inventorySha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1",
   "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
   "admission": {
     "ownerCount": 1,
@@ -163,20 +163,24 @@
     "staleEvidenceDeadlineExtended": false,
     "scheduleUnchangedForLatencyCorrection": true,
     "scheduleUnchangedForMidnightAndRequestCorrection": true,
-    "scheduleUnchangedForUniformLobbyCorrection": true
+    "scheduleUnchangedForUniformLobbyCorrection": true,
+    "scheduleUnchangedForTelegramPresentation": true
   },
   "verification": {
     "frozenLockfileInstall": true,
     "formatLintArchitectureAndWebTypecheck": true,
-    "webUnitTests": 78,
-    "midnightBrowserCases": 30,
+    "webUnitTests": 85,
+    "midnightBrowserCases": 38,
+    "newTelegramPresentationBrowserCases": 8,
+    "existingBrowserCases": 28,
     "midnightBrowserEngines": ["chromium", "webkit"],
     "packagedSmokeChecks": 44,
     "packagedSmokeBrowserCases": 2,
     "secretsHistoryAndFiles": true,
     "dependencyAudit": true,
     "backendAndPolicyByteEqualityFiles": 444,
-    "backendIntegrationEvidence": "Prior 55a4b19 evidence retained with exact backend/policy/lock equality; not rerun for CSS framing",
+    "preexistingInstructionAndDocumentFilesUnchanged": 125,
+    "backendIntegrationEvidence": "Prior 395c6e7 evidence retained with exact backend/policy/lock equality; not rerun for Telegram presentation",
     "fullRootCheckRerun": false,
     "compiledApiAndBotNumericAdmission": true,
     "publicRouting": "web 200; admin/internal/private health/ordinary catalog 404",
@@ -186,156 +190,168 @@
       "syntheticAuthResponseOnly": true,
       "realAccountMutationExecuted": false,
       "chromium": "direct HTTPS",
-      "webkit": "TLS-verified request adapter; not direct native Telegram"
+      "webkit": "TLS-verified request adapter; not native Telegram",
+      "nativeLaunchRequestDispatch": true,
+      "fullscreenExitNotRetried": true,
+      "safeAreaPadding": true
     },
-    "uniformTileGeometryWidths": [320, 375, 390],
-    "coupEntryAndTutorialNavigation": true,
-    "hokmAndLudoDisabled": true,
     "noMigrationOrBackfill": true,
-    "nativeUniformLobbyAcceptance": false,
+    "nativeTelegramPresentationAcceptance": false,
     "agentObservedNativeUI": false
   },
   "operatorRunner": {
-    "preparationDirectory": "/opt/hambazi-staging/private/runner-395c6e7",
-    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
+    "preparationDirectory": "/opt/hambazi-staging/private/runner-8a3d319",
+    "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
-  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/previous-current-binding.json",
+  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
     "images.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/images.json",
-      "sha256": "d56fdee13ac9904576b8acdf06a5110e439d00429c8edc347bc92f9135566f05"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json",
+      "sha256": "d4780612cab95227b608bef5291a2911f24126a7379e824f3244b1d80e570bd1"
     },
     "images.json.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/images.json.scan.json",
-      "sha256": "4102f3fd5eb04fe4cf991f92c9999ec3050e15af050fbd44242c1f83af5e3703"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/images.json.scan.json",
+      "sha256": "8bf962c182b17b6cff8e4350ae61bcf2cf4544dbdc5ca4a1eb2233f27868e3d3"
     },
     "components.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/components.scan.json",
-      "sha256": "c9eb420ee9f130bc6142ca180a60b3a0e17fc656180a362373f7ea5312fb858c"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/components.scan.json",
+      "sha256": "2aa5a1362d6d03b97c22672eceae9f1aa71f1254eec2b0db44d901c26fcc9244"
     },
     "data.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/data.scan.json",
-      "sha256": "26bd1d21f8e794f9a6de04924714f16c79237a1ae727eccc4b93535c21376a63"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/data.scan.json",
+      "sha256": "11a6a4d54a06cc4fa7b228d054bf4ab737c21e35dc447fafd358b330519c4c01"
     },
     "scan-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/scan-binding.json",
-      "sha256": "dc807766c1df45c53326a330017bc476ba9d8caa3c3f02d777288cd611f7c6fb"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/scan-binding.json",
+      "sha256": "096b66e79f747fa701fb1c825552bf1421c9447a66e78997ce39ec77453c38ea"
     },
     "preflight.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/preflight.json",
-      "sha256": "4b969dbab647fe48388f1cbbdc588ec21c0819622e3199e135fd652e223b5627"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preflight.json",
+      "sha256": "58ca05901c43c4d85f63fb38eefbd006df3a0fc6ab890e101568eb1700d1c3e9"
     },
     "preparation-guards.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/preparation-guards.json",
-      "sha256": "d8b9aae4121ffab3661c0f466e6e90e12420958bcf82d8154d817a223f102260"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/preparation-guards.json",
+      "sha256": "07ff87aecfba92d0e75a945eb7c30eca97441a2fed7d56b57e017f8ca1d4cb5f"
     },
     "renewed-preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/renewed-preparation.json",
-      "sha256": "d8f0cf5ae702b15a9f01cb4fe88066e3bab67075f814d68b15166b36483034c6"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/renewed-preparation.json",
+      "sha256": "261b6e48f48d088d9b5895e3987396e55789d8428a54683056f4be3d6aaa493c"
     },
     "capacity-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/capacity-recovery.json",
-      "sha256": "c119ed6573344073c53af73e909d3b1ee8fb8cc257ee7326efdb12dca331313c"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity-recovery.json",
+      "sha256": "e4b874890788718ece193665585d1bca8aa72fd692dacb473b768465c0adce70"
     },
     "capacity.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/capacity.json",
-      "sha256": "820021a93ea71035c3a1f4553cd90f16f0d91620bb87b3c673a03f994f8ff173"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/capacity.json",
+      "sha256": "7909f2ea3276fc8ee72a04ccf0524e79969b2a79b0358bd960a4486ea341b240"
     },
     "validation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/validation.json",
-      "sha256": "090b8779a85db19a71ba68dbf46e65232a525f6c6ee855f2a262dedee10b6b53"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/validation.json",
+      "sha256": "a36309e1d596a93d427f853f1cf351e065cf19256c53ab9ef408b990682545ea"
     },
     "migration.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/migration.json",
-      "sha256": "72671e70c207665f3741374a9c6d7b63a6c906aca81d10df20c2c31417e6862e"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/migration.json",
+      "sha256": "3c8f9b53db41d99dceb26eab0b7acba649ddeee84e961d361341ed382d1cc2d8"
     },
     "startup.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/startup.json",
-      "sha256": "805d57fdb46088d136f2605735d4c66db4caa99a5e17da51cc29eafcb2a37c49"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/startup.json",
+      "sha256": "5911399f1ef360e5c58ff4b894d48937c3627bf0c3f623246d6b726f9d61d90b"
     },
     "traffic-open.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/traffic-open.json",
-      "sha256": "e2e38c86864871df2b4aa490630f43681d795d9a29051c401012c85897837f64"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/traffic-open.json",
+      "sha256": "e10cb588aee8b2e35ba99f10fde1ebf4101687dd1f0a50ce4151acb7a76e04c2"
     },
     "compiled-admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/compiled-admission.json",
-      "sha256": "4b2a3afb9fe36ab5f676436373f89790498b3d4fb4a414f7d195e0fd5895413d"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/compiled-admission.json",
+      "sha256": "e2dad09d89b80c1440c16159e75c7b05da3e39310d0396bf64d8a2d510b1e880"
     },
     "operational-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/operational-final.json",
-      "sha256": "ee971522a06a922d6bbd800d237e1f12e59f89a528e1547258b235d460ab75e2"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/operational-final.json",
+      "sha256": "b63b80cc170e38cbcd925aab6443ed902a4afa15525ffd0282fc20a65ca4aa47"
     },
     "public-routing.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/public-routing.json",
-      "sha256": "57bfe4d68934b5c69c0d4a0386e6b23b0328b27ee3a523e87ba348e05c163e68"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/public-routing.json",
+      "sha256": "b5e19292a716249a41b6bfb45f4b00a6034e7824fa51b5062fc07c22cd455c36"
     },
     "deployed-browser.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/deployed-browser.json",
-      "sha256": "996c4004f1645f299fcdf9cf7d7fb7eb8afb3f7d0ab69732b5641d9b317f67a1"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployed-browser.json",
+      "sha256": "79a63fc22cdca2c35a4082f427e4bdaa9c13b9edc4152be2f1d153ff22319de7"
     },
     "previous-current-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/previous-current-binding.json",
-      "sha256": "d0fe85f7aed5c53529bd6159535850b6f651b1f9a6ec21e5391f1b96788364ff"
-    },
-    "unchanged-controls.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/unchanged-controls.json",
-      "sha256": "2a17a7c7ba6a33728e7eceb88c3424901534123f2bd92a5fdba44562f1151cc0"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
+      "sha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479"
     },
     "historical-local-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/historical-local-recovery.json",
-      "sha256": "13c063c9ee0dea5fa814b9edb8329e6785bbea660fad7bc2ab015004304dbd0f"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/historical-local-recovery.json",
+      "sha256": "834046a322a8990f550bc80621e809e9120e08cfd0c81204c4674d8c2cfbcf84"
     },
     "format.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/format.log",
-      "sha256": "1d66faad74f5e8709353f7288592866bd3a9095da1174a916e7aa632949971e2"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/format.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
     },
     "lint.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/lint.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/lint.log",
       "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
     },
     "architecture.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/architecture.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/architecture.log",
       "sha256": "7f7b2d8994dca17c12b6d8b07388aa7ef04d1be701697735daab9d691c31a6ad"
     },
-    "typecheck.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/typecheck.log",
+    "typecheck-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/typecheck-final.log",
       "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
     },
     "web-unit.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/web-unit.log",
-      "sha256": "ac61e5a94cb70fb186b717cf7669681d0fa60ea444da75db73db2fdc99ed8ebd"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/web-unit.log",
+      "sha256": "2492e470891098c79a1e1adb0e9c7d0320e5b5c93acc90ff43cc8edb40d7dba2"
     },
     "midnight-browser-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/midnight-browser-final.log",
-      "sha256": "7775dcca3d9f437e18d8311b0ea1aed8c4fa9232de9fa8786176b8a0b4517e19"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/midnight-browser-final.log",
+      "sha256": "e4d3467c14c2c568e17fd443ccb178f74024800e176d379b38243b2d08677f2e"
     },
-    "secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/secrets.log",
-      "sha256": "24f8350324ae6d0bc978d7579df7152ba5bf267efb293f9e9279bf8fc5fd4822"
+    "presentation-browser-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/presentation-browser-final.log",
+      "sha256": "4527551566286f01039a0091073736e57907a82da2c7596359cba0446b5bbcec"
     },
-    "dependencies.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/dependencies.log",
-      "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
+    "existing-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/existing-browser.log",
+      "sha256": "697d3b9d0eadab8a2600a04074ef9e4731a2c526b77ac93040c9ba28d5ff807f"
     },
     "packaged-smoke.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/packaged-smoke.log",
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/packaged-smoke.log",
       "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
     },
+    "secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/secrets.log",
+      "sha256": "587088bb95dc4df10aa2afcdc0ede6416aa5c51059214a19b146041f37c51ed7"
+    },
+    "dependencies.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/dependencies.log",
+      "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
+    },
+    "unchanged-controls.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/unchanged-controls.json",
+      "sha256": "190785107a6b36bb2c79e060e35fece08931cdaf977ec27eb942114d4ed9156a"
+    },
+    "instruction-files-before.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/instruction-files-before.json",
+      "sha256": "6acf687999f8980a8b0fa78d8c3079bd6afe0f75e9f99f97164c6a6a5c3661b1"
+    },
     "preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010/preparation.json",
-      "sha256": "e884a9ac1469222906eb6ff3ae5af9424ad22ca033c1fb9dce4218f0bcb1d076"
+      "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/preparation.json",
+      "sha256": "1f5c7ee62513bd91d6415619102e2bb24e47721a2638d6c79dc29130acd505c2"
     },
     "compose.yaml": {
-      "privatePath": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010/compose.yaml",
-      "sha256": "dc7cb9547e0e9795c8ccc5f9f70078241030e04af5fd76f7567bedc0b9f7019e"
+      "privatePath": "/opt/hambazi-staging/private/prepared-telegram-presentation-20261010/compose.yaml",
+      "sha256": "801067d799bfa04e59599226a7d41d925d88e8e365c6e2bc5efb4c7996a55d39"
     },
     "deployment-evidence.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010/deployment-evidence.json",
-      "sha256": "bcab784bea462a1f2e7a4e14ade026919f2e0edda4fc3166f380baabd146bc5d"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/deployment-evidence.json",
+      "sha256": "8be389f719f0ee08c5b10622b3a2b6be4d2478f974383b593a08d92d7dc5e920"
     }
   },
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
@@ -525,7 +541,7 @@
       "passed": true
     }
   },
-  "previousBindingSha256": "d0fe85f7aed5c53529bd6159535850b6f651b1f9a6ec21e5391f1b96788364ff",
+  "previousBindingSha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
     "frozenLockfileInstall": "passed",
@@ -931,11 +947,10 @@
     "allFourCandidateLayersMaterializedBeforeMaintenance": true,
     "probeContainersStarted": false,
     "probeContainersRemoved": true,
-    "freeDiskBytesAtFinalAutomatedReadback": 1495863296,
-    "selectedPrevious55ImagesAndPreparationPreserved": true,
-    "historicalInitialMidnightSpaceFailureAndRecoveryRetained": true,
+    "freeDiskBytesAtFinalAutomatedReadback": 1465384960,
+    "selectedPrevious395ImagesAndPreparationPreserved": true,
     "exactUnreferencedHistoricalImagesRemovedForCapacity": 4,
-    "historicalSourceRemoved": "8138d2a2fede95c5e0cd06bfe996eff6249771eb",
+    "historicalSourceRemoved": "4d7db5882ca7505286cbf6916060033cfa87b9dd",
     "historicalCopiesRecoverableLocally": true,
     "dataVolumesSecretsScanCacheAndContainmentUnchanged": true
   },
@@ -994,14 +1009,14 @@
     },
     "retainedAsSelectedPrevious": true
   },
-  "selectedPreviousPreparedDirectory": "/opt/hambazi-staging/private/prepared-personal-requests-20261010",
+  "selectedPreviousPreparedDirectory": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010",
   "historicalRollbackAcceptance": {
     "passed": false,
     "scope": "previous compatible 4d7db58 artifacts preserved; no new current-to-previous rollback drill is claimed; older exact-pair acceptance retains its own binding"
   },
   "rollbackAcceptance": {
     "passed": null,
-    "scope": "No rollback executed for this visual correction; exact compatible 55a4b19 images and preparation retained"
+    "scope": "No rollback executed for this adapter correction; exact compatible 395c6e7 images and preparation retained"
   },
   "uniformLobbyFraming": {
     "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
@@ -1014,5 +1029,57 @@
     "disabledHokmLudoPreserved": true,
     "entryGameplayBotControlsUnchanged": true,
     "nativeAcceptance": false
+  },
+  "previousUniformLobbyDeployment": {
+    "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
+    "preparedDirectory": "/opt/hambazi-staging/private/prepared-uniform-lobby-20261010",
+    "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/uniform-lobby-20261010",
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-candidate/api:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:1c6ccb49e45bdacfec4d20007caf693e57fdaa237b44674dd09b314aa2f5c5c3"
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-candidate/bot:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:3d9cf458f462d531e2b19be667db3698ef7e275141001ffea77f66bf7d14a871"
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-candidate/worker:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:6126edc61223ff71723fd7b020a2c5e836fcf1fd19541ac31db103231ab63501"
+      },
+      {
+        "role": "web",
+        "image": "hambazi-candidate/web:395c6e737fa55743aa29896508aa75d0e6a75fca-36db2e94575d2e3e@sha256:9b4f67dec0d00728ab588b874679db2cb2c4562d8d7128936a0d0048fe543310"
+      }
+    ],
+    "composeSha256": "dc7cb9547e0e9795c8ccc5f9f70078241030e04af5fd76f7567bedc0b9f7019e",
+    "inventorySha256": "d56fdee13ac9904576b8acdf06a5110e439d00429c8edc347bc92f9135566f05",
+    "completePriorBindingPrivatePath": "/opt/hambazi-staging/private/execution-20261008/telegram-presentation-20261010/previous-current-binding.json",
+    "completePriorBindingSha256": "1ea4f5a729e30531fd00e4ec2907af4247e28d39d4ecb2e96763d97699133479",
+    "repositoryBindingAt": "7bfe5cd:infra/docker/staging/staging-test-user-current.json",
+    "retainedAsSelectedPrevious": true,
+    "nativeAcceptance": false
+  },
+  "telegramMiniAppPresentation": {
+    "sourceCommit": "8a3d3197ea5c1976172e598d1e6e86a0e7e41c70",
+    "trafficOpenedAtUTC": "2026-10-10T09:22:26.309Z",
+    "trafficOpenedAtAsiaTehran": "2026-10-10T12:52:26.309000+03:30",
+    "requestFullscreenOncePerBridgeDocumentOnLaunch": true,
+    "fullscreenMinimumBotApiVersion": "8.0",
+    "alreadyFullscreenLaunchSkipsRequest": true,
+    "disableVerticalSwipesMinimumBotApiVersion": "7.7",
+    "unsupportedAndThrowingNativeCallsDoNotInterruptAuthentication": true,
+    "fullscreenExitFailureActivationAndNavigationNeverRetry": true,
+    "existingSafeAreaPaddingPreserved": true,
+    "fullscreenChangedRefreshesInsets": true,
+    "touchAndScrollEventsNotCancelled": true,
+    "nativeControlsNotHiddenByApp": true,
+    "headerSwipeMinimizationMayRemain": true,
+    "buttonOnlyMinimizationGuaranteed": false,
+    "registrationNavigationAndGameControlsPreserved": true,
+    "nativeAcceptance": false,
+    "nativeAcceptanceStatus": "pending-real-iphone-success",
+    "operationReport": "docs/operations/telegram-mini-app-presentation.md",
+    "officialReference": "https://core.telegram.org/bots/webapps#initializing-mini-apps"
   }
 }
