@@ -5,6 +5,11 @@ every route retain the existing Persian registration gate and return-to-Bot
 action; navigation never creates or completes a profile. Admission remains the
 server's verified numeric-ID policy, not a frontend username check.
 
+All three lobby tiles share the same horizontal frame, aspect ratio, corner
+radius and right-side title/status column. Coup retains its gold active style
+and entry action; Hokm and Ludo retain their silver disabled style. The Coup
+entry hero and gameplay layout are independent of the lobby tile framing.
+
 | Route                  | Screen                               | Entry side effects                                                           |
 | ---------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
 | `/games`               | Coup active, Hokm/Ludo coming soon   | None                                                                         |

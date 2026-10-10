@@ -63,11 +63,6 @@ export function PersonalLobby() {
                   {!game.enabled && <MidnightIcon name="lock" />}
                   {game.enabled ? "فعال" : "به‌زودی"}
                 </span>
-                {game.enabled && (
-                  <span className="tile-arrow">
-                    <MidnightIcon name="back" />
-                  </span>
-                )}
               </span>
             </OrnateFrame>
           </button>
