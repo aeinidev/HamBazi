@@ -1,14 +1,35 @@
 <!doctype html>
-<html lang="en">
+<html lang="fa">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="description" content="Your shared table for multiplayer games in Telegram." />
-    <title>HamBazi · Your table</title>
+    <meta name="theme-color" content="#001226" />
+    <meta name="description" content="هم‌بازی؛ بازی‌های جذاب با دوستان در تلگرام" />
+    <link
+      rel="preload"
+      href="/assets/fonts/Vazirmatn-4e3fa217d38f.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/src/ui/launch.css" />
+    <title>HamBazi · هم‌بازی</title>
   </head>
   <body>
-    <div id="root"><p role="status">Opening HamBazi…</p></div>
+    <div id="root">
+      <div class="hambazi-loading" role="status" lang="fa" aria-label="در حال بارگذاری هم‌بازی">
+        <div class="hambazi-loading-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40">
+            <rect x="13" y="7" width="21" height="27" rx="4" />
+            <path d="m10 9-5 2 3 23 5-1M24 16c-4-5-10 2 0 8 10-6 4-13 0-8Z" />
+          </svg>
+        </div>
+        <div class="hambazi-loading-name" aria-hidden="true"><span>هم</span>‌بازی</div>
+        <p aria-hidden="true">در حال بارگذاری…</p>
+        <div class="hambazi-loading-track" aria-hidden="true"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

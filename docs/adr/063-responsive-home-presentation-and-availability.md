@@ -1,6 +1,6 @@
 # ADR-063: Responsive home presentation and available game entry
 
-- Status: Accepted; deployment to the existing admitted personal staging authorized on 2026-10-11; production release remains on hold
+- Status: Accepted behavior and visuals; owner approved the current implementation and restricted staging deployment on 2026-10-11. Production release remains on hold
 - Owner: HamBazi project owner
 - Date: 2026-10-11
 - Supersedes: ADR-060's three-tile personal lobby presentation only
@@ -15,7 +15,9 @@ Render the reference as live RTL React controls with separate self-hosted artwor
 
 Home and Profile use `/games` and `/profile`. The personal Profile route reuses the existing profile editor; the Settings icon retains `/settings`. The notification control, banner CTA, all-games control, Friends and Leaderboard are disabled with explicit “به‌زودی” labels. Bottom navigation is fixed with enough scroll padding for the final card, including Telegram safe areas.
 
-The generated banner, Kahroba, Chess and Domino art contains no UI text or controls. Existing Coup, Hokm and Ludo art remains in use. The supplied phone frame and screenshot are not shipped as a page image.
+The owner requested replacement of all seven illustrations using the supplied `Luxury Kahroba Gemstones Game Tile.png` as the authoritative visual reference. The six separate posters and four-player banner are reconstructed in the reference's bright style; old poster files are removed from the static inventory. Asset filenames include their content hashes. No interface text or controls are baked into the art. Persian game titles, arrows, badges, identity, CTA and navigation remain live UI. The supplied phone frame and screenshot are not shipped as a page image.
+
+A navy/cyan/purple HTML/CSS loading shell is present before the application bundle and Telegram SDK finish. The same shell covers initial automatic authentication and the first authenticated profile request, with no artificial minimum duration. Errors leave the shell and expose the existing retry/reopen paths. The personal home is rendered only after its authenticated profile is available. Home/loading use a self-hosted, version-pinned Vazirmatn font; the existing Coup UI retains its supplied display font. Telegram's pre-page placeholder, native sheet controls and system chrome are outside React; optional BotFather splash customization is not changed in this revision.
 
 ## Alternatives
 

@@ -6,10 +6,10 @@ export function CoupEntry({ onStart, pending }: { onStart: () => void; pending: 
     <section className="midnight-coup-entry" aria-labelledby="coup-entry-heading">
       <OrnateFrame className="coup-hero">
         <img
-          src="/assets/midnight/coup-art.webp"
-          alt="کارت‌های شخصیت تاج‌دار و آدمکش نقاب‌پوش، با تاج و سکه‌های طلایی"
-          width="960"
-          height="720"
+          src="/assets/home/coup-2811ce0e87a8.webp"
+          alt="شخصیت کلاه‌دار، کارت‌های ملکه و شاه و سکه‌های طلایی"
+          width="1200"
+          height="676"
         />
         <div className="hero-plaque">
           <h1 id="coup-entry-heading">کودتا</h1>

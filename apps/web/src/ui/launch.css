@@ -1,0 +1,112 @@
+@font-face {
+  font-family: "HamBazi Display";
+  src: url("/assets/midnight/HamBaziDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html:has(.hambazi-loading) {
+  background: #001226;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+}
+.hambazi-loading {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, var(--telegram-top, 0px)) 24px max(24px, var(--telegram-bottom, 0px));
+  overflow: hidden;
+  direction: rtl;
+  color: #f7f6ff;
+  background:
+    radial-gradient(ellipse at 18% 25%, #6828ac40, transparent 48%),
+    radial-gradient(ellipse at 84% 74%, #0089df35, transparent 45%), #001226;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
+}
+.hambazi-loading-mark {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 24px;
+  border: 1px solid #58dfff;
+  border-radius: 29px;
+  color: #1ee8ff;
+  background: linear-gradient(140deg, #092d59, #201449);
+  box-shadow:
+    0 0 24px #08ceff45,
+    inset 0 0 24px #9070f230;
+  transform: rotate(-8deg);
+}
+.hambazi-loading-mark svg {
+  width: 60px;
+  height: 60px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hambazi-loading-name {
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1.4;
+  text-shadow: 0 0 24px #6355da66;
+}
+.hambazi-loading-name span {
+  color: #22e2ff;
+}
+.hambazi-loading p {
+  margin: 8px 0 22px;
+  font:
+    15px/1.8 Tahoma,
+    sans-serif;
+  color: #c6baff;
+}
+.hambazi-loading-track {
+  width: 144px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #4c408d66;
+}
+.hambazi-loading-track::after {
+  content: "";
+  display: block;
+  width: 50%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #9871fa, #22e2ff);
+  animation: hambazi-loading 1.25s ease-in-out infinite alternate;
+}
+@keyframes hambazi-loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hambazi-loading-track::after {
+    animation: none;
+    width: 100%;
+  }
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/assets/fonts/Vazirmatn-4e3fa217d38f.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}

@@ -1,15 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { profileSchema } from "../../platform/contracts.js";
+import { HamBaziLoading } from "../../ui/loading.js";
 import type { TelegramApp } from "../../platform/telegram.js";
 import { AuthScreen } from "../auth/index.js";
 import { PersonalGame } from "../personal-game/index.js";
 import { SettingsScreen } from "../profile/index.js";
 import { CoupEntry, CoupTutorial } from "../../games/coup/index.js";
 import { MidnightHeader } from "../../ui/midnight.js";
-import { go, useSession } from "../../ui/shared.js";
+import { ErrorNotice, go, useRuntime, useSession } from "../../ui/shared.js";
 import { HomeBottomNav, PersonalLobby } from "./personal-lobby.js";
 
 export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | undefined }) {
   const session = useSession((s) => s.session);
+  const runtime = useRuntime();
+  const identity = useQuery({
+    queryKey: ["profile"],
+    queryFn: ({ signal }) => runtime.http("/v1/me", profileSchema, undefined, "GET", true, signal),
+    enabled: !!session,
+  });
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
   const [startIntent, setStartIntent] = useState<string | undefined>();
   const [opening, setOpening] = useState(false);
@@ -56,6 +65,22 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
     setOpening(true);
     setStartIntent(startIntent ?? crypto.randomUUID());
     go("/games/coup/play");
+  }
+  // Keep the initial home hidden until the authenticated name is available.
+  if (session && homeFrame && !identity.data) {
+    if (identity.error)
+      return (
+        <div className="app-shell midnight-shell" lang="fa" dir="rtl">
+          <ErrorNotice
+            error={identity.error}
+            language="fa"
+            retry={() => {
+              void identity.refetch();
+            }}
+          />
+        </div>
+      );
+    return <HamBaziLoading />;
   }
   return (
     <div

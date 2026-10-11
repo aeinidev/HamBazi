@@ -1,59 +1,55 @@
-# Midnight asset provenance
+# HamBazi presentation assets
 
-Tool mode: built-in `image_gen`, reference-image editing, no CLI fallback.
-Authoritative references: the owner's `HamBazi-Games-Midnight.png` and
-`HamBazi-Coup-Midnight-final.png`. Artwork contains no UI text, plaques, badges or
-buttons. React/CSS/SVG renders those separately; reference screenshots are not
-shipped as interactive pages.
+## Current home revision — local, awaiting visual review
 
-| Production path under `apps/web/public/assets/midnight/` | Use                      | Encoding                    |
-| -------------------------------------------------------- | ------------------------ | --------------------------- |
-| `coup-art.webp`                                          | Coup tile and entry hero | 960 × 720, WebP quality 88  |
-| `hokm-art.webp`                                          | Disabled Hokm tile       | Width 800, WebP quality 88  |
-| `ludo-art.webp`                                          | Disabled Ludo tile       | Width 800, WebP quality 88  |
-| `kahroba-art.webp`                                       | Disabled Kahroba card    | Width 1200, WebP quality 82 |
-| `chess-art.webp`                                         | Disabled Chess card      | Width 1200, WebP quality 82 |
-| `domino-art.webp`                                        | Disabled Domino card     | Width 1200, WebP quality 82 |
-| `home-banner.webp`                                       | Home banner illustration | Width 1200, WebP quality 82 |
-| `HamBaziDisplay-Regular.ttf`                             | Live display text        | Exact supplied font bytes   |
+The authoritative reference is the owner's `Luxury Kahroba Gemstones Game Tile.png`.
+All six home posters and the four-player banner were recreated with the built-in
+`image_gen` tool, one referenced-image editing call per illustration. The phone
+frame and screenshot are not shipped. UI titles, identity, buttons, arrows and
+availability labels remain live React/CSS/SVG.
 
-Generated PNGs remain in
-`/home/mehdi/.codex/generated_images/01a12062-96f0-7be0-a3e3-10d8c64fe709/`:
-`exec-fc5059e7-446f-402a-b0a1-d1fc4610308c.png` (Coup),
-`exec-e764569c-1a32-45c1-906b-7d248ae0da90.png` (Hokm), and
-`exec-a56a06a3-0860-4ab6-bc17-614fe39c1e8f.png` (Ludo).
-ffmpeg only resized/encoded the selected assets after generation.
+[Exact prompts](home-art-prompts.json) and [source PNG paths, production filenames
+and SHA-256 values](home-art-provenance.json) record the selected outputs. Source
+PNGs remain at their generated-image paths; selected project assets are copied
+into `apps/web/public/assets/home/` as content-hashed WebP files. ffmpeg only
+resized/encoded the generated outputs to width 1200, quality 88. No old poster
+file is retained in the public asset directory. Coup entry and the existing
+shell backdrop also reference the replacement Coup artwork.
 
-The home slice generated four separate text-free illustrations using the built-in
-`image_gen` tool. Their source PNGs are in
-`/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/`:
-`exec-044e6d35-2e68-4f52-8f7c-0f82d83fe727.png` (Kahroba),
-`exec-1994651b-2269-4da1-b5fe-62a7a0d625a5.png` (Chess),
-`exec-029e9a7e-0e1d-46c7-9c69-86675a56d8cc.png` (Domino), and
-`exec-9c6feb1d-1411-4614-b505-a29eb0385726.png` (banner). The supplied
-`Luxury Kahroba Gemstones Game Tile.png` guided palette and composition; the
-phone frame and screenshot are not shipped. ffmpeg only resized/encoded the
-generated images. Persian text, disabled badges and buttons are React/CSS.
+| Artwork | Composition                                                                         |
+| ------- | ----------------------------------------------------------------------------------- |
+| Hokm    | Fanned ivory A/K cards with red hearts and dark spades; magenta/purple glow         |
+| Kahroba | Green/red/blue/amber gems, illustrated palace card and gold tokens                  |
+| Chess   | Golden king, black knight and small pawn; amber/plum lights                         |
+| Domino  | Overlapping ivory dominoes with brown pips; teal/cyan table                         |
+| Coup    | Red-lit hat-wearing character, queen/king cards and gold coins                      |
+| Ludo    | Colorful board, four bright pawns and two white dice                                |
+| Banner  | Four smiling stylized young adults playing cards on the right; navy copy space left |
 
-## Prompt set
+## Typography and existing game assets
 
-The Coup prompt is retained verbatim. Hokm/Ludo below record the generation
-briefs; their original full tool-call wording is not retained in this document.
+Home and the startup loading screen use self-hosted Vazirmatn v33.003, retrieved
+from the [official font repository](https://github.com/rastikerdar/vazirmatn/tree/v33.003).
+The unmodified variable WOFF2 is
+`apps/web/public/assets/fonts/Vazirmatn-4e3fa217d38f.woff2`, SHA-256
+`4e3fa217d38fdafc1fea4414ceb58ca5e662cf0ab5fa735a8c8c20e8b42cad92`.
+Its [SIL Open Font License](licenses/Vazirmatn-OFL.md) is retained. This is a
+legible approximation of the reference typography; the reference provides no
+original font file.
 
-### Coup
+`HamBaziDisplay-Regular.ttf` remains the exact owner-supplied font for the existing
+Coup UI. The gameplay role assets under `public/assets/coup/` and their provenance
+are unchanged; these are distinct from the retired home posters.
 
-```text
-Use case: precise-object-edit. Asset type: clean illustration for a real Telegram Mini App, reused in Coup lobby tile and entry hero. Input image: /home/mehdi/Downloads/HamBazi-Coup-Midnight-final.png is the authoritative EDIT TARGET and identity/style reference. Extract and recompose ONLY the artwork of its two large midnight-blue and metallic-gold character cards: the crowned bearded noble on the left and hooded assassin on the right, preserving their faces, costumes, ornate card borders and palette, with the physical golden crown in the foreground on the left and fleur-de-lis coins on the right. Keep the velvet dark royal-blue palace backdrop, warm golden columns and near-black navy shadows. Portrait 4:3-ish composition (near square is acceptable), characters fill the frame, enough foreground for crown/coins, clean continuous velvet/table surface. Remove ALL interface: no HamBazi text, no Persian text, no title plaque, no outer UI frame, no buttons, no book/play/gear/back icons, no lettering, no badge, no watermark. Physical ornamental card artwork is retained. This is illustration only; real text and controls will be built separately in React. Match the attached reference closely, not emerald or cyan. Nontransparent full-bleed background.
-```
+## Loading ownership
 
-### Hokm brief
+The former pre-bundle message and automatic sign-in panel were app-controlled.
+The replacement shell is immediately in the HTML and persists through SDK,
+authentication and the first verified profile fetch. Animation is decorative,
+indeterminate and respects reduced motion; it never delays completion.
 
-```text
-From the supplied Midnight Games reference, produce artwork only for the silver disabled Hokm tile: a fan of silver spade playing cards with king/queen/jack and a deck on dark midnight-blue velvet. Cards/deck occupy the left two-thirds; leave dark continuous velvet on the right for live React title/badge. Keep the ornate palace atmosphere, cool navy/silver palette, full-bleed wide composition. No UI text, labels, badges, locks, buttons, outer interface frame or watermark; physical card artwork is allowed.
-```
-
-### Ludo brief
-
-```text
-From the supplied Midnight Games reference, produce artwork only for the disabled Ludo tile: a cross-shaped board, blue/silver/burgundy/amber pawns and die on dark midnight-blue velvet. Board/pawns occupy the left two-thirds; leave dark continuous velvet on the right for live React title/badge. Match the cool navy/silver palace atmosphere in a full-bleed wide composition. No UI text, labels, badges, locks, buttons, outer interface frame or watermark.
-```
+Telegram's native placeholder is hidden by the existing early `WebApp.ready()`
+call once essential UI is available. Native splash icon/colors can be configured
+through BotFather, while native controls and OS status/navigation bars are not
+React elements. No BotFather configuration is changed here. See the
+[official Mini App documentation](https://core.telegram.org/bots/webapps#initializing-mini-apps).

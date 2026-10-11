@@ -3,16 +3,26 @@ import { MidnightIcon } from "../../ui/midnight.js";
 
 /** The admitted personal Coup flow is separate from the read-only public catalog. */
 export const personalLobbyCatalog = Object.freeze([
-  { id: "kahroba", title: "کهربا", enabled: false, artwork: "/assets/midnight/kahroba-art.webp" },
-  { id: "hokm", title: "حکم", enabled: false, artwork: "/assets/midnight/hokm-art.webp" },
-  { id: "domino", title: "دومینو", enabled: false, artwork: "/assets/midnight/domino-art.webp" },
-  { id: "chess", title: "شطرنج", enabled: false, artwork: "/assets/midnight/chess-art.webp" },
-  { id: "ludo", title: "منچ", enabled: false, artwork: "/assets/midnight/ludo-art.webp" },
+  {
+    id: "kahroba",
+    title: "کهربا",
+    enabled: false,
+    artwork: "/assets/home/kahroba-94b0289f428c.webp",
+  },
+  { id: "hokm", title: "حکم", enabled: false, artwork: "/assets/home/hokm-4a8999bf3214.webp" },
+  {
+    id: "domino",
+    title: "دومینو",
+    enabled: false,
+    artwork: "/assets/home/domino-068f68864add.webp",
+  },
+  { id: "chess", title: "شطرنج", enabled: false, artwork: "/assets/home/chess-5f0c34b275df.webp" },
+  { id: "ludo", title: "منچ", enabled: false, artwork: "/assets/home/ludo-c8e10a82c8d8.webp" },
   {
     id: "coup",
     title: "کودتا",
     enabled: true,
-    artwork: "/assets/midnight/coup-art.webp",
+    artwork: "/assets/home/coup-2811ce0e87a8.webp",
     route: "/games/coup",
   },
 ] as const);
@@ -46,7 +56,7 @@ export function PersonalLobby() {
   return (
     <section className="home-screen" aria-labelledby="games-heading">
       <div className="home-banner">
-        <img src="/assets/midnight/home-banner.webp" alt="" width="1200" height="544" />
+        <img src="/assets/home/banner-95092dfe7663.webp" alt="" width="1200" height="544" />
         <div className="home-banner-copy">
           <strong aria-label="هم‌بازی">
             <span>هم</span>‌بازی
@@ -67,7 +77,7 @@ export function PersonalLobby() {
           <MidnightIcon name="cards" /> بازی‌ها
         </h1>
         <button disabled aria-label="همه را ببینید، به‌زودی">
-          همه را ببینید <span>←</span>
+          همه را ببینید <span aria-hidden="true">→</span>
           <small>به‌زودی</small>
         </button>
       </div>
@@ -82,15 +92,14 @@ export function PersonalLobby() {
               if (game.enabled && "route" in game) go(game.route);
             }}
           >
-            <img src={game.artwork} alt="" width="800" height="450" loading="lazy" />
+            <img src={game.artwork} alt="" width="1200" height="660" />
             <span className="home-card-title">{game.title}</span>
-            {game.enabled ? (
-              <span className="home-card-arrow" aria-hidden="true">
-                ‹
-              </span>
-            ) : (
-              <span className="home-card-badge">به‌زودی</span>
-            )}
+            <span className="home-card-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="m9 5 7 7-7 7" />
+              </svg>
+            </span>
+            {!game.enabled && <span className="home-card-badge">به‌زودی</span>}
           </button>
         ))}
       </div>

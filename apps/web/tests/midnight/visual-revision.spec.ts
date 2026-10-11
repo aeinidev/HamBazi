@@ -1,0 +1,156 @@
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+import { setup, launch, fixtureOrigin } from "./fixture.js";
+
+for (const size of [
+  { width: 320, height: 568 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+]) {
+  test(`branded boot and authenticated home at ${size.width}`, async ({ page, request }, info) => {
+    const state = await setup(page, request);
+    await request.post(`${fixtureOrigin}/__test/state`, { data: { displayName: "الکس" } });
+    await page.setViewportSize(size);
+    // Block the bundle in the test only to inspect the real pre-JS shell.
+    // Aborting lets WebKit finish document loading before it captures the page.
+    await page.route(/\/assets\/index-[^/]+\.js$/, (route) => route.abort());
+    await page.goto("https://staging.hambazi.top/");
+    await expect(page.getByRole("status", { name: "در حال بارگذاری هم‌بازی" })).toBeVisible();
+    await page.evaluate(() => document.fonts.load('900 52px "Vazirmatn"'));
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.querySelector(".hambazi-loading")!).position,
+      ),
+    ).toBe("fixed");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({
+      path: info.outputPath(`loading-${size.width}.png`),
+      animations: "disabled",
+    });
+    expect(state.http).toEqual([]);
+    await page.unroute(/\/assets\/index-[^/]+\.js$/);
+    await launch(page);
+    await expect(page.locator(".hambazi-loading")).toHaveCount(0);
+    await expect(page.locator(".home-identity")).toContainText("الکس");
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all(
+        [...document.querySelectorAll<HTMLImageElement>(".home-screen img")].map((img) =>
+          img.decode(),
+        ),
+      );
+    });
+    const layout = await page.evaluate(() => {
+      const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+      return {
+        headingLeft:
+          rect(".home-section-heading h1").left < rect(".home-section-heading button").left,
+        hokmLeft: rect(".home-game-hokm").left < rect(".home-game-kahroba").left,
+        coupLeft: rect(".home-game-coup").left < rect(".home-game-ludo").left,
+        homeRight:
+          rect('.home-bottom-nav a[href="#/games"]').left >
+          rect('.home-bottom-nav a[href="#/profile"]').left,
+        noOverflow: document.documentElement.scrollWidth <= innerWidth,
+        bannerRatio: rect(".home-banner").width / rect(".home-banner").height,
+        cardRatio: rect(".home-game-hokm").width / rect(".home-game-hokm").height,
+        chessRatio: rect(".home-game-chess").width / rect(".home-game-chess").height,
+        coupRatio: rect(".home-game-coup").width / rect(".home-game-coup").height,
+      };
+    });
+    expect(layout).toMatchObject({
+      headingLeft: true,
+      hokmLeft: true,
+      coupLeft: true,
+      homeRight: true,
+      noOverflow: true,
+    });
+    expect(layout.bannerRatio).toBeCloseTo(2.17, 1);
+    expect(layout.cardRatio).toBeCloseTo(1.82, 1);
+    expect(layout.chessRatio).toBeCloseTo(1.77, 1);
+    expect(layout.coupRatio).toBeCloseTo(1.63, 1);
+    await expect(page.locator(".home-card-arrow svg")).toHaveCount(6);
+    await expect(page.locator(".home-card-badge")).toHaveCount(5);
+    const art = await page
+      .locator(".home-screen img")
+      .evaluateAll((imgs) => imgs.map((img) => img.getAttribute("src")));
+    expect(art).toHaveLength(7);
+    expect(art.every((src) => /^\/assets\/home\/[a-z]+-[a-f0-9]{12}\.webp$/.test(src!))).toBe(true);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: info.outputPath(`home-${size.width}.png`), fullPage: true });
+    await page.screenshot({ path: info.outputPath(`home-top-${size.width}.png`) });
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const overlap = await page.evaluate(
+      () =>
+        document.querySelector(".home-game-coup")!.getBoundingClientRect().bottom -
+        document.querySelector(".home-bottom-nav")!.getBoundingClientRect().top,
+    );
+    expect(overlap).toBeLessThanOrEqual(0);
+    await page.screenshot({ path: info.outputPath(`home-bottom-${size.width}.png`) });
+  });
+}
+
+test("auth and profile loading never reveal a guessed home identity", async ({ page, request }) => {
+  await setup(page, request);
+  let releaseAuth!: () => void;
+  let releaseProfile!: () => void;
+  const authGate = new Promise<void>((resolve) => {
+    releaseAuth = resolve;
+  });
+  const profileGate = new Promise<void>((resolve) => {
+    releaseProfile = resolve;
+  });
+  await page.route("https://api-staging.hambazi.top/**", async (route) => {
+    const incoming = route.request();
+    const url = new URL(incoming.url());
+    await (url.pathname === "/v1/me" ? profileGate : authGate);
+    const response = await request.fetch(`${fixtureOrigin}${url.pathname}`, {
+      method: incoming.method(),
+      data: incoming.postData() ?? undefined,
+      headers: { "content-type": "application/json" },
+    });
+    await route.fulfill({
+      response,
+      headers: {
+        ...response.headers(),
+        "access-control-allow-origin": "https://staging.hambazi.top",
+      },
+    });
+  });
+  const query = new URLSearchParams({
+    tgWebAppData: "test=synthetic&auth_date=1791612000",
+    tgWebAppVersion: "8.0",
+    tgWebAppPlatform: "ios",
+  });
+  await page.goto(`https://staging.hambazi.top/?${query}#${query}`);
+  await expect(page.locator(".hambazi-loading")).toBeVisible();
+  await expect(page.locator(".home-identity,.home-game-grid")).toHaveCount(0);
+  releaseAuth();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/games");
+  await expect(page.locator(".hambazi-loading")).toBeVisible();
+  await expect(page.locator(".home-identity,.home-game-grid")).toHaveCount(0);
+  releaseProfile();
+  await expect(page.locator(".home-game-grid")).toBeVisible();
+  await expect(page.locator(".hambazi-loading")).toHaveCount(0);
+});
+
+for (const endpoint of ["registered-session-photo", "me"]) {
+  test(`${endpoint} failure leaves the loader and supports retry`, async ({ page, request }) => {
+    await setup(page, request);
+    let fail = true;
+    await page.route(`https://api-staging.hambazi.top/**/${endpoint}`, async (route) => {
+      if (fail) {
+        fail = false;
+        await route.abort();
+      } else await route.fallback();
+    });
+    await launch(page);
+    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.locator(".hambazi-loading,.home-game-grid")).toHaveCount(0);
+    await page.getByRole("button", { name: "تلاش دوباره", exact: true }).click();
+    await expect(page.locator(".home-game-grid")).toBeVisible();
+    await expect(page.locator(".hambazi-loading")).toHaveCount(0);
+  });
+}

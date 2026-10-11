@@ -301,7 +301,7 @@ for (const size of [
     });
     expect(
       await page.evaluate(() =>
-        [...document.fonts].some((f) => f.family === "HamBazi Display" && f.status === "loaded"),
+        [...document.fonts].some((f) => f.family === "Vazirmatn" && f.status === "loaded"),
       ),
     ).toBe(true);
     await nativeEvent(page, "safe_area_changed", { top: 20, bottom: 25, left: 0, right: 0 });
@@ -338,6 +338,7 @@ for (const size of [
 test("font download failure keeps live Persian controls readable", async ({ page, request }) => {
   await setup(page, request);
   await page.route("**/HamBaziDisplay-Regular.ttf", (route) => route.abort());
+  await page.route("**/Vazirmatn-*.woff2", (route) => route.abort());
   await page.setViewportSize({ width: 320, height: 568 });
   await launch(page);
   await expect(page.getByRole("heading", { name: "بازی‌ها", exact: true })).toBeVisible();

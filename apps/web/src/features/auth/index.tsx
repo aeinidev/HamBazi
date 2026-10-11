@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Panel, go, useRuntime, useSession, useTask } from "../../ui/shared.js";
+import { HamBaziLoading } from "../../ui/loading.js";
 export function AuthScreen({ localPreview = false }: { localPreview?: boolean }) {
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
@@ -35,6 +36,15 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
       submit();
     }
   }, [runtime, available, preview, task, registrationRequired]);
+  if (
+    (import.meta.env.PROD || runtime.scope === "owner-auth") &&
+    !preview &&
+    available &&
+    !registrationRequired &&
+    !creating &&
+    !task.error
+  )
+    return <HamBaziLoading />;
   if (registrationRequired)
     return (
       <div className="welcome" lang="fa" dir="rtl">

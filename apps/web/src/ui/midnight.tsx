@@ -54,7 +54,7 @@ export function MidnightIcon({
         <>
           <rect x="7" y="4" width="14" height="17" rx="2" transform="rotate(10 14 12)" />
           <path d="M5 6 2 7v14h13" />
-          <path d="m14 10 1 2 2 1-2 1-1 2-1-2-2-1 2-1Z" />
+          <path d="M14 10a2 2 0 1 0-2 3 2 2 0 1 0 3 2 2 2 0 1 0 1-3 2 2 0 0 0-2-2ZM14 15v3" />
         </>
       ) : name === "home" ? (
         <>
@@ -67,7 +67,7 @@ export function MidnightIcon({
         </>
       ) : name === "trophy" ? (
         <>
-          <path d="M7 3h10v8a5 5 0 0 1-10 0V3ZM7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4M12 16v4M8 21h8" />
+          <path d="M10 2h4v4a2 2 0 0 1-4 0ZM10 3H8v2a2 2 0 0 0 2 2M14 3h2v2a2 2 0 0 1-2 2M12 8v3M10 11h4M8 22V13h8v9ZM2 22v-6h6M16 16h6v6ZM5 19v1M12 16v3M19 19v1M1 22h22" />
         </>
       ) : name === "profile" ? (
         <>

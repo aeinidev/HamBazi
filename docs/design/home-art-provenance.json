@@ -1,0 +1,37 @@
+{
+  "hokm": {
+    "path": "/assets/home/hokm-4a8999bf3214.webp",
+    "sha256": "4a8999bf3214675f88ce4ad54d49aac344702fe3eebef493302aab8018e6ddbe",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-6754bd23-28f1-46b8-b424-e5cd384e4717.png"
+  },
+  "kahroba": {
+    "path": "/assets/home/kahroba-94b0289f428c.webp",
+    "sha256": "94b0289f428cd19cb3a7eacd174b33f94d582be1be37f01c421f3f82988b4483",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-a1e64ef8-63e7-4bf8-acd5-e2e0e195d75b.png"
+  },
+  "chess": {
+    "path": "/assets/home/chess-5f0c34b275df.webp",
+    "sha256": "5f0c34b275df31a467aba589a2a1a8037a795119badba08b44657a99969edeb9",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-e3bc6bb6-ffd9-495a-be97-e8c279946e33.png"
+  },
+  "domino": {
+    "path": "/assets/home/domino-068f68864add.webp",
+    "sha256": "068f68864add59fbaf9f820b3f729a3391e89249592b8cfca4276a10bf5bdf0b",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-68dd440c-4946-4fb9-a301-a47e1a614121.png"
+  },
+  "coup": {
+    "path": "/assets/home/coup-2811ce0e87a8.webp",
+    "sha256": "2811ce0e87a87c0fd25c4a3a3785d0be047743be85468fa391d325daf90b6c19",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-59cd4722-84c4-4be9-aa36-d4b9c5581a5c.png"
+  },
+  "ludo": {
+    "path": "/assets/home/ludo-c8e10a82c8d8.webp",
+    "sha256": "c8e10a82c8d8768a755dc810606dc3c31ae75241f36333d23df685f119ac9a49",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-b68e6aee-c97b-4c70-b6ca-b9b31c845c0b.png"
+  },
+  "banner": {
+    "path": "/assets/home/banner-95092dfe7663.webp",
+    "sha256": "95092dfe7663ba01af9335577543e51780e4ac58a3a81a015210e21f6f5cef96",
+    "source": "/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/exec-f992a677-d5e0-4868-ba4b-6012d331301c.png"
+  }
+}
