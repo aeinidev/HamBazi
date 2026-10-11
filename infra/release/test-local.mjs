@@ -300,15 +300,6 @@ try {
   const key = createHmac("sha256", "WebAppData").update(token).digest();
   params.set("hash", createHmac("sha256", key).update(data).digest("hex"));
   const body = { schemaVersion: 1, commandId: randomUUID(), initData: params.toString() };
-  const create = await fetch(origin + "/v1/auth/telegram-mini-app/account", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ ...body, displayName: "Packaging fixture" }),
-    signal: AbortSignal.timeout(5000),
-  });
-  assert(create.status === 201 || create.status === 200);
-  const originalAccount = releaseRehearsal ? JSON.stringify(await create.json()) : undefined;
-  // Technical account creation does not make the synthetic actor registered.
   const beforeRegistration = await fetch(origin + "/v1/auth/telegram-mini-app/registered-session", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -319,19 +310,23 @@ try {
     beforeRegistration.status === 403 &&
       (await beforeRegistration.json()).error.code === "REGISTRATION_REQUIRED",
   );
-  await run("docker", [
-    "exec",
-    api,
-    "node",
-    "--input-type=module",
-    "-e",
-    `
-    import { createDatabase } from '@hambazi/database';
-    import { createRegistrationPort } from './dist/users/index.js';
-    const db = createDatabase({ databaseUrl: { reveal: () => process.env.API_DATABASE_URL }, poolMax: 2, connectionTimeoutMs: 2000, idleTimeoutMs: 1000, transactionMaxWaitMs: 5000, transactionTimeoutMs: 5000 });
-    try { const r = await createRegistrationPort(db, { nowMs: () => Date.now() }).complete('777000456', 'Packaging fixture'); if (!r.ok) process.exitCode = 1; } finally { await db.disconnect(); }
-  `,
-  ]);
+  const create = await fetch(origin + "/v1/auth/telegram-mini-app/account", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...body, displayName: "Packaging fixture" }),
+    signal: AbortSignal.timeout(5000),
+  });
+  assert(create.status === 201 || create.status === 200);
+  const created = await create.json();
+  assert(created.account?.displayName === "Packaging fixture");
+  const originalAccount = releaseRehearsal ? JSON.stringify(created) : undefined;
+  const afterRegistration = await fetch(origin + "/v1/auth/telegram-mini-app/registered-session", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...body, commandId: randomUUID() }),
+    signal: AbortSignal.timeout(5000),
+  });
+  assert(afterRegistration.ok);
   const issued = await fetch(origin + "/v1/auth/telegram-mini-app", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -341,14 +336,11 @@ try {
   assert(issued.ok);
   const session = await issued.json();
   assert(typeof session.accessToken === "string");
-  assert(
-    (
-      await fetch(origin + "/v1/me", {
-        headers: { authorization: `Bearer ${session.accessToken}` },
-        signal: AbortSignal.timeout(5000),
-      })
-    ).ok,
-  );
+  const profile = await fetch(origin + "/v1/me", {
+    headers: { authorization: `Bearer ${session.accessToken}` },
+    signal: AbortSignal.timeout(5000),
+  });
+  assert(profile.ok && (await profile.json()).displayName === "Packaging fixture");
   assert(
     (await fetch(origin + "/v1/health/ready", { signal: AbortSignal.timeout(5000) })).status ===
       404,
