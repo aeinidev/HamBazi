@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-11T12:58:54.461961+00:00",
-  "status": "restricted-staging-home-entry-native-acceptance-pending",
+  "checkedAt": "2026-10-11T15:02:08.933Z",
+  "status": "restricted-staging-approved-home-deployed-browser-and-game-smoke-passed-native-evidence-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,8 +10,8 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-home-entry-20261011",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/home-entry-20261011",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-approved-home-web-685d9f6",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6",
   "application": {
     "sourceCommit": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
     "sourceDirty": false,
@@ -32,11 +32,22 @@
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:1bfc42e50c6f7b3f1a27168df22c99018356ab18-5684bdee799bedec@sha256:7a918e91e42a1ceeae287ed842630ec84d458898467af9a8513fb884c0535c99"
+        "image": "hambazi-candidate/web:685d9f6683fef8e06197622b4c695a145c7b8c94-9dbdc0ed38d35807@sha256:dc60073323acefc0e8d05be213291856810c02866797b6ffed512beba1196c06"
       }
-    ]
+    ],
+    "sourceCommitScope": "api-bot-worker",
+    "releaseMode": "web-only-mixed-source-overlay",
+    "roleSourceCommits": {
+      "api": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
+      "bot": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
+      "worker": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
+      "web": "685d9f6683fef8e06197622b4c695a145c7b8c94"
+    },
+    "webSourceSnapshotSha256": "e92a9e06dfd63080e21ac8dc431f8ee84f823a197062cea74f0eb42bb4b172d8",
+    "webBuildInputSha256": "9dbdc0ed38d35807ce22be12edb2e0c809c1602753671e2fb06d3064a8a41132",
+    "sharedBuildIdentityScope": "retained-api-bot-worker; web identity recorded separately"
   },
-  "composeSha256": "50bc9d616e11bacbc498863ce0b5ec55386165cfd748fc1be3aec8c88f4b6164",
+  "composeSha256": "b64ac8ca4f28e5a3f35451c6a1469d7b2151691610a9cc103770cf8e933bd69c",
   "inventorySha256": "d6a7f14946f219bce2fdff2ce4e16003f305d74a3dca021d743b57b06c012264",
   "runtimeRoutesSha256": "c36b33c836b38a9b62f38541f0f8755649d036e55105bfcfe5f5de1a07c96600",
   "admission": {
@@ -75,7 +86,7 @@
     "testerMenuUsesVerifiedDefault": true,
     "menuReference": "https://core.telegram.org/bots/api#menubutton",
     "defaultAndPersianNativeDescriptionVerified": false,
-    "startReply": "برای ادامه، از دکمه‌های پایین استفاده کن.",
+    "startReply": "\u0628\u0631\u0627\u06cc \u0627\u062f\u0627\u0645\u0647\u060c \u0627\u0632 \u062f\u06a9\u0645\u0647\u200c\u0647\u0627\u06cc \u067e\u0627\u06cc\u06cc\u0646 \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u06a9\u0646.",
     "startPhotoCalls": 0,
     "webhookConfigured": true,
     "pendingUpdates": 0,
@@ -149,8 +160,8 @@
     "normalMaximumAgeHours": 24,
     "exactImagesPassed": 8,
     "database": {
-      "updatedAt": "2026-10-11T07:05:14.103977313Z",
-      "downloadedAt": "2026-10-11T12:36:00.287884796Z"
+      "updatedAt": "2026-10-11T13:06:05.155544028Z",
+      "downloadedAt": "2026-10-11T14:53:06.12782468Z"
     },
     "expiryAsiaTehran": "2026-10-12 10:35:14",
     "evidenceExpiresAtUTC": "2026-10-12T07:05:14+00:00",
@@ -165,7 +176,10 @@
     "staleEvidenceDeadlineExtended": false,
     "normalFreshScanRenewal": true,
     "previousExpiryContainmentActivatedAtUTC": "2026-10-11T12:33:35+00:00",
-    "previousFourRolesStoppedGracefully": true
+    "previousFourRolesStoppedGracefully": true,
+    "scanEvidenceExpiresAtUTC": "2026-10-12T13:06:05.155544Z",
+    "installedContainmentDeadlineUTC": "2026-10-12T07:05:14Z",
+    "installedDeadlineUnchanged": true
   },
   "verification": {
     "frozenLockfileInstall": true,
@@ -217,189 +231,61 @@
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
-  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/previous-current-binding.json",
+  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/previous-current-binding.json",
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
-    "deployed-browser.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/deployed-browser.json",
-      "sha256": "933081bd8fc5e16c38c7041ac31efb0c82506e008b73a2b609455e375d71dea2"
-    },
-    "previous-current-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/previous-current-binding.json",
-      "sha256": "b4bd6eb08975aa29e7dc308b80007ad33c85ffa140068cdc646a4d956892622d"
-    },
     "images.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json",
-      "sha256": "6c1eaa29a50b78814276e3c3b27060d2269f37524913801c1383e121c8773221"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/images.json",
+      "sha256": "8fac3f2978e9cf48de5217cc3cbbf06d6e16ee6ef04401bae9d470b4e6560f44"
     },
     "images.json.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json.scan.json",
-      "sha256": "fd6676731e0f5fe32a56d6e8c7f3e7bc547e510f1fb8a6a8cab6d45beab76112"
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/images.json.scan.json",
+      "sha256": "0669795222d22e9744edf29c294bcfbec358e4e73894b5f76dc47cb2f605450c"
     },
-    "components.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/components.scan.json",
-      "sha256": "c7c03da745f4fd1e20e06a5bc5d1dfd0eb76e1077c2117d00274b52df7f9f663"
+    "runtime-images.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/runtime-images.scan.json",
+      "sha256": "9742cfb3b17a2600b530a1809d43858b5671b2d4c0694c45b11457c9ba76f5a8"
     },
-    "data.scan.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/data.scan.json",
-      "sha256": "fb2ea7aeabe749d006ba165fd5935d0e3ddb5590fbe96335d48d79bee9948934"
+    "prepared.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/prepared.json",
+      "sha256": "5bcb4149df3d07c3738b8f90b3b60f5017221f6eade1e53fd8e7644da6581f55"
     },
-    "scan-binding.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/scan-binding.json",
-      "sha256": "342e8bea92eb48357de39429a98af3063d792549a2cfdda3f15fd8c3a653596f"
+    "before.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/before.json",
+      "sha256": "cd4513b7aa39dc2d79d2f2ae7f9b9937b6d33edb927999344adcc4a4c85f13e4"
     },
-    "preflight.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preflight.json",
-      "sha256": "c0d9bf25d8bb845697b74d5c847618d90d644a694b236024ed945b71fb93496b"
+    "deployment.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/deployment.json",
+      "sha256": "7eda251b2c2e3b01ec3bf3c2993a5fd7cdcdb91b252aa34b796dd63edfa8c2aa"
     },
-    "preparation-guards.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preparation-guards.json",
-      "sha256": "55c8d486aa979f4745a5553e795fd9bdee461782c604d98e834c4d81fb29ed92"
+    "game-smoke.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/game-smoke.json",
+      "sha256": "8aba72d7d9511567bb477a20cd3878323746085672b03f2582a3b96acfdfc726"
     },
-    "normal-containment-renewal.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/normal-containment-renewal.json",
-      "sha256": "ca0bbe617061a4ed1f5aec96c1a5061b2a54f7d007c17c257239a377e4497d7d"
+    "previous-current-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/previous-current-binding.json",
+      "sha256": "6410be2d6e3dcc49e3d8419bf76a5ec62f6b676026b50e6368dda822b3dfcf25"
     },
-    "renewed-preparation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/renewed-preparation.json",
-      "sha256": "e4337b30909c1c9c4cd88e5e30086c645ffbcdbbeb07abc801c21d8a92e117f0"
+    "stage-web.mjs": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/stage-web.mjs",
+      "sha256": "7921f496f07533bd58c988ca6b2692f9b027dadf0d485c0080c99728271a2597"
     },
-    "capacity-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery.json",
-      "sha256": "54455e44a2eeda9b8bf728e2a3c413b1fb06454a88c6c36d2d90e7e011921cc3"
+    "scan-runtime.mjs": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/scan-runtime.mjs",
+      "sha256": "d9564d46bb03537de0195189e89d33b8e6602f30027ed33e2decd0628b8d1e00"
     },
-    "capacity-recovery-55.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery-55.json",
-      "sha256": "364eb9707f4c5c470eade57d9f293ab119e69857407658496ff1e71405cd9368"
+    "game-smoke.mjs": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/game-smoke.mjs",
+      "sha256": "4a2f77643d57d89fb8ba056a8c6897c43eed585a2f5ab9e4d7c2bec5a8f3195d"
     },
-    "rejected-candidate-removal.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-removal.json",
-      "sha256": "cec7269240b389e9cd29c50d87ee3da82a53620c640a3832a06869277c2af779"
+    "final.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/final.json",
+      "sha256": "39965c9f0db517e6e70f103c184c5cac750092fb06776aa7fe5ee190c46f0823"
     },
-    "failed-db-capacity.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/failed-db-capacity.json",
-      "sha256": "7c1d0e168232c50d55f2fdb739f9b1c7d3359f91bfd176abc27287348ff23144"
-    },
-    "capacity.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity.json",
-      "sha256": "b6e7b4b3a8675fafa59a4c406155a9ffd15542734d7468e26ec9b20c4596f99d"
-    },
-    "validation.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/validation.json",
-      "sha256": "7dcf05103cad5b2259a9f800ffab8b3c34a99403b0819d903bdb186252b1171c"
-    },
-    "migration.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/migration.json",
-      "sha256": "c892ca7894c6c1f306d8efdd757ae5c43ecebcdcda2c529a472ae3449eea0335"
-    },
-    "startup.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/startup.json",
-      "sha256": "12c6f37ff03351537614cfc2d073c71be2bb9193e2abbef837d5e56e173a7dfb"
-    },
-    "traffic-open.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/traffic-open.json",
-      "sha256": "646d8feefad5f5d90a1b9f962e639c559d9fb88ba2f8ae767270eb0dd93fb426"
-    },
-    "compiled-admission.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-admission.json",
-      "sha256": "858427330de72f66331734ceb3782dc4d33c80dfb955198751af6f9f032f58d2"
-    },
-    "compiled-pins.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-pins.json",
-      "sha256": "ab0e0e29b8fad7bd31c4ff161101d42a013fff8415be35e2f521da13063ccb15"
-    },
-    "operational-final.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/operational-final.json",
-      "sha256": "dff2bd2143b3f1569ffcef7e2bf8c82e2306a209bda4f3762a17ceaaab902526"
-    },
-    "public-routing.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/public-routing.json",
-      "sha256": "fb03d84355b50a7ea8088c0619eb65b9d43d57b4dcc6e5c3a73a3a35072be3b0"
-    },
-    "download-proof.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/download-proof.json",
-      "sha256": "86e2ce5eae39252e684a76f8e7dea638f80826614d58dfb7fdc40812c6f2b009"
-    },
-    "historical-local-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-local-recovery.json",
-      "sha256": "528367e4c81cfd6aa488ab4f6921c26ba7b25217bb9a1ff83ddd98d8c30cb855"
-    },
-    "historical-55-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-55-recovery.json",
-      "sha256": "72ff2b0d366d732df8226d0dc09ed7a0f283da3009935e91bdda84c04bf6b0fe"
-    },
-    "rejected-candidate-recovery.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-recovery.json",
-      "sha256": "21495d4d06c0ea1ca06a669fa6974f29013f84282b361ac6ba5df51ca73ec40f"
-    },
-    "root-check.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/root-check.log",
-      "sha256": "40769681b3723385aef789367b191d182f718de333faa18567eb7df55f794df3"
-    },
-    "integration.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/integration.log",
-      "sha256": "3f210a6b677119f9589abc734f3011b73fde358f1448f764107689297d595bea"
-    },
-    "midnight-browser.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/midnight-browser.log",
-      "sha256": "180209f3f5082595152bc637e07f29342d44203dba3213ed38c0a33f304e66d3"
-    },
-    "existing-browser.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/existing-browser.log",
-      "sha256": "43b5c580ebc7b94c8b767d944067f3638f19b23854dcd4b4698de14a344c321a"
-    },
-    "jpeg-tests.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-tests.log",
-      "sha256": "0cb9ec0c062a52d8a540c4015aa5758ffa16bedd3964b17310b9c35509fbaade"
-    },
-    "jpeg-lint.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-lint.log",
-      "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
-    },
-    "packaged-smoke.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/packaged-smoke.log",
-      "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
-    },
-    "secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/secrets.log",
-      "sha256": "ca92320a35630a1377fb7b839b4ffe558e3db24b9062f3c903b2cb7be79543b3"
-    },
-    "dependencies.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/dependencies.log",
-      "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
-    },
-    "unchanged-controls.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/unchanged-controls.json",
-      "sha256": "a63bdb544972e73d7c7e5d9a84232368210d03d05af10940edcfa3afc6b014dd"
-    },
-    "engine-final.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/engine-final.log",
-      "sha256": "be232bb175984de6c2c89d89665d1d1efc80998da56fdf617d9b32307153930f"
-    },
-    "final-test-format.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/final-test-format.log",
-      "sha256": "760dce810b9233eac5c6be696e1c7681f4e34ace4b05423366c8cd290e0bf5c4"
-    },
-    "evidence-index.json": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/evidence-index.json",
-      "sha256": "ae66636be117f26de69462cf51a0259338776c764b6ed9f7e0d8efe0fd846473"
-    },
-    "closeout-secrets.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-secrets.log",
-      "sha256": "c360752836cdd02cfd282202010280cb71eb60be2e2457766e48ba2453dcc6da"
-    },
-    "closeout-lint.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-lint.log",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "closeout-typecheck.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-typecheck.log",
-      "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
-    },
-    "closeout-format-focused.log": {
-      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-format-focused.log",
-      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    "deployed-browser.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/deployed-browser.json",
+      "sha256": "e5da63483482e97c51dc813a07649d4cc5e8553f6de57ec25ed4ac8198369e85"
     }
   },
   "historicalPreparedDirectory": "/opt/hambazi-staging/private/prepared-bot-latency-20261010",
@@ -589,7 +475,7 @@
       "passed": true
     }
   },
-  "previousBindingSha256": "b4bd6eb08975aa29e7dc308b80007ad33c85ffa140068cdc646a4d956892622d",
+  "previousBindingSha256": "6410be2d6e3dcc49e3d8419bf76a5ec62f6b676026b50e6368dda822b3dfcf25",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
     "frozenLockfileInstall": "passed",
@@ -1041,7 +927,7 @@
       "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
       "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
       "userReportedSuccessful": true,
-      "response": "اوکیه",
+      "response": "\u0627\u0648\u06a9\u06cc\u0647",
       "questionCovered": [
         "close and reopen with Open",
         "start/finish personal Coup with normal moves",
@@ -1070,9 +956,7 @@
   },
   "rollbackAcceptance": {
     "passed": null,
-    "scope": "No rollback executed. Previous 4b154f1 images and preparation retained; compatibility with all retained state and jobs requires verification before rollback.",
-    "previousArtifactSupportsNewPins": null,
-    "oldOrNewPersistentStateRewritten": false
+    "scope": "Immediate Web-only rollback readiness verified; no live rollback executed for the approved visual revision"
   },
   "uniformLobbyFraming": {
     "sourceCommit": "395c6e737fa55743aa29896508aa75d0e6a75fca",
@@ -1479,5 +1363,247 @@
     "compatibleRollbackProven": false,
     "productionReleaseApproved": false,
     "operationReport": "docs/operations/2026-10-11-home-entry-staging.md"
+  },
+  "previousVisualRevisionBinding": {
+    "privatePath": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/previous-current-binding.json",
+    "sha256": "6410be2d6e3dcc49e3d8419bf76a5ec62f6b676026b50e6368dda822b3dfcf25"
+  },
+  "previousVisualRevisionPreparedDirectory": "/opt/hambazi-staging/private/prepared-home-entry-20261011",
+  "preparationSha256": "7454478d3dbd1ced731192feeff3cd6ac163ee69b91d685f2049518bd99d5a9f",
+  "inventorySha256Scope": "retained-api-bot-worker-base-inventory; new web inventory bound in visualRevision",
+  "visualRevision": {
+    "ownerVisualReviewApproved": true,
+    "sourceCommit": "685d9f6683fef8e06197622b4c695a145c7b8c94",
+    "deployedAtUTC": "2026-10-11T14:54:11.808Z",
+    "deployedRoles": ["web"],
+    "candidateOtherRolesNotActivated": true,
+    "webImage": "hambazi-candidate/web:685d9f6683fef8e06197622b4c695a145c7b8c94-9dbdc0ed38d35807@sha256:dc60073323acefc0e8d05be213291856810c02866797b6ffed512beba1196c06",
+    "cleanSource": true,
+    "webInventorySha256": "8fac3f2978e9cf48de5217cc3cbbf06d6e16ee6ef04401bae9d470b4e6560f44",
+    "webCandidateScanSha256": "0669795222d22e9744edf29c294bcfbec358e4e73894b5f76dc47cb2f605450c",
+    "runtimeEightImageScanSha256": "9742cfb3b17a2600b530a1809d43858b5671b2d4c0694c45b11457c9ba76f5a8",
+    "backendContainerIdsAndStartTimesUnchanged": true,
+    "webNonClientRuntimeUnchanged": true,
+    "controlsUnchanged": true,
+    "migrationsExecuted": false,
+    "webUnitTests": 87,
+    "packagedRuntimeChecks": 46,
+    "packagedBrowserCases": 2,
+    "deployedBrowserEngines": ["chromium", "webkit"],
+    "deployedMobileWidths": [320, 375, 390],
+    "webKitTlsVerifiedRequestAdapter": true,
+    "retiredPosterUrls404": 7,
+    "servedAssetsByteMatched": true,
+    "liveGameSmokeChecks": 33,
+    "liveGameSmokeFinished": true,
+    "liveGameSmokeHumanCommands": 6,
+    "syntheticSignedLaunchForExistingAdmittedTester": true,
+    "nativeTelegramVerified": false,
+    "realTelegramPhotoVerified": false,
+    "counts": {
+      "users": 2,
+      "registeredUsers": 2,
+      "matches": 47,
+      "activeMatches": 0,
+      "migrations": 15
+    },
+    "previousRunningReleaseRetained": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
+    "previousRollbackCandidateRetained": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
+    "rollback": {
+      "ready": true,
+      "executed": false,
+      "scope": "web only; no backend/database/queue rollback"
+    },
+    "operationReport": "docs/operations/2026-10-11-approved-home-visual-staging.md",
+    "productionReleaseApproved": false
+  },
+  "previousVisualRevisionPrivateEvidence": {
+    "deployed-browser.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/deployed-browser.json",
+      "sha256": "933081bd8fc5e16c38c7041ac31efb0c82506e008b73a2b609455e375d71dea2"
+    },
+    "previous-current-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/previous-current-binding.json",
+      "sha256": "b4bd6eb08975aa29e7dc308b80007ad33c85ffa140068cdc646a4d956892622d"
+    },
+    "images.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json",
+      "sha256": "6c1eaa29a50b78814276e3c3b27060d2269f37524913801c1383e121c8773221"
+    },
+    "images.json.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/images.json.scan.json",
+      "sha256": "fd6676731e0f5fe32a56d6e8c7f3e7bc547e510f1fb8a6a8cab6d45beab76112"
+    },
+    "components.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/components.scan.json",
+      "sha256": "c7c03da745f4fd1e20e06a5bc5d1dfd0eb76e1077c2117d00274b52df7f9f663"
+    },
+    "data.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/data.scan.json",
+      "sha256": "fb2ea7aeabe749d006ba165fd5935d0e3ddb5590fbe96335d48d79bee9948934"
+    },
+    "scan-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/scan-binding.json",
+      "sha256": "342e8bea92eb48357de39429a98af3063d792549a2cfdda3f15fd8c3a653596f"
+    },
+    "preflight.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preflight.json",
+      "sha256": "c0d9bf25d8bb845697b74d5c847618d90d644a694b236024ed945b71fb93496b"
+    },
+    "preparation-guards.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/preparation-guards.json",
+      "sha256": "55c8d486aa979f4745a5553e795fd9bdee461782c604d98e834c4d81fb29ed92"
+    },
+    "normal-containment-renewal.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/normal-containment-renewal.json",
+      "sha256": "ca0bbe617061a4ed1f5aec96c1a5061b2a54f7d007c17c257239a377e4497d7d"
+    },
+    "renewed-preparation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/renewed-preparation.json",
+      "sha256": "e4337b30909c1c9c4cd88e5e30086c645ffbcdbbeb07abc801c21d8a92e117f0"
+    },
+    "capacity-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery.json",
+      "sha256": "54455e44a2eeda9b8bf728e2a3c413b1fb06454a88c6c36d2d90e7e011921cc3"
+    },
+    "capacity-recovery-55.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity-recovery-55.json",
+      "sha256": "364eb9707f4c5c470eade57d9f293ab119e69857407658496ff1e71405cd9368"
+    },
+    "rejected-candidate-removal.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-removal.json",
+      "sha256": "cec7269240b389e9cd29c50d87ee3da82a53620c640a3832a06869277c2af779"
+    },
+    "failed-db-capacity.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/failed-db-capacity.json",
+      "sha256": "7c1d0e168232c50d55f2fdb739f9b1c7d3359f91bfd176abc27287348ff23144"
+    },
+    "capacity.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/capacity.json",
+      "sha256": "b6e7b4b3a8675fafa59a4c406155a9ffd15542734d7468e26ec9b20c4596f99d"
+    },
+    "validation.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/validation.json",
+      "sha256": "7dcf05103cad5b2259a9f800ffab8b3c34a99403b0819d903bdb186252b1171c"
+    },
+    "migration.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/migration.json",
+      "sha256": "c892ca7894c6c1f306d8efdd757ae5c43ecebcdcda2c529a472ae3449eea0335"
+    },
+    "startup.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/startup.json",
+      "sha256": "12c6f37ff03351537614cfc2d073c71be2bb9193e2abbef837d5e56e173a7dfb"
+    },
+    "traffic-open.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/traffic-open.json",
+      "sha256": "646d8feefad5f5d90a1b9f962e639c559d9fb88ba2f8ae767270eb0dd93fb426"
+    },
+    "compiled-admission.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-admission.json",
+      "sha256": "858427330de72f66331734ceb3782dc4d33c80dfb955198751af6f9f032f58d2"
+    },
+    "compiled-pins.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/compiled-pins.json",
+      "sha256": "ab0e0e29b8fad7bd31c4ff161101d42a013fff8415be35e2f521da13063ccb15"
+    },
+    "operational-final.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/operational-final.json",
+      "sha256": "dff2bd2143b3f1569ffcef7e2bf8c82e2306a209bda4f3762a17ceaaab902526"
+    },
+    "public-routing.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/public-routing.json",
+      "sha256": "fb03d84355b50a7ea8088c0619eb65b9d43d57b4dcc6e5c3a73a3a35072be3b0"
+    },
+    "download-proof.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/download-proof.json",
+      "sha256": "86e2ce5eae39252e684a76f8e7dea638f80826614d58dfb7fdc40812c6f2b009"
+    },
+    "historical-local-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-local-recovery.json",
+      "sha256": "528367e4c81cfd6aa488ab4f6921c26ba7b25217bb9a1ff83ddd98d8c30cb855"
+    },
+    "historical-55-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/historical-55-recovery.json",
+      "sha256": "72ff2b0d366d732df8226d0dc09ed7a0f283da3009935e91bdda84c04bf6b0fe"
+    },
+    "rejected-candidate-recovery.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/rejected-candidate-recovery.json",
+      "sha256": "21495d4d06c0ea1ca06a669fa6974f29013f84282b361ac6ba5df51ca73ec40f"
+    },
+    "root-check.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/root-check.log",
+      "sha256": "40769681b3723385aef789367b191d182f718de333faa18567eb7df55f794df3"
+    },
+    "integration.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/integration.log",
+      "sha256": "3f210a6b677119f9589abc734f3011b73fde358f1448f764107689297d595bea"
+    },
+    "midnight-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/midnight-browser.log",
+      "sha256": "180209f3f5082595152bc637e07f29342d44203dba3213ed38c0a33f304e66d3"
+    },
+    "existing-browser.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/existing-browser.log",
+      "sha256": "43b5c580ebc7b94c8b767d944067f3638f19b23854dcd4b4698de14a344c321a"
+    },
+    "jpeg-tests.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-tests.log",
+      "sha256": "0cb9ec0c062a52d8a540c4015aa5758ffa16bedd3964b17310b9c35509fbaade"
+    },
+    "jpeg-lint.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/jpeg-lint.log",
+      "sha256": "960f1eb37ac4d28430af9bef2c98f32333254854ffde619330f53d373ce0f632"
+    },
+    "packaged-smoke.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/packaged-smoke.log",
+      "sha256": "65de764822be10b4dad8067c33dfe63a59f6a93f91fbbde855d34ae63700219a"
+    },
+    "secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/secrets.log",
+      "sha256": "ca92320a35630a1377fb7b839b4ffe558e3db24b9062f3c903b2cb7be79543b3"
+    },
+    "dependencies.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/dependencies.log",
+      "sha256": "3acfff4b56d8d94aac75e4c154d59c3c3e024a4f645bb3bcb481093fd921d90e"
+    },
+    "unchanged-controls.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/unchanged-controls.json",
+      "sha256": "a63bdb544972e73d7c7e5d9a84232368210d03d05af10940edcfa3afc6b014dd"
+    },
+    "engine-final.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/engine-final.log",
+      "sha256": "be232bb175984de6c2c89d89665d1d1efc80998da56fdf617d9b32307153930f"
+    },
+    "final-test-format.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/final-test-format.log",
+      "sha256": "760dce810b9233eac5c6be696e1c7681f4e34ace4b05423366c8cd290e0bf5c4"
+    },
+    "evidence-index.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/evidence-index.json",
+      "sha256": "ae66636be117f26de69462cf51a0259338776c764b6ed9f7e0d8efe0fd846473"
+    },
+    "closeout-secrets.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-secrets.log",
+      "sha256": "c360752836cdd02cfd282202010280cb71eb60be2e2457766e48ba2453dcc6da"
+    },
+    "closeout-lint.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "closeout-typecheck.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-typecheck.log",
+      "sha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0"
+    },
+    "closeout-format-focused.log": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010/closeout-format-focused.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    }
+  },
+  "verificationScope": "historical full-suite results; this deployment checks are recorded in visualRevision",
+  "previousVisualRevisionRollbackAcceptance": {
+    "passed": null,
+    "scope": "No rollback executed. Previous 4b154f1 images and preparation retained; compatibility with all retained state and jobs requires verification before rollback.",
+    "previousArtifactSupportsNewPins": null,
+    "oldOrNewPersistentStateRewritten": false
   }
 }
