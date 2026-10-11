@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-10T21:41:53.070073+00:00",
-  "status": "restricted-staging-game-table-anarchist-verified-native-iphone-acceptance-pending",
+  "checkedAt": "2026-10-11T12:58:54.461961+00:00",
+  "status": "restricted-staging-home-entry-native-acceptance-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -10,35 +10,35 @@
   },
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
-  "preparedDirectory": "/opt/hambazi-staging/private/prepared-game-table-anarchist-20261010",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/game-table-anarchist-20261010",
+  "preparedDirectory": "/opt/hambazi-staging/private/prepared-home-entry-20261011",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/home-entry-20261011",
   "application": {
-    "sourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
+    "sourceCommit": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
     "sourceDirty": false,
-    "sourceSnapshotSha256": "33c491cd3daaf2f03161f789d38ab8602c5d10c8d85158f9acccc57c15870eec",
-    "buildInputSha256": "700c1ba5fe23978ea3ec26050f8321a7a1c8be3d470112133a67c74744b679e6",
+    "sourceSnapshotSha256": "a4fafa80c88263d2b51148ad3e4797fa4acde1e4859825e2dec84ea60866e0db",
+    "buildInputSha256": "5684bdee799bedecd5907870c642d5979e7c27822ce4e3080599663a6bcf6b35",
     "images": [
       {
         "role": "api",
-        "image": "hambazi-candidate/api:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:03d8fc62089621a1c41118e0d308e4f953a891c2667dbc73c8065bd2b46b0b23"
+        "image": "hambazi-candidate/api:1bfc42e50c6f7b3f1a27168df22c99018356ab18-5684bdee799bedec@sha256:e8f4710f9f9ee07d6cde5e831656b7ac238d1052b4abe06a6cd528ca8f876e96"
       },
       {
         "role": "bot",
-        "image": "hambazi-candidate/bot:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:a45bf91801204040a9bbdbd211bc46d6ca646410a63beecd4065bb3c202b28e9"
+        "image": "hambazi-candidate/bot:1bfc42e50c6f7b3f1a27168df22c99018356ab18-5684bdee799bedec@sha256:595eace831f50bc824cd9147360109a713c46c6d4dac4febedf32639d8154509"
       },
       {
         "role": "worker",
-        "image": "hambazi-candidate/worker:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:9c6194641131db2028e3e3da6fe14feb80a5a03f5df3e4bfaaac78fa538f0456"
+        "image": "hambazi-candidate/worker:1bfc42e50c6f7b3f1a27168df22c99018356ab18-5684bdee799bedec@sha256:4f9074dd2dfa4a96f29c52fbf658ae0985ff68a627b406ebc56acbffe3e488ba"
       },
       {
         "role": "web",
-        "image": "hambazi-candidate/web:4b154f1e6437aa4908752a1e6b7e080ba83c5448-700c1ba5fe23978e@sha256:68d8c76ea63f43308c6b4e1dff43b0fe153b7557d03e86f84fcd7f1abb325c31"
+        "image": "hambazi-candidate/web:1bfc42e50c6f7b3f1a27168df22c99018356ab18-5684bdee799bedec@sha256:7a918e91e42a1ceeae287ed842630ec84d458898467af9a8513fb884c0535c99"
       }
     ]
   },
-  "composeSha256": "1074c89086da22610bfb42344e6282101d5350529518046699bea674e429e57a",
-  "inventorySha256": "6c1eaa29a50b78814276e3c3b27060d2269f37524913801c1383e121c8773221",
-  "runtimeRoutesSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
+  "composeSha256": "50bc9d616e11bacbc498863ce0b5ec55386165cfd748fc1be3aec8c88f4b6164",
+  "inventorySha256": "d6a7f14946f219bce2fdff2ce4e16003f305d74a3dca021d743b57b06c012264",
+  "runtimeRoutesSha256": "c36b33c836b38a9b62f38541f0f8755649d036e55105bfcfe5f5de1a07c96600",
   "admission": {
     "ownerCount": 1,
     "ordinaryTestUserCount": 1,
@@ -75,7 +75,7 @@
     "testerMenuUsesVerifiedDefault": true,
     "menuReference": "https://core.telegram.org/bots/api#menubutton",
     "defaultAndPersianNativeDescriptionVerified": false,
-    "startReply": "\u0628\u0631\u0627\u06cc \u0627\u062f\u0627\u0645\u0647\u060c \u0627\u0632 \u062f\u06a9\u0645\u0647\u200c\u0647\u0627\u06cc \u067e\u0627\u06cc\u06cc\u0646 \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u06a9\u0646.",
+    "startReply": "برای ادامه، از دکمه‌های پایین استفاده کن.",
     "startPhotoCalls": 0,
     "webhookConfigured": true,
     "pendingUpdates": 0,
@@ -149,23 +149,22 @@
     "normalMaximumAgeHours": 24,
     "exactImagesPassed": 8,
     "database": {
-      "updatedAt": "2026-10-10T12:33:35.352381306Z",
-      "downloadedAt": "2026-10-10T19:17:49.240995842Z",
-      "nextUpdate": "2026-10-11T12:33:35.352381125Z"
+      "updatedAt": "2026-10-11T07:05:14.103977313Z",
+      "downloadedAt": "2026-10-11T12:36:00.287884796Z"
     },
-    "expiryAsiaTehran": "2026-10-11 16:03:35",
-    "evidenceExpiresAtUTC": "2026-10-11T12:33:35+00:00",
+    "expiryAsiaTehran": "2026-10-12 10:35:14",
+    "evidenceExpiresAtUTC": "2026-10-12T07:05:14+00:00",
     "expiryContainmentTimerEnabled": true,
-    "expiryNextTrigger": "Sun 2026-10-11 12:33:35 UTC",
+    "expiryNextTrigger": "Mon 2026-10-12 07:05:14 UTC",
     "freshnessExceptionUsed": false,
     "containmentDisabled": false,
     "containmentServiceUnchanged": true,
     "containmentServiceSha256": "ef990122e8d007966cd3fcb24811098cb46e8aee4673ad25a96b1edab884cdc6",
-    "timerDropInSha256": "e4f9c5fc0e00ab42f79618b0b78bd7abcfb41ad8d70eff5d9e6d86df1cd8c77f",
+    "timerDropInSha256": "7872f253ad15217442962595a7d3defa43c2bd18ef89ab31ccede4f39480cd1d",
     "freshnessWindowHours": 24,
     "staleEvidenceDeadlineExtended": false,
     "normalFreshScanRenewal": true,
-    "previousExpiryContainmentActivatedAtUTC": "2026-10-10T19:06:47+00:00",
+    "previousExpiryContainmentActivatedAtUTC": "2026-10-11T12:33:35+00:00",
     "previousFourRolesStoppedGracefully": true
   },
   "verification": {
@@ -213,8 +212,8 @@
     "closeoutTestTypecheckLintAndSecretsPassed": true
   },
   "operatorRunner": {
-    "preparationDirectory": "/opt/hambazi-staging/private/runner-4b154f1",
-    "sourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
+    "preparationDirectory": "/opt/hambazi-staging/private/runner-home-entry-1bfc42e",
+    "sourceCommit": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
@@ -1042,7 +1041,7 @@
       "sourceCommit": "55a4b19d96bc4f79aadb782dc2f356a7864d6dc0",
       "scope": "Midnight lobby/Coup entry and focused personal request-overlap correction on restricted staging",
       "userReportedSuccessful": true,
-      "response": "\u0627\u0648\u06a9\u06cc\u0647",
+      "response": "اوکیه",
       "questionCovered": [
         "close and reopen with Open",
         "start/finish personal Coup with normal moves",
@@ -1071,8 +1070,8 @@
   },
   "rollbackAcceptance": {
     "passed": null,
-    "scope": "No rollback executed. Retained 8a artifacts cannot serve v2 pinned state/jobs; require a validated compatible repair retaining both adapters. Draining active matches alone is insufficient.",
-    "previousArtifactSupportsNewPins": false,
+    "scope": "No rollback executed. Previous 4b154f1 images and preparation retained; compatibility with all retained state and jobs requires verification before rollback.",
+    "previousArtifactSupportsNewPins": null,
     "oldOrNewPersistentStateRewritten": false
   },
   "uniformLobbyFraming": {
@@ -1420,6 +1419,65 @@
     "nativeAcceptanceStatus": "pending-real-iphone-success",
     "operationReport": "docs/operations/2026-10-11-game-table-anarchist-staging.md",
     "decision": "docs/adr/061-shared-anarchist-and-retained-personal-pins.md",
-    "rejectedCandidateCause": "JPEG absent from packaged static MIME inventory; fixed and checked before traffic"
+    "rejectedCandidateCause": "JPEG absent from packaged static MIME inventory; fixed and checked before traffic",
+    "securityScanBeforeHomeEntry": {
+      "normalMaximumAgeHours": 24,
+      "exactImagesPassed": 8,
+      "database": {
+        "updatedAt": "2026-10-10T12:33:35.352381306Z",
+        "downloadedAt": "2026-10-10T19:17:49.240995842Z",
+        "nextUpdate": "2026-10-11T12:33:35.352381125Z"
+      },
+      "expiryAsiaTehran": "2026-10-11 16:03:35",
+      "evidenceExpiresAtUTC": "2026-10-11T12:33:35+00:00",
+      "expiryContainmentTimerEnabled": true,
+      "expiryNextTrigger": "Sun 2026-10-11 12:33:35 UTC",
+      "freshnessExceptionUsed": false,
+      "containmentDisabled": false,
+      "containmentServiceUnchanged": true,
+      "containmentServiceSha256": "ef990122e8d007966cd3fcb24811098cb46e8aee4673ad25a96b1edab884cdc6",
+      "timerDropInSha256": "e4f9c5fc0e00ab42f79618b0b78bd7abcfb41ad8d70eff5d9e6d86df1cd8c77f",
+      "freshnessWindowHours": 24,
+      "staleEvidenceDeadlineExtended": false,
+      "normalFreshScanRenewal": true,
+      "previousExpiryContainmentActivatedAtUTC": "2026-10-10T19:06:47+00:00",
+      "previousFourRolesStoppedGracefully": true
+    }
+  },
+  "homeEntry": {
+    "sourceCommit": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
+    "routeChange": "Exact registered-session-photo POST/OPTIONS ingress location; other prior route bytes preserved",
+    "routeSha256": "c36b33c836b38a9b62f38541f0f8755649d036e55105bfcfe5f5de1a07c96600",
+    "previousRouteSha256": "d45395e20e1d314ba2ccb5e919a9bf709546c8a4c35d034766fea676f495a388",
+    "ownerAdmissionSha256": "382a3c3185f45bdf787503dfe2594f29e3245faa2e82c3ae0d01ee75b104d817",
+    "testerAdmissionSha256": "4ad78882f119873a90e2f87c0b8559ee4c20b546988cc4949e164b9dad8d91c6",
+    "admittedOwnerCount": 1,
+    "admittedTesterCount": 1,
+    "previousSourceCommit": "4b154f1e6437aa4908752a1e6b7e080ba83c5448",
+    "previousPreparedDirectory": "/opt/hambazi-staging/private/prepared-game-table-anarchist-20261010",
+    "previousBindingPrivatePath": "/opt/hambazi-staging/private/execution-20261008/home-entry-20261011/previous-current-binding.json",
+    "previousBindingSha256": "5e7f3392fb76001d04dff463cadcc0488550458cb576e9e5ba7a2ec585120055",
+    "preparedSha256": "1ee1a385fea707751bda2d2937bf6a37798525efa8d0459a1ac81f1b0c63ef2f",
+    "originalAppScanSha256": "03e993d233a0d993be518b67392bd2646746d6a2f27629cf1a90d874bccbcc8c",
+    "freshAppScanSha256": "6c1dd0030387f3ad3eec5256dcced1ec67eb5c525aa120b3b8d014418d704eab",
+    "freshComponentScanSha256": "710837b06280601f739fd771f6159ab33e6a1108e0b5b7a86af75bdf545a5cf2",
+    "freshDataScanSha256": "d2461d891d03fb01cd6d5ed011355829085302002f8b96e9d806eb54d5162f20",
+    "normalRenewalPrivatePath": "/opt/hambazi-staging/private/execution-20261008/home-entry-20261011/normal-renewal.json",
+    "rootCheckPassed": true,
+    "personalIntegrationPassed": true,
+    "packagedRuntimeChecksPassed": 46,
+    "packagedBrowserCasesPassed": 2,
+    "homeBrowserCasesPassed": 74,
+    "deployedChromiumMobileWidths": [320, 375, 390],
+    "deployedWebKitViaTlsVerifiedRequestAdapter": true,
+    "newMigrationExecuted": false,
+    "backfillExecuted": false,
+    "existingMigrationCount": 15,
+    "nativeTelegramAcceptance": false,
+    "realTelegramPhotoUrlTested": false,
+    "rollbackExecuted": false,
+    "compatibleRollbackProven": false,
+    "productionReleaseApproved": false,
+    "operationReport": "docs/operations/2026-10-11-home-entry-staging.md"
   }
 }

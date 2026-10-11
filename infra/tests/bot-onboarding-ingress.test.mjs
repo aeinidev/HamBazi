@@ -20,4 +20,10 @@ it("allows only the exact Bot webhook with verified private TLS and stripped unt
   expect(bot).toContain("location / { return 404; }");
   expect(bot).not.toMatch(/X-Forwarded|Authorization|Origin|proxy_ssl_verify off/);
   expect(routes).toContain("location = /v1/auth/telegram-mini-app/registered-session");
+  expect(routes).toContain(
+    "location = /v1/auth/telegram-mini-app/registered-session-photo {\n" +
+      "    limit_except POST OPTIONS { deny all; }\n" +
+      "    proxy_pass http://10.89.18.10:8080;\n" +
+      "  }",
+  );
 });
