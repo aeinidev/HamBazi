@@ -7,18 +7,19 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
   const attempted = useRef(false);
   const expired = useSession((s) => s.expired);
   const [creating, setCreating] = useState(false);
+  const createIntent = useRef(crypto.randomUUID());
+  const loginIntent = useRef(crypto.randomUUID());
   const [name, setName] = useState("");
-  const task = useTask(runtime.scope === "owner-auth" ? "fa" : undefined);
+  const task = useTask(registrationRequired || runtime.scope === "owner-auth" ? "fa" : undefined);
   const available = runtime.hasLaunch() && !expired;
   function submit() {
-    const commandId = crypto.randomUUID();
-    const loginId = crypto.randomUUID();
+    const needsName = registrationRequired || creating;
     const displayName = name;
     const hash = window.location.hash.slice(1);
     const resume = /^\/(rooms|match)\/[0-9a-f-]{36}$/i.test(hash) ? hash : "/games";
     task.run(async () => {
-      if (creating) await runtime.createAccount(commandId, displayName);
-      await runtime.login(creating ? loginId : commandId);
+      if (needsName) await runtime.createAccount(createIntent.current, displayName);
+      await runtime.login(needsName ? loginIntent.current : createIntent.current);
       go(runtime.store.getState().invite ? "/invite" : resume);
     });
   }
@@ -27,28 +28,40 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
       (import.meta.env.PROD || runtime.scope === "owner-auth") &&
       !preview &&
       available &&
+      !registrationRequired &&
       !attempted.current
     ) {
       attempted.current = true;
       submit();
     }
-  }, [runtime, available, preview, task]);
+  }, [runtime, available, preview, task, registrationRequired]);
   if (registrationRequired)
     return (
       <div className="welcome" lang="fa" dir="rtl">
         <Panel title="ثبت‌نام در هم‌بازی">
-          <p>برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.</p>
-          <p>به ربات برگرد و دکمهٔ «ایجاد حساب کاربری» را بزن.</p>
-          <button
-            onClick={() => {
-              const app = window.Telegram?.WebApp;
-              if (app?.openTelegramLink) app.openTelegramLink("https://t.me/Hambazidev_bot");
-              else window.location.assign("https://t.me/Hambazidev_bot");
-              app?.close?.();
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              submit();
             }}
           >
-            بازگشت به ربات
-          </button>
+            <label>
+              دوست داری با چه اسمی در بازی دیده بشی؟
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                required
+                maxLength={256}
+                dir="auto"
+                autoComplete="nickname"
+                disabled={task.blocked}
+              />
+            </label>
+            <button disabled={task.blocked}>
+              {task.pending ? "در حال ثبت‌نام…" : "ثبت نام و ادامه"}
+            </button>
+          </form>
+          {task.notice}
         </Panel>
       </div>
     );

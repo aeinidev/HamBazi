@@ -4,7 +4,29 @@ import { z } from "zod";
 import type { TelegramVerifier } from "../application/telegram-verifier.js";
 import type { TelegramIdentity, TelegramVerificationPolicy } from "../domain/telegram-identity.js";
 
-const userSchema = z.object({ id: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });
+const userSchema = z.object({
+  id: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  photo_url: z.unknown().optional(),
+});
+function trustedPhotoUrl(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > 2048) return;
+  try {
+    const url = new URL(value);
+    if (
+      url.protocol === "https:" &&
+      url.hostname === "t.me" &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      !url.search &&
+      !url.hash &&
+      url.pathname.startsWith("/i/userpic/")
+    )
+      return url.href;
+  } catch {
+    /* An optional photo never affects identity verification. */
+  }
+}
 
 function parameters(raw: string, maxFields: number): Map<string, string> | undefined {
   const entries = raw.split("&");
@@ -96,11 +118,13 @@ export function telegramHmacVerifier(
         const user = userSchema.safeParse(JSON.parse(fields.get("user") ?? "null"));
         if (!user.success) return rejected();
         const startParam = fields.get("start_param");
+        const photoUrl = trustedPhotoUrl(user.data.photo_url);
         // Signed routing hint only, never an authorization/admission token.
         const identity: TelegramIdentity = Object.freeze({
           telegramUserId: String(user.data.id),
           authDate,
           ...(startParam !== undefined ? { startParam } : {}),
+          ...(photoUrl ? { photoUrl } : {}),
         });
         return { ok: true as const, identity };
       } catch {

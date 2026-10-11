@@ -28,7 +28,7 @@ function observe(page: Page) {
   };
   page.on("response", (response) => {
     if (
-      response.url().endsWith("/v1/auth/telegram-mini-app/registered-session") &&
+      response.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo") &&
       response.status() === 200
     )
       void response
@@ -369,7 +369,7 @@ test("invalid signed Telegram launch cannot issue a session or create an account
   const fields = new URLSearchParams(person.initData);
   fields.set("user", JSON.stringify({ id: person.telegramUserId + 1, first_name: "Forged" }));
   const result = page.waitForResponse((response) =>
-    response.url().endsWith("/v1/auth/telegram-mini-app/registered-session"),
+    response.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
   );
   await launch(page, { ...person, initData: fields.toString() });
   expect((await result).status()).toBe(401);
@@ -385,9 +385,9 @@ test("direct production entry requires durable registration before gameplay", as
   const person = await actor(request);
   await launch(page, person);
   await expect(
-    page.getByText("برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.", { exact: true }),
+    page.getByText("دوست داری با چه اسمی در بازی دیده بشی؟", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ثبت نام و ادامه" })).toBeVisible();
   const saved = await (await request.get(`${control}/audit/actor/${person.telegramUserId}`)).json();
   expect(saved.userId).toBeNull();
   await account(page, person);

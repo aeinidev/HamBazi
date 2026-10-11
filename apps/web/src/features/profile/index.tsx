@@ -79,7 +79,7 @@ function Editor({ profile, persian = false }: { profile: Profile; persian?: bool
   );
 }
 /** Reuses the existing profile editor; no statistics or unrelated product requests. */
-export function SettingsScreen() {
+export function SettingsScreen({ title = "تنظیمات" }: { title?: string } = {}) {
   const runtime = useRuntime();
   const task = useTask("fa");
   const profile = useQuery({
@@ -91,7 +91,7 @@ export function SettingsScreen() {
   }, [profile.data]);
   return (
     <section className="midnight-settings" aria-labelledby="settings-heading">
-      <h1 id="settings-heading">تنظیمات</h1>
+      <h1 id="settings-heading">{title}</h1>
       <Panel title="حساب و تنظیمات">
         {profile.isPending ? (
           <p role="status">در حال بارگذاری…</p>

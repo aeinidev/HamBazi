@@ -56,7 +56,7 @@ async function enterMatch(page: Page) {
 test.beforeEach(async ({ request }) => {
   await request.post(`${fixture}/__test/reset`);
 });
-test("direct game entry without registration renders the Persian return action without protected requests", async ({
+test("direct game entry without registration offers a name before protected requests", async ({
   page,
   request,
 }) => {
@@ -72,11 +72,34 @@ test("direct game entry without registration renders the Persian return action w
   }, matchId);
   await page.getByRole("button", { name: "Continue with Telegram" }).click();
   await expect(
-    page.getByText("برای ورود به هم‌بازی، ابتدا در ربات حساب کاربری بساز.", { exact: true }),
+    page.getByText("دوست داری با چه اسمی در بازی دیده بشی؟", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ثبت نام و ادامه" })).toBeVisible();
   await expect(page.getByRole("button", { name: "New here? Create an account" })).toHaveCount(0);
   expect(protectedRequests).toEqual([]);
+});
+test("direct invite registration keeps the invite and shows the chosen profile name", async ({
+  page,
+  request,
+}) => {
+  await request.post(`${fixture}/__test/state`, { data: { registrationRequired: true } });
+  await launch(page, true);
+  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await page.getByLabel("دوست داری با چه اسمی در بازی دیده بشی؟").fill("مهدی بازیگر");
+  await page.getByRole("button", { name: "ثبت نام و ادامه" }).click();
+  await expect(page.getByRole("heading", { name: "You’re invited" })).toBeVisible();
+  await expect(page.locator(".header-identity")).toContainText("مهدی بازیگر");
+});
+test("session photo falls back to the HamBazi avatar when loading fails", async ({
+  page,
+  request,
+}) => {
+  await request.post(`${fixture}/__test/state`, {
+    data: { photoUrl: "https://t.me/i/userpic/320/synthetic.jpg" },
+  });
+  await page.route("https://t.me/i/userpic/**", (route) => route.abort());
+  await signIn(page);
+  await expect(page.locator(".fallback-avatar")).toBeVisible();
 });
 test("Telegram-only entry is accessible and keeps a narrow viewport", async ({ page }, info) => {
   await page.route("https://telegram.org/**", (route) =>

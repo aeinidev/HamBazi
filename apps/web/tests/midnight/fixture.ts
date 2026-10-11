@@ -180,7 +180,7 @@ export async function launch(page: Page, path = "/games") {
     await expect(
       page
         .getByRole("heading", { name: "بازی‌ها", exact: true })
-        .or(page.getByRole("button", { name: "بازگشت به ربات" })),
+        .or(page.getByRole("button", { name: "ثبت نام و ادامه" })),
     ).toBeVisible();
     await page.evaluate((path) => {
       location.hash = path;

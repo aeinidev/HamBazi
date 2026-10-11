@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, it, vi } from "vitest";
 import { roomsService, type RoomsRepository } from "../../src/rooms/application/rooms.js";
 import { RoomFault, type Room } from "../../src/rooms/domain/room.js";
+import type { CatalogPort } from "../../src/games/index.js";
 function setup() {
   const actor = randomUUID();
   const roomId = randomUUID();
@@ -201,6 +202,30 @@ it("requires both implementation readiness flags and catalog capacities", async 
     error: { code: "GAME_UNAVAILABLE" },
   });
 });
+it.each(["hokm", "kahroba", "chess", "domino", "ludo"])(
+  "rejects direct room creation for the %s presentation card",
+  async (gameId) => {
+    const f = setup();
+    const games = {
+      ...f.games,
+      find: vi.fn<CatalogPort["find"]>(async () => ({
+        ok: false,
+        error: { code: "NOT_FOUND" },
+      })),
+    };
+    const service = roomsService({
+      repository: f.repository,
+      users: f.users,
+      games,
+      invites: f.invites,
+    });
+    expect(await service.create(f.actor, { ...f.input, gameId })).toMatchObject({
+      error: { code: "NOT_FOUND" },
+    });
+    expect(games.find).toHaveBeenCalledWith(gameId);
+    expect(f.repository.create).not.toHaveBeenCalled();
+  },
+);
 it("checks host and every member eligibility before start", async () => {
   const f = setup();
   expect(await f.service.start(randomUUID(), f.command)).toMatchObject({

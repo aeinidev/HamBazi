@@ -12,6 +12,7 @@ import {
   inspectedSchema,
   issuanceSchema,
   issuedSchema,
+  issuedWithPhotoSchema,
   logoutSchema,
 } from "./http-contract.js";
 
@@ -94,11 +95,16 @@ export function createAuthHttpModule(deps: {
     async registeredSession(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       return this.issue(request, reply, true);
     }
+    @Post("telegram-mini-app/registered-session-photo")
+    async registeredSessionPhoto(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+      return this.issue(request, reply, true, true);
+    }
     @Post("telegram-mini-app")
     async issue(
       @Req() request: FastifyRequest,
       @Res() reply: FastifyReply,
       registeredEntry = false,
+      includePhoto = false,
     ) {
       const parsed = issuanceSchema.safeParse(request.body);
       if (!parsed.success || Buffer.byteLength(parsed.data.initData, "utf8") > 16384)
@@ -115,11 +121,12 @@ export function createAuthHttpModule(deps: {
       const result = await deps.sessions.issue(parsed.data.initData, parsed.data.commandId);
       if (!result.ok) return failure(reply, result, registeredEntry);
       // The sole credential reveal into a successful response. Never attach this to telemetry.
-      const response = issuedSchema.safeParse({
+      const response = (includePhoto ? issuedWithPhotoSchema : issuedSchema).safeParse({
         schemaVersion: 1,
         tokenType: "Bearer",
         accessToken: result.accessToken.reveal(),
         session: result.session,
+        ...(includePhoto && result.photoUrl ? { photoUrl: result.photoUrl } : {}),
       });
       if (!response.success) return reply.code(500).send(createErrorEnvelope("INTERNAL_ERROR"));
       return reply.code(200).send(response.data);

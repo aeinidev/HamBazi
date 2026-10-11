@@ -36,10 +36,17 @@ describe("verified original private Telegram intents", () => {
       ).toMatchObject({ action: "REGISTER", displayName: "مهدی تست", senderId: "100" });
     },
   );
-  it("ordinary text, including replies, is an intent for the server-owned composition gate", () => {
-    expect(map(name())).toMatchObject({ action: "TEXT", text: "  Mehdi  " });
+  it("maps a reply to the server-owned name prompt without accepting it automatically", () => {
+    expect(map(name())).toMatchObject({
+      action: "NAME",
+      displayName: "  Mehdi  ",
+      replyToMessageId: 900,
+    });
     expect(map(raw("ordinary text"))).toMatchObject({ action: "TEXT" });
-    expect(map(name("x".repeat(257)))).toMatchObject({ action: "TEXT", text: "x".repeat(257) });
+    expect(map(name("x".repeat(257)))).toMatchObject({
+      action: "NAME",
+      displayName: "x".repeat(257),
+    });
   });
   it.each([
     "/start@someone_else_bot",

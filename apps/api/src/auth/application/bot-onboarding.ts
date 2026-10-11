@@ -209,7 +209,14 @@ export function botOnboardingService(deps: {
         if (claim.status !== "CLAIMED")
           return { ok: true as const, schemaVersion: 1 as const, status: claim.status };
         const r = claim.receipt;
-        if (deps.registration && update.action !== "NAME" && update.action !== "CREATE") {
+        const registration = deps.registration
+          ? await deps.registration.read(update.senderId)
+          : undefined;
+        if (
+          deps.registration &&
+          (registration?.completed ||
+            !["START", "CREATE", "REGISTER", "CANCEL", "NAME"].includes(update.action))
+        ) {
           return await botExperience(
             { ...deps, registration: deps.registration, now, delivery, reply },
             context,
@@ -217,7 +224,8 @@ export function botOnboardingService(deps: {
             r,
           );
         }
-        if (!["START", "CREATE", "CANCEL", "NAME"].includes(update.action)) return retry();
+        if (!["START", "CREATE", "REGISTER", "CANCEL", "NAME"].includes(update.action))
+          return retry();
         if (r.phase === "REPLY") {
           const resumed = await deps.repository.transition(r, now, (receipt, flow, at) => {
             if (
@@ -238,7 +246,9 @@ export function botOnboardingService(deps: {
           });
           return resumed ? delivery(resumed) : retry();
         }
-        const active = await deps.users.findActiveByTelegramId(update.senderId);
+        const active = deps.registration
+          ? registration?.completed
+          : await deps.users.findActiveByTelegramId(update.senderId);
         const flowId = z.uuid().parse(deps.newId());
         const planned = await deps.repository.transition(r, now, (receipt, stored, at) => {
           const flow = stored && stored.expiresAt > at ? stored : undefined;
@@ -251,7 +261,11 @@ export function botOnboardingService(deps: {
           if (flow?.state === "SUBMITTING") return undefined;
           if (update.action === "CANCEL")
             return reply(receipt, "CANCELLED", stored ? null : undefined);
-          if (update.action === "START" || update.action === "CREATE") {
+          if (
+            update.action === "START" ||
+            update.action === "CREATE" ||
+            update.action === "REGISTER"
+          ) {
             if (flow) return prompt(receipt, flow);
             if (update.action === "START") return reply(receipt, "CREATE_ACCOUNT");
             const fresh: OnboardingFlow = {
@@ -284,14 +298,21 @@ export function botOnboardingService(deps: {
         if (planned.phase !== "CREATING" || update.action !== "NAME") return retry();
         // Irrevocable admission happened above. Users is idempotent by identity;
         // no external operation is executed while the Auth transaction is open.
-        const created = await deps.accounts.createForVerifiedTelegramIdentity(
-          update.senderId,
-          update.displayName,
-        );
+        const created = deps.registration
+          ? await deps.registration.complete(update.senderId, update.displayName)
+          : await deps.accounts.createForVerifiedTelegramIdentity(
+              update.senderId,
+              update.displayName,
+            );
         if (!created.ok && created.error.code === "INTERNAL_ERROR") return retry();
         const finished = await deps.repository.transition(r, now, (receipt, flow, finishedAt) => {
           const ownFlow = flow?.id === planned.flowId && flow.admittedReceiptId === receipt.id;
-          if (created.ok) return reply(receipt, "MENU", ownFlow ? null : undefined);
+          if (created.ok)
+            return reply(
+              receipt,
+              deps.registration ? "REGISTERED" : "MENU",
+              ownFlow ? null : undefined,
+            );
           if (created.error.code === "UNAUTHENTICATED")
             return reply(receipt, "DENIED", ownFlow ? null : undefined);
           if (ownFlow && flow.expiresAt > finishedAt) return prompt(receipt, flow, true);

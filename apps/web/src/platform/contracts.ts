@@ -12,6 +12,7 @@ export const issuedSchema = z.object({
   tokenType: z.literal("Bearer"),
   accessToken: z.string().min(1).max(4096),
   session: sessionSchema,
+  photoUrl: z.url().optional(),
 });
 export const accountSchema = z.object({
   schemaVersion: z.literal(1),

@@ -61,6 +61,31 @@ async function setup(
   return { ...f, ...http, output, ip, identity, issue, authenticate, admissionIp, payload, post };
 }
 describe("Nest/Fastify authentication boundary", () => {
+  it("adds a signed photo only on the new registered-session response", async () => {
+    const f = await setup();
+    const photo = "https://t.me/i/userpic/320/synthetic.jpg";
+    const payload = { ...f.payload, initData: initData(42, undefined, undefined, photo) };
+    const withPhoto = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSessionPhoto,
+      payload,
+    });
+    expect(withPhoto.statusCode).toBe(200);
+    expect(withPhoto.json()).toMatchObject({ photoUrl: photo });
+    const original = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSession,
+      payload,
+    });
+    expect(original.statusCode).toBe(200);
+    expect(original.json()).not.toHaveProperty("photoUrl");
+    const forged = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSessionPhoto,
+      payload: { ...payload, initData: payload.initData.replace("synthetic.jpg", "forged.jpg") },
+    });
+    expect(forged.statusCode).toBe(401);
+  });
   it("exposes registration denial only on the additive entry and issues no credential", async () => {
     const f = await setup();
     f.issue.mockResolvedValue(createErrorEnvelope("REGISTRATION_REQUIRED"));
@@ -71,6 +96,13 @@ describe("Nest/Fastify authentication boundary", () => {
     });
     expect(response.statusCode).toBe(403);
     expect(response.json()).toMatchObject({ ok: false, error: { code: "REGISTRATION_REQUIRED" } });
+    const photoResponse = await f.server.inject({
+      method: "POST",
+      url: authPaths.registeredSessionPhoto,
+      payload: f.payload,
+    });
+    expect(photoResponse.statusCode).toBe(403);
+    expect(photoResponse.json()).toMatchObject({ error: { code: "REGISTRATION_REQUIRED" } });
     expect(response.body).not.toContain("accessToken");
     const forbidden = await f.server.inject({
       method: "POST",

@@ -6,7 +6,7 @@ import { SettingsScreen } from "../profile/index.js";
 import { CoupEntry, CoupTutorial } from "../../games/coup/index.js";
 import { MidnightHeader } from "../../ui/midnight.js";
 import { go, useSession } from "../../ui/shared.js";
-import { PersonalLobby } from "./personal-lobby.js";
+import { HomeBottomNav, PersonalLobby } from "./personal-lobby.js";
 
 export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | undefined }) {
   const session = useSession((s) => s.session);
@@ -18,8 +18,12 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   const tutorial = route === "/games/coup/tutorial";
   const entry = route === "/games/coup";
   const settings = route === "/settings";
+  const profile = route === "/profile";
+  const home = route === "/games";
+  const homeFrame = home || profile;
+  const unavailable = !home && !profile && !settings && !entry && !tutorial && !playing;
   const backPath = tutorial || playing ? "/games/coup" : "/games";
-  const hasBack = !!session && (tutorial || entry || playing || settings);
+  const hasBack = !!session && !home;
   const back = useCallback(() => go(backPath), [backPath]);
   const consumed = useCallback(() => {
     setStartIntent(undefined);
@@ -54,7 +58,11 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
     go("/games/coup/play");
   }
   return (
-    <div className="app-shell midnight-shell" dir="rtl" lang="fa">
+    <div
+      className={`app-shell midnight-shell ${homeFrame && session ? "home-shell" : ""}`}
+      dir="rtl"
+      lang="fa"
+    >
       <a
         className="skip"
         href="#main"
@@ -65,7 +73,11 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
       >
         رفتن به محتوا
       </a>
-      <MidnightHeader back={hasBack ? back : undefined} onSettings={() => go("/settings")} />
+      <MidnightHeader
+        back={hasBack && !homeFrame ? back : undefined}
+        home={homeFrame}
+        onSettings={() => go("/settings")}
+      />
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
         {!session ? (
           <AuthScreen />
@@ -75,12 +87,19 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
           <CoupEntry onStart={begin} pending={opening} />
         ) : playing ? (
           <PersonalGame startIntent={startIntent} onStartConsumed={consumed} />
-        ) : settings ? (
-          <SettingsScreen />
+        ) : settings || profile ? (
+          <SettingsScreen title={profile ? "پروفایل" : "تنظیمات"} />
+        ) : unavailable ? (
+          <section className="home-unavailable" role="status">
+            <h1>به‌زودی</h1>
+            <p>این بخش هنوز برای بازی آماده نیست.</p>
+            <a href="#/games">بازگشت به خانه</a>
+          </section>
         ) : (
           <PersonalLobby />
         )}
       </main>
+      {session && homeFrame && <HomeBottomNav active={profile ? "profile" : "home"} />}
     </div>
   );
 }

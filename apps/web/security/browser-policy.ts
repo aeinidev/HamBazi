@@ -61,7 +61,7 @@ export function createBrowserPolicy(input: BrowserPolicyInput, sdkIntegrity: str
       "script-src-attr 'none'",
       // Telegram's iframe custom style and dynamic theme CSS require inline styles.
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self'",
+      "img-src 'self' https://t.me",
       "font-src 'self'",
       `connect-src ${[...connect].join(" ")}`,
       "object-src 'none'",

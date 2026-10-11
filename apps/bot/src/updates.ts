@@ -74,6 +74,13 @@ export function mapUpdate(
   if (["Open", "Open HamBazi"].includes(m.text)) return { ...base, action: "NAVIGATION" };
   if (m.text.startsWith("/")) return { ...base, action: "NAVIGATION" };
   if (m.text.length === 0) return;
+  if (m.reply_to_message && m.reply_to_message.from.is_bot)
+    return {
+      ...base,
+      action: "NAME",
+      replyToMessageId: m.reply_to_message.message_id,
+      displayName: m.text,
+    };
   return { ...base, action: "TEXT", text: m.text };
 }
 function telegramName(sender: { first_name?: string | undefined; last_name?: string | undefined }) {

@@ -143,7 +143,7 @@ test("real SDK launch never writes credentials and preserves invite, theme and v
     await page.evaluate(() => document.documentElement.style.getPropertyValue("--telegram-top")),
   ).toBe("12px");
   const issued = page.waitForRequest((request) =>
-    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session"),
+    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
   );
   await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
   expect((await issued).postDataJSON().initData === initData).toBe(true);
@@ -299,7 +299,7 @@ test("query-only native launch uses the bundled SDK with external SDK network bl
   );
   expect(await page.evaluate(() => location.href.includes("tgWebAppData"))).toBe(false);
   const issued = page.waitForRequest((request) =>
-    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session"),
+    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
   );
   await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
   expect((await issued).postDataJSON().initData === initData).toBe(true);

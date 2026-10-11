@@ -12,6 +12,7 @@ import { MatchScreen } from "./platform/match-screen.js";
 import { DirectCoupPreview } from "./dev/coup-preview.js";
 import { RuntimeContext, go, useRuntime, useSession } from "./ui/shared.js";
 import { profileSchema } from "./platform/contracts.js";
+import { AccountAvatar } from "./ui/midnight.js";
 function Shell({
   telegram,
   localPreview,
@@ -32,6 +33,7 @@ function Shell({
       directCoupPreviewMatchId,
     );
   const session = useSession((s) => s.session);
+  const photoUrl = useSession((s) => s.photoUrl);
   const connection = useSession((s) => s.connection);
   const ticket = useSession((s) => s.ticket);
   const profile = useQuery({
@@ -84,6 +86,12 @@ function Shell({
           </span>
           HamBazi
         </a>
+        {session && (
+          <span className="header-identity" dir="auto">
+            <AccountAvatar photoUrl={photoUrl} />
+            {profile.data?.displayName ?? "HamBazi"}
+          </span>
+        )}
         {session && (
           <span className="connection" role="status">
             <span className={`dot ${connection === "connected" ? "online" : ""}`} />

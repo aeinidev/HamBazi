@@ -20,10 +20,14 @@ export const now = 1700000000;
 export const userId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 export const otherUserId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 export const commandId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
-export function initData(id = 42, date = now, startParam?: string): string {
+export function initData(id = 42, date = now, startParam?: string, photoUrl?: string): string {
   const fields: Record<string, string> = {
     auth_date: String(date),
-    user: JSON.stringify({ id, first_name: "Synthetic" }),
+    user: JSON.stringify({
+      id,
+      first_name: "Synthetic",
+      ...(photoUrl ? { photo_url: photoUrl } : {}),
+    }),
     ...(startParam !== undefined ? { start_param: startParam } : {}),
   };
   const key = createHmac("sha256", "WebAppData").update(botToken).digest();

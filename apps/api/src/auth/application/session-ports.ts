@@ -35,6 +35,7 @@ export interface AuthSessions {
         readonly ok: true;
         readonly session: SessionContext;
         readonly accessToken: SessionCredential;
+        readonly photoUrl?: string;
       }
     | SessionFailure
   >;

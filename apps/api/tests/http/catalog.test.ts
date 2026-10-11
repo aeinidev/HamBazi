@@ -91,6 +91,16 @@ it.each(["/v1/games", "/v1/games/coup"])(
     expect(f.rate).toHaveBeenCalledWith(f.userId);
   },
 );
+it.each(["hokm", "kahroba", "chess", "domino", "ludo"])(
+  "does not register the %s home card as an API game",
+  async (slug) => {
+    const f = await setup();
+    const response = await f.server.inject({ url: `/v1/games/${slug}`, headers: f.headers });
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({ error: { code: "NOT_FOUND" } });
+    expect(f.find).toHaveBeenCalledWith(slug);
+  },
+);
 it.each(["/v1/games", "/v1/games/coup"])(
   "fails open on limiter outage at %s with safe telemetry",
   async (url) => {

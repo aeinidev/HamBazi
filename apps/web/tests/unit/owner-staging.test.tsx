@@ -40,7 +40,7 @@ describe("temporary staging account scope", () => {
     await runtime.logout();
     expect(runtime.store.getState().session).toBeNull();
     expect(fetcher.mock.calls.map((c) => String(c[0]))).toEqual([
-      "https://api-staging.hambazi.top/v1/auth/telegram-mini-app/registered-session",
+      "https://api-staging.hambazi.top/v1/auth/telegram-mini-app/registered-session-photo",
       "https://api-staging.hambazi.top/v1/auth/logout",
     ]);
     runtime.dispose();
@@ -64,13 +64,45 @@ describe("temporary staging account scope", () => {
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
     expect(html).toContain("بازی‌ها");
+    expect(html).toContain("Synthetic owner");
+    expect(html).toContain("fallback-avatar");
     expect(html).toContain("کودتا، فعال");
-    expect(html).toContain("حکم، به‌زودی");
-    expect(html).toContain("منچ، به‌زودی");
-    expect(html.match(/disabled=""/g)).toHaveLength(2);
+    for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
+      expect(html).toContain(`${name}، به‌زودی`);
+    expect(html).toContain("بازی پیدا کن، به‌زودی");
+    expect(html).toContain("همه را ببینید، به‌زودی");
+    expect(html).toContain("جدول، به‌زودی");
+    expect(html).toContain("دوستان، به‌زودی");
+    expect(html.match(/disabled=""/g)).toHaveLength(10);
+    expect(html).toContain('href="#/profile"');
+    expect(html).toContain('href="#/games"');
     expect(html).not.toContain('aria-label="Main navigation"');
     expect(html).not.toContain("Reconnect");
     expect(html).not.toContain("Match session");
+    runtime.dispose();
+  });
+  it("renders the session photo beside the authenticated saved name", () => {
+    vi.stubGlobal("window", { location: { hash: "" } });
+    const runtime = createRuntime(
+      "https://api-staging.hambazi.top",
+      "",
+      vi.fn(),
+      vi.fn(),
+      "owner-auth",
+    );
+    runtime.store.setState({
+      session: { schemaVersion: 1, sessionId: id, userId: id, expiresAt: 9999999999 },
+      photoUrl: "https://t.me/i/userpic/320/synthetic.jpg",
+    });
+    runtime.query.setQueryData(["profile"], {
+      displayName: "Chosen",
+      settings: { theme: "system" },
+    });
+    vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
+    const html = renderToStaticMarkup(<App runtime={runtime} />);
+    expect(html).toContain("Chosen");
+    expect(html).toContain("https://t.me/i/userpic/320/synthetic.jpg");
+    expect(html).not.toContain("fallback-avatar");
     runtime.dispose();
   });
   it.each(["/games", "/games/coup", "/games/coup/tutorial", "/games/coup/play", "/settings"])(
@@ -89,7 +121,7 @@ describe("temporary staging account scope", () => {
       runtime.store.setState({ registrationRequired: true });
       vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
       const html = renderToStaticMarkup(<App runtime={runtime} />);
-      expect(html).toContain("بازگشت به ربات");
+      expect(html).toContain("دوست داری با چه اسمی در بازی دیده بشی؟");
       expect(html).not.toContain("coup-entry-options");
       expect(html).not.toContain("midnight-catalog");
       expect(html).not.toContain("midnight-personal-game");

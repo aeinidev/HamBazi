@@ -23,6 +23,18 @@ async function issued(f = fixture()) {
   return { f, result, raw: result.accessToken.reveal() };
 }
 describe("durable session application semantics", () => {
+  it("returns a validated photo only with issuance and never embeds it in the JWT or durable row", async () => {
+    const f = fixture();
+    const photo = "https://t.me/i/userpic/320/synthetic.jpg";
+    const result = await f.service.issue(initData(42, now, undefined, photo), commandId);
+    expect(result).toMatchObject({ ok: true, photoUrl: photo });
+    if (!result.ok) return;
+    expect(decodeJwt(result.accessToken.reveal())).not.toHaveProperty("photoUrl");
+    expect([...f.rows.values()][0]).not.toHaveProperty("photoUrl");
+    expect(await f.service.authenticate(result.accessToken.reveal())).not.toHaveProperty(
+      "photoUrl",
+    );
+  });
   it("issues a redacted credential and returns a minimal v1 context", async () => {
     const { f, result, raw } = await issued();
     expect(await f.service.authenticate(raw)).toEqual({ ok: true, session: result.session });

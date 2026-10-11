@@ -1,25 +1,36 @@
 # Midnight personal lobby and Coup entry
 
 The registered `owner-auth` session lands on `/games`. Unregistered sessions on
-every route retain the existing Persian registration gate and return-to-Bot
-action; navigation never creates or completes a profile. Admission remains the
+every route retain the existing Persian chosen-name registration gate;
+navigation never creates or completes a profile. Admission remains the
 server's verified numeric-ID policy, not a frontend username check.
 
-All three lobby tiles share the same horizontal frame, aspect ratio, corner
-radius and right-side title/status column. Coup retains its gold active style
-and entry action; Hokm and Ludo retain their silver disabled style. The Coup
-entry hero and gameplay layout are independent of the lobby tile framing.
+The [home presentation decision](../adr/063-responsive-home-presentation-and-availability.md)
+uses a responsive RTL identity header, separate art banner, six two-column cards
+and safe-area-aware bottom navigation. The title, chosen name, avatar, status
+labels and controls are live UI. Only Coup has an enabled route; Hokm, Kahroba,
+Chess, Domino and Ludo are disabled presentation entries with “به‌زودی” badges.
+The CTA, all-games control, Friends, Leaderboard and notifications are visibly
+disabled. The Settings control continues to the existing editor.
 
 | Route                  | Screen                               | Entry side effects                                                           |
 | ---------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| `/games`               | Coup active, Hokm/Ludo coming soon   | None                                                                         |
+| `/games`               | Responsive home; Coup active         | None                                                                         |
+| `/profile`             | Existing profile editor              | Own profile read; explicit patch only                                        |
 | `/games/coup`          | Artwork, tutorial and start controls | None                                                                         |
 | `/games/coup/tutorial` | Current five-role tutorial           | None                                                                         |
 | `/settings`            | Existing profile preferences editor  | Own profile read; explicit patch only                                        |
 | `/games/coup/play`     | Existing personal game/table         | Personal connection/current lookup; creation only with explicit start intent |
 
-Native BackButton and visible back share the same destination: tutorial/play to
-entry, entry/settings to lobby. Leaving the table clears its UI timer but never
+Direct future-game routes show an unavailable screen without game requests. The
+ordinary Games API still registers only non-playable Coup under ADR-018; future
+slugs return 404, room and matchmaking creation reject them, and the personal
+start schema cannot name a different game. This personal home presentation does
+not activate the ordinary catalog.
+
+Native BackButton returns tutorial/play to entry and entry/settings/profile/
+unavailable routes to home. Where a visible back control is present, it shares
+that destination. Leaving the table clears its UI timer but never
 sends personal close. The existing runtime owns reconnect and memory-only auth;
 no token, initData, hidden state, chat content or profile is logged or stored for
 UI diagnostics. The legacy personal `/match/<uuid>` route uses the current own

@@ -42,12 +42,7 @@ export async function botExperience(
   receipt: Receipt,
 ) {
   const profile = await deps.registration.read(update.senderId);
-  let registered = profile?.completed === true;
-  if (update.action === "REGISTER" && receipt.phase !== "REPLY") {
-    const result = await deps.registration.complete(update.senderId, update.displayName);
-    if (!result.ok) return retry();
-    registered = true;
-  }
+  const registered = profile?.completed === true;
   const admin = deps.ownerAdmission ? await deps.ownerAdmission.telegramId() : undefined;
   const pending =
     deps.support && registered
@@ -73,7 +68,18 @@ export async function botExperience(
     if (update.action === "REGISTER") return respond("REGISTERED", stored ? null : undefined);
     if (update.action === "START") return respond("WELCOME_REGISTERED", stored ? null : undefined);
     if (update.action === "PROFILE")
-      return { ...respond("PROFILE", stored ? null : undefined), replyData: { profile } };
+      return {
+        ...respond("PROFILE", stored ? null : undefined),
+        replyData: {
+          profile: profile
+            ? {
+                userId: profile.userId,
+                displayName: profile.displayName,
+                completed: profile.completed,
+              }
+            : undefined,
+        },
+      };
     if (update.action === "CANCEL" || update.action === "NAVIGATION")
       return respond("SUPPORT_CANCELLED", stored ? null : undefined);
     if (update.action === "SUPPORT") {

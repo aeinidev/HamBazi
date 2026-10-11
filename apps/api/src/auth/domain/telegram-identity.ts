@@ -3,6 +3,7 @@ export interface TelegramIdentity {
   readonly telegramUserId: string;
   readonly authDate: number;
   readonly startParam?: string;
+  readonly photoUrl?: string;
 }
 
 /** Explicit operational bounds; transport rate/size limits remain independently required. */

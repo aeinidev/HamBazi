@@ -119,7 +119,12 @@ export function sessionService(deps: {
           return denied();
         if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(record.userId)))
           return denied();
-        return { ok: true as const, session: context(current), accessToken };
+        return {
+          ok: true as const,
+          session: context(current),
+          accessToken,
+          ...(verified.identity.photoUrl ? { photoUrl: verified.identity.photoUrl } : {}),
+        };
       } catch {
         return failed();
       }

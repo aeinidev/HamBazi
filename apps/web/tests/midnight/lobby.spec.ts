@@ -30,8 +30,111 @@ for (const viewerIndex of [0, 1])
     await expect(page).toHaveURL(/#\/games$/);
     expect(state.sockets).toHaveLength(0);
     expect(state.events).toEqual([]);
-    expect(state.http).toEqual(["POST /v1/auth/telegram-mini-app/registered-session"]);
+    expect(state.http).toEqual([
+      "POST /v1/auth/telegram-mini-app/registered-session-photo",
+      "GET /v1/me",
+    ]);
   });
+
+test("home shows six live cards and keeps future actions inert across direct routes", async ({
+  page,
+  request,
+}) => {
+  const state = await setup(page, request);
+  await launch(page);
+  await expect(page.locator(".home-game-card")).toHaveCount(6);
+  await expect(page.getByRole("button", { name: "کودتا، فعال" })).toBeEnabled();
+  for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
+    await expect(page.getByRole("button", { name: `${name}، به‌زودی` })).toBeDisabled();
+  for (const name of [
+    "بازی پیدا کن، به‌زودی",
+    "همه را ببینید، به‌زودی",
+    "دوستان، به‌زودی",
+    "جدول، به‌زودی",
+    "اعلان‌ها، به‌زودی",
+  ])
+    await expect(page.getByRole("button", { name })).toBeDisabled();
+  const calls = [...state.http];
+  for (const path of [
+    "/games/hokm",
+    "/games/kahroba",
+    "/games/chess",
+    "/games/domino",
+    "/games/ludo",
+    "/friends",
+    "/leaderboard/coup",
+  ]) {
+    await page.evaluate((value) => {
+      location.hash = value;
+    }, path);
+    await expect(page.getByRole("heading", { name: "به‌زودی" })).toBeVisible();
+    await expect(page.locator(".coup-entry-options,.midnight-personal-game")).toHaveCount(0);
+  }
+  expect(state.http).toEqual(calls);
+  expect(state.events).toEqual([]);
+  expect(state.starts).toEqual([]);
+  await page.getByRole("link", { name: "بازگشت به خانه" }).click();
+  await page.getByRole("link", { name: "پروفایل" }).click();
+  await expect(page).toHaveURL(/#\/profile$/);
+  await expect(page.getByRole("heading", { name: "پروفایل" })).toBeVisible();
+  await page.getByRole("link", { name: "خانه" }).click();
+  await expect(page).toHaveURL(/#\/games$/);
+});
+
+test("home renders the authenticated photo and saved name", async ({ page, request }) => {
+  await setup(page, request);
+  await request.post(`${fixtureOrigin}/__test/state`, {
+    data: { displayName: "نام آزمایشی", photoUrl: "https://t.me/i/userpic/320/synthetic.jpg" },
+  });
+  await page.route("https://t.me/i/userpic/**", (route) =>
+    route.fulfill({
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==",
+        "base64",
+      ),
+    }),
+  );
+  await launch(page);
+  await expect(page.locator(".home-identity")).toContainText("نام آزمایشی");
+  await expect(page.locator(".home-identity img")).toHaveAttribute("src", /t\.me\/i\/userpic/);
+  await expect
+    .poll(() =>
+      page.locator(".home-identity img").evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBe(1);
+  await expect(page.locator(".home-identity .fallback-avatar")).toHaveCount(0);
+});
+
+test("mobile RTL grid and fixed navigation leave the last card reachable", async ({
+  page,
+  request,
+}) => {
+  await setup(page, request);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await launch(page);
+  await expect(page.locator(".home-game-coup")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        const card = document.querySelector<HTMLElement>(".home-game-coup")!;
+        const nav = document.querySelector<HTMLElement>(".home-bottom-nav")!;
+        return Math.round(card.getBoundingClientRect().bottom - nav.getBoundingClientRect().top);
+      }),
+    )
+    .toBeLessThanOrEqual(0);
+  expect(
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLElement>(".home-game-grid")!;
+      return {
+        direction: getComputedStyle(grid).direction,
+        columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+        noHorizontalOverflow: document.documentElement.scrollWidth <= innerWidth,
+      };
+    }),
+  ).toEqual({ direction: "rtl", columns: 2, noHorizontalOverflow: true });
+});
 
 test("unregistered direct routes remain gated without profile creation or gameplay", async ({
   page,
@@ -40,18 +143,18 @@ test("unregistered direct routes remain gated without profile creation or gamepl
   const state = await setup(page, request);
   await request.post(`${fixtureOrigin}/__test/state`, { data: { registrationRequired: true } });
   await launch(page, "/games/coup/play");
-  await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ثبت نام و ادامه" })).toBeVisible();
   for (const path of ["/games", "/games/coup", "/games/coup/tutorial", "/settings"]) {
     await page.evaluate((path) => {
       location.hash = path;
     }, path);
-    await expect(page.getByRole("button", { name: "بازگشت به ربات" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ثبت نام و ادامه" })).toBeVisible();
     await expect(
       page.locator(".midnight-catalog,.coup-entry-options,.midnight-tutorial,.midnight-settings"),
     ).toHaveCount(0);
   }
   expect(state.sockets).toHaveLength(0);
-  expect(state.http).toEqual(["POST /v1/auth/telegram-mini-app/registered-session"]);
+  expect(state.http).toEqual(["POST /v1/auth/telegram-mini-app/registered-session-photo"]);
 });
 
 test("start is explicit, duplicate taps are bounded, back/reentry/reconnect resume the same match", async ({
@@ -164,7 +267,12 @@ test("settings uses the existing profile patch flow without public product reque
   await page.getByRole("button", { name: "تنظیمات", exact: true }).click();
   await expect(page.getByRole("heading", { name: "حساب و تنظیمات" })).toBeVisible();
   await page.getByLabel("نام نمایشی").fill("بازیکن آزمایشی");
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/v1/me") && response.request().method() === "PATCH" && response.ok(),
+  );
   await page.getByRole("button", { name: "ذخیرهٔ تغییرات" }).click();
+  await saved;
   await expect.poll(() => state.http.filter((x) => x === "PATCH /v1/me").length).toBe(1);
   await nativeEvent(page, "back_button_pressed");
   await expect(page).toHaveURL(/#\/games$/);
@@ -182,9 +290,12 @@ for (const size of [
     request,
   }, info) => {
     await setup(page, request);
+    await request.post(`${fixtureOrigin}/__test/state`, { data: { displayName: "الکس" } });
     await page.setViewportSize(size);
     await launch(page);
     await expect(page.getByRole("heading", { name: "بازی‌ها", exact: true })).toBeVisible();
+    await expect(page.locator(".home-identity")).toContainText("الکس");
+    await expect(page.locator(".home-identity .fallback-avatar")).toBeVisible();
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
@@ -215,6 +326,12 @@ for (const size of [
         path: info.outputPath(`${screen}-${size.width}.png`),
         fullPage: true,
       });
+      if (screen === "lobby") {
+        await page.screenshot({ path: info.outputPath(`home-top-${size.width}.png`) });
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await expect(page.getByRole("button", { name: "کودتا، فعال" })).toBeInViewport();
+        await page.screenshot({ path: info.outputPath(`home-bottom-${size.width}.png`) });
+      }
     }
   });
 

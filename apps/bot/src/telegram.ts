@@ -52,7 +52,8 @@ export function createTelegramSender(
         CREATE_ACCOUNT: startReply,
         WELCOME_REGISTERED: startReply,
         REGISTERED: "حساب کاربری‌ات ساخته شد ✅\nبرای ورود به بازی، دکمهٔ Open را بزن.",
-        PROMPT_NAME: "نام نمایشی‌ات را در پاسخ به همین پیام بنویس. برای انصراف، لغو را بزن.",
+        PROMPT_NAME:
+          "دوست داری با چه اسمی در بازی دیده بشی؟ در پاسخ به همین پیام بنویس. برای انصراف، لغو را بزن.",
         INVALID_NAME: "این نام معتبر نیست. نام دیگری بنویس یا لغو را بزن.",
         MENU: "برای ورود به بازی، دکمهٔ Open را بزن.",
         CANCELLED: "ایجاد حساب لغو شد. می‌توانی دوباره تلاش کنی.",

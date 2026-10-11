@@ -172,7 +172,7 @@ export async function startApi(
     const clock = { nowMs: () => Date.now() };
     const onboarding = createMiniAppOnboarding({
       ...(ownerAdmission ? { ownerAdmission } : {}),
-      accounts: createAccountCreationPort(database),
+      registration: createRegistrationPort(database, clock),
       users: createUserIdentityPort(database),
       telegram,
       clock,

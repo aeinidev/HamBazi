@@ -36,6 +36,9 @@ export const issuedSchema = z.strictObject({
   accessToken: z.string().min(1).max(4096),
   session: sessionSchema,
 });
+export const issuedWithPhotoSchema = issuedSchema.extend({
+  photoUrl: z.url().max(2048).optional(),
+});
 export const inspectedSchema = z.strictObject({
   schemaVersion: z.literal(1),
   session: sessionSchema,
@@ -60,6 +63,7 @@ const errorSchema = z.strictObject({
 export const authPaths = Object.freeze({
   issue: "/v1/auth/telegram-mini-app",
   registeredSession: "/v1/auth/telegram-mini-app/registered-session",
+  registeredSessionPhoto: "/v1/auth/telegram-mini-app/registered-session-photo",
   inspect: "/v1/auth/session",
   logout: "/v1/auth/logout",
   createAccount: "/v1/auth/telegram-mini-app/account",
@@ -94,6 +98,36 @@ export function authOpenApiDocument() {
       securitySchemes: { bearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
     },
     paths: {
+      [authPaths.registeredSessionPhoto]: {
+        post: {
+          operationId: "issueRegisteredTelegramSessionWithPhoto",
+          security: [],
+          requestBody: body(issuanceSchema),
+          responses: {
+            ...responses(issuedWithPhotoSchema),
+            "403": {
+              description:
+                "Registration is required after Telegram verification, or the shared HTTPS/origin boundary rejects the request. No session or account is created.",
+              content: {
+                "application/json": {
+                  schema: json(
+                    z.strictObject({
+                      ok: z.literal(false),
+                      error: z.strictObject({
+                        code: z.enum(["REGISTRATION_REQUIRED", "FORBIDDEN"]),
+                        message: z.string(),
+                        retryable: z.boolean(),
+                      }),
+                    }),
+                  ),
+                },
+              },
+            },
+          },
+          description:
+            "Registered session with optional HTTPS Telegram profile photo from freshly validated signed initData. The photo URL is not stored in the account or session database.",
+        },
+      },
       [authPaths.registeredSession]: {
         post: {
           operationId: "issueRegisteredTelegramSession",
@@ -156,7 +190,7 @@ export function authOpenApiDocument() {
           requestBody: body(accountCreationSchema),
           responses: responses(accountCreatedSchema),
           description:
-            "Explicit creation with fresh verified initData. Retry using the same commandId and fresh initData. First-create-wins account identity is idempotent even across different command IDs; current profile is returned, never renamed or reactivated. Shares issuance IP/identity rate budgets. startParam is signed opaque routing context, not membership or an arbitrary redirect URL. No session, cookie or credential is issued. Names are plain text requiring escaped rendering. A failed response after commit may leave the account created; retry recovers it.",
+            "Explicit chosen-name registration with fresh verified initData. Retry using the same commandId and fresh initData. Telegram identity and registration completion are idempotent even across different command IDs; completed accounts retain their names and handles. Shares issuance IP/identity rate budgets. startParam is signed opaque routing context, not membership or an arbitrary redirect URL. No session, cookie or credential is issued. Names are plain text requiring escaped rendering. A failed response after commit may leave registration complete; retry recovers it.",
         },
       },
     },

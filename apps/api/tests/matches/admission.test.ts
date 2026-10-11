@@ -134,6 +134,19 @@ it("fails closed on disabled production readiness before consulting executable v
   });
   expect(f.resolve).not.toHaveBeenCalled();
 });
+it.each(["hokm", "kahroba", "chess", "domino", "ludo"])(
+  "rejects direct matchmaking for the %s presentation card",
+  async (gameId) => {
+    const f = fixture();
+    vi.mocked(f.games.find).mockResolvedValue({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await f.service.register(actor, { ...intent, gameId })).toMatchObject({
+      error: { code: "GAME_UNAVAILABLE" },
+    });
+    expect(f.games.find).toHaveBeenCalledWith(gameId);
+    expect(f.resolve).not.toHaveBeenCalled();
+    expect(f.repository.register).not.toHaveBeenCalled();
+  },
+);
 it("requires a server descriptor and never accepts client versions", async () => {
   const f = fixture();
   f.resolve.mockResolvedValue(null);

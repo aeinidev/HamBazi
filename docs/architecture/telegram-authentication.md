@@ -1,5 +1,11 @@
 # Telegram authentication boundary
 
+The first entry slice in [ADR-062](../adr/062-chosen-entry-name-and-telegram-photo.md)
+adds a narrowly validated, optional signed `user.photo_url` projection and a new
+registered-session-photo route. The historical Phase 6A1 scope below describes
+its original delivery; the current route still requires verified identity,
+durable registration and admission. The original v1 session response is unchanged.
+
 Phase 6A3 transport/configuration behavior and runnable commands are documented in
 [Authentication HTTP runtime](auth-http.md). The staged sections below retain the
 scope and limitations of their original verifier/session-only deliveries.

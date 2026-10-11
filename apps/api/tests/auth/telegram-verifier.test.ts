@@ -105,6 +105,33 @@ describe("Telegram HMAC verification through the Auth public surface", () => {
       rejected,
     );
   });
+  it("projects only a signed Telegram profile photo at the narrow image origin", () => {
+    const photo = "https://t.me/i/userpic/320/synthetic.jpg";
+    const signed = sign(fields({ user: JSON.stringify({ id: 42, photo_url: photo }) }));
+    expect(verifier.verify(signed, nowMs)).toMatchObject({
+      ok: true,
+      identity: { photoUrl: photo },
+    });
+    expect(verifier.verify(signed.replace("synthetic.jpg", "forged.jpg"), nowMs)).toEqual(rejected);
+    const unrelated = sign(
+      fields({ user: JSON.stringify({ id: 42, photo_url: "https://example.test/a" }) }),
+    );
+    expect(verifier.verify(unrelated, nowMs)).toEqual({
+      ok: true,
+      identity: { telegramUserId: "42", authDate: date },
+    });
+  });
+
+  it.each([42, "x".repeat(2050)])(
+    "keeps verified identity when the optional photo is unusable",
+    (photo_url) => {
+      const signed = sign(fields({ user: JSON.stringify({ id: 42, photo_url }) }));
+      expect(verifier.verify(signed, nowMs)).toEqual({
+        ok: true,
+        identity: { telegramUserId: "42", authDate: date },
+      });
+    },
+  );
 
   it("accepts uppercase hexadecimal digest bytes", () => {
     const query = new URLSearchParams(fixed);

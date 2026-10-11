@@ -77,6 +77,14 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       });
       const process = (action: string, extra = {}) =>
         service.process(botContext, command(action, extra));
+      const register = async (displayName: string) => {
+        const prompt = await process("REGISTER", { displayName: "Ignored transport name" });
+        expect(prompt).toMatchObject({ delivery: { reply: "PROMPT_NAME" } });
+        await acknowledge(service, prompt, 900);
+        const result = await process("NAME", { replyToMessageId: 900, displayName });
+        expect(result).toMatchObject({ delivery: { reply: "REGISTERED" } });
+        await acknowledge(service, result);
+      };
       return {
         id,
         ownerId,
@@ -86,6 +94,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
         make,
         command,
         process,
+        register,
         ownerAdmission,
         revokeTestAdmission() {
           testUser = undefined;
@@ -108,7 +117,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       expect(await sessions.issue(initData(Number(f.id)), randomUUID())).toMatchObject({
         error: { code: "REGISTRATION_REQUIRED" },
       });
-      await acknowledge(f.service, await f.process("REGISTER", { displayName: "Regular tester" }));
+      await f.register("Regular tester");
       const profile = await f.registration.read(f.id);
       expect(profile?.completed).toBe(true);
       if (!profile) throw Error("Expected isolated profile");
@@ -188,7 +197,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       expect((await personal.current(profile.userId)).ok).toBe(false);
       expect(await f.ownerAdmission.allowsTelegramId(f.ownerId)).toBe(true);
     });
-    it("does not backfill technical users; explicit repeated registration preserves their data and enables fresh auth", async () => {
+    it("does not backfill technical users; chosen completion preserves identity and enables fresh auth", async () => {
       const f = setup();
       const account = await createAccountCreationPort(a).createForVerifiedTelegramIdentity(
         f.id,
@@ -218,7 +227,8 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       expect(results.every((r) => r.ok)).toBe(true);
       expect(await f.registration.read(f.id)).toEqual({
         userId: account.account.userId,
-        displayName: "Original",
+        displayName: "New name",
+        publicHandle: account.account.publicHandle,
         completed: true,
       });
       const stored = await admin
@@ -247,7 +257,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
     });
     it("commits one accepted support submission under simultaneous text updates and one network attempt under competing processes", async () => {
       const f = setup();
-      await acknowledge(f.service, await f.process("REGISTER", { displayName: "Synthetic" }));
+      await f.register("Synthetic");
       await acknowledge(f.service, await f.process("SUPPORT"));
       const updates = [
         f.command("TEXT", { text: "First submitted text" }),
@@ -295,7 +305,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       "atomically settles %s and resumes immediately; duplicate acknowledgements cannot steal a newer reply lease",
       async (outcome) => {
         const f = setup(true);
-        await acknowledge(f.service, await f.process("REGISTER", { displayName: "Synthetic" }));
+        await f.register("Synthetic");
         await acknowledge(f.service, await f.process("SUPPORT"));
         const update = f.command("TEXT", { text: "Isolated continuation fixture" });
         const result = await f.service.process(botContext, update);
@@ -378,7 +388,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
     );
     it("failure retains the original message, and an explicit retry claims it exactly once", async () => {
       const f = setup();
-      await acknowledge(f.service, await f.process("REGISTER", { displayName: "Synthetic" }));
+      await f.register("Synthetic");
       await acknowledge(f.service, await f.process("SUPPORT"));
       const update = f.command("TEXT", { text: "Message to retry" });
       const result = await f.service.process(botContext, update);

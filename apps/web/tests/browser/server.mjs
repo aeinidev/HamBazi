@@ -26,6 +26,7 @@ function reset() {
     statsFailure: false,
     statsEmpty: false,
     displayName: "Test player",
+    photoUrl: null,
     settings: { locale: "auto", theme: "system" },
     roomVersion: 1,
     roomStatus: "WAITING",
@@ -176,7 +177,9 @@ const http = createServer(async (req, res) => {
       });
     return send({ ok: true });
   }
-  if (req.url === "/v1/auth/telegram-mini-app/account")
+  if (req.url === "/v1/auth/telegram-mini-app/account") {
+    state.displayName = body.displayName;
+    state.registrationRequired = false;
     return send({
       schemaVersion: 1,
       account: {
@@ -187,7 +190,11 @@ const http = createServer(async (req, res) => {
       },
       startParam: `room_${code}`,
     });
-  if (req.url === "/v1/auth/telegram-mini-app/registered-session" && state.registrationRequired) {
+  }
+  if (
+    req.url === "/v1/auth/telegram-mini-app/registered-session-photo" &&
+    state.registrationRequired
+  ) {
     res.statusCode = 403;
     return send({
       ok: false,
@@ -196,12 +203,13 @@ const http = createServer(async (req, res) => {
   }
   if (
     req.url === "/v1/auth/telegram-mini-app" ||
-    req.url === "/v1/auth/telegram-mini-app/registered-session"
+    req.url === "/v1/auth/telegram-mini-app/registered-session-photo"
   )
     return send({
       schemaVersion: 1,
       tokenType: "Bearer",
       accessToken: "synthetic-access",
+      ...(state.photoUrl ? { photoUrl: state.photoUrl } : {}),
       session: {
         schemaVersion: 1,
         userId: userId(),

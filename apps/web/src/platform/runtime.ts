@@ -21,6 +21,7 @@ import { publicSnapshot } from "../games/index.js";
 export interface State {
   telegramDiagnostics: TelegramDiagnostics | null;
   session: Session | null;
+  photoUrl: string | null;
   expired: boolean;
   registrationRequired: boolean;
   connection: Connection;
@@ -56,6 +57,7 @@ export function createRuntime(
       ? { ...startup, authentication: "not-requested", errorCode: null }
       : null,
     session: null,
+    photoUrl: null,
     expired: false,
     registrationRequired: false,
     connection: "offline",
@@ -82,6 +84,7 @@ export function createRuntime(
     query.clear();
     store.setState({
       session: null,
+      photoUrl: null,
       expired,
       connection: "offline",
       snapshot: null,
@@ -108,7 +111,7 @@ export function createRuntime(
     try {
       const epoch = generation;
       const result = await http(
-        "/v1/auth/telegram-mini-app/registered-session",
+        "/v1/auth/telegram-mini-app/registered-session-photo",
         issuedSchema,
         { schemaVersion: 1, commandId, initData },
         "POST",
@@ -118,7 +121,12 @@ export function createRuntime(
       if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
       clear();
       token = result.accessToken;
-      store.setState({ session: result.session, expired: false, registrationRequired: false });
+      store.setState({
+        session: result.session,
+        photoUrl: result.photoUrl ?? null,
+        expired: false,
+        registrationRequired: false,
+      });
       authDiagnostic("authenticated");
       timer = setTimeout(
         () => clear(true),

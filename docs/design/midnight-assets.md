@@ -6,12 +6,16 @@ Authoritative references: the owner's `HamBazi-Games-Midnight.png` and
 buttons. React/CSS/SVG renders those separately; reference screenshots are not
 shipped as interactive pages.
 
-| Production path under `apps/web/public/assets/midnight/` | Use                      | Encoding                   |
-| -------------------------------------------------------- | ------------------------ | -------------------------- |
-| `coup-art.webp`                                          | Coup tile and entry hero | 960 × 720, WebP quality 88 |
-| `hokm-art.webp`                                          | Disabled Hokm tile       | Width 800, WebP quality 88 |
-| `ludo-art.webp`                                          | Disabled Ludo tile       | Width 800, WebP quality 88 |
-| `HamBaziDisplay-Regular.ttf`                             | Live display text        | Exact supplied font bytes  |
+| Production path under `apps/web/public/assets/midnight/` | Use                      | Encoding                    |
+| -------------------------------------------------------- | ------------------------ | --------------------------- |
+| `coup-art.webp`                                          | Coup tile and entry hero | 960 × 720, WebP quality 88  |
+| `hokm-art.webp`                                          | Disabled Hokm tile       | Width 800, WebP quality 88  |
+| `ludo-art.webp`                                          | Disabled Ludo tile       | Width 800, WebP quality 88  |
+| `kahroba-art.webp`                                       | Disabled Kahroba card    | Width 1200, WebP quality 82 |
+| `chess-art.webp`                                         | Disabled Chess card      | Width 1200, WebP quality 82 |
+| `domino-art.webp`                                        | Disabled Domino card     | Width 1200, WebP quality 82 |
+| `home-banner.webp`                                       | Home banner illustration | Width 1200, WebP quality 82 |
+| `HamBaziDisplay-Regular.ttf`                             | Live display text        | Exact supplied font bytes   |
 
 Generated PNGs remain in
 `/home/mehdi/.codex/generated_images/01a12062-96f0-7be0-a3e3-10d8c64fe709/`:
@@ -19,6 +23,17 @@ Generated PNGs remain in
 `exec-e764569c-1a32-45c1-906b-7d248ae0da90.png` (Hokm), and
 `exec-a56a06a3-0860-4ab6-bc17-614fe39c1e8f.png` (Ludo).
 ffmpeg only resized/encoded the selected assets after generation.
+
+The home slice generated four separate text-free illustrations using the built-in
+`image_gen` tool. Their source PNGs are in
+`/home/mehdi/.codex/generated_images/01a127fe-7a28-7a52-8009-834a8d8e54c7/`:
+`exec-044e6d35-2e68-4f52-8f7c-0f82d83fe727.png` (Kahroba),
+`exec-1994651b-2269-4da1-b5fe-62a7a0d625a5.png` (Chess),
+`exec-029e9a7e-0e1d-46c7-9c69-86675a56d8cc.png` (Domino), and
+`exec-9c6feb1d-1411-4614-b505-a29eb0385726.png` (banner). The supplied
+`Luxury Kahroba Gemstones Game Tile.png` guided palette and composition; the
+phone frame and screenshot are not shipped. ffmpeg only resized/encoded the
+generated images. Persian text, disabled badges and buttons are React/CSS.
 
 ## Prompt set
 

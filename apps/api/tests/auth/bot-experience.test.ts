@@ -14,11 +14,18 @@ function fixture(testUser?: string) {
   const read = async (id: bigint) => {
     const row = f.accountsByTelegram.get(id);
     return row?.status === "ACTIVE"
-      ? { userId: row.userId, displayName: row.displayName, completed: completed.has(id) }
+      ? {
+          userId: row.userId,
+          displayName: row.displayName,
+          publicHandle: row.publicHandle,
+          completed: completed.has(id),
+        }
       : undefined;
   };
-  const complete = vi.fn(async (id: bigint) => {
+  const complete = vi.fn(async (id: bigint, _at: number, name: string) => {
     completed.add(id);
+    const row = f.accountsByTelegram.get(id);
+    if (row) f.accountsByTelegram.set(id, { ...row, displayName: name });
     return read(id);
   });
   const registration = registrationService({
@@ -98,11 +105,33 @@ function fixture(testUser?: string) {
       ...extra,
     });
   async function register() {
-    await acknowledge(service, await process("REGISTER", { displayName: "Mehdi" }));
+    const prompt = await process("REGISTER", { displayName: "Ignored Telegram name" });
+    await acknowledge(service, prompt);
+    if (prompt.ok && "delivery" in prompt && prompt.delivery.reply === "PROMPT_NAME")
+      await acknowledge(
+        service,
+        await process("NAME", { replyToMessageId: 900, displayName: "Mehdi" }),
+      );
   }
   return { ...f, deps, service, process, register, completed, complete, submissions, support };
 }
 describe("explicit Persian bot registration and support", () => {
+  it("ignores Telegram's suggested name, rejects an invalid reply, and saves the chosen retry once", async () => {
+    const f = fixture();
+    const prompt = await f.process("REGISTER", { displayName: "Telegram suggestion" });
+    expect(prompt).toMatchObject({ delivery: { reply: "PROMPT_NAME" } });
+    await acknowledge(f.service, prompt, 900);
+    const invalid = await f.process("NAME", { replyToMessageId: 900, displayName: "   " });
+    expect(invalid).toMatchObject({ delivery: { reply: "INVALID_NAME" } });
+    expect(f.accountsByTelegram.has(100n)).toBe(false);
+    await acknowledge(f.service, invalid, 901);
+    const chosen = await f.process("NAME", { replyToMessageId: 901, displayName: "Chosen name" });
+    expect(chosen).toMatchObject({ delivery: { reply: "REGISTERED" } });
+    await acknowledge(f.service, chosen);
+    expect(f.accountsByTelegram.get(100n)?.displayName).toBe("Chosen name");
+    expect(f.completed.has(100n)).toBe(true);
+    expect(await f.process("START")).toMatchObject({ delivery: { reply: "WELCOME_REGISTERED" } });
+  });
   it("admits a regular tester without registering on start, acknowledges their replies and sends support only to the owner", async () => {
     const f = fixture("101");
     const identity = { senderId: "101", chatId: "101" };
@@ -111,9 +140,12 @@ describe("explicit Persian bot registration and support", () => {
     expect(await acknowledge(f.service, start)).toMatchObject({ status: "DONE" });
     expect(f.accountsByTelegram.has(101n)).toBe(false);
     expect(f.completed.has(101n)).toBe(false);
+    const prompt = await f.process("REGISTER", { ...identity, displayName: "Ignored" });
+    expect(prompt).toMatchObject({ delivery: { reply: "PROMPT_NAME" } });
+    await acknowledge(f.service, prompt);
     await acknowledge(
       f.service,
-      await f.process("REGISTER", { ...identity, displayName: "Tester" }),
+      await f.process("NAME", { ...identity, replyToMessageId: 900, displayName: "Tester" }),
     );
     expect(await f.process("PROFILE", identity)).toMatchObject({
       delivery: { data: { profile: { completed: true, displayName: "Tester" } } },
@@ -162,11 +194,26 @@ describe("explicit Persian bot registration and support", () => {
   it("registration failure keeps the retryable action and does not grant completion", async () => {
     const f = fixture();
     f.complete.mockRejectedValueOnce(new Error("private db failure"));
-    expect(await f.process("REGISTER", { displayName: "Mehdi" })).toMatchObject({
+    const prompt = await f.process("REGISTER", { displayName: "Ignored" });
+    await acknowledge(f.service, prompt);
+    expect(await f.process("NAME", { replyToMessageId: 900, displayName: "Mehdi" })).toMatchObject({
       status: "RETRY",
     });
     expect(f.completed.size).toBe(0);
-    expect(await f.process("START")).toMatchObject({ delivery: { reply: "CREATE_ACCOUNT" } });
+    f.clock.value += 5001;
+    expect(
+      await f.service.process(botContext, {
+        schemaVersion: 1,
+        updateId: 2,
+        messageId: 3,
+        senderId: "100",
+        chatId: "100",
+        chatType: "private",
+        action: "NAME",
+        replyToMessageId: 900,
+        displayName: "Mehdi",
+      }),
+    ).toMatchObject({ delivery: { reply: "REGISTERED" } });
   });
   it("registration and owner admission gate support", async () => {
     const f = fixture();

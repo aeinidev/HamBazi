@@ -941,6 +941,35 @@ async function issue(command = randomUUID(), app = auth) {
 }
 
 describe("Auth and Users ports against PostgreSQL", () => {
+  it("completes direct invite registration through Users and serves the chosen profile name", async () => {
+    const telegramId = 70077;
+    const registration = createRegistrationPort(db, clock);
+    const onboarding = createMiniAppOnboarding({ registration, users, telegram, clock });
+    const signed = initData(telegramId, now, "room_opaque-invite");
+    const first = await onboarding.create(signed, randomUUID(), "  نام بازیکن  ");
+    expect(first).toMatchObject({
+      ok: true,
+      startParam: "room_opaque-invite",
+      account: { displayName: "نام بازیکن" },
+    });
+    if (!first.ok) throw new Error("Expected direct registration");
+    expect(await onboarding.create(signed, randomUUID(), "Different")).toMatchObject({
+      ok: true,
+      account: { userId: first.account.userId, displayName: "نام بازیکن" },
+      startParam: "room_opaque-invite",
+    });
+    const issued = await auth.issue(signed, randomUUID());
+    expect(issued).toMatchObject({ ok: true, session: { userId: first.account.userId } });
+    expect(await createProfilePort(db, clock).read(first.account.userId)).toMatchObject({
+      ok: true,
+      profile: { displayName: "نام بازیکن", publicHandle: first.account.publicHandle },
+    });
+    expect(
+      await admin
+        .forModule("users")
+        .execute((client) => client.user.count({ where: { telegramUserId: BigInt(telegramId) } })),
+    ).toBe(1);
+  });
   it("maps existing active identity without profile or persistence types", async () => {
     expect(await users.findActiveByTelegramId("42")).toEqual({
       userId,

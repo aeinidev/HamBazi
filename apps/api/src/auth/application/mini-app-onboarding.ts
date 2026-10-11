@@ -1,6 +1,11 @@
 import { createErrorEnvelope } from "@hambazi/contracts";
 import { z } from "zod";
-import type { Account, AccountCreationPort, UserIdentityPort } from "../../users/index.js";
+import type {
+  Account,
+  AccountCreationPort,
+  RegistrationPort,
+  UserIdentityPort,
+} from "../../users/index.js";
 import type { SessionClock, SessionFailure } from "./session-ports.js";
 import type { TelegramVerifier } from "./telegram-verifier.js";
 import type { OwnerAdmission } from "./owner-admission.js";
@@ -17,7 +22,8 @@ export interface MiniAppOnboarding {
 
 /** Explicit creation intent; never issues a session or grants room membership. */
 export function miniAppOnboardingService(deps: {
-  accounts: AccountCreationPort;
+  registration?: RegistrationPort;
+  accounts?: AccountCreationPort;
   users: UserIdentityPort;
   telegram: TelegramVerifier;
   clock: SessionClock;
@@ -47,20 +53,21 @@ export function miniAppOnboardingService(deps: {
         // Preserve signed routing data opaquely, bounded by the existing initData transport cap.
         if (startParam !== undefined && startParam.length > 16384)
           return createErrorEnvelope("INVALID_INPUT");
-        // commandId identifies the caller's retry. Users' create-only Telegram identity
-        // uniqueness gives the same logical account even across different command IDs.
-        const result = await deps.accounts.createForVerifiedTelegramIdentity(
-          telegramUserId,
-          displayName,
-        );
+        // Users owns the same completion intent for Bot and direct Mini App entry.
+        // Telegram identity uniqueness and the completion guard make retries idempotent.
+        const result = deps.registration
+          ? await deps.registration.complete(telegramUserId, displayName)
+          : await deps.accounts!.createForVerifiedTelegramIdentity(telegramUserId, displayName);
         if (!result.ok) return createErrorEnvelope(result.error.code);
+        const account = "profile" in result ? result.profile : result.account;
         const current = await deps.users.findActiveByTelegramId(telegramUserId);
         const end = time();
         const stillVerified = deps.telegram.verify(initData, end);
         if (
           end < start ||
           !current ||
-          current.userId !== result.account.userId ||
+          current.userId !== account.userId ||
+          (deps.registration && current.registrationCompleted !== true) ||
           !stillVerified.ok ||
           stillVerified.identity.telegramUserId !== telegramUserId
         )
@@ -72,9 +79,9 @@ export function miniAppOnboardingService(deps: {
           ok: true as const,
           account: Object.freeze({
             schemaVersion: 1 as const,
-            userId: result.account.userId,
-            displayName: result.account.displayName,
-            publicHandle: result.account.publicHandle,
+            userId: account.userId,
+            displayName: account.displayName,
+            publicHandle: account.publicHandle,
           }),
           ...(startParam !== undefined ? { startParam } : {}),
         };

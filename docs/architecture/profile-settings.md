@@ -12,6 +12,12 @@ ID, status, timestamps, session or receipt metadata is projected. Missing settin
 read as locale `auto`, theme `system`, without creating rows. Unknown persisted
 settings/schema versions fail safely rather than being silently discarded.
 
+For the entry slice in [ADR-062](../adr/062-chosen-entry-name-and-telegram-photo.md),
+Bot and direct Mini App registration choose `displayName` through the same Users
+completion port. The profile read and existing public-name player-view projection
+read that saved value. Telegram photo is session-scoped presentation data from the
+additive registered-session-photo route, not a `GET /v1/me` field.
+
 `PATCH /v1/me` requires schemaVersion 1, UUID commandId, expectedVersion and a
 nonempty patch containing displayName and/or nonempty settings. Allowed locales
 are auto/fa/en and themes system/light/dark; omitted keys retain current values.
