@@ -119,6 +119,9 @@ the full root check was not rerun for this Web-only deployment.
 Both the previously running **`1bfc42e`** release and the older **`4b154f1`**
 rollback candidate retain their four exact image pins and unchanged preparations.
 No images, data volumes, queues or release preparations were pruned.
+After verification, the exclusively created 1.4 GB scanner cache for this rollout
+was removed. Its scan reports and the existing operational scanner cache were
+retained; free disk space returned to approximately 3.9 GB.
 
 The immediate rollback is Web only, using the previous running preparation:
 
