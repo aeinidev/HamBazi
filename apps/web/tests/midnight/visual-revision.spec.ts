@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { test } from "./fixture.js";
+import { expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { setup, launch, fixtureOrigin } from "./fixture.js";
 

@@ -1,7 +1,8 @@
+import { gameResultV2Schema } from "@hambazi/validation";
 import { personalRoster, personalMatchType } from "./personal-roster.js";
 import { persistMatchResult } from "./results.js";
 import {
-  matchFinishedInputSchema,
+  durableMatchFinishedSchema,
   standardResultInputSchema,
 } from "../../application/result-input.js";
 import type { MatchCorrelation } from "../../application/correlation.js";
@@ -226,7 +227,9 @@ export function createMatchProcessingRepository(
         });
       }
       if (outcome.result !== null) {
-        const parsed = standardResultInputSchema.safeParse(outcome.result);
+        const parsed = (
+          adapter.resultSchemaVersion === 2 ? gameResultV2Schema : standardResultInputSchema
+        ).safeParse(outcome.result);
         if (
           !parsed.success ||
           parsed.data.placements.length !== ids.length ||
@@ -321,8 +324,8 @@ export function createMatchProcessingRepository(
     });
     // Personal bot results stay in the durable engine snapshot/events; no fake user stats.
     if (resultInput !== null && !options.personal) {
-      const payload = matchFinishedInputSchema.parse({
-        schemaVersion: 1,
+      const payload = durableMatchFinishedSchema.parse({
+        schemaVersion: game().resultSchemaVersion ?? 1,
         matchId: row.id,
         gameId: row.gameId,
         stateVersion: version,
@@ -339,8 +342,8 @@ export function createMatchProcessingRepository(
         data: {
           id: resultEventId,
           aggregateId: row.id,
-          type: "MATCH_FINISHED_V1",
-          schemaVersion: 1,
+          type: payload.schemaVersion === 2 ? "MATCH_FINISHED_V2" : "MATCH_FINISHED_V1",
+          schemaVersion: payload.schemaVersion,
           payloadJsonb: payload,
           status: "PENDING",
           nextAttemptAt: new Date(at),

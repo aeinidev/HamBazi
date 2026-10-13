@@ -38,6 +38,8 @@ export function createRuntime(
   realtimeFactory = createRealtime,
   scope: "full" | "owner-auth" = "full",
   startup?: TelegramStartup,
+  projectSnapshot: typeof publicSnapshot = publicSnapshot,
+  inherited?: z.infer<typeof issuedSchema>,
 ) {
   const parsedOrigin = new URL(origin);
   if (
@@ -48,6 +50,7 @@ export function createRuntime(
     throw new Error("Invalid API origin");
   let initData = initialInitData;
   let token: string | null = null;
+  let lastIssued: z.infer<typeof issuedSchema> | null = null;
   let realtime: Realtime | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let generation = 0;
@@ -78,6 +81,7 @@ export function createRuntime(
     generation++;
     clearTimeout(timer);
     token = null;
+    lastIssued = null;
     realtime?.close();
     realtime = null;
     void query.cancelQueries();
@@ -119,33 +123,7 @@ export function createRuntime(
       );
       if (epoch !== generation) throw new ClientError("UNAUTHENTICATED");
       if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
-      clear();
-      token = result.accessToken;
-      store.setState({
-        session: result.session,
-        photoUrl: result.photoUrl ?? null,
-        expired: false,
-        registrationRequired: false,
-      });
-      authDiagnostic("authenticated");
-      timer = setTimeout(
-        () => clear(true),
-        Math.min(2147483647, result.session.expiresAt * 1000 - Date.now()),
-      );
-      if (scope === "owner-auth") return;
-      realtime = realtimeFactory(origin, token, {
-        state: (connection) => store.setState({ connection }),
-        snapshot: (snapshot) =>
-          store.setState({
-            snapshot:
-              snapshot && store.getState().session
-                ? publicSnapshot(snapshot, store.getState().session!.userId)
-                : null,
-          }),
-        resync: (resyncNeeded) => store.setState({ resyncNeeded }),
-        expired: () => clear(true),
-        error: (realtimeError) => store.setState({ realtimeError }),
-      });
+      acceptIssued(result);
     } catch (error) {
       if (error instanceof ClientError && error.code === "REGISTRATION_REQUIRED") {
         clear();
@@ -158,12 +136,49 @@ export function createRuntime(
       throw error;
     }
   }
+  function acceptIssued(result: z.infer<typeof issuedSchema>) {
+    if (result.session.expiresAt * 1000 <= Date.now()) throw new ClientError("UNAUTHENTICATED");
+    clear();
+    lastIssued = result;
+    token = result.accessToken;
+    store.setState({
+      session: result.session,
+      photoUrl: result.photoUrl ?? null,
+      expired: false,
+      registrationRequired: false,
+    });
+    authDiagnostic("authenticated");
+    timer = setTimeout(
+      () => clear(true),
+      Math.min(2147483647, result.session.expiresAt * 1000 - Date.now()),
+    );
+    if (scope === "owner-auth") return;
+    realtime = realtimeFactory(origin, token, {
+      state: (connection) => store.setState({ connection }),
+      snapshot: (snapshot) =>
+        store.setState({
+          snapshot:
+            snapshot && store.getState().session
+              ? projectSnapshot(snapshot, store.getState().session!.userId)
+              : null,
+        }),
+      resync: (resyncNeeded) => store.setState({ resyncNeeded }),
+      expired: () => clear(true),
+      error: (realtimeError) => store.setState({ realtimeError }),
+    });
+  }
+  if (inherited) acceptIssued(inherited);
   return {
     scope,
     store,
     query,
     http,
     login,
+    /** Share this server-issued memory session with an isolated game transport. */
+    forkGame(factory: typeof createRealtime, project: typeof publicSnapshot) {
+      if (!lastIssued || !token) throw new ClientError("UNAUTHENTICATED");
+      return createRuntime(origin, "", fetcher, factory, "full", undefined, project, lastIssued);
+    },
     hasLaunch: () => initData.length > 0,
     async createAccount(commandId: string, displayName: string) {
       authDiagnostic("pending");
@@ -214,7 +229,7 @@ export function createRuntime(
             store.setState({
               snapshot:
                 snapshot && store.getState().session
-                  ? publicSnapshot(snapshot, store.getState().session!.userId)
+                  ? projectSnapshot(snapshot, store.getState().session!.userId)
                   : null,
             }),
           resync: (resyncNeeded) => store.setState({ resyncNeeded }),

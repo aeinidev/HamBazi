@@ -24,6 +24,7 @@ export const outboxQueueNames = Object.freeze({
   "matchmaking.found": "matchmaking-found-v1",
   MATCH_CHANGED_V1: "match-changed-v1",
   MATCH_FINISHED_V1: "match-finished-v1",
+  MATCH_FINISHED_V2: "match-finished-v2",
   CHAT_MESSAGE_V1: "chat-message-v1",
 });
 export type OutboxEventName =

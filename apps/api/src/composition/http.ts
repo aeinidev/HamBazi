@@ -21,6 +21,7 @@ import { createRoomsHttpModule, type RoomsHttpDependencies } from "../rooms/inde
 import { createRealtimeGateway, type RealtimeDependencies } from "../realtime/index.js";
 import { trackHttpWork } from "./http-drain.js";
 import { installHttpAdmission, type HttpAdmission } from "./http-admission.js";
+import { createKahrobaHttpModule } from "./kahroba-http.js";
 
 export async function createHttpApplication(options: {
   auth: Parameters<typeof createAuthHttpModule>[0];
@@ -30,6 +31,10 @@ export async function createHttpApplication(options: {
   rooms?: RoomsHttpDependencies;
   personal?: PersonalGatewayDependencies;
   realtime?: RealtimeDependencies;
+  kahroba?: {
+    rooms: RoomsHttpDependencies;
+    metadata: Parameters<typeof createKahrobaHttpModule>[0];
+  };
   admission?: HttpAdmission;
   allowedOrigins: readonly string[];
   trustedProxies: readonly string[];
@@ -146,6 +151,12 @@ export async function createHttpApplication(options: {
       createAuthHttpModule(options.auth),
       ...(options.statistics ? [createStatisticsHttpModule(options.statistics)] : []),
       ...(options.rooms ? [createRoomsHttpModule(options.rooms)] : []),
+      ...(options.kahroba
+        ? [
+            createRoomsHttpModule(options.kahroba.rooms, "v1/kahroba"),
+            createKahrobaHttpModule(options.kahroba.metadata),
+          ]
+        : []),
       ...(options.profile ? [createProfileHttpModule(options.profile)] : []),
       ...(options.catalog ? [createCatalogHttpModule(options.catalog)] : []),
     ],
@@ -200,8 +211,24 @@ export async function createHttpApplication(options: {
       })
     : undefined;
   const personal = options.personal
-    ? createPersonalGateway(server.server, options.personal)
+    ? createPersonalGateway(server.server, {
+        ...options.personal,
+        ...(options.kahroba ? { coexistsWithKahroba: true } : {}),
+      })
     : undefined;
+  if (options.personal && options.kahroba)
+    server.server.on("upgrade", (request, socket) => {
+      const path = (request.url ?? "").split("?")[0];
+      if (
+        ![
+          "/v1/personal/socket.io",
+          "/v1/personal/socket.io/",
+          "/v1/kahroba/socket.io",
+          "/v1/kahroba/socket.io/",
+        ].includes(path ?? "")
+      )
+        socket.destroy();
+    });
   return {
     personal,
     app,

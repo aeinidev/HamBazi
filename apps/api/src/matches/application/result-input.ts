@@ -1,3 +1,4 @@
+import { matchFinishedV2Schema } from "@hambazi/validation";
 import { z } from "zod";
 const uuid = z.uuid();
 const counter = z.number().int().min(0).max(2147483647);
@@ -30,3 +31,9 @@ export const matchFinishedInputSchema = z.strictObject({
 });
 
 export type FinishedResult = z.infer<typeof matchFinishedInputSchema>;
+
+export const durableMatchFinishedSchema = z.union([
+  matchFinishedInputSchema,
+  matchFinishedV2Schema,
+]);
+export type DurableFinishedResult = z.infer<typeof durableMatchFinishedSchema>;

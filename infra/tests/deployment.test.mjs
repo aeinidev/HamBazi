@@ -29,6 +29,76 @@ const lines = (env) =>
     .map(([key, value]) => `${key}=${value}\n`)
     .join("");
 
+it("prepares dormant restricted Kahroba profiles only with paired owner/tester, private rooms and v2 consumers", () => {
+  const { envs, inputs } = deploymentFixture();
+  inputs.ownerAdmissionFile = "/private/owner.json";
+  inputs.stagingTestAdmissionFile = "/private/tester.json";
+  for (const role of ["api", "bot"])
+    Object.assign(envs[role], {
+      AUTH_ADMISSION_POLICY: "telegram-owner-only-v1",
+      OWNER_ADMISSION_FILE: "/run/hambazi/owner-admission.json",
+      STAGING_TEST_ADMISSION_FILE: "/run/hambazi/staging-test-admission.json",
+    });
+  envs.api.ALLOWED_ORIGINS = "https://staging.hambazi.top";
+  envs.bot.BOT_MINI_APP_URL = "https://staging.hambazi.top/";
+  const flags = {
+    PERSONAL_GAMEPLAY_PROFILE: "owner-bots-v1",
+    KAHROBA_RUNTIME_PROFILE: "restricted-staging-v1",
+    KAHROBA_ENGINE_REGISTERED: "false",
+    KAHROBA_RUNTIME_ENABLED: "false",
+    KAHROBA_ROUTES_ENABLED: "false",
+    KAHROBA_ADMISSION_ENABLED: "false",
+    KAHROBA_QUEUE_NAMESPACE: "fixture",
+    KAHROBA_RECONNECT_LEASE_MS: "30000",
+    KAHROBA_RECONNECT_GRACE_MS: "30000",
+  };
+  Object.assign(envs.api, flags, {
+    ROOM_TTL_SECONDS: "900",
+    ROOM_READ_LIMIT: "60",
+    ROOM_CREATE_LIMIT: "6",
+    ROOM_BOT_USERNAME: "HamBaziFixtureBot",
+    ROOM_APP_NAME: "play",
+    ROOM_INVITE_LIMIT: "60",
+  });
+  Object.assign(envs.worker, flags, {
+    STATS_ENABLED: "true",
+    STATS_CONCURRENCY: "1",
+    STATS_DRAIN_TIMEOUT_MS: "15000",
+    MATCH_OUTBOX_ENABLED: "true",
+    MATCH_OUTBOX_INTERVAL_MS: "1000",
+    MATCH_OUTBOX_BATCH_SIZE: "10",
+    MATCH_OUTBOX_LEASE_MS: "10000",
+    MATCH_OUTBOX_ATTEMPTS: "5",
+    MATCH_OUTBOX_BACKOFF_MS: "1000",
+    MATCH_OUTBOX_MAX_BACKOFF_MS: "60000",
+    MATCH_OUTBOX_PUBLISH_TIMEOUT_MS: "2000",
+  });
+  for (const role of ["api", "worker"]) envs[role] = parseRoleFile(lines(envs[role]), role);
+  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+  for (const patch of [
+    (e) => {
+      e.worker.KAHROBA_QUEUE_NAMESPACE = "other";
+    },
+    (e) => {
+      e.api.KAHROBA_RUNTIME_PROFILE = "local-private-v1";
+    },
+    (e) => {
+      e.worker.STATS_ENABLED = "false";
+    },
+    (e) => {
+      delete e.api.ROOM_APP_NAME;
+    },
+    (_e, i) => {
+      delete i.stagingTestAdmissionFile;
+    },
+  ]) {
+    const e = structuredClone(envs),
+      i = structuredClone(inputs);
+    patch(e, i);
+    expect(() => validateEnvironments(e, i)).toThrow();
+  }
+});
+
 it("pairs the regular tester reference across API/Bot without replacing owner admission or opening another origin", () => {
   const { envs, inputs } = deploymentFixture();
   inputs.ownerAdmissionFile = "/private/owner.json";
@@ -93,7 +163,7 @@ it("denies unknown/cross-role/migration credentials, duplicates, shell syntax an
     "NODE_OPTIONS=private-canary",
     "export X=private-canary",
     "NODE_ENV=test",
-    "ROOM_TTL_SECONDS=60",
+    "KAHROBA_LOCAL_ADMISSION_FILE=/tmp/local.json",
     "API_SENTRY_DSN=private-canary",
     "API_PORT=8080\r",
   ])

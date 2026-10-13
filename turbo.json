@@ -12,6 +12,7 @@
       "outputs": ["dist/**"],
       "env": [
         "VITE_API_ORIGIN",
+        "VITE_KAHROBA_RUNTIME",
         "HAMBAZI_WEB_ORIGIN",
         "HAMBAZI_WEB_FRAME_ANCESTORS",
         "HAMBAZI_WEB_POLICY_PROFILE"
@@ -46,7 +47,8 @@
         "$TURBO_ROOT$/docs/contracts/realtime.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/realtime.delivery.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/realtime.chat.v1.baseline.json",
-        "$TURBO_ROOT$/docs/contracts/statistics.v1.baseline.json"
+        "$TURBO_ROOT$/docs/contracts/statistics.v1.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/kahroba.result.v2.baseline.json"
       ],
       "outputs": []
     },

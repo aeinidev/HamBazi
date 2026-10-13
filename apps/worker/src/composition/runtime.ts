@@ -1,5 +1,6 @@
 import { createPersonalCoupGames } from "@hambazi/api";
 import { parsePersonalGameplayConfig } from "@hambazi/config";
+import { parseKahrobaRuntimeConfig } from "@hambazi/config";
 import { startStatisticsConsumer } from "../statistics.js";
 import { createStatisticsProjection } from "@hambazi/api/leaderboard";
 import { createMatchResultPort } from "@hambazi/api/matches";
@@ -60,6 +61,9 @@ export async function startWorker(
   telemetry?: Telemetry,
 ) {
   const runtime = parseRuntimeConfig(environment, "worker");
+  // v2 consumers/outbox are required before an explicitly private producer can be enabled.
+  const kahroba = parseKahrobaRuntimeConfig(environment, "worker");
+  if (kahroba && resilience) throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
   const personal = parsePersonalGameplayConfig(environment, "worker");
   if (personal && resilience) throw new Error("PERSONAL_GAMEPLAY_CONFIGURATION_INVALID");
   if (personal)

@@ -1,7 +1,10 @@
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
 import type { createDatabase } from "@hambazi/database";
-import { matchFinishedInputSchema, type FinishedResult } from "../../application/result-input.js";
+import {
+  durableMatchFinishedSchema,
+  type DurableFinishedResult,
+} from "../../application/result-input.js";
 import { matchDomainEventSchema } from "../../application/outbox.js";
 
 function matchScope(
@@ -14,8 +17,12 @@ type Client = Parameters<Parameters<ReturnType<typeof matchScope>["transaction"]
 export async function persistMatchResult(
   db: Pick<Client, "matchResult" | "gameResult">,
   eventId: string,
-  payload: FinishedResult,
+  payload: DurableFinishedResult,
 ) {
+  const isWinner = (id: string) =>
+    payload.schemaVersion === 2
+      ? payload.result.winnerIds.includes(id)
+      : payload.result.winnerId === id;
   const previous = await db.matchResult.findUnique({ where: { matchId: payload.matchId } });
   if (previous) {
     if (previous.eventId !== eventId || !isDeepStrictEqual(previous.payloadJsonb, payload))
@@ -30,8 +37,8 @@ export async function persistMatchResult(
           userId: p.playerId,
           gameId: payload.gameId,
           placement: p.place,
-          winner: payload.result.winnerId === p.playerId,
-          schemaVersion: 1,
+          winner: isWinner(p.playerId),
+          schemaVersion: payload.schemaVersion,
           metricsJsonb: payload.result.metrics,
           createdAt: new Date(payload.finishedAt),
         },
@@ -47,8 +54,8 @@ export async function persistMatchResult(
         !p ||
         row.gameId !== payload.gameId ||
         row.placement !== p.place ||
-        row.winner !== (row.userId === payload.result.winnerId) ||
-        row.schemaVersion !== 1 ||
+        row.winner !== isWinner(row.userId) ||
+        row.schemaVersion !== payload.schemaVersion ||
         row.createdAt.getTime() !== payload.finishedAt ||
         !isDeepStrictEqual(row.metricsJsonb, payload.result.metrics)
       );
@@ -63,7 +70,8 @@ export function createMatchResultRepository(database: ReturnType<typeof createDa
   const scope = matchScope(database);
   async function record(input: unknown) {
     const event = matchDomainEventSchema.parse(input);
-    if (event.type !== "MATCH_FINISHED_V1") throw new Error("Invalid result input");
+    if (event.type !== "MATCH_FINISHED_V1" && event.type !== "MATCH_FINISHED_V2")
+      throw new Error("Invalid result input");
     return scope.transaction(async (db) => {
       await db.lockMatch(event.aggregateId);
       const row = await db.match.findUniqueOrThrow({ where: { id: event.aggregateId } });
@@ -72,7 +80,7 @@ export function createMatchResultRepository(database: ReturnType<typeof createDa
       if (
         stored.type !== event.type ||
         stored.aggregateId !== payload.matchId ||
-        stored.schemaVersion !== 1 ||
+        stored.schemaVersion !== event.schemaVersion ||
         !isDeepStrictEqual(stored.payloadJsonb, payload) ||
         row.status !== "FINISHED" ||
         row.gameId !== payload.gameId ||
@@ -116,7 +124,7 @@ export function createMatchResultRepository(database: ReturnType<typeof createDa
       const rows = await scope.execute((db) =>
         db.outboxEvent.findMany({
           where: {
-            type: "MATCH_FINISHED_V1",
+            type: { in: ["MATCH_FINISHED_V1", "MATCH_FINISHED_V2"] },
             id: { gt: after ?? "00000000-0000-0000-0000-000000000000" },
           },
           orderBy: { id: "asc" },
@@ -156,7 +164,7 @@ export function createMatchResultRepository(database: ReturnType<typeof createDa
       return {
         results: rows.map((r) => ({
           eventId: r.eventId,
-          payload: matchFinishedInputSchema.parse(r.payloadJsonb),
+          payload: durableMatchFinishedSchema.parse(r.payloadJsonb),
         })),
         next: rows.length ? rows.at(-1)!.ordinal.toString() : null,
       };

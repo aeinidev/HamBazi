@@ -31,7 +31,13 @@ async function project(db: Client, generationId: string, input: StatsFinish) {
     for (const seat of p.result.placements)
       for (const metric of ["completed", "wins"] as const) {
         const key = { generationId, userId: seat.playerId, gameId: p.gameId, metric, period };
-        const amount = metric === "completed" || p.result.winnerId === seat.playerId ? 1n : 0n;
+        const amount =
+          metric === "completed" ||
+          (p.schemaVersion === 2
+            ? p.result.winnerIds.includes(seat.playerId)
+            : p.result.winnerId === seat.playerId)
+            ? 1n
+            : 0n;
         await db.statsValue.upsert({
           where: { generationId_userId_gameId_metric_period: key },
           create: {

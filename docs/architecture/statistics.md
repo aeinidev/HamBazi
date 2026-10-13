@@ -134,3 +134,18 @@ additive schema and grants. Existing queued finish inputs remain readable and ol
 writer shapes remain valid. No destructive down migration, automatic generation
 cleanup, final retention/erasure policy, seasonal activation, production gameplay,
 staging HTTPS/WebView validation or load-test readiness is claimed.
+
+## Kahroba local K2 compatibility
+
+[ADR-065](../adr/065-kahroba-local-multiplayer-and-shared-results.md) adds a separate
+`MATCH_FINISHED_V2` / `match-finished-v2` handler and strict schema-2 result for
+Kahroba. Every first-place winner is retained; shared outcomes use null legacy
+winnerId and explicit SHARED_VICTORY. Existing per-seat winner booleans are true
+for all co-winners. No table/column or migration is added.
+
+The configured statistics consumer retains both queue handlers. V1 Coup payloads,
+credit and HTTP contracts remain unchanged. V2 credits one completion per seat
+and one win per co-winner, with the same transactional receipts and per-generation
+Match/digest guards. Recovery/rebuild reads both immutable envelope versions.
+Consumer support does not enable public Kahroba production, navigation or
+admission. No staging/production execution occurs in K2.

@@ -1,3 +1,4 @@
+import { matchFinishedV2Schema } from "@hambazi/validation";
 import { z } from "zod";
 import { matchmakingFoundIntentSchema } from "./admission.js";
 import { matchChangedIntentSchema } from "./processing.js";
@@ -28,11 +29,17 @@ export const matchDomainEventSchema = z
       type: z.literal("MATCH_FINISHED_V1"),
       payload: matchFinishedInputSchema,
     }),
+    z.strictObject({
+      ...metadata,
+      schemaVersion: z.literal(2),
+      type: z.literal("MATCH_FINISHED_V2"),
+      payload: matchFinishedV2Schema,
+    }),
   ])
   .refine((event) => event.aggregateId === event.payload.matchId);
 export type MatchDomainEvent = z.infer<typeof matchDomainEventSchema>;
 export interface OutboxEvent {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   eventId: string;
   aggregateId: string;
   occurredAt: number;

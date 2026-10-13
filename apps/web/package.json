@@ -17,7 +17,9 @@
     "test": "vitest run tests/unit",
     "test:browser": "playwright test",
     "test:preview": "playwright test --config preview.playwright.config.ts",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "dev:kahroba": "node dev/kahroba-preview.mjs",
+    "test:kahroba": "playwright test --config kahroba.playwright.config.ts"
   },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",

@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "datasetVersion": "kahroba-economy-v1",
+  "verifiedAt": "2026-10-12",
+  "status": "VERIFIED_FOR_ISOLATED_K1",
+  "counts": {
+    "developmentCards": 90,
+    "tiers": [40, 30, 20],
+    "nobles": 10
+  },
+  "canonicalSha256": "99f42d76b89ee2d668a46acf153b9aecb9dc823e2dd7decc7c3adf8f4dfd31c2",
+  "columnOrder": ["diamond", "sapphire", "emerald", "ruby", "onyx"],
+  "source": {
+    "repository": "https://github.com/AchrafAmil/splendor-api",
+    "commit": "248579fd4099a6f0a519554228a32b5ec6287de9",
+    "license": "MIT",
+    "files": [
+      {
+        "path": "src/main/resources/cards/cards.txt",
+        "sha256": "a067b515826f5baa417ed92ec8076794baf6959f5409ba062932636b9f2cdfad"
+      },
+      {
+        "path": "src/main/resources/cards/nobles.txt",
+        "sha256": "dd4110ab7173b052af9a58cdfbeea5746ace3af8af49bbc2eae0edbb0cefa1a1"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "01aee0789f5e74feb3b600669ff1860614f388a81533571768b0193e38bae975"
+      }
+    ]
+  },
+  "developmentVerification": {
+    "repository": "https://github.com/anicolao/splendor",
+    "commit": "5b3efd26f2e460b1bef3839a058270b536a13648",
+    "license": "GPL-3.0 (inspection only; no source code, CSV or photographs distributed)",
+    "csvSha256": "3e7025f64c7788a8021688099048aa4d21198a28286f3b227aa16fc805057f5b",
+    "matchedTuples": 90,
+    "mismatches": 0,
+    "photographs": [
+      {
+        "path": "PXL_20260304_170043943.jpg",
+        "sha256": "53121eae2177a2e1f3f5897ba7b59fe61a0886ff2e3ade1ebf1c79c44c87c91d"
+      },
+      {
+        "path": "PXL_20260304_170052269.jpg",
+        "sha256": "8e9768efc3ba9952d36ad6193be38fe87899dce154659b3bda903ee5f8ddb90d"
+      }
+    ],
+    "crosswalk": [
+      {
+        "sourceId": 0,
+        "photographicId": "white-L1-03"
+      },
+      {
+        "sourceId": 1,
+        "photographicId": "blue-L1-03"
+      },
+      {
+        "sourceId": 2,
+        "photographicId": "green-L1-03"
+      },
+      {
+        "sourceId": 3,
+        "photographicId": "red-L1-03"
+      },
+      {
+        "sourceId": 4,
+        "photographicId": "black-L1-03"
+      },
+      {
+        "sourceId": 5,
+        "photographicId": "white-L1-01"
+      },
+      {
+        "sourceId": 6,
+        "photographicId": "blue-L1-01"
+      },
+      {
+        "sourceId": 7,
+        "photographicId": "green-L1-01"
+      },
+      {
+        "sourceId": 8,
+        "photographicId": "red-L1-01"
+      },
+      {
+        "sourceId": 9,
+        "photographicId": "black-L1-01"
+      },
+      {
+        "sourceId": 10,
+        "photographicId": "white-L1-07"
+      },
+      {
+        "sourceId": 11,
+        "photographicId": "blue-L1-07"
+      },
+      {
+        "sourceId": 12,
+        "photographicId": "green-L1-07"
+      },
+      {
+        "sourceId": 13,
+        "photographicId": "red-L1-07"
+      },
+      {
+        "sourceId": 14,
+        "photographicId": "black-L1-07"
+      },
+      {
+        "sourceId": 15,
+        "photographicId": "white-L1-08"
+      },
+      {
+        "sourceId": 16,
+        "photographicId": "blue-L1-08"
+      },
+      {
+        "sourceId": 17,
+        "photographicId": "green-L1-08"
+      },
+      {
+        "sourceId": 18,
+        "photographicId": "red-L1-08"
+      },
+      {
+        "sourceId": 19,
+        "photographicId": "black-L1-08"
+      },
+      {
+        "sourceId": 20,
+        "photographicId": "white-L1-04"
+      },
+      {
+        "sourceId": 21,
+        "photographicId": "blue-L1-04"
+      },
+      {
+        "sourceId": 22,
+        "photographicId": "green-L1-04"
+      },
+      {
+        "sourceId": 23,
+        "photographicId": "red-L1-04"
+      },
+      {
+        "sourceId": 24,
+        "photographicId": "black-L1-04"
+      },
+      {
+        "sourceId": 25,
+        "photographicId": "white-L1-05"
+      },
+      {
+        "sourceId": 26,
+        "photographicId": "blue-L1-05"
+      },
+      {
+        "sourceId": 27,
+        "photographicId": "green-L1-05"
+      },
+      {
+        "sourceId": 28,
+        "photographicId": "red-L1-05"
+      },
+      {
+        "sourceId": 29,
+        "photographicId": "black-L1-05"
+      },
+      {
+        "sourceId": 30,
+        "photographicId": "white-L1-06"
+      },
+      {
+        "sourceId": 31,
+        "photographicId": "blue-L1-06"
+      },
+      {
+        "sourceId": 32,
+        "photographicId": "green-L1-06"
+      },
+      {
+        "sourceId": 33,
+        "photographicId": "red-L1-06"
+      },
+      {
+        "sourceId": 34,
+        "photographicId": "black-L1-06"
+      },
+      {
+        "sourceId": 35,
+        "photographicId": "white-L1-02"
+      },
+      {
+        "sourceId": 36,
+        "photographicId": "blue-L1-02"
+      },
+      {
+        "sourceId": 37,
+        "photographicId": "green-L1-02"
+      },
+      {
+        "sourceId": 38,
+        "photographicId": "red-L1-02"
+      },
+      {
+        "sourceId": 39,
+        "photographicId": "black-L1-02"
+      },
+      {
+        "sourceId": 40,
+        "photographicId": "white-L2-06"
+      },
+      {
+        "sourceId": 41,
+        "photographicId": "blue-L2-06"
+      },
+      {
+        "sourceId": 42,
+        "photographicId": "green-L2-06"
+      },
+      {
+        "sourceId": 43,
+        "photographicId": "red-L2-06"
+      },
+      {
+        "sourceId": 44,
+        "photographicId": "black-L2-06"
+      },
+      {
+        "sourceId": 45,
+        "photographicId": "white-L2-05"
+      },
+      {
+        "sourceId": 46,
+        "photographicId": "blue-L2-05"
+      },
+      {
+        "sourceId": 47,
+        "photographicId": "green-L2-05"
+      },
+      {
+        "sourceId": 48,
+        "photographicId": "red-L2-05"
+      },
+      {
+        "sourceId": 49,
+        "photographicId": "black-L2-05"
+      },
+      {
+        "sourceId": 50,
+        "photographicId": "white-L2-04"
+      },
+      {
+        "sourceId": 51,
+        "photographicId": "blue-L2-04"
+      },
+      {
+        "sourceId": 52,
+        "photographicId": "green-L2-04"
+      },
+      {
+        "sourceId": 53,
+        "photographicId": "red-L2-04"
+      },
+      {
+        "sourceId": 54,
+        "photographicId": "black-L2-04"
+      },
+      {
+        "sourceId": 55,
+        "photographicId": "white-L2-03"
+      },
+      {
+        "sourceId": 56,
+        "photographicId": "blue-L2-03"
+      },
+      {
+        "sourceId": 57,
+        "photographicId": "green-L2-03"
+      },
+      {
+        "sourceId": 58,
+        "photographicId": "red-L2-03"
+      },
+      {
+        "sourceId": 59,
+        "photographicId": "black-L2-03"
+      },
+      {
+        "sourceId": 60,
+        "photographicId": "white-L2-01"
+      },
+      {
+        "sourceId": 61,
+        "photographicId": "blue-L2-01"
+      },
+      {
+        "sourceId": 62,
+        "photographicId": "green-L2-01"
+      },
+      {
+        "sourceId": 63,
+        "photographicId": "red-L2-01"
+      },
+      {
+        "sourceId": 64,
+        "photographicId": "black-L2-01"
+      },
+      {
+        "sourceId": 65,
+        "photographicId": "white-L2-02"
+      },
+      {
+        "sourceId": 66,
+        "photographicId": "blue-L2-02"
+      },
+      {
+        "sourceId": 67,
+        "photographicId": "green-L2-02"
+      },
+      {
+        "sourceId": 68,
+        "photographicId": "red-L2-02"
+      },
+      {
+        "sourceId": 69,
+        "photographicId": "black-L2-02"
+      },
+      {
+        "sourceId": 70,
+        "photographicId": "white-L3-03"
+      },
+      {
+        "sourceId": 71,
+        "photographicId": "blue-L3-03"
+      },
+      {
+        "sourceId": 72,
+        "photographicId": "green-L3-03"
+      },
+      {
+        "sourceId": 73,
+        "photographicId": "red-L3-03"
+      },
+      {
+        "sourceId": 74,
+        "photographicId": "black-L3-03"
+      },
+      {
+        "sourceId": 75,
+        "photographicId": "white-L3-02"
+      },
+      {
+        "sourceId": 76,
+        "photographicId": "blue-L3-02"
+      },
+      {
+        "sourceId": 77,
+        "photographicId": "green-L3-02"
+      },
+      {
+        "sourceId": 78,
+        "photographicId": "red-L3-02"
+      },
+      {
+        "sourceId": 79,
+        "photographicId": "black-L3-02"
+      },
+      {
+        "sourceId": 80,
+        "photographicId": "white-L3-04"
+      },
+      {
+        "sourceId": 81,
+        "photographicId": "blue-L3-04"
+      },
+      {
+        "sourceId": 82,
+        "photographicId": "green-L3-04"
+      },
+      {
+        "sourceId": 83,
+        "photographicId": "red-L3-04"
+      },
+      {
+        "sourceId": 84,
+        "photographicId": "black-L3-04"
+      },
+      {
+        "sourceId": 85,
+        "photographicId": "white-L3-01"
+      },
+      {
+        "sourceId": 86,
+        "photographicId": "blue-L3-01"
+      },
+      {
+        "sourceId": 87,
+        "photographicId": "green-L3-01"
+      },
+      {
+        "sourceId": 88,
+        "photographicId": "red-L3-01"
+      },
+      {
+        "sourceId": 89,
+        "photographicId": "black-L3-01"
+      }
+    ]
+  },
+  "nobleVerification": {
+    "repository": "https://github.com/roeey777/Splendor-AI",
+    "commit": "95f84d2e6e839c0ef09ca97bdc3b3048a792fb0b",
+    "method": "Visually inspected all ten numeric tile scans; no artwork shipped. Publisher-maintained Dized confirms three prestige each.",
+    "scans": [
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/3blu3g3r.png",
+        "sha256": "12162d3b9d54fe0be1b54279b2f66f02498ae6e0f6468f60ea36e33dd60600cd"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/3g3r3bla.png",
+        "sha256": "2f0e45112eafcaa69d019c163f4fe0b6eeb4fd7dc9b13db76c48e2944607f279"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/3w3blu3bla.png",
+        "sha256": "4af78f9b858da22676fbf1f9313bf2135377d9a237375f8eecaf6ac6ff962bbe"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/3w3blu3g.png",
+        "sha256": "49e0081fa1092880de738d89dd4bbf7fbfdfea4440dc08d4d43cb0ab7492b948"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/3w3r3bla.png",
+        "sha256": "a7bd5d27f7d231d9269a644114263983af02236ec25a8544cd44549f4f93d13d"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/4blu4g.png",
+        "sha256": "23a359a66249b66b12ebc69acb8d46ff694443956b51a8f8731a2b7e1de34bc5"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/4g4r.png",
+        "sha256": "2d6baf9135d1bebb679fc85b6b1cc27f1f090e5dc3631d6f8868c4bd9b975f43"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/4r4bla.png",
+        "sha256": "1011a2caac106ae398a65ccdf72361e0d5ac10c3fb5a5b700744a22f94d70c6e"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/4w4bla.png",
+        "sha256": "07a97f221bf3900e114dd4ad46463645f92f4dea53b5519e843b54be3a333698"
+      },
+      {
+        "path": "src/splendor/splendor/resources/nobles_large/4w4blu.png",
+        "sha256": "2164282d7bc8ffb268bcbe87fefd95569126e765804e41da0ade90de129f21e5"
+      }
+    ]
+  },
+  "knownIssues": [
+    "Source nobles.txt header is id,points,white,blue,green,red,black; its Kotlin noble loader interprets that order incorrectly. Only the verified raw resource values are adapted.",
+    "boardgamers/splendor claims exact agreement with older CSVs but inspected tuples disagree; that unlicensed source is not used.",
+    "Publisher noble-history PDF contains biographies/expansion labels, not a complete economic table; it is not used as numerical verification."
+  ],
+  "reuse": "MIT numeric resources adapted with full notice retained. Independent original engine. No publisher rule prose, names, logos, scans, artwork or third-party engine code distributed. This does not establish publisher endorsement or public-release trademark/artwork clearance."
+}

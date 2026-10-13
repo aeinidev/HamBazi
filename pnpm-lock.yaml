@@ -210,9 +210,15 @@ importers:
       '@hambazi/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
+      '@hambazi/kahroba-engine':
+        specifier: workspace:*
+        version: link:../../packages/games/kahroba-engine
       '@hambazi/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@hambazi/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       '@nestjs/common':
         specifier: 12.0.3
         version: 12.0.3(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -490,6 +496,28 @@ importers:
         version: 5.0.0(@types/node@24.13.4)(vite@8.3.1(@types/node@24.13.4)(jiti@2.7.0)(yaml@2.9.1))
 
   packages/games/coup-engine:
+    dependencies:
+      '@hambazi/game-core':
+        specifier: workspace:*
+        version: link:../../game-core
+      zod:
+        specifier: 4.6.2
+        version: 4.6.2
+    devDependencies:
+      '@hambazi/typescript':
+        specifier: workspace:*
+        version: link:../../../tooling/typescript
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 5.0.0
+        version: 5.0.0(@types/node@24.13.4)(vite@8.3.1(@types/node@24.13.4)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/games/kahroba-engine:
     dependencies:
       '@hambazi/game-core':
         specifier: workspace:*

@@ -24,6 +24,7 @@ export function createRealtime(
   },
   connect: typeof io = io,
   personal = false,
+  transport?: { namespace: "kahroba-v1"; path: "/v1/kahroba/socket.io" },
 ) {
   const chatListeners = new Set<(message: ChatMessage) => void>();
   let disposed = false;
@@ -35,14 +36,17 @@ export function createRealtime(
   // reconnect lookups and foreground intents in the same bounded lane.
   let personalTail = Promise.resolve();
   let personalPending = 0;
-  const socket: Socket = connect(`${origin}/${personal ? "personal-v1" : "v1"}`, {
-    path: personal ? "/v1/personal/socket.io" : "/v1/socket.io",
-    ...(personal ? { transports: ["websocket"] } : {}),
-    auth: { schemaVersion: 1, accessToken },
-    autoConnect: false,
-    reconnection: true,
-    timeout: 10000,
-  });
+  const socket: Socket = connect(
+    `${origin}/${transport?.namespace ?? (personal ? "personal-v1" : "v1")}`,
+    {
+      path: transport?.path ?? (personal ? "/v1/personal/socket.io" : "/v1/socket.io"),
+      ...(personal ? { transports: ["websocket"] } : {}),
+      auth: { schemaVersion: 1, accessToken },
+      autoConnect: false,
+      reconnection: true,
+      timeout: 10000,
+    },
+  );
   async function request<T>(event: string, payload: unknown, schema: z.ZodType<T>): Promise<T> {
     if (disposed || !socket.connected) throw new ClientError("NETWORK_ERROR", true);
     const epoch = generation;

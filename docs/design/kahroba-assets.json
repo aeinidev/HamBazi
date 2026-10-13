@@ -1,0 +1,197 @@
+{
+  "date": "2026-10-12",
+  "sourceArchive": "/home/mehdi/Downloads/Kahroba_Assets.zip",
+  "archiveSha256": "e93bd0672560ef7a99f71f46222f175ddeca5788d0d389f9ec3dcfc85d77d5d8",
+  "provenance": "Owner-supplied originals; archive documents independently recreated illustrations. Original archive and reference left intact. No publication-rights claim.",
+  "conversion": "Pillow Lanczos resize and WebP quality 88/method 6; transparency retained; no creative artwork alteration.",
+  "assets": [
+    {
+      "source": "Kahroba_Assets/backgrounds/palace-background.png",
+      "sourceSha256": "8e1f658c444e71e4f819747762821af5b8532e8b325cf8a84d8f130d82528aeb",
+      "originalBytes": 1828888,
+      "originalDimensions": [940, 1672],
+      "target": "apps/web/public/assets/kahroba/palace-background.webp",
+      "optimizedDimensions": [576, 1024],
+      "optimizedBytes": 68218,
+      "sha256": "3ccc62ca7f625af69658654d5b860b9688921c75220bdd556c3a8454730c51c3",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/branding/kahroba-logo.png",
+      "sourceSha256": "591e9942d8433c81f7bc6d0a1394da7e03b9339212877723aad867e9eae61e44",
+      "originalBytes": 1967961,
+      "originalDimensions": [1536, 1024],
+      "target": "apps/web/public/assets/kahroba/kahroba-logo.webp",
+      "optimizedDimensions": [320, 213],
+      "optimizedBytes": 22266,
+      "sha256": "60dfa677c27fdfe40eba1c986dab52ab3d5ca428821508da711a98ab45aa51a2",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/cards/card-art-diamond.png",
+      "sourceSha256": "01c95d383a591f228dc61c852a2aefdbcda5a9ac64c2f4bafbd3ead4c9aeeaa4",
+      "originalBytes": 2904244,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/card-art-diamond.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 78298,
+      "sha256": "fc7e9b97374ac510a4f738b03a242645e2735ddaab6818c2cb6311275a11ae73",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/cards/card-art-emerald.png",
+      "sourceSha256": "f3fe7661971be961e2d86adaf5c268eeec6b87c5fb06849d42adef6a409ef8bc",
+      "originalBytes": 3168448,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/card-art-emerald.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 95168,
+      "sha256": "40b28afd67170b79a9468dcbf94d2f161214adc9399628567c20d8bd5fdb612e",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/cards/card-art-onyx.png",
+      "sourceSha256": "209fb458b8e13a7bc4bb03ce8094763a19475c161f7f9011ee26f20cca2f8f96",
+      "originalBytes": 2850332,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/card-art-onyx.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 75948,
+      "sha256": "02a37c722f936eab5cc2bd47ffd6bec753e4ce65b846f6e6aedaf7d465531d08",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/cards/card-art-ruby.png",
+      "sourceSha256": "ec3a14e179e588c179b95ca866a6d746b56485b4e0d36defb2d295e7ce3474de",
+      "originalBytes": 2880454,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/card-art-ruby.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 82068,
+      "sha256": "f2b2c6967530c3fd8e1bb5be9a4e06c48cc069db429f20048c51a4725deec590",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/cards/card-art-sapphire.png",
+      "sourceSha256": "23b4b5663f41706314f3d02d416266ac03a281dc6f93e81a3043e88640f7d0ff",
+      "originalBytes": 3004979,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/card-art-sapphire.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 88226,
+      "sha256": "71951641898db5ec57b31d5b511ebfab7fdb277092fe15e1c17dd50a79b6495b",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/nobles/noble-elder.png",
+      "sourceSha256": "036031e63b49580d0e229ba1899e46a8409713c9fd4fcdbac2f76bda21512ec8",
+      "originalBytes": 2293384,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/noble-elder.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 59484,
+      "sha256": "adec9fc10f677146a01919449cc7f3173f7617b01147d06bc1aefb85c368e8ed",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/nobles/noble-king.png",
+      "sourceSha256": "290906a60e756e640d979929f87e49ad2554baa6be7cc6409c693d52688103de",
+      "originalBytes": 2602182,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/noble-king.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 73580,
+      "sha256": "785f33aca73d31d6959b1bee55ba27c45bf6c41c52586c875286513af7298a80",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/nobles/noble-queen-ivory.png",
+      "sourceSha256": "12a8581705c3cf02f6f629a2b5ad67f7e8314b4d9bc1b163eaecf8c115dc210e",
+      "originalBytes": 2543074,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/noble-queen-ivory.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 68356,
+      "sha256": "9a4eb8342f5ead445db5d7240c3a015f3443a32ed342a0b7539fa3f2840587e2",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/nobles/noble-queen-ruby.png",
+      "sourceSha256": "b05321651fdf4d1fe7b607678f89e9137b678110a9d8b06595b483f324962057",
+      "originalBytes": 2440095,
+      "originalDimensions": [1086, 1448],
+      "target": "apps/web/public/assets/kahroba/noble-queen-ruby.webp",
+      "optimizedDimensions": [384, 512],
+      "optimizedBytes": 69630,
+      "sha256": "53caab213bba75dc1088f461826339e5a2c7bc4acee62dac3e81333e922e4c3c",
+      "alpha": false
+    },
+    {
+      "source": "Kahroba_Assets/tokens/gem-diamond.png",
+      "sourceSha256": "fc1474cc02ec0572088d0ed6faa72bf758409986378a5b6376e6f3997148e77b",
+      "originalBytes": 1204293,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/gem-diamond.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 7038,
+      "sha256": "75f03152379c59404a8f33bcbc95e266d4130c679c0b1ae033293eeac1fe170a",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/tokens/gem-emerald.png",
+      "sourceSha256": "62301a63dab8b48e13e650ea45e7c0d4337b194a9bc4f8709a2d6267a41d7b2b",
+      "originalBytes": 1189057,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/gem-emerald.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 6668,
+      "sha256": "aeef3713bbf2a772f65b89d4b1858430af00e910b308076658685116e6d54404",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/tokens/gem-onyx.png",
+      "sourceSha256": "0bf2f473052414c7813c9028f08bca5a4227e515170baaa60c2a61e04c22ba42",
+      "originalBytes": 1044787,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/gem-onyx.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 5808,
+      "sha256": "e6735e4fd9d1c1ba29a98b1a77d37c9a036e15dafe006483024757dcbfe26dd6",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/tokens/gem-ruby.png",
+      "sourceSha256": "faa2750d4117a93be70a59d94e684df24a989279f6181dd2a29fad09aec75cae",
+      "originalBytes": 1206881,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/gem-ruby.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 6874,
+      "sha256": "5041ad6a32e20f9381778bd65287ddcb036e0becec4f8d941fa4a6c1e243435c",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/tokens/gem-sapphire.png",
+      "sourceSha256": "4cb7fadf5b2a15d6ee626fd3fe08cb43229cd509e06650283a4b1b57f4da152f",
+      "originalBytes": 1050575,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/gem-sapphire.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 6478,
+      "sha256": "4ed71c52965434489e8bf6799e5d7a126be179fee7b37a5b8594e1d58bd3376d",
+      "alpha": true
+    },
+    {
+      "source": "Kahroba_Assets/tokens/token-gold.png",
+      "sourceSha256": "9a5a3627a21ecf1c4cef4906f25d1c347b8a83d999cf0cfcb69a1954487667b3",
+      "originalBytes": 1712901,
+      "originalDimensions": [1254, 1254],
+      "target": "apps/web/public/assets/kahroba/token-gold.webp",
+      "optimizedDimensions": [128, 128],
+      "optimizedBytes": 8376,
+      "sha256": "228d887e3e74a2333fdc904f37f65f2f04ab787c28ebae6a7f71e91eaab2acad",
+      "alpha": true
+    }
+  ],
+  "nobleMapping": "definition numeric suffix modulo 4 maps queen-ivory, king, queen-ruby, elder; four supplied portraits reused for ten definitions; requirements remain data-driven."
+}

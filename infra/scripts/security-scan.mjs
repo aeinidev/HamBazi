@@ -23,6 +23,12 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const policy = JSON.parse(
   await readFile(new URL("../security/policy.json", import.meta.url), "utf8"),
 );
+const provenanceException = JSON.parse(
+  await readFile(
+    new URL("../security/gitleaks-provenance-exception.json", import.meta.url),
+    "utf8",
+  ),
+);
 const exec = promisify(execFile);
 const severities = ["info", "low", "moderate", "high", "critical"];
 const invalid = () => {
@@ -69,6 +75,61 @@ export function assessSecrets(report, exitCode) {
   // All matches block, regardless of rule/severity. Never export match text, keys,
   // fingerprints, commits, author identity or raw paths from the report.
   return { ok: report.length === 0, findings: report.length };
+}
+
+/** A single approved public revision; detectors still report it. Fail closed on drift. */
+export async function assessProvenanceSecrets(report, exitCode, scope, sourceRoot) {
+  assessSecrets(report, exitCode); // Validate raw scanner exit/report consistency first.
+  if (!["history", "current"].includes(scope) || !isAbsolute(sourceRoot)) invalid();
+  const exception = provenanceException;
+  let reviewedFalsePositives = 0;
+  for (const finding of report) {
+    const exactColumns =
+      finding.StartColumn === exception.startColumn && finding.EndColumn === exception.endColumn;
+    // Gitleaks 8.30.1 reports columns one lower on the first diff line.
+    // Both forms still require the exact match, source line, field and full blob hash.
+    const firstDiffLineColumns =
+      scope === "history" &&
+      finding.StartColumn === exception.startColumn - 1 &&
+      finding.EndColumn === exception.endColumn - 1;
+    if (
+      finding.RuleID !== exception.rule ||
+      finding.File !== (scope === "history" ? exception.path : join(sourceRoot, exception.path)) ||
+      finding.StartLine !== exception.startLine ||
+      finding.EndLine !== exception.endLine ||
+      (!exactColumns && !firstDiffLineColumns) ||
+      finding.Secret !== "REDACTED" ||
+      finding.Match !== exception.redactedMatch ||
+      finding.SymlinkFile ||
+      (scope === "current" && finding.Commit !== "")
+    )
+      continue;
+    let source;
+    if (scope === "history") {
+      if (!/^[a-f0-9]{40}$/.test(finding.Commit ?? "")) invalid();
+      const blob = await run("git", ["show", `${finding.Commit}:${exception.path}`], sourceRoot);
+      if (blob.code !== 0) invalid();
+      source = blob.stdout;
+    } else {
+      const path = join(sourceRoot, exception.path);
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink()) invalid();
+      source = await readFile(path, "utf8");
+    }
+    if (
+      !exception.reviewedSourceSha256.includes(createHash("sha256").update(source).digest("hex")) ||
+      exception.field.split(".").reduce((value, key) => value?.[key], JSON.parse(source)) !==
+        exception.revision ||
+      source.split("\n")[exception.startLine - 1] !== `      "api": "${exception.revision}",`
+    )
+      continue;
+    // The public revision must still be an available Git commit, never an arbitrary key.
+    const object = await run("git", ["cat-file", "-t", exception.revision], root);
+    if (object.code !== 0 || object.stdout.trim() !== "commit") invalid();
+    reviewedFalsePositives++;
+  }
+  const findings = report.length - reviewedFalsePositives;
+  return { ok: findings === 0, findings, detectedFindings: report.length, reviewedFalsePositives };
 }
 
 export function assessImage(report, image) {
@@ -285,7 +346,12 @@ export async function scan(kind, scannerDirectory = process.env.SECURITY_SCANNER
           ["git", "--log-opts=--all", "--report-path", history, ...args, root],
           directory,
         );
-        summary.history = assessSecrets(await json(history), h.code);
+        summary.history = await assessProvenanceSecrets(
+          await json(history),
+          h.code,
+          "history",
+          root,
+        );
         stage = "candidate-tree";
         const candidate = join(directory, "candidate");
         await mkdir(candidate, { mode: 0o700 });
@@ -296,7 +362,12 @@ export async function scan(kind, scannerDirectory = process.env.SECURITY_SCANNER
           ["dir", "--report-path", current, ...args, candidate],
           directory,
         );
-        summary.current = assessSecrets(await json(current), c.code);
+        summary.current = await assessProvenanceSecrets(
+          await json(current),
+          c.code,
+          "current",
+          candidate,
+        );
         summary.ok = summary.history.ok && summary.current.ok;
       } else {
         const cache = resolve(scannerDirectory, "cache");

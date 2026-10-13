@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 2,
+  "eventType": "MATCH_FINISHED_V2",
+  "queue": "match-finished-v2",
+  "result": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "schemaVersion": {
+        "type": "number",
+        "const": 2
+      },
+      "placements": {
+        "minItems": 2,
+        "maxItems": 64,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "playerId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "place": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            }
+          },
+          "required": ["playerId", "place"],
+          "additionalProperties": false
+        }
+      },
+      "winnerId": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "winnerIds": {
+        "minItems": 1,
+        "maxItems": 64,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        }
+      },
+      "outcome": {
+        "type": "string",
+        "enum": ["SOLE_VICTORY", "SHARED_VICTORY"]
+      },
+      "reason": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+      },
+      "metrics": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$"
+        },
+        "additionalProperties": {
+          "type": "number"
+        }
+      }
+    },
+    "required": [
+      "schemaVersion",
+      "placements",
+      "winnerId",
+      "winnerIds",
+      "outcome",
+      "reason",
+      "metrics"
+    ],
+    "additionalProperties": false
+  },
+  "payload": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "schemaVersion": {
+        "type": "number",
+        "const": 2
+      },
+      "matchId": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "gameId": {
+        "type": "string",
+        "const": "kahroba"
+      },
+      "stateVersion": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "lastEventSeq": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+      },
+      "finishedAt": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 253402300799999
+      },
+      "engineVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "stateSchemaVersion": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "rulesetVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "result": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "number",
+            "const": 2
+          },
+          "placements": {
+            "minItems": 2,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "playerId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "place": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 64
+                }
+              },
+              "required": ["playerId", "place"],
+              "additionalProperties": false
+            }
+          },
+          "winnerId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "winnerIds": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "outcome": {
+            "type": "string",
+            "enum": ["SOLE_VICTORY", "SHARED_VICTORY"]
+          },
+          "reason": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+          },
+          "metrics": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "placements",
+          "winnerId",
+          "winnerIds",
+          "outcome",
+          "reason",
+          "metrics"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "schemaVersion",
+      "matchId",
+      "gameId",
+      "stateVersion",
+      "lastEventSeq",
+      "finishedAt",
+      "engineVersion",
+      "stateSchemaVersion",
+      "rulesetVersion",
+      "result"
+    ],
+    "additionalProperties": false
+  },
+  "invariants": {
+    "winners": "exactly the unique placements at place 1",
+    "sole": "one winnerId equal to the sole winnerIds entry",
+    "shared": "winnerId null, multiple winnerIds, SHARED_VICTORY",
+    "statistics": "one completed and one win per winner, deduplicated per Match and generation"
+  }
+}

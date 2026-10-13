@@ -1,4 +1,5 @@
 export { createCatalogPort } from "./module.js";
+export { createPrivateRegistrationCatalog } from "./module.js";
 export type { CatalogPort, CatalogGame } from "./application/catalog.js";
 export {
   createCatalogHttpModule,

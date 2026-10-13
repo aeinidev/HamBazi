@@ -6,9 +6,14 @@ import { queueConnection, probeQueue, requeueForDrain } from "./queue-connection
 import type { Telemetry } from "@hambazi/observability";
 type Matches = ReturnType<typeof createMatchResultPort>;
 type Statistics = ReturnType<typeof createStatisticsProjection>;
-export function finishProcessor(matches: Matches, statistics: Statistics, telemetry?: Telemetry) {
+export function finishProcessor(
+  matches: Matches,
+  statistics: Statistics,
+  telemetry?: Telemetry,
+  version: 1 | 2 = 1,
+) {
   return domainEventProcessor(
-    "MATCH_FINISHED_V1",
+    version === 2 ? "MATCH_FINISHED_V2" : "MATCH_FINISHED_V1",
     async (event) => {
       const recorded = await matches.record(event);
       return statistics.consume(recorded);
@@ -35,17 +40,20 @@ export async function rebuildStatistics(matches: Matches, statistics: Statistics
     throw new Error("Statistics rebuild failed");
   }
 }
-export async function startStatisticsConsumer(options: {
-  matches: Matches;
-  statistics: Statistics;
-  redisUrl: { reveal(): string };
-  namespace: string;
-  concurrency: number;
-  drainTimeoutMs: number;
-  unavailable(): void;
-  telemetry?: Telemetry;
-  diagnostics?: boolean;
-}) {
+async function startVersionedStatisticsConsumer(
+  options: {
+    matches: Matches;
+    statistics: Statistics;
+    redisUrl: { reveal(): string };
+    namespace: string;
+    concurrency: number;
+    drainTimeoutMs: number;
+    unavailable(): void;
+    telemetry?: Telemetry;
+    diagnostics?: boolean;
+  },
+  version: 1 | 2,
+) {
   if (
     !/^[A-Za-z0-9_-]{1,64}$/.test(options.namespace) ||
     !Number.isInteger(options.concurrency) ||
@@ -56,12 +64,17 @@ export async function startStatisticsConsumer(options: {
     options.drainTimeoutMs > 60000
   )
     throw new Error("Invalid statistics consumer configuration");
-  const processing = finishProcessor(options.matches, options.statistics, options.telemetry);
+  const processing = finishProcessor(
+    options.matches,
+    options.statistics,
+    options.telemetry,
+    version,
+  );
   const inflight = new Set<Promise<unknown>>();
   let stopping = false;
   let paused: Promise<void> | undefined;
   const diagnosticQueue = options.diagnostics
-    ? new Queue(outboxQueueNames.MATCH_FINISHED_V1, {
+    ? new Queue(outboxQueueNames[version === 2 ? "MATCH_FINISHED_V2" : "MATCH_FINISHED_V1"], {
         connection: queueConnection(options.redisUrl, false),
         prefix: `hambazi:jobs:${options.namespace}`,
       })
@@ -70,7 +83,7 @@ export async function startStatisticsConsumer(options: {
     /* Collection validity carries this failure; never report raw diagnostics. */
   });
   const worker = new Worker(
-    outboxQueueNames.MATCH_FINISHED_V1,
+    outboxQueueNames[version === 2 ? "MATCH_FINISHED_V2" : "MATCH_FINISHED_V1"],
     (job, token) => {
       if (stopping) return requeueForDrain(job, token!);
       const work = processing(job);
@@ -146,6 +159,39 @@ export async function startStatisticsConsumer(options: {
           await diagnosticQueue?.close();
         }
       })());
+    },
+  };
+}
+
+export async function startStatisticsConsumer(
+  options: Parameters<typeof startVersionedStatisticsConsumer>[0],
+) {
+  const first = await startVersionedStatisticsConsumer(options, 1);
+  let second: Awaited<ReturnType<typeof startVersionedStatisticsConsumer>>;
+  try {
+    second = await startVersionedStatisticsConsumer(options, 2);
+  } catch {
+    await first.close();
+    throw new Error("Statistics consumer unavailable");
+  }
+  const both = [first, second];
+  return {
+    stopAdmission: () => Promise.all(both.map((w) => w.stopAdmission())).then(() => {}),
+    settled: () => Promise.all(both.map((w) => w.settled())).then(() => {}),
+    probe: async () => (await Promise.all(both.map((w) => w.probe()))).every(Boolean),
+    counts: async () => {
+      const counts = await Promise.all(both.map((w) => w.counts()));
+      return Object.fromEntries(
+        ["waiting", "active", "delayed", "failed"].map((key) => [
+          key,
+          counts.reduce((n, c) => n + (c[key] ?? 0), 0),
+        ]),
+      );
+    },
+    close: async () => {
+      const outcomes = await Promise.allSettled(both.map((w) => w.close()));
+      if (outcomes.some((r) => r.status === "rejected"))
+        throw new Error("Statistics consumer drain failed");
     },
   };
 }

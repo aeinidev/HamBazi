@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test } from "./fixture.js";
+import { expect, type Page } from "@playwright/test";
 import { setup, nativeEvent, matchId } from "./fixture.js";
 
 declare global {

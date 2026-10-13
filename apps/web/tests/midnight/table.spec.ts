@@ -1,5 +1,6 @@
+import { test } from "./fixture.js";
 import { readFileSync } from "node:fs";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { setup, launch, nativeEvent, matchId } from "./fixture.js";
 const views = JSON.parse(
   readFileSync(new URL("./anarchist-views.json", import.meta.url), "utf8"),

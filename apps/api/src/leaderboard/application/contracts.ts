@@ -1,3 +1,4 @@
+import { matchFinishedV2Schema } from "@hambazi/validation";
 import { z } from "zod";
 export const countSchema = z.string().regex(/^(0|[1-9][0-9]{0,18})$/);
 const gameId = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/);
@@ -50,7 +51,7 @@ export const leaderboardResponseSchema = z.strictObject({
   nextOffset: z.number().int().min(0).max(1000000).nullable(),
 });
 // Projection input is an owned public DTO; no persistence or Matches internals are imported.
-export const statsFinishSchema = z
+export const statsFinishV1Schema = z
   .strictObject({
     eventId: z.uuid(),
     payload: z.strictObject({
@@ -80,6 +81,10 @@ export const statsFinishSchema = z
       (p.result.winnerId === null ||
         p.result.placements.some((r) => r.playerId === p.result.winnerId && r.place === 1)),
   );
+export const statsFinishSchema = z.union([
+  statsFinishV1Schema,
+  z.strictObject({ eventId: z.uuid(), payload: matchFinishedV2Schema }),
+]);
 export type StatsFinish = z.infer<typeof statsFinishSchema>;
 export type StatsResponse = z.infer<typeof statsResponseSchema>;
 export type LeaderboardResponse = z.infer<typeof leaderboardResponseSchema>;

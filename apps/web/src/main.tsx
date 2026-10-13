@@ -2,6 +2,9 @@ import "./platform/browser-validation.js";
 import { createRoot } from "react-dom/client";
 import { App } from "./app.js";
 import { createRuntime } from "./platform/runtime.js";
+import { createKahrobaRealtime, publicKahrobaSnapshot } from "./games/kahroba/index.js";
+import { createRealtime } from "./platform/realtime.js";
+import { publicSnapshot } from "./games/index.js";
 import { bootstrapTelegram } from "./platform/telegram.js";
 import { loadTelegramSdk } from "./platform/telegram-loader.js";
 import {
@@ -31,7 +34,11 @@ void loadTelegramSdk((state) => {
     import.meta.env.VITE_API_ORIGIN || window.location.origin,
     telegram.initData,
     fetch,
-    undefined,
+    import.meta.env.DEV &&
+      window.location.hostname === "127.0.0.1" &&
+      import.meta.env.VITE_KAHROBA_RUNTIME === "true"
+      ? createKahrobaRealtime
+      : createRealtime,
     import.meta.env.PROD &&
       window.location.origin === "https://staging.hambazi.top" &&
       import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top"
@@ -48,6 +55,11 @@ void loadTelegramSdk((state) => {
           ? "sdk-error"
           : sdkState,
     },
+    import.meta.env.DEV &&
+      window.location.hostname === "127.0.0.1" &&
+      import.meta.env.VITE_KAHROBA_RUNTIME === "true"
+      ? publicKahrobaSnapshot
+      : publicSnapshot,
   );
   const root = createRoot(document.getElementById("root")!);
   root.render(
@@ -55,6 +67,13 @@ void loadTelegramSdk((state) => {
       runtime={runtime}
       telegram={telegram.app}
       localPreview={localPreview}
+      kahrobaEnabled={
+        import.meta.env.VITE_KAHROBA_RUNTIME === "true" &&
+        ((import.meta.env.DEV && window.location.hostname === "127.0.0.1") ||
+          (import.meta.env.PROD &&
+            window.location.origin === "https://staging.hambazi.top" &&
+            import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top"))
+      }
       directCoupPreviewMatchId={
         localPreview
           ? document.querySelector<HTMLMetaElement>('meta[name="hambazi-coup-preview-match"]')

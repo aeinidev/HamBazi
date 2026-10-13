@@ -141,3 +141,16 @@ input/queue versions and old callback shapes above remain compatible.
 [Statistics](statistics.md) describes activation, duplicate delivery, trusted
 maintenance, rollback and legacy-input recovery; no missing pre-11B historical
 outcome is fabricated.
+
+## Kahroba local K2 finish events
+
+[ADR-065](../adr/065-kahroba-local-multiplayer-and-shared-results.md) introduces
+`MATCH_FINISHED_V2` with outer/payload schema 2 on the separate `match-finished-v2`
+queue. The finish envelope contains explicit winner IDs/outcome and no private
+engine state. Existing v1 producer/consumer shapes are retained. Both result
+versions participate in existing claim/redrive/receipt/rebuild workflows.
+
+Public gameplay delivery still uses the unchanged `MATCH_CHANGED_V1` wake-up,
+empty invalidations and pinned recipient-safe projections. Internal Kahroba audit
+events are never public jobs. No public/staging producer is activated, and no
+new schema migration or deployment is required/performed by local K2.

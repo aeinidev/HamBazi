@@ -6,7 +6,12 @@ import { afterEach, expect, it } from "vitest";
 import { startStaticWeb } from "../../apps/web/server/serve.mjs";
 import { createBrowserPolicy } from "../../apps/web/security/browser-policy.ts";
 import { telegramSdkIntegrity } from "../../apps/web/src/platform/telegram-sdk.ts";
-import { hashContext, verifyArchive, buildIdentity } from "../release/build.mjs";
+import {
+  hashContext,
+  verifyArchive,
+  buildIdentity,
+  kahrobaBuildFeatures,
+} from "../release/build.mjs";
 import { assessImage } from "../scripts/security-scan.mjs";
 import { projectScan } from "../ci/scan-evidence.mjs";
 import { runSequence } from "../ci/gates.mjs";
@@ -165,6 +170,20 @@ it("binds image identity to both source and public browser policy", () => {
   expect(buildIdentity(source, { apiOrigin: null })).not.toBe(
     buildIdentity("b".repeat(64), { apiOrigin: null }),
   );
+});
+it("pins the private Web flag into image identity and limits it to the existing staging origins", () => {
+  const policy = {
+    webOrigin: "https://staging.hambazi.top",
+    apiOrigin: "https://api-staging.hambazi.top",
+  };
+  const feature = kahrobaBuildFeatures("true", policy),
+    source = "a".repeat(64);
+  expect(buildIdentity(source, policy, feature)).not.toBe(buildIdentity(source, policy));
+  expect(kahrobaBuildFeatures("false", policy)).toBeUndefined();
+  for (const value of ["1", "yes"]) expect(() => kahrobaBuildFeatures(value, policy)).toThrow();
+  expect(() =>
+    kahrobaBuildFeatures("true", { ...policy, webOrigin: "https://public.example" }),
+  ).toThrow();
 });
 it("rejects incomplete, reordered or unsafe application-image CI evidence", () => {
   const counts = { info: 0, unknown: 0, low: 0, moderate: 0, high: 0, critical: 0 };

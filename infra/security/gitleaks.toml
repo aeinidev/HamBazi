@@ -3,6 +3,10 @@ title = "HamBazi: default rules, no credential exceptions"
 [extend]
 useDefault = true
 
+# The owner-approved public revision exception is context-verified AFTER detection
+# by security-scan.mjs using gitleaks-provenance-exception.json. Native line/secret
+# allowlists cannot enforce the full JSON field, so no detector allowance is added.
+
 # Reviewed false positive in historical architecture decision prose, not a key.
 # Match BOTH the exact file and the exact extracted timestamp label.
 [[allowlists]]

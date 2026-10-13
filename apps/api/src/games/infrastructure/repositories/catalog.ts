@@ -2,13 +2,14 @@ import type { createDatabase } from "@hambazi/database";
 import type { CatalogRepository } from "../../application/catalog.js";
 export function createCatalogRepository(
   database: ReturnType<typeof createDatabase>,
+  registeredId = "coup",
 ): CatalogRepository {
   const scoped = database.forModule("games");
   return {
     list: () =>
       scoped.execute((db) =>
         db.game.findMany({
-          where: { id: "coup" },
+          where: { id: registeredId },
           orderBy: { slug: "asc" },
           select: {
             id: true,
@@ -29,7 +30,7 @@ export function createCatalogRepository(
     find: (slug) =>
       scoped.execute((db) =>
         db.game.findUnique({
-          where: { slug, id: "coup" },
+          where: { slug, id: registeredId },
           select: {
             id: true,
             slug: true,

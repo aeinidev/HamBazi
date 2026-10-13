@@ -25,7 +25,10 @@ export interface RoomsHttpDependencies {
   >;
   rate: RoomsRate;
 }
-export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
+export function createRoomsHttpModule(
+  deps: RoomsHttpDependencies,
+  prefix: "v1" | "v1/kahroba" = "v1",
+) {
   function fail(reply: FastifyReply, code: RoomCode | "REGISTRATION_REQUIRED") {
     if (code === "RATE_LIMITED")
       return reply.header("Retry-After", 60).code(429).send(createErrorEnvelope(code));
@@ -101,7 +104,7 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
       return fail(reply, "INTERNAL_ERROR");
     }
   }
-  @Controller("v1/rooms")
+  @Controller(`${prefix}/rooms`)
   class RoomsController {
     @Post() create(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return handle(req, reply, "create");
@@ -113,7 +116,7 @@ export function createRoomsHttpModule(deps: RoomsHttpDependencies) {
       return handle(req, reply, "read");
     }
   }
-  @Controller("v1/room-invites")
+  @Controller(`${prefix}/room-invites`)
   class InvitesController {
     @Post("resolve") resolve(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return handle(req, reply, "resolveInvite");

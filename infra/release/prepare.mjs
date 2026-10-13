@@ -5,7 +5,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse, stringify } from "yaml";
 import * as config from "../../packages/config/dist/index.js";
-import { roles, buildIdentity } from "./build.mjs";
+import { roles, buildIdentity, kahrobaBuildFeatures } from "./build.mjs";
 import { projectScan } from "../ci/scan-evidence.mjs";
 import { runGate } from "../ci/gates.mjs";
 import { verifyBrowserPolicyArtifact } from "../../apps/web/security/browser-policy.ts";
@@ -130,6 +130,40 @@ const groups = {
   web: ["WEB_BIND_ADDRESS", "WEB_PORT", "WEB_HEALTH_PORT"],
 };
 
+const kahrobaFields = [
+  "KAHROBA_RUNTIME_PROFILE",
+  "KAHROBA_ENGINE_REGISTERED",
+  "KAHROBA_RUNTIME_ENABLED",
+  "KAHROBA_ROUTES_ENABLED",
+  "KAHROBA_ADMISSION_ENABLED",
+  "KAHROBA_QUEUE_NAMESPACE",
+  "KAHROBA_RECONNECT_LEASE_MS",
+  "KAHROBA_RECONNECT_GRACE_MS",
+];
+groups.api.push(
+  ...kahrobaFields,
+  "ROOM_TTL_SECONDS",
+  "ROOM_READ_LIMIT",
+  "ROOM_CREATE_LIMIT",
+  "ROOM_BOT_USERNAME",
+  "ROOM_APP_NAME",
+  "ROOM_INVITE_LIMIT",
+);
+groups.worker.push(
+  ...kahrobaFields,
+  "STATS_ENABLED",
+  "STATS_CONCURRENCY",
+  "STATS_DRAIN_TIMEOUT_MS",
+  "MATCH_OUTBOX_ENABLED",
+  "MATCH_OUTBOX_INTERVAL_MS",
+  "MATCH_OUTBOX_BATCH_SIZE",
+  "MATCH_OUTBOX_LEASE_MS",
+  "MATCH_OUTBOX_ATTEMPTS",
+  "MATCH_OUTBOX_BACKOFF_MS",
+  "MATCH_OUTBOX_MAX_BACKOFF_MS",
+  "MATCH_OUTBOX_PUBLISH_TIMEOUT_MS",
+);
+
 /** Literal single-line KEY=value files: no shell, quotes, interpolation or dotenv fallback. */
 export function parseRoleFile(text, role) {
   if (!roles.includes(role) || typeof text !== "string" || Buffer.byteLength(text) > 32768)
@@ -152,6 +186,11 @@ export function parseRoleFile(text, role) {
 
 export function validateInventory(manifest, report, stagingContext) {
   verifyBrowserPolicyArtifact(manifest?.browserPolicy, telegramSdkIntegrity);
+  if (manifest?.features !== undefined) {
+    exact(manifest.features, ["kahrobaPrivateRuntime"]);
+    if (manifest.features.kahrobaPrivateRuntime !== true) invalid();
+    kahrobaBuildFeatures("true", manifest.browserPolicy);
+  }
   if (
     manifest?.schemaVersion !== 1 ||
     manifest.purpose !== "local-packaging-candidate" ||
@@ -160,7 +199,7 @@ export function validateInventory(manifest, report, stagingContext) {
     !/^[a-f0-9]{40}$/.test(manifest.sourceCommit ?? "") ||
     typeof manifest.sourceDirty !== "boolean" ||
     !/^[a-f0-9]{64}$/.test(manifest.sourceSnapshotSha256 ?? "") ||
-    buildIdentity(manifest.sourceSnapshotSha256, manifest.browserPolicy) !==
+    buildIdentity(manifest.sourceSnapshotSha256, manifest.browserPolicy, manifest.features) !==
       manifest.buildInputSha256 ||
     !Array.isArray(manifest.images) ||
     manifest.images.length !== 4
@@ -195,6 +234,25 @@ export function validateEnvironments(envs, inputs) {
     const personalApi = config.parsePersonalGameplayConfig(api, "api"),
       personalWorker = config.parsePersonalGameplayConfig(worker, "worker");
     if (Boolean(personalApi) !== Boolean(personalWorker)) invalid();
+    const ka = config.parseKahrobaRuntimeConfig(api, "api"),
+      kw = config.parseKahrobaRuntimeConfig(worker, "worker");
+    if (Boolean(ka) !== Boolean(kw)) invalid();
+    if (
+      ka &&
+      (!kw ||
+        ka.local ||
+        kw.local ||
+        ka.namespace !== kw.namespace ||
+        ka.registered !== kw.registered ||
+        ka.enabled !== kw.enabled ||
+        ka.routes !== kw.routes ||
+        ka.admission !== kw.admission ||
+        !inputs.stagingTestAdmissionFile ||
+        !config.parseRoomsConfig(api)?.target)
+    )
+      invalid();
+    config.parseStatisticsConfig(worker, "worker");
+    config.parseOutboxWorkerConfig(worker);
     const aOwner = config.parseOwnerAdmissionConfig(api),
       bOwner = config.parseOwnerAdmissionConfig(bot);
     if (inputs.ownerAdmissionFile !== undefined || aOwner || bOwner) {

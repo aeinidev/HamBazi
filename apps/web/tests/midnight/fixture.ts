@@ -1,5 +1,23 @@
 import { readFileSync } from "node:fs";
-import { expect, type APIRequestContext, type Page, type WebSocketRoute } from "@playwright/test";
+import {
+  test as base,
+  expect,
+  type APIRequestContext,
+  type Page,
+  type WebSocketRoute,
+} from "@playwright/test";
+// Keep APIRequestContext alive until all intercepted fetch/fulfill callbacks have settled.
+// The fixture depends on both resources, so teardown runs before either is disposed.
+export const test = base.extend<{ settledRoutes: void }>({
+  settledRoutes: [
+    async ({ page, request }, use) => {
+      void request;
+      await use();
+      await page.unrouteAll({ behavior: "wait" });
+    },
+    { auto: true },
+  ],
+});
 // UI transport fixture only: the actual engine/DB path is tested separately.
 // The real production bundle and unmodified pinned Telegram SDK run in the browser.
 const goldens = (

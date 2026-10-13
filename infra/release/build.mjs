@@ -24,8 +24,19 @@ export function verifyArchive(data, expected) {
     invalid();
 }
 
-export const buildIdentity = (sourceSnapshotSha256, browserPolicy) =>
-  hash(JSON.stringify({ sourceSnapshotSha256, browserPolicy }));
+export const buildIdentity = (sourceSnapshotSha256, browserPolicy, features) =>
+  hash(JSON.stringify({ sourceSnapshotSha256, browserPolicy, ...(features ? { features } : {}) }));
+
+export function kahrobaBuildFeatures(value, policy) {
+  if (value === undefined || value === "false") return undefined;
+  if (
+    value !== "true" ||
+    policy.webOrigin !== "https://staging.hambazi.top" ||
+    policy.apiOrigin !== "https://api-staging.hambazi.top"
+  )
+    invalid();
+  return Object.freeze({ kahrobaPrivateRuntime: true });
+}
 
 export async function hashContext(directory) {
   const files = [];
@@ -72,6 +83,7 @@ export async function buildCandidates(directory, environment = process.env) {
   const dirty =
     (await runGate("packaging-status", "git", ["status", "--porcelain"], { cwd: root })).trim()
       .length > 0;
+  const features = kahrobaBuildFeatures(environment.VITE_KAHROBA_RUNTIME, policy);
   await mkdir(directory, { mode: 0o700 });
   const context = join(directory, "context");
   await mkdir(context, { mode: 0o700 });
@@ -79,7 +91,7 @@ export async function buildCandidates(directory, environment = process.env) {
   try {
     await snapshotCandidate(context);
     const source = await hashContext(context);
-    const buildInputSha256 = buildIdentity(source.sha256, policy);
+    const buildInputSha256 = buildIdentity(source.sha256, policy, features);
     const baseLock = JSON.parse(
       await readFile(join(context, "infra/docker/apps/base-lock.json"), "utf8"),
     );
@@ -172,6 +184,8 @@ export async function buildCandidates(directory, environment = process.env) {
           "--build-arg",
           `VITE_API_ORIGIN=${policy.apiOrigin ?? ""}`,
           "--build-arg",
+          `VITE_KAHROBA_RUNTIME=${features ? "true" : "false"}`,
+          "--build-arg",
           `HAMBAZI_WEB_ORIGIN=${policy.webOrigin ?? ""}`,
           "--build-arg",
           `HAMBAZI_WEB_FRAME_ANCESTORS=${JSON.stringify(policy.frameAncestors)}`,
@@ -241,6 +255,7 @@ export async function buildCandidates(directory, environment = process.env) {
       dockerfileSha256: hash(await readFile(join(context, "infra/docker/apps/Dockerfile"))),
       baseLockSha256: hash(await readFile(join(context, "infra/docker/apps/base-lock.json"))),
       browserPolicy: policy,
+      ...(features ? { features } : {}),
       images,
     };
     await writeFile(join(directory, "images.json"), JSON.stringify(manifest, null, 2) + "\n", {

@@ -13,6 +13,7 @@ import { DirectCoupPreview } from "./dev/coup-preview.js";
 import { RuntimeContext, go, useRuntime, useSession } from "./ui/shared.js";
 import { profileSchema } from "./platform/contracts.js";
 import { AccountAvatar } from "./ui/midnight.js";
+import { KahrobaRouteBoundary } from "./games/kahroba/index.js";
 function Shell({
   telegram,
   localPreview,
@@ -155,16 +156,30 @@ export function App({
   telegram,
   localPreview = false,
   directCoupPreviewMatchId,
+  kahrobaEnabled = false,
 }: {
   runtime: Runtime;
   telegram?: TelegramApp | undefined;
   localPreview?: boolean;
   directCoupPreviewMatchId?: string | undefined;
+  kahrobaEnabled?: boolean;
 }) {
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
-        {runtime.scope === "owner-auth" ? (
+        {kahrobaEnabled ? (
+          <KahrobaRouteBoundary runtime={runtime}>
+            {runtime.scope === "owner-auth" ? (
+              <PersonalLobbyShell telegram={telegram} />
+            ) : (
+              <Shell
+                telegram={telegram}
+                localPreview={localPreview}
+                directCoupPreviewMatchId={directCoupPreviewMatchId}
+              />
+            )}
+          </KahrobaRouteBoundary>
+        ) : runtime.scope === "owner-auth" ? (
           <PersonalLobbyShell telegram={telegram} />
         ) : (
           <Shell

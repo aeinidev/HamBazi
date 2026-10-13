@@ -8,6 +8,7 @@ import { expect, it } from "vitest";
 import {
   assessAudit,
   assessSecrets,
+  assessProvenanceSecrets,
   assessImage,
   assertFreshDatabase,
   verifyTool,
@@ -342,4 +343,174 @@ it.skipIf(!process.env.SECURITY_SCANNER_DIR)(
     }
   },
   15000,
+);
+
+it.skipIf(!process.env.SECURITY_SCANNER_DIR)(
+  "the approved provenance exception preserves detection outside its exact reviewed field, value, path, rule and bytes",
+  async () => {
+    const directory = await mkdtemp(join(tmpdir(), "hambazi-provenance-canary-"));
+    try {
+      const executable = resolve(process.env.SECURITY_SCANNER_DIR, "gitleaks");
+      await verifyTool(executable, "gitleaks");
+      const exception = JSON.parse(
+        await readFile(resolve("infra/security/gitleaks-provenance-exception.json"), "utf8"),
+      );
+      const original = await readFile(resolve(exception.path), "utf8");
+      const fixture = join(directory, "repo");
+      const path = join(fixture, exception.path);
+      await mkdir(join(fixture, "infra/docker/staging"), { recursive: true });
+      await run("git", ["init", "--quiet"], { cwd: fixture });
+      const report = join(directory, "report.json");
+      const ignore = join(directory, "empty-ignore");
+      await writeFile(ignore, "", { mode: 0o600 });
+      const args = [
+        "--config",
+        resolve("infra/security/gitleaks.toml"),
+        "--gitleaks-ignore-path",
+        ignore,
+        "--ignore-gitleaks-allow",
+        "--redact=100",
+        "--no-banner",
+        "--no-color",
+        "--timeout=120",
+        "--max-archive-depth=2",
+        "--report-format=json",
+        "--report-path",
+        report,
+      ];
+      const generated = ["ghp", "_", randomBytes(18).toString("hex")].join("");
+      // Fixed symbol counts ensure detector entropy; randomness only permutes them.
+      const symbols = [...("0123456789abcdef".repeat(2) + "01234567")];
+      const changedRevision = [...randomBytes(symbols.length)]
+        .map((byte) => symbols.splice(byte % symbols.length, 1)[0])
+        .join("");
+      const inspect = async (scope) => {
+        let code = 0;
+        try {
+          await run(executable, [scope === "history" ? "git" : "dir", ...args, fixture]);
+        } catch (error) {
+          // Never let execFile's raw diagnostics escape through a rejected test.
+          code = error.code === 1 ? 1 : -1;
+        }
+        if (code === -1) throw new Error("CANARY_SCANNER_FAILED");
+        const raw = await readFile(report, "utf8");
+        expect(raw.includes(generated) || raw.includes(changedRevision)).toBe(false);
+        const rows = JSON.parse(raw);
+        const result = await assessProvenanceSecrets(rows, code, scope, fixture);
+        return { rows, code, result };
+      };
+
+      await writeFile(path, original);
+      const allowed = await inspect("current");
+      expect(allowed.code).toBe(1); // The native detector is still enabled.
+      expect(allowed.result).toEqual({
+        ok: true,
+        findings: 0,
+        detectedFindings: 1,
+        reviewedFalsePositives: 1,
+      });
+      for (const change of [
+        { RuleID: "github-pat" },
+        { StartLine: exception.startLine + 1 },
+        { StartColumn: exception.startColumn + 1 },
+        { Secret: "unexpected" },
+        { Commit: "a".repeat(40) },
+      ]) {
+        const altered = allowed.rows.map((row) => ({ ...row, ...change }));
+        expect(await assessProvenanceSecrets(altered, 1, "current", fixture)).toMatchObject({
+          ok: false,
+          findings: 1,
+          reviewedFalsePositives: 0,
+        });
+      }
+      await expect(assessProvenanceSecrets(allowed.rows, 0, "current", fixture)).rejects.toThrow();
+      await expect(assessProvenanceSecrets([], 0, "other", fixture)).rejects.toThrow();
+
+      // Same field and path, different revision; no arbitrary hexadecimal allowance.
+      await writeFile(
+        path,
+        original.replace(`"api": "${exception.revision}"`, `"api": "${changedRevision}"`),
+      );
+      expect((await inspect("current")).result).toMatchObject({
+        ok: false,
+        reviewedFalsePositives: 0,
+      });
+      // Same line, column, revision and path, but a different JSON ancestor.
+      await writeFile(path, original.replace('"roleSourceCommits"', '"credentials"'));
+      expect((await inspect("current")).result).toMatchObject({
+        ok: false,
+        reviewedFalsePositives: 0,
+      });
+      // Even unrelated source edits reopen review rather than widen the allowance.
+      await writeFile(path, original + "\n");
+      expect((await inspect("current")).result).toMatchObject({
+        ok: false,
+        reviewedFalsePositives: 0,
+      });
+      await writeFile(path, original);
+      const otherPath = join(fixture, "infra/docker/staging/other.json");
+      await writeFile(otherPath, original);
+      expect((await inspect("current")).result).toMatchObject({
+        ok: false,
+        findings: 1,
+        detectedFindings: 2,
+        reviewedFalsePositives: 1,
+      });
+      await rm(otherPath);
+
+      // Genuine detector-shaped synthetic credential in the approved file/field.
+      await writeFile(
+        path,
+        original.replace(`"api": "${exception.revision}"`, `"api": "${generated}"`),
+      );
+      const positive = await inspect("current");
+      expect(positive.result.ok).toBe(false);
+      expect(positive.result.reviewedFalsePositives).toBe(0);
+      expect(positive.rows.some((row) => row.RuleID === "github-pat")).toBe(true);
+      await run("git", ["add", "."], { cwd: fixture });
+      const commit = async () =>
+        run(
+          "git",
+          [
+            "-c",
+            "user.name=HamBazi scan test",
+            "-c",
+            "user.email=scan-test@example.invalid",
+            "commit",
+            "--quiet",
+            "-m",
+            "Disposable provenance canary",
+          ],
+          { cwd: fixture },
+        );
+      await commit();
+      expect((await inspect("history")).result).toMatchObject({
+        ok: false,
+        reviewedFalsePositives: 0,
+      });
+      // A credential in another field of the same file also stays blocking.
+      const withSecret = JSON.parse(original);
+      withSecret.authentication = { api: generated };
+      await writeFile(path, JSON.stringify(withSecret, null, 2) + "\n");
+      expect((await inspect("current")).result).toMatchObject({
+        ok: false,
+        reviewedFalsePositives: 0,
+      });
+      await writeFile(path, original);
+      await run("git", ["add", "."], { cwd: fixture });
+      await commit();
+      expect((await inspect("current")).result.ok).toBe(true);
+      const historicalOnly = await inspect("history");
+      expect(historicalOnly.result).toMatchObject({
+        ok: false,
+        detectedFindings: 2,
+        findings: 1,
+        reviewedFalsePositives: 1,
+      });
+      expect(historicalOnly.rows.some((row) => row.RuleID === "github-pat")).toBe(true);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+  30000,
 );

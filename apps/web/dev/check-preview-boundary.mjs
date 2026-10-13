@@ -25,6 +25,10 @@ const markers = [
   "Local preview · synthetic Telegram identity and server data",
   "hambazi-coup-preview-match",
   "/preview/coup",
+  "hambazi-kahroba-local-preview",
+  "kahroba-synthetic-only",
+  "kahroba-local-",
+  "/__preview/case",
 ];
 let officialBridge = false;
 let launchCacheGuard = false;

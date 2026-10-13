@@ -47,12 +47,17 @@ import {
 import { createRoomDiagnostics } from "../rooms/index.js";
 import { createApiHealth } from "../health/index.js";
 import { createRedisTransportAdmission } from "../realtime/index.js";
+import { createRealtimeRedisAdapter, createRealtimeConsumer } from "../realtime/index.js";
+import { parseKahrobaRuntimeConfig } from "@hambazi/config";
+import { createKahrobaLocalAdmission } from "./kahroba-local-admission.js";
+import { createKahrobaRuntimePorts } from "./kahroba-runtime.js";
 
 export async function startApi(
   environment: Readonly<Record<string, string | undefined>>,
   logger: SafeLogger,
 ) {
   const runtime = parseRuntimeConfig(environment, "api");
+  const kahrobaConfig = parseKahrobaRuntimeConfig(environment, "api");
   if (runtime.role !== "api") throw new Error("Invalid runtime role");
   const auth = parseAuthRuntimeConfig(environment);
   const ownerConfig = parseOwnerAdmissionConfig(environment);
@@ -97,6 +102,9 @@ export async function startApi(
     ...profileConfig,
   });
   let http: Awaited<ReturnType<typeof createHttpApplication>> | undefined;
+  let kahrobaRedis: Awaited<ReturnType<typeof createRealtimeRedisAdapter>> | undefined;
+  let kahrobaConsumer: ReturnType<typeof createRealtimeConsumer> | undefined;
+  let kahrobaDeliveryReady = false;
   const catalogRate = createCatalogRate({
     url: runtime.redisUrl,
     namespace: auth.signing.issuer,
@@ -124,6 +132,9 @@ export async function startApi(
           ...(roomsRate ? [roomsRate.probe(signal)] : []),
           ...(statisticsRate ? [statisticsRate.probe(signal)] : []),
           ...(admission ? [admission.probe(signal)] : []),
+          ...(kahrobaConfig?.routes
+            ? [Promise.resolve(kahrobaDeliveryReady && kahrobaRedis?.ready() === true)]
+            : []),
         ])
       ).every(Boolean),
     timeoutMs: operations.probeTimeoutMs,
@@ -131,13 +142,18 @@ export async function startApi(
   });
   let healthServer: Awaited<ReturnType<typeof startHealthServer>> | undefined;
   try {
-    const ownerAdmission = ownerConfig
-      ? createFileOwnerAdmission(
-          ownerConfig.file,
+    const ownerAdmission = kahrobaConfig?.localAdmissionFile
+      ? createKahrobaLocalAdmission(
+          kahrobaConfig.localAdmissionFile,
           createUserIdentityPort(database),
-          ownerConfig.testFile,
         )
-      : undefined;
+      : ownerConfig
+        ? createFileOwnerAdmission(
+            ownerConfig.file,
+            createUserIdentityPort(database),
+            ownerConfig.testFile,
+          )
+        : undefined;
     if (ownerAdmission && !(await ownerAdmission.telegramId()))
       throw new Error("OWNER_ADMISSION_POLICY_INVALID");
     const collect = createMetricCollection(
@@ -194,7 +210,58 @@ export async function startApi(
     await roomsRate?.connect().catch(() => {});
     await statisticsRate?.connect().catch(() => {});
     await admission?.connect().catch(() => {});
+    let kahroba: ReturnType<typeof createKahrobaRuntimePorts> | undefined;
+    if (kahrobaConfig?.routes) {
+      if (!ownerAdmission || !roomsConfig || !roomsRate || !admission || !admissionPolicy)
+        throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
+      const ids = await ownerAdmission.admittedTelegramIds();
+      if (ids.length < 2 || (!kahrobaConfig.local && ids.length !== 2))
+        throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
+      kahroba = createKahrobaRuntimePorts(database, {
+        config: kahrobaConfig,
+        clock,
+        sessions,
+        owner: ownerAdmission,
+        roomConfig: roomsConfig,
+        roomRate: roomsRate.consume,
+        transport: admission,
+        policy: admissionPolicy,
+        origins: runtime.allowedOrigins,
+        coexists: !!personalConfig,
+      });
+      if (!(await kahroba.catalog.find("kahroba")).ok)
+        throw new Error("KAHROBA_REGISTRATION_REQUIRED");
+      kahrobaRedis = await createRealtimeRedisAdapter({
+        redisUrl: runtime.redisUrl,
+        namespace: kahrobaConfig.namespace,
+        timeoutMs: operations.probeTimeoutMs,
+      });
+      kahroba.realtime.delivery!.redis = kahrobaRedis;
+    }
     http = await createHttpApplication({
+      ...(kahroba && kahrobaConfig && ownerAdmission && roomsRate
+        ? {
+            realtime: kahroba.realtime,
+            kahroba: {
+              rooms: {
+                rooms: kahroba.rooms,
+                authenticate: async (token: string) => {
+                  const r = await sessions.authenticate(token);
+                  return r.ok ? { ok: true as const, userId: r.session.userId } : r;
+                },
+                rate: roomsRate.consume,
+              },
+              metadata: {
+                sessions,
+                admission: ownerAdmission,
+                config: kahrobaConfig,
+                resync: kahroba.resync,
+                names: kahroba.names,
+                rate: (userId) => roomsRate.consume("read", userId),
+              },
+            },
+          }
+        : {}),
       ...(personalConfig && ownerAdmission && admission && admissionPolicy
         ? {
             personal: {
@@ -220,7 +287,7 @@ export async function startApi(
       ...(admission && admissionPolicy
         ? { admission: { policy: admissionPolicy, ip: admission.ip } }
         : {}),
-      ...(roomsConfig && roomsRate
+      ...(roomsConfig && roomsRate && !kahrobaConfig?.routes
         ? {
             rooms: {
               rooms: createRoomsPort(
@@ -306,6 +373,20 @@ export async function startApi(
       probeTimeoutMs: operations.probeTimeoutMs,
     });
     await http.app.listen(runtime.port, auth.bindAddress);
+    if (kahrobaConfig?.routes && http.realtime) {
+      const gateway = http.realtime;
+      kahrobaConsumer = createRealtimeConsumer({
+        redisUrl: runtime.redisUrl,
+        namespace: kahrobaConfig.namespace,
+        publish: (event) => gateway.publish(event),
+        unavailable: () => {
+          kahrobaDeliveryReady = false;
+        },
+        drainTimeoutMs: operations.drainTimeoutMs,
+      });
+      await withDeadline(kahrobaConsumer.ready(), operations.probeTimeoutMs);
+      kahrobaDeliveryReady = true;
+    }
     health.started();
     logger.lifecycle("api.started");
     let closing: Promise<void> | undefined;
@@ -321,6 +402,7 @@ export async function startApi(
         return (closing ??= withDeadline(
           (async () => {
             const drains = await Promise.allSettled([
+              kahrobaConsumer?.close(),
               http?.realtime?.close(),
               http?.personal?.close(),
               (async () => {
@@ -337,6 +419,7 @@ export async function startApi(
             statisticsRate?.close();
             admission?.close();
             await database.disconnect();
+            await kahrobaRedis?.close();
             health.stopped();
             await healthServer?.close();
             logger.lifecycle("api.stopped");
@@ -355,6 +438,8 @@ export async function startApi(
     };
   } catch {
     health.stopAdmission();
+    await kahrobaConsumer?.close().catch(() => {});
+    await kahrobaRedis?.close().catch(() => {});
     await internal?.close().catch(() => {});
     await http?.realtime?.close().catch(() => {});
     await http?.personal?.close().catch(() => {});

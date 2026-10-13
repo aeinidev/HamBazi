@@ -60,6 +60,7 @@ export type MatchRequest = z.infer<typeof envelope> &
   );
 /** Synchronous server adapter. Never fetch config, Users, or another service under the lock. */
 export interface MatchGame {
+  readonly resultSchemaVersion?: 2;
   automation?: AutomationGame["automation"];
   automate?: AutomationGame["automate"];
   readonly gameId: string;

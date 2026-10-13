@@ -43,6 +43,7 @@ export type RealtimeRate = (
   | { allowed: false; reason: "limited" | "unavailable"; retryAfterSeconds?: number }
 >;
 export interface RealtimeDependencies {
+  transport?: { namespace: "/kahroba-v1"; path: "/v1/kahroba/socket.io"; coexists: boolean };
   privateRooms?: Pick<PrivateRoomMatchPort, "start" | "ready" | "command">;
   admission: {
     policy: TransportAdmissionPolicy;
@@ -144,6 +145,13 @@ function workSlots(concurrency: number) {
 
 /** Adapter only: every mutation and membership decision goes through a public port. */
 export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDependencies) {
+  if (
+    deps.transport &&
+    (deps.transport.namespace !== "/kahroba-v1" ||
+      deps.transport.path !== "/v1/kahroba/socket.io" ||
+      typeof deps.transport.coexists !== "boolean")
+  )
+    throw new Error("Invalid realtime transport");
   if (typeof deps.admission.production !== "boolean")
     throw new Error("Invalid transport production configuration");
   const policy = transportAdmissionPolicySchema.parse(deps.admission.policy);
@@ -322,7 +330,8 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
           pingTimeout: deps.presence.heartbeatTimeoutMs,
         }
       : {}),
-    path: "/v1/socket.io",
+    path: deps.transport?.path ?? "/v1/socket.io",
+    ...(deps.transport?.coexists ? { destroyUpgrade: false } : {}),
     serveClient: false,
     allowEIO3: false,
     maxHttpBufferSize: 16384,
@@ -422,7 +431,7 @@ export function createRealtimeGateway(httpServer: HttpServer, deps: RealtimeDepe
   );
   if (deps.delivery?.redis) io.adapter(deps.delivery.redis.adapter);
   io.of("/").use((_socket, next) => next(transportError(failure("INVALID_INPUT"))));
-  const namespace = io.of("/v1");
+  const namespace = io.of(deps.transport?.namespace ?? "/v1");
   const stopObserving = deps.delivery?.redis?.onUnavailable(() => {
     for (const socket of namespace.sockets.values()) socket.conn.close();
   });

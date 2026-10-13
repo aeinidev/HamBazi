@@ -17,6 +17,7 @@ const catchup = z.strictObject({
   afterSeq: z.number().int().min(0).max(2147483647),
 });
 export interface PersonalGatewayDependencies {
+  coexistsWithKahroba?: boolean;
   sessions: Pick<AuthSessions, "authenticate">;
   matches: PersonalMatchPort;
   rate: RealtimeRate;
@@ -35,6 +36,7 @@ export function createPersonalGateway(server: HttpServer, deps: PersonalGatewayD
     handshakes = 0;
   const io = new SocketServer(server, {
     path: "/v1/personal/socket.io",
+    ...(deps.coexistsWithKahroba ? { destroyUpgrade: false } : {}),
     transports: ["websocket"],
     maxHttpBufferSize: 32768,
     pingInterval: 20000,

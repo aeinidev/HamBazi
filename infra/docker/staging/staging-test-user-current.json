@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "purpose": "one-verified-regular-staging-test-user-deployment-binding",
-  "checkedAt": "2026-10-11T15:02:08.933Z",
-  "status": "restricted-staging-approved-home-deployed-browser-and-game-smoke-passed-native-evidence-pending",
+  "checkedAt": "2026-10-12T19:14:11.651Z",
+  "status": "restricted-staging-restored-approved-normal-scan-renewal-native-device-evidence-pending",
   "target": {
     "ipv4": "185.110.191.104",
     "dockerDaemonId": "342f251a-9e56-4353-af12-a32429b7a2e7",
@@ -11,7 +11,7 @@
   "botUsername": "Hambazidev_bot",
   "miniAppUrl": "https://staging.hambazi.top/",
   "preparedDirectory": "/opt/hambazi-staging/private/prepared-approved-home-web-685d9f6",
-  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6",
+  "privateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905",
   "application": {
     "sourceCommit": "1bfc42e50c6f7b3f1a27168df22c99018356ab18",
     "sourceDirty": false,
@@ -160,26 +160,27 @@
     "normalMaximumAgeHours": 24,
     "exactImagesPassed": 8,
     "database": {
-      "updatedAt": "2026-10-11T13:06:05.155544028Z",
-      "downloadedAt": "2026-10-11T14:53:06.12782468Z"
+      "updatedAt": "2026-10-12T13:18:23.1639207Z",
+      "downloadedAt": "2026-10-12T19:05:02.564899693Z"
     },
-    "expiryAsiaTehran": "2026-10-12 10:35:14",
-    "evidenceExpiresAtUTC": "2026-10-12T07:05:14+00:00",
+    "expiryAsiaTehran": "2026-10-13 16:48:23",
+    "evidenceExpiresAtUTC": "2026-10-13T13:18:23.163Z",
     "expiryContainmentTimerEnabled": true,
-    "expiryNextTrigger": "Mon 2026-10-12 07:05:14 UTC",
+    "expiryNextTrigger": "Tue 2026-10-13 13:18:23 UTC",
     "freshnessExceptionUsed": false,
     "containmentDisabled": false,
     "containmentServiceUnchanged": true,
     "containmentServiceSha256": "ef990122e8d007966cd3fcb24811098cb46e8aee4673ad25a96b1edab884cdc6",
-    "timerDropInSha256": "7872f253ad15217442962595a7d3defa43c2bd18ef89ab31ccede4f39480cd1d",
+    "timerDropInSha256": "8a71cff1c63c9dcdad7dc6580517969987867dae1ae6994033ef31f68e8a6748",
     "freshnessWindowHours": 24,
     "staleEvidenceDeadlineExtended": false,
     "normalFreshScanRenewal": true,
-    "previousExpiryContainmentActivatedAtUTC": "2026-10-11T12:33:35+00:00",
+    "previousExpiryContainmentActivatedAtUTC": "2026-10-12T07:05:14Z",
     "previousFourRolesStoppedGracefully": true,
-    "scanEvidenceExpiresAtUTC": "2026-10-12T13:06:05.155544Z",
-    "installedContainmentDeadlineUTC": "2026-10-12T07:05:14Z",
-    "installedDeadlineUnchanged": true
+    "scanEvidenceExpiresAtUTC": "2026-10-13T13:18:23.163Z",
+    "installedContainmentDeadlineUTC": "2026-10-13T13:18:23Z",
+    "installedDeadlineUnchanged": false,
+    "renewalExplicitlyApproved": true
   },
   "verification": {
     "frozenLockfileInstall": true,
@@ -231,7 +232,7 @@
     "genericContainmentRunner": "/opt/hambazi-staging/private/runner-6e63149",
     "soleOperatorChanged": false
   },
-  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6/previous-current-binding.json",
+  "previousBinding": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/previous-current-binding.json",
   "productionReleaseApproved": false,
   "productionReleaseRecommendation": "HOLD",
   "privateEvidence": {
@@ -475,7 +476,7 @@
       "passed": true
     }
   },
-  "previousBindingSha256": "6410be2d6e3dcc49e3d8419bf76a5ec62f6b676026b50e6368dda822b3dfcf25",
+  "previousBindingSha256": "4c97190653b6af413e3be1befb2c831e23490a3e5a3d0adfd15f4fa0d8a99c15",
   "admissionPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/staging-test-user-20261009",
   "previousRecoveryVerification": {
     "frozenLockfileInstall": "passed",
@@ -1605,5 +1606,97 @@
     "scope": "No rollback executed. Previous 4b154f1 images and preparation retained; compatibility with all retained state and jobs requires verification before rollback.",
     "previousArtifactSupportsNewPins": null,
     "oldOrNewPersistentStateRewritten": false
+  },
+  "previousOutageSecurityScan": {
+    "normalMaximumAgeHours": 24,
+    "exactImagesPassed": 8,
+    "database": {
+      "updatedAt": "2026-10-11T13:06:05.155544028Z",
+      "downloadedAt": "2026-10-11T14:53:06.12782468Z"
+    },
+    "expiryAsiaTehran": "2026-10-12 10:35:14",
+    "evidenceExpiresAtUTC": "2026-10-12T07:05:14+00:00",
+    "expiryContainmentTimerEnabled": true,
+    "expiryNextTrigger": "Mon 2026-10-12 07:05:14 UTC",
+    "freshnessExceptionUsed": false,
+    "containmentDisabled": false,
+    "containmentServiceUnchanged": true,
+    "containmentServiceSha256": "ef990122e8d007966cd3fcb24811098cb46e8aee4673ad25a96b1edab884cdc6",
+    "timerDropInSha256": "7872f253ad15217442962595a7d3defa43c2bd18ef89ab31ccede4f39480cd1d",
+    "freshnessWindowHours": 24,
+    "staleEvidenceDeadlineExtended": false,
+    "normalFreshScanRenewal": true,
+    "previousExpiryContainmentActivatedAtUTC": "2026-10-11T12:33:35+00:00",
+    "previousFourRolesStoppedGracefully": true,
+    "scanEvidenceExpiresAtUTC": "2026-10-12T13:06:05.155544Z",
+    "installedContainmentDeadlineUTC": "2026-10-12T07:05:14Z",
+    "installedDeadlineUnchanged": true
+  },
+  "previousDeploymentPrivateExecutionDirectory": "/opt/hambazi-staging/private/execution-20261008/approved-home-685d9f6",
+  "renewalPrivateEvidence": {
+    "runtime-images.scan.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/runtime-images.scan.json",
+      "sha256": "5119079a54fe7500acea6dc4987f8ef24da87652762edcc40fdc9fb4b3afb72f"
+    },
+    "database-metadata.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/database-metadata.json",
+      "sha256": "3c0c3bbf7ff2410aea4beabd6631a566ca5cced33e775d05cfb56d261335691a"
+    },
+    "activation-binding.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/activation-binding.json",
+      "sha256": "bc900acbe0245d95a67418a3a9a6246e76e17721fcf5b29317f0018ce3aab78e"
+    },
+    "timer-before.conf": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/timer-before.conf",
+      "sha256": "7872f253ad15217442962595a7d3defa43c2bd18ef89ab31ccede4f39480cd1d"
+    },
+    "timer-installed.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/timer-installed.json",
+      "sha256": "76d71857710811e90ccf2cb89966a391e567216ffbb1e67c3e75bcb5b829841f"
+    },
+    "startup.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/startup.json",
+      "sha256": "d68b760b2d78832ba75a92fa04dfbcebee58e46e18a49412badacb7d4f020fba"
+    },
+    "traffic-open.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/traffic-open.json",
+      "sha256": "6ddc045347702a3ce29eb36c4ce34e35a2dbb72bfdbe125ab236d0b2dc676b56"
+    },
+    "auth-wss-smoke.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/auth-wss-smoke.json",
+      "sha256": "b26e320910c643746e14ce66c59df9d72a297a66410e368a8a46d23686adeae0"
+    },
+    "telegram-after.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/telegram-after.json",
+      "sha256": "e1983188a50774d93de3146ffe9223fdd2bd46f12c1b3015b1233db374f65e8d"
+    },
+    "final.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/final.json",
+      "sha256": "d2f04fc521408e0981d2ec0154fafd7defda91a213b48aa88214883067b7ab23"
+    },
+    "web-assets-smoke.json": {
+      "privatePath": "/opt/hambazi-staging/private/execution-20261008/outage-renewal-20261012-1905/web-assets-smoke.json",
+      "sha256": "977be160e08257417250206dd34f806c9e10d39143ee7a7f4f899c2f1a8c67f4"
+    }
+  },
+  "containmentIncident20261012": {
+    "cause": "scheduled-advisory-containment-success",
+    "timerTriggeredAtUTC": "2026-10-12T07:05:14Z",
+    "maintenanceAppliedAtUTC": "2026-10-12T07:05:15.171Z",
+    "restoredTrafficAtUTC": "2026-10-12T19:11:40.508Z",
+    "confirmedExpiryUTC": "2026-10-13T13:18:23Z",
+    "sameContainersAndImages": true,
+    "platformIdsAndStartTimesUnchanged": true,
+    "counts": "2|2|47|0|15",
+    "authWssSmokeChecks": 31,
+    "telegramPendingUpdatesBefore": 4,
+    "telegramPendingUpdatesAfter": 0,
+    "noWebhookResetOrBacklogDrop": true,
+    "nativeTelegramAcceptance": false,
+    "operationReport": "docs/operations/incidents/2026-10-12-staging-containment.md",
+    "servedAssetsByteMatched": 12,
+    "webhookWithoutSecretDenied": true,
+    "telegramFinalCheckUTC": "2026-10-12T19:16:34.451252+00:00",
+    "noNewTelegramDeliveryErrorsSinceReopening": true
   }
 }
