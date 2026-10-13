@@ -38,9 +38,20 @@ async function launch(page: Page, invite = false) {
   );
   await page.goto("/");
 }
+async function continueAuth(page: Page, needsName = false) {
+  const button = page.getByRole("button", { name: "Continue with Telegram", exact: true });
+  if (test.info().config.metadata.telegramAuthMode === "automatic") {
+    await expect(button).toHaveCount(0);
+    await expect(
+      needsName
+        ? page.getByLabel("دوست داری با چه اسمی در بازی دیده بشی؟")
+        : page.getByRole("link", { name: "Profile", exact: true }),
+    ).toBeVisible();
+  } else await button.click();
+}
 async function signIn(page: Page) {
   await launch(page);
-  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await continueAuth(page);
   await expect(page.getByRole("heading", { name: "Games", exact: true })).toBeVisible();
   await expect(page.getByText("Connected", { exact: true })).toBeVisible();
 }
@@ -70,7 +81,7 @@ test("direct game entry without registration offers a name before protected requ
   await page.evaluate((id) => {
     location.hash = `/match/${id}`;
   }, matchId);
-  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await continueAuth(page, true);
   await expect(
     page.getByText("دوست داری با چه اسمی در بازی دیده بشی؟", { exact: true }),
   ).toBeVisible();
@@ -84,7 +95,7 @@ test("direct invite registration keeps the invite and shows the chosen profile n
 }) => {
   await request.post(`${fixture}/__test/state`, { data: { registrationRequired: true } });
   await launch(page, true);
-  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await continueAuth(page, true);
   await page.getByLabel("دوست داری با چه اسمی در بازی دیده بشی؟").fill("مهدی بازیگر");
   await page.getByRole("button", { name: "ثبت نام و ادامه" }).click();
   await expect(page.getByRole("heading", { name: "You’re invited" })).toBeVisible();
@@ -196,7 +207,7 @@ test("invite survives registered login and grants membership only on explicit jo
 }) => {
   await launch(page, true);
   await expect(page.getByRole("button", { name: "New here? Create an account" })).toHaveCount(0);
-  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await continueAuth(page);
   await expect(page.getByRole("heading", { name: "You’re invited" })).toBeVisible();
   expect(
     (await (await request.get(`${fixture}/__test/state`)).json()).commands.some(
@@ -259,7 +270,7 @@ test("platform views pass accessibility and responsive checks", async ({ page },
 test("re-authentication preserves a direct Match route", async ({ page }) => {
   await launch(page);
   await page.goto("/#/match/33333333-3333-4333-8333-333333333333");
-  await page.getByRole("button", { name: "Continue with Telegram" }).click();
+  await continueAuth(page);
   await expect(page.getByRole("heading", { name: "At the table" })).toBeVisible();
   await expect(page).toHaveURL(/#\/match\//);
 });

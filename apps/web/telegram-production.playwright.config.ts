@@ -7,6 +7,7 @@ export default defineConfig({
     "**/browser/telegram-privacy.spec.ts",
     "**/security/browser-policy.spec.ts",
   ],
+  metadata: { telegramAuthMode: "automatic" },
   workers: 1,
   use: { baseURL: "http://127.0.0.1:4173", browserName: "chromium", trace: "off" },
   webServer: [

@@ -79,6 +79,19 @@ async function prepare(page: Page, legacy = false) {
   );
 }
 
+async function launchReady(page: Page) {
+  await expect(
+    test.info().config.metadata.telegramAuthMode === "automatic"
+      ? page.getByRole("link", { name: "Profile", exact: true })
+      : page.getByRole("button", { name: "Continue with Telegram", exact: true }),
+  ).toBeVisible();
+}
+async function submitIfManual(page: Page) {
+  const button = page.getByRole("button", { name: "Continue with Telegram", exact: true });
+  if (test.info().config.metadata.telegramAuthMode === "automatic")
+    await expect(button).toHaveCount(0);
+  else await button.click();
+}
 async function privateStorage(page: Page) {
   expect(await page.evaluate(() => window.__telegramPrivacyProbe())).toEqual({
     credentialWritten: false,
@@ -112,10 +125,11 @@ test("real SDK launch never writes credentials and preserves invite, theme and v
   page.on("console", (message) => {
     privateConsole ||= message.text().includes(canary);
   });
+  const issued = page.waitForRequest((request) =>
+    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
+  );
   await page.goto(`/?tgWebAppData=${encodeURIComponent(initData)}#${launchHash}`);
-  await expect(
-    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
-  ).toBeVisible();
+  await launchReady(page);
   expect(await page.evaluate(() => location.href.includes("tgWebAppData"))).toBe(false);
   expect(await page.evaluate((raw) => window.Telegram?.WebApp?.initData === raw, initData)).toBe(
     true,
@@ -142,10 +156,7 @@ test("real SDK launch never writes credentials and preserves invite, theme and v
   expect(
     await page.evaluate(() => document.documentElement.style.getPropertyValue("--telegram-top")),
   ).toBe("12px");
-  const issued = page.waitForRequest((request) =>
-    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
-  );
-  await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+  await submitIfManual(page);
   expect((await issued).postDataJSON().initData === initData).toBe(true);
   await expect(page.getByRole("heading", { name: "You’re invited", exact: true })).toBeVisible();
   await privateStorage(page);
@@ -169,9 +180,7 @@ test("a clean reload drops the real SDK credential and requires a fresh Telegram
 }) => {
   await prepare(page);
   await page.goto(`/#${launchHash}`);
-  await expect(
-    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
-  ).toBeVisible();
+  await launchReady(page);
   await privateStorage(page);
   await page.reload();
   await expect(
@@ -187,7 +196,7 @@ for (const failedLogout of [false, true]) {
   }) => {
     await prepare(page);
     await page.goto(`/#${launchHash}`);
-    await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+    await submitIfManual(page);
     await expect(page.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
     await page.getByRole("link", { name: "Profile", exact: true }).click();
     if (failedLogout) await page.route("**/v1/auth/logout", (route) => route.abort());
@@ -235,9 +244,7 @@ test("real SDK launch works when browser storage is unavailable", async ({ page 
       });
   });
   await page.goto(`/#${launchHash}`);
-  await expect(
-    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
-  ).toBeVisible();
+  await launchReady(page);
   expect(await page.evaluate((raw) => window.Telegram?.WebApp?.initData === raw, initData)).toBe(
     true,
   );
@@ -290,18 +297,16 @@ test("query-only native launch uses the bundled SDK with external SDK network bl
   page.on("console", (message) => {
     privateConsole ||= message.text().includes(canary);
   });
+  const issued = page.waitForRequest((request) =>
+    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
+  );
   await page.goto(`/?tgWebAppData=${encodeURIComponent(initData)}`);
-  await expect(
-    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
-  ).toBeVisible();
+  await launchReady(page);
   expect(await page.evaluate(() => typeof window.Telegram?.WebApp?.ready === "function")).toBe(
     true,
   );
   expect(await page.evaluate(() => location.href.includes("tgWebAppData"))).toBe(false);
-  const issued = page.waitForRequest((request) =>
-    request.url().endsWith("/v1/auth/telegram-mini-app/registered-session-photo"),
-  );
-  await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+  await submitIfManual(page);
   expect((await issued).postDataJSON().initData === initData).toBe(true);
   await expect(page.getByRole("heading", { name: "You’re invited", exact: true })).toBeVisible();
   await privateStorage(page);

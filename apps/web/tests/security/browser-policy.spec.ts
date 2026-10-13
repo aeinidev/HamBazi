@@ -52,7 +52,9 @@ async function open(page: Page) {
   await prepare(page);
   await page.goto(`/#${hash}`);
   await expect(
-    page.getByRole("button", { name: "Continue with Telegram", exact: true }),
+    test.info().config.metadata.telegramAuthMode === "automatic"
+      ? page.getByRole("link", { name: "Profile", exact: true })
+      : page.getByRole("button", { name: "Continue with Telegram", exact: true }),
   ).toBeVisible();
 }
 
@@ -131,7 +133,11 @@ test("actual SDK sign-in, polling and WebSocket upgrade work with no CSP violati
     upgrade ||= socket.url().startsWith("ws://127.0.0.1:4174/v1/socket.io");
   });
   await open(page);
-  await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+  if (test.info().config.metadata.telegramAuthMode === "automatic")
+    await expect(
+      page.getByRole("button", { name: "Continue with Telegram", exact: true }),
+    ).toHaveCount(0);
+  else await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
   await expect(page.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
   await expect.poll(() => polling && upgrade).toBe(true);
   expect(await page.evaluate(() => window.__cspDirectives)).toEqual([]);
@@ -237,7 +243,19 @@ test("unapproved network, CSS/image, frames, forms, bases and workers are denied
   expect(await page.evaluate(() => document.baseURI.startsWith("http://127.0.0.1:4173/"))).toBe(
     true,
   );
-  expect(await page.evaluate(() => !!document.querySelector("#root button"))).toBe(true);
+  if (test.info().config.metadata.telegramAuthMode === "automatic") {
+    // A denied form navigation is intentionally pending here. Inspect the
+    // authenticated DOM directly, as the original rendered-control check did.
+    expect(
+      await page.evaluate(() => ({
+        profile:
+          document.querySelector('#root a[href="#/profile"]')?.textContent?.trim() === "Profile",
+        catalog: [...document.querySelectorAll("#root h1")].some(
+          (heading) => heading.textContent?.trim() === "Games",
+        ),
+      })),
+    ).toEqual({ profile: true, catalog: true });
+  } else expect(await page.evaluate(() => !!document.querySelector("#root button"))).toBe(true);
 });
 
 test("the approved Telegram ancestor can load the SDK and apply its dynamic iframe style", async ({
