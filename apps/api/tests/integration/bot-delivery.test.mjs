@@ -73,11 +73,12 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       });
       await rate.connect();
       closes.push(async () => rate.close());
+      const registration = createRegistrationPort(database, clock);
       const onboarding = createBotOnboarding({
         database,
         accounts: createAccountCreationPort(database),
         users: createUserIdentityPort(database),
-        registration: createRegistrationPort(database, clock),
+        registration,
         clock,
         leaseMs: 15000,
         ...(supportEnabled ? { ownerAdmission } : {}),
@@ -180,12 +181,19 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
         admin
           .forModule("users")
           .execute((db) => db.user.count({ where: { telegramUserId: BigInt(identity) } }));
-      return { clock, rate, sender, outputs, instance, update, count };
+      const profile = () => registration.read(String(identity));
+      return { clock, rate, sender, outputs, instance, update, count, profile };
     }
     it("confirms support through real private HTTPS/PostgreSQL in one webhook, then serves the profile without waiting for a worker/lease", async () => {
       const f = await setup(true);
       const bot = await f.instance();
       expect(await bot.post(f.update("ایجاد حساب کاربری"))).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("PROMPT_NAME");
+      expect(await f.count()).toBe(0);
+      const promptId = await f.sender.send.mock.results.at(-1).value;
+      expect(await bot.post(f.update("Support player", promptId))).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("REGISTERED");
+      expect(await f.profile()).toMatchObject({ completed: true, displayName: "Support player" });
       expect(await bot.post(f.update("ارتباط با پشتیبان"))).toBe(200);
       const input = f.update("Isolated private support fixture");
       const started = performance.now();
@@ -211,15 +219,29 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       const bot = await f.instance();
       expect(await bot.post(f.update("/start"))).toBe(200);
       expect(await f.count()).toBe(0);
-      const name = f.update("ایجاد حساب کاربری");
-      expect(await bot.post(name)).toBe(200);
-      expect(await f.count()).toBe(1);
+      const create = f.update("ایجاد حساب کاربری");
+      expect(await bot.post(create)).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("PROMPT_NAME");
+      expect(await f.count()).toBe(0);
       expect(f.sender.send).toHaveBeenCalledTimes(2);
+      const promptId = await f.sender.send.mock.results.at(-1).value;
       await bot.close();
       const restarted = await f.instance();
-      expect(await restarted.post(name)).toBe(200);
+      expect(await restarted.post(create)).toBe(200);
       expect(f.sender.send).toHaveBeenCalledTimes(2);
+      expect(await f.count()).toBe(0);
+      const name = f.update("Chosen player", promptId);
+      expect(await restarted.post(name)).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("REGISTERED");
+      expect(f.sender.send).toHaveBeenCalledTimes(3);
+      const registered = await f.profile();
+      expect(registered).toMatchObject({ completed: true, displayName: "Chosen player" });
+      await restarted.close();
+      const completed = await f.instance();
+      expect(await completed.post(name)).toBe(200);
+      expect(f.sender.send).toHaveBeenCalledTimes(3);
       expect(await f.count()).toBe(1);
+      expect(await f.profile()).toEqual(registered);
       expect(f.outputs.join("")).not.toContain("Mehdi");
     });
     it("retries send failure after lease expiry instead of acknowledging incomplete work", async () => {
@@ -237,15 +259,23 @@ describe.skipIf(!process.env.TEST_AUTH_REDIS_URL)(
       const f = await setup();
       const good = await f.instance();
       expect(await good.post(f.update("/start"))).toBe(200);
-      const name = f.update("ایجاد حساب کاربری");
+      expect(await good.post(f.update("ایجاد حساب کاربری"))).toBe(200);
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("PROMPT_NAME");
+      expect(await f.count()).toBe(0);
+      const promptId = await f.sender.send.mock.results.at(-1).value;
+      const name = f.update("Restart player", promptId);
       const interrupted = await f.instance(true);
       expect(await interrupted.post(name)).toBe(503);
       expect(await f.count()).toBe(1);
+      const registered = await f.profile();
+      expect(registered).toMatchObject({ completed: true, displayName: "Restart player" });
+      expect(f.sender.send.mock.calls.at(-1)[0].reply).toBe("REGISTERED");
       await interrupted.close();
       f.clock.value += 15001;
       expect(await good.post(name)).toBe(200);
       expect(await f.count()).toBe(1);
-      expect(f.sender.send).toHaveBeenCalledTimes(3);
+      expect(await f.profile()).toEqual(registered);
+      expect(f.sender.send).toHaveBeenCalledTimes(4);
     });
     it("concurrent duplicate webhooks admit one backend effect and one send", async () => {
       const f = await setup();

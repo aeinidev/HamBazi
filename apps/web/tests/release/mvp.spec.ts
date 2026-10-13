@@ -156,18 +156,21 @@ async function ready(f: Pair) {
       .poll(() => f.observations.every((value) => (value.snapshot?.stateVersion ?? 0) > before))
       .toBe(true);
   }
-  for (const page of f.pages)
-    await visible(page.getByRole("region", { name: "Available actions" }));
+  for (const page of f.pages) await visible(page.getByRole("region", { name: "اقدام‌های بازی" }));
   await expect
     .poll(() => f.observations.every((value) => value.snapshot?.status === "ACTIVE"))
     .toBe(true);
   return f.observations[0]!.snapshot!.matchId;
 }
 async function attemptMove(f: Pair) {
-  for (const label of [/^select card to lose/, /^declare coup/, /^declare income$/]) {
+  for (const [label, targeted] of [
+    [/^از دست دادن/, false],
+    [/^کودتا/, true],
+    [/^درآمد/, false],
+  ] as const) {
     for (const [index, page] of f.pages.entries()) {
       const buttons = page
-        .getByRole("region", { name: "Available actions" })
+        .getByRole("region", { name: "اقدام‌های بازی" })
         .getByRole("button", { name: label });
       for (const button of await buttons.all()) {
         const observation = f.observations[index]!;
@@ -175,6 +178,16 @@ async function attemptMove(f: Pair) {
         const snapshots = observation.snapshots;
         const revision = (observation.snapshot?.view as { revision: number }).revision;
         if (await clickGameIntent(button)) {
+          if (targeted) {
+            const dialog = page.getByRole("dialog", { name: "انتخاب هدف کودتا", exact: true });
+            await visible(dialog);
+            const target = dialog.locator(".target-options").getByRole("button").first();
+            await enabled(target);
+            expect(await clickGameIntent(target)).toBe(true);
+            const confirm = dialog.getByRole("button", { name: "تأیید هدف و اقدام" });
+            await enabled(confirm);
+            expect(await clickGameIntent(confirm)).toBe(true);
+          }
           await expect.poll(() => observation.gameAcks.length > receipts).toBe(true);
           const acknowledgement = observation.gameAcks.at(-1)!;
           if (!acknowledgement.ok) {
@@ -196,6 +209,17 @@ async function attemptMove(f: Pair) {
           await expect
             .poll(() => new Set(f.observations.map((value) => value.snapshot?.stateVersion)).size)
             .toBe(1);
+          // Wire snapshots arrive before React finishes the command's catch-up.
+          // Wait for both UI request guards rather than sending into pending work.
+          await expect
+            .poll(async () =>
+              (
+                await Promise.all(
+                  f.pages.map((p) => p.locator('.coup-gameplay[aria-busy="true"]').count()),
+                )
+              ).every((pending) => pending === 0),
+            )
+            .toBe(true);
           return index;
         }
       }
@@ -308,7 +332,7 @@ test("Account → Find → real Coup with offline catch-up → Finish → Stats"
     // Queue reservation order can differ from browser launch order. Disconnect
     // browser zero only after its actual turn, leaving browser one able to act.
     if ((await move(f)) !== 0) expect(await move(f)).toBe(0);
-    await enabled(f.pages[1]!.getByRole("button", { name: "declare income", exact: true }));
+    await enabled(f.pages[1]!.getByRole("button", { name: /^درآمد/ }));
     const before = f.observations[0]!.snapshot!.stateVersion;
     await f.contexts[0]!.setOffline(true);
     // Chromium offline emulation does not reliably close an established WebSocket.
@@ -316,7 +340,9 @@ test("Account → Find → real Coup with offline catch-up → Finish → Stats"
     await command(request, "/api/restart");
     await visible(f.pages[0]!.getByText("Synchronizing the table…", { exact: true }));
     // Disconnect drops the snapshot, so no stale game action remains available.
-    await expect.poll(() => f.pages[0]!.getByRole("button", { name: /^declare/ }).count()).toBe(0);
+    await expect
+      .poll(() => f.pages[0]!.getByRole("region", { name: "اقدام‌های بازی" }).count())
+      .toBe(0);
     // Seat two acts while seat one's browser misses the committed invalidation.
     await visible(f.pages[1]!.getByText("Connected", { exact: true }));
     await expect
@@ -329,8 +355,7 @@ test("Account → Find → real Coup with offline catch-up → Finish → Stats"
           wireIncome:
             view?.legalCommands?.some((command) => command.type === "DECLARE_INCOME") ?? false,
           renderedIncome: await f.pages[1]!.getByRole("button", {
-            name: "declare income",
-            exact: true,
+            name: /^درآمد/,
           }).count(),
           synchronizing: await f.pages[1]!.getByText("Synchronizing the table…", {
             exact: true,
@@ -344,7 +369,7 @@ test("Account → Find → real Coup with offline catch-up → Finish → Stats"
         renderedIncome: 1,
         synchronizing: 0,
       });
-    await f.pages[1]!.getByRole("button", { name: "declare income", exact: true }).click();
+    await f.pages[1]!.getByRole("button", { name: /^درآمد/ }).click();
     await expect.poll(() => (f.observations[1]!.snapshot?.stateVersion ?? 0) > before).toBe(true);
     await f.contexts[0]!.setOffline(false);
     await expect
