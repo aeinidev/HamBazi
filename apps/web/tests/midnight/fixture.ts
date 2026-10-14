@@ -37,6 +37,8 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
   await request.post(`${fixtureOrigin}/__test/reset`);
   await request.post(`${fixtureOrigin}/__test/state`, { data: { viewerIndex } });
   const state = {
+    coupPaused: false,
+    availabilityMissing: false,
     current: null as string | null,
     customView: null as Record<string, unknown> | null,
     sentCommands: [] as Record<string, unknown>[],
@@ -87,6 +89,26 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
     const incoming = route.request();
     const url = new URL(incoming.url());
     state.http.push(`${incoming.method()} ${url.pathname}`);
+    if (url.pathname === "/v1/games/availability") {
+      return route.fulfill({
+        json: {
+          schemaVersion: 1,
+          games: [],
+          ...(state.availabilityMissing
+            ? {}
+            : {
+                lobbyAvailability: [
+                  ...["kahroba", "hokm", "domino", "chess", "ludo"].map((id) => ({
+                    id,
+                    state: "COMING_SOON",
+                  })),
+                  { id: "coup", state: state.coupPaused ? "TEMPORARILY_DISABLED" : "AVAILABLE" },
+                ],
+              }),
+        },
+        headers: { "access-control-allow-origin": "https://staging.hambazi.top" },
+      });
+    }
     const response = await request.fetch(`${fixtureOrigin}${url.pathname}${url.search}`, {
       method: incoming.method(),
       data: incoming.postData() ?? undefined,
@@ -143,6 +165,8 @@ export async function setup(page: Page, request: APIRequestContext, viewerIndex 
         return ok({ schemaVersion: 1, matchId: state.current });
       }
       if (event === "personal:start") {
+        if (state.coupPaused)
+          return ack({ ok: false, error: { code: "GAME_UNAVAILABLE", retryable: false } });
         state.starts.push(String(input.commandId));
         const fail = state.failStart;
         state.failStart = null;

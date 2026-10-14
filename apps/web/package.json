@@ -16,6 +16,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
     "test": "vitest run tests/unit",
     "test:browser": "playwright test",
+    "test:midnight": "playwright test --config midnight.playwright.config.ts",
     "test:preview": "playwright test --config preview.playwright.config.ts",
     "preview": "vite preview --host 127.0.0.1",
     "dev:kahroba": "node dev/kahroba-preview.mjs",

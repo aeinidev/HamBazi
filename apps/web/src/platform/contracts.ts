@@ -57,7 +57,19 @@ export const gameSchema = z.object({
     .array(z.object({ id: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/), title: z.string().min(1) }))
     .optional(),
 });
-export const catalogSchema = z.object({ schemaVersion: z.literal(1), games: z.array(gameSchema) });
+export const catalogSchema = z.object({
+  schemaVersion: z.literal(1),
+  games: z.array(gameSchema),
+});
+export const lobbyAvailabilitySchema = z.object({
+  schemaVersion: z.literal(1),
+  lobbyAvailability: z.array(
+    z.object({
+      id: z.enum(["kahroba", "hokm", "domino", "chess", "ludo", "coup"]),
+      state: z.enum(["AVAILABLE", "COMING_SOON", "TEMPORARILY_DISABLED"]),
+    }),
+  ),
+});
 export const gameResponseSchema = z.object({ schemaVersion: z.literal(1), game: gameSchema });
 export const roomSchema = z.object({
   id: uuid,

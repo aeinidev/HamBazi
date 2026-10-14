@@ -128,6 +128,7 @@ export function botExperienceIntegrationCases(admin: ReturnType<typeof createDat
       const ownerProfile = await f.registration.complete(f.ownerId, "Fixture owner");
       if (!ownerProfile.ok) throw Error("Expected isolated owner profile");
       const personal = createPersonalMatchPort(a, {
+        newMatchesAllowed: true,
         game: createPersonalCoupGame(),
         clock: f.clock,
         owner: f.ownerAdmission,

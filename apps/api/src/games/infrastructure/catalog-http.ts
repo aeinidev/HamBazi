@@ -2,11 +2,17 @@ import "reflect-metadata";
 import { Controller, Get, Module, Req, Res } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { createErrorEnvelope } from "@hambazi/contracts";
+import type { LobbyAvailability } from "../application/availability.js";
 import type { CatalogPort } from "../application/catalog.js";
 import type { CatalogRate } from "./catalog-rate.js";
-import { catalogResponseSchema, gameResponseSchema } from "./catalog-contract.js";
+import {
+  catalogResponseSchema,
+  gameResponseSchema,
+  lobbyAvailabilityResponseSchema,
+} from "./catalog-contract.js";
 export interface CatalogHttpDependencies {
   catalog: CatalogPort;
+  lobbyAvailability?(userId: string): Promise<LobbyAvailability>;
   authenticate(token: string): Promise<
     | { ok: true; userId: string }
     | {
@@ -43,7 +49,12 @@ export function createCatalogHttpModule(deps: CatalogHttpDependencies) {
       )
       .send(createErrorEnvelope(code === "REGISTRATION_REQUIRED" ? "UNAUTHENTICATED" : code));
   }
-  async function read(req: FastifyRequest, reply: FastifyReply, detail: boolean) {
+  async function read(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    detail: boolean,
+    availability = false,
+  ) {
     try {
       let count = 0;
       for (let i = 0; i < req.raw.rawHeaders.length; i += 2)
@@ -77,6 +88,16 @@ export function createCatalogHttpModule(deps: CatalogHttpDependencies) {
       }
       const result = await deps.catalog.list();
       if (!result.ok) return fail(reply, result.error.code);
+      if (availability) {
+        if (!deps.lobbyAvailability) return fail(reply, "INTERNAL_ERROR");
+        const response = lobbyAvailabilityResponseSchema.safeParse({
+          schemaVersion: 1,
+          lobbyAvailability: await deps.lobbyAvailability(auth.userId),
+        });
+        return response.success
+          ? reply.code(200).send(response.data)
+          : fail(reply, "INTERNAL_ERROR");
+      }
       const response = catalogResponseSchema.safeParse({ schemaVersion: 1, games: result.games });
       return response.success ? reply.code(200).send(response.data) : fail(reply, "INTERNAL_ERROR");
     } catch {
@@ -88,6 +109,10 @@ export function createCatalogHttpModule(deps: CatalogHttpDependencies) {
     @Get()
     list(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return read(req, reply, false);
+    }
+    @Get("availability")
+    availability(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return read(req, reply, false, true);
     }
     @Get(":slug")
     detail(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {

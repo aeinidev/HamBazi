@@ -61,19 +61,29 @@ describe("temporary staging account scope", () => {
       displayName: "Synthetic owner",
       settings: { theme: "system" },
     });
+    runtime.query.setQueryData(["lobby-availability", id], {
+      schemaVersion: 1,
+      lobbyAvailability: [
+        ...["kahroba", "hokm", "domino", "chess", "ludo"].map((id) => ({
+          id,
+          state: "COMING_SOON",
+        })),
+        { id: "coup", state: "TEMPORARILY_DISABLED" },
+      ],
+    });
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
     expect(html).toContain("بازی‌ها");
     expect(html).toContain("Synthetic owner");
     expect(html).toContain("fallback-avatar");
-    expect(html).toContain("کودتا، فعال");
+    expect(html).toContain("کودتا، موقتاً غیرفعال");
     for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
       expect(html).toContain(`${name}، به‌زودی`);
     expect(html).toContain("بازی پیدا کن، به‌زودی");
     expect(html).toContain("همه را ببینید، به‌زودی");
     expect(html).toContain("جدول، به‌زودی");
     expect(html).toContain("دوستان، به‌زودی");
-    expect(html.match(/disabled=""/g)).toHaveLength(10);
+    expect(html.match(/disabled=""/g)).toHaveLength(11);
     expect(html).toContain('href="#/profile"');
     expect(html).toContain('href="#/games"');
     expect(html).not.toContain('aria-label="Main navigation"');

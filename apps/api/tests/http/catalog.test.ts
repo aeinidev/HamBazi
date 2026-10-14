@@ -5,6 +5,7 @@ import { createHttpApplication } from "../../src/composition/http.js";
 import { createSafeLogger } from "../../src/composition/safe-logger.js";
 import { onboardingFixture } from "../auth/onboarding-fixtures.js";
 import { catalogService } from "../../src/games/application/catalog.js";
+import { lobbyAvailability } from "../../src/games/index.js";
 import { catalogOpenApiDocument } from "../../src/games/index.js";
 import type { CatalogRateDecision } from "../../src/games/infrastructure/catalog-rate.js";
 import type { CatalogHttpDependencies } from "../../src/games/infrastructure/catalog-http.js";
@@ -44,6 +45,9 @@ async function setup(decision: CatalogRateDecision = { allowed: true }) {
     userId,
   }));
   const rate = vi.fn(async () => decision);
+  const availability = vi.fn(async () =>
+    lobbyAvailability({ coupTemporarilyDisabled: true }, false),
+  );
   const http = await createHttpApplication({
     auth: {
       sessions: f.service,
@@ -57,6 +61,7 @@ async function setup(decision: CatalogRateDecision = { allowed: true }) {
     },
     catalog: {
       catalog: catalogService({ list, find }),
+      lobbyAvailability: availability,
       authenticate,
       rate,
       degraded: logger.catalogRateUnavailable,
@@ -72,6 +77,7 @@ async function setup(decision: CatalogRateDecision = { allowed: true }) {
     list,
     find,
     authenticate,
+    availability,
     rate,
     output,
     logger,
@@ -123,17 +129,24 @@ it("does not bypass authentication on Redis failure", async () => {
   expect(f.rate).not.toHaveBeenCalled();
   expect(f.list).not.toHaveBeenCalled();
 });
-it.each(["/v1/games", "/v1/games/coup"])("returns 429 for exhausted budget at %s", async (url) => {
-  const f = await setup({ allowed: false, reason: "limited", retryAfterSeconds: 12 });
-  const response = await f.server.inject({ url, headers: f.headers });
-  expect(response.statusCode).toBe(429);
-  expect(response.headers["retry-after"]).toBe("12");
-  expect(f.list).not.toHaveBeenCalled();
-  expect(f.find).not.toHaveBeenCalled();
-});
+it.each(["/v1/games", "/v1/games/coup", "/v1/games/availability"])(
+  "returns 429 for exhausted budget at %s",
+  async (url) => {
+    const f = await setup({ allowed: false, reason: "limited", retryAfterSeconds: 12 });
+    const response = await f.server.inject({ url, headers: f.headers });
+    expect(response.statusCode).toBe(429);
+    expect(response.headers["retry-after"]).toBe("12");
+    expect(f.list).not.toHaveBeenCalled();
+    expect(f.find).not.toHaveBeenCalled();
+  },
+);
 it("rejects input injection and write routes; unknown slug is 404", async () => {
   const f = await setup();
-  for (const url of ["/v1/games?userId=someone", "/v1/games/INVALID"])
+  for (const url of [
+    "/v1/games?userId=someone",
+    "/v1/games/availability?userId=someone",
+    "/v1/games/INVALID",
+  ])
     expect((await f.server.inject({ url, headers: f.headers })).statusCode).toBe(400);
   expect((await f.server.inject({ url: "/v1/games/missing", headers: f.headers })).statusCode).toBe(
     404,
@@ -185,4 +198,43 @@ it("freezes the optional mode addition and rejects changes to old fields", () =>
   const changed = structuredClone(contract);
   changed.paths["/v1/games"].get.security = [];
   expect(compatibleAuthContract(baseline, changed)).toBe(false);
+});
+
+it("returns verified lobby metadata only after authentication and quota", async () => {
+  const f = await setup();
+  expect((await f.server.inject({ url: "/v1/games/availability" })).statusCode).toBe(401);
+  expect(f.availability).not.toHaveBeenCalled();
+  const r = await f.server.inject({ url: "/v1/games/availability", headers: f.headers });
+  expect(r.json().lobbyAvailability).toEqual(
+    lobbyAvailability({ coupTemporarilyDisabled: true }, false),
+  );
+  expect(f.availability).toHaveBeenCalledWith(f.userId);
+  expect(
+    (await f.server.inject({ url: "/v1/games", headers: f.headers })).json().games[0].playable,
+  ).toBe(false);
+});
+
+it("availability fails closed for invalid configuration or unavailable durable catalog", async () => {
+  const f = await setup();
+  f.availability.mockRejectedValue(new Error("private config"));
+  const failed = await f.server.inject({ url: "/v1/games/availability", headers: f.headers });
+  expect(failed.statusCode).toBe(503);
+  expect(failed.body).not.toContain("private config");
+  f.availability.mockResolvedValue(lobbyAvailability({ coupTemporarilyDisabled: false }, true));
+  f.list.mockResolvedValue([]);
+  const unavailable = await f.server.inject({ url: "/v1/games/availability", headers: f.headers });
+  expect(unavailable.statusCode).toBe(503);
+});
+
+it("freezes availability v1 response and its authentication", () => {
+  const baseline = JSON.parse(
+    readFileSync(
+      new URL("../../../../docs/contracts/catalog.availability.v1.baseline.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const contract = catalogOpenApiDocument();
+  expect(compatibleAuthContract(baseline, contract)).toBe(true);
+  contract.paths["/v1/games/availability"].get.security = [];
+  expect(compatibleAuthContract(baseline, contract)).toBe(false);
 });

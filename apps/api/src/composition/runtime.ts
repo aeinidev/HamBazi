@@ -12,12 +12,13 @@ import {
   parseAuthRuntimeConfig,
   parseProfileConfig,
   parseCatalogConfig,
+  parseGameAvailabilityConfig,
   parseRoomsConfig,
   parseTransportAdmissionConfig,
   parseOwnerAdmissionConfig,
 } from "@hambazi/config";
 import { createRoomsPort, createRoomsRate } from "../rooms/index.js";
-import { createCatalogPort, createCatalogRate } from "../games/index.js";
+import { createCatalogPort, createCatalogRate, lobbyAvailability } from "../games/index.js";
 import { createDatabase } from "@hambazi/database";
 import {
   createAuthSessions,
@@ -64,6 +65,7 @@ export async function startApi(
   const personalConfig = parsePersonalGameplayConfig(environment, "api");
   const profileConfig = parseProfileConfig(environment);
   const catalogConfig = parseCatalogConfig(environment);
+  const availability = parseGameAvailabilityConfig(environment);
   const roomsConfig = parseRoomsConfig(environment);
   const statsConfig = parseStatisticsConfig(environment, "api");
   const operations = parseOperationsConfig(environment, "api");
@@ -271,6 +273,7 @@ export async function startApi(
                   game: createPersonalAnarchistCoupGame(),
                   retainedGames: [createPersonalCoupGame()],
                   owner: ownerAdmission,
+                  newMatchesAllowed: !availability.coupTemporarilyDisabled,
                 }),
                 createPublicNamesPort(database),
               ),
@@ -343,6 +346,15 @@ export async function startApi(
       allowedOrigins: runtime.allowedOrigins,
       catalog: {
         catalog: createCatalogPort(database),
+        lobbyAvailability: async (userId) =>
+          lobbyAvailability(
+            availability,
+            !!personalConfig &&
+              !!ownerAdmission &&
+              !!admission &&
+              !!admissionPolicy &&
+              (await ownerAdmission.allowsUserId(userId)),
+          ),
         authenticate: async (token) => {
           const result = await sessions.authenticate(token);
           return result.ok ? { ok: true, userId: result.session.userId } : result;

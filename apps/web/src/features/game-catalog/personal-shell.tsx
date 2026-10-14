@@ -6,6 +6,7 @@ import type { TelegramApp } from "../../platform/telegram.js";
 import { AuthScreen } from "../auth/index.js";
 import { PersonalGame } from "../personal-game/index.js";
 import { SettingsScreen } from "../profile/index.js";
+import { useLobbyAvailability, availabilityLabel } from "./availability.js";
 import { CoupEntry, CoupTutorial } from "../../games/coup/index.js";
 import { MidnightHeader } from "../../ui/midnight.js";
 import { ErrorNotice, go, useRuntime, useSession } from "../../ui/shared.js";
@@ -14,6 +15,11 @@ import { HomeBottomNav, PersonalLobby } from "./personal-lobby.js";
 export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | undefined }) {
   const session = useSession((s) => s.session);
   const runtime = useRuntime();
+  const availability = useLobbyAvailability();
+  const coupState = availability.error
+    ? undefined
+    : availability.data?.lobbyAvailability?.find((game) => game.id === "coup")?.state;
+  const canStart = coupState === "AVAILABLE";
   const identity = useQuery({
     queryKey: ["profile"],
     queryFn: ({ signal }) => runtime.http("/v1/me", profileSchema, undefined, "GET", true, signal),
@@ -31,7 +37,7 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   const home = route === "/games";
   const homeFrame = home || profile;
   const unavailable = !home && !profile && !settings && !entry && !tutorial && !playing;
-  const backPath = tutorial || playing ? "/games/coup" : "/games";
+  const backPath = (tutorial || playing) && canStart ? "/games/coup" : "/games";
   const hasBack = !!session && !home;
   const back = useCallback(() => go(backPath), [backPath]);
   const consumed = useCallback(() => {
@@ -60,7 +66,7 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
     };
   }, [telegram, back, hasBack, route, session]);
   function begin() {
-    if (entering.current) return;
+    if (!canStart || entering.current) return;
     entering.current = true;
     setOpening(true);
     setStartIntent(startIntent ?? crypto.randomUUID());
@@ -106,12 +112,24 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
         {!session ? (
           <AuthScreen />
+        ) : (entry || tutorial) && !canStart ? (
+          <section className="home-unavailable" role="status">
+            <h1>کودتا — {availabilityLabel(coupState)}</h1>
+            <a href="#/games/coup/play">ادامهٔ بازی موجود</a>
+            <a href="#/games">بازگشت به خانه</a>
+          </section>
         ) : tutorial ? (
           <CoupTutorial />
         ) : entry ? (
           <CoupEntry onStart={begin} pending={opening} />
         ) : playing ? (
-          <PersonalGame startIntent={startIntent} onStartConsumed={consumed} />
+          <PersonalGame
+            key={route}
+            canStart={canStart}
+            matchId={route.startsWith("/match/") ? route.slice(7) : undefined}
+            startIntent={canStart ? startIntent : undefined}
+            onStartConsumed={consumed}
+          />
         ) : settings || profile ? (
           <SettingsScreen title={profile ? "پروفایل" : "تنظیمات"} />
         ) : unavailable ? (

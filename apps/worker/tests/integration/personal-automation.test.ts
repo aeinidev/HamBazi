@@ -53,6 +53,7 @@ it("uses real role-separated BullMQ automation for an admitted server seat and d
     }),
   );
   const personal = createPersonalMatchPort(api, {
+    newMatchesAllowed: true,
     clock,
     game,
     owner: { allowsUserId: async (id) => id === owner },

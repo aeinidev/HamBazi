@@ -31,10 +31,8 @@ for (const viewerIndex of [0, 1])
     await expect(page).toHaveURL(/#\/games$/);
     expect(state.sockets).toHaveLength(0);
     expect(state.events).toEqual([]);
-    expect(state.http).toEqual([
-      "POST /v1/auth/telegram-mini-app/registered-session-photo",
-      "GET /v1/me",
-    ]);
+    expect(state.http[0]).toBe("POST /v1/auth/telegram-mini-app/registered-session-photo");
+    expect(state.http.slice(1).sort()).toEqual(["GET /v1/games/availability", "GET /v1/me"]);
   });
 
 test("home shows six live cards and keeps future actions inert across direct routes", async ({
@@ -278,7 +276,7 @@ test("settings uses the existing profile patch flow without public product reque
   await nativeEvent(page, "back_button_pressed");
   await expect(page).toHaveURL(/#\/games$/);
   expect(state.sockets).toHaveLength(0);
-  expect(state.http.every((x) => /\/v1\/(auth|me)(\/|$)/.test(x))).toBe(true);
+  expect(state.http.every((x) => /\/v1\/(auth|me|games)(\/|$)/.test(x))).toBe(true);
 });
 
 for (const size of [

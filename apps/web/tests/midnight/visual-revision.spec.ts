@@ -72,7 +72,7 @@ for (const size of [
     expect(layout.cardRatio).toBeCloseTo(1.82, 1);
     expect(layout.chessRatio).toBeCloseTo(1.77, 1);
     expect(layout.coupRatio).toBeCloseTo(1.63, 1);
-    await expect(page.locator(".home-card-arrow svg")).toHaveCount(6);
+    await expect(page.locator(".home-card-arrow svg")).toHaveCount(1);
     await expect(page.locator(".home-card-badge")).toHaveCount(5);
     const art = await page
       .locator(".home-screen img")

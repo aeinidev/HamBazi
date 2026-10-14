@@ -53,7 +53,12 @@ const policy = {
   allowsTelegramId: async () => false,
   allowsUserId: async (id: string) => authorized && id === owner,
 };
-const port = createPersonalMatchPort(api, { game, clock: { nowMs: () => at }, owner: policy });
+const port = createPersonalMatchPort(api, {
+  newMatchesAllowed: true,
+  game,
+  clock: { nowMs: () => at },
+  owner: policy,
+});
 const automation = createMatchAutomationPort(api, {
   games: [game],
   clock: { nowMs: () => at },
@@ -97,6 +102,37 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
     initial.matchId,
   );
   expect((await port.start(owner, { schemaVersion: 1, commandId: randomUUID() })).ok).toBe(false);
+  const paused = createPersonalMatchPort(api, { game, clock: { nowMs: () => at }, owner: policy });
+  const beforePause = await api.forModule("matches").execute(async (db) => ({
+    matches: await db.match.count(),
+    events: await db.gameEvent.count(),
+    receipts: await db.processedCommand.count(),
+    outbox: await db.outboxEvent.count(),
+  }));
+  expect(await paused.start(owner, { schemaVersion: 1, commandId: randomUUID() })).toMatchObject({
+    error: { code: "GAME_UNAVAILABLE" },
+  });
+  expect(
+    await paused.start(randomUUID(), { schemaVersion: 1, commandId: randomUUID() }),
+  ).toMatchObject({ error: { code: "FORBIDDEN" } });
+  expect(await paused.start(owner, { schemaVersion: 1, commandId })).toEqual(
+    await port.start(owner, { schemaVersion: 1, commandId }),
+  );
+  expect(await paused.current(owner)).toEqual({
+    ok: true,
+    value: { schemaVersion: 1, matchId: initial.matchId },
+  });
+  expect(parse(await paused.read(owner, { schemaVersion: 1, matchId: initial.matchId }))).toEqual(
+    initial,
+  );
+  expect(
+    await api.forModule("matches").execute(async (db) => ({
+      matches: await db.match.count(),
+      events: await db.gameEvent.count(),
+      receipts: await db.processedCommand.count(),
+      outbox: await db.outboxEvent.count(),
+    })),
+  ).toEqual(beforePause);
   const bot = await api
     .forModule("matches")
     .execute((db) => db.matchBotSeat.findFirstOrThrow({ where: { matchId: initial.matchId } }));
@@ -147,7 +183,7 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
         expectedVersion: snapshot.stateVersion,
         command,
       };
-      const first = await port.command(owner, body);
+      const first = await paused.command(owner, body);
       expect(first.ok).toBe(true);
       expect(await port.command(owner, body)).toEqual(first);
       moves++;
@@ -185,6 +221,13 @@ it("admits server seats without Users, finishes legal play, isolates views, and 
   expect(await port.current(owner)).toEqual({
     ok: true,
     value: { schemaVersion: 1, matchId: null },
+  });
+  expect(
+    parse(await paused.read(owner, { schemaVersion: 1, matchId: initial.matchId })).status,
+  ).toBe("FINISHED");
+  expect(parse(await paused.start(owner, { schemaVersion: 1, commandId })).status).toBe("FINISHED");
+  expect(await paused.start(owner, { schemaVersion: 1, commandId: randomUUID() })).toMatchObject({
+    error: { code: "GAME_UNAVAILABLE" },
   });
   const closeStartId = randomUUID();
   const started = parse(await port.start(owner, { schemaVersion: 1, commandId: closeStartId }));
@@ -272,6 +315,7 @@ it("persists v2 payment/defense atomically, deduplicates racing attacks, restore
     };
     const port = withPersonalPublicNames(
       createPersonalMatchPort(api, {
+        newMatchesAllowed: true,
         game: fixtureGame,
         retainedGames: [game],
         clock: { nowMs: () => at },
@@ -319,6 +363,7 @@ it("persists v2 payment/defense atomically, deduplicates racing attacks, restore
         .execute((db) => db.outboxEvent.count({ where: { aggregateId: start.matchId } })),
     ).toBe(2);
     const restored = createPersonalMatchPort(api, {
+      newMatchesAllowed: true,
       game: newGame,
       retainedGames: [game],
       clock: { nowMs: () => at },
@@ -371,9 +416,15 @@ it("persists v2 payment/defense atomically, deduplicates racing attacks, restore
     }
     expect(finished).toBe(true);
   }
-  const legacy = createPersonalMatchPort(api, { game, clock: { nowMs: () => at }, owner: policy });
+  const legacy = createPersonalMatchPort(api, {
+    newMatchesAllowed: true,
+    game,
+    clock: { nowMs: () => at },
+    owner: policy,
+  });
   const old = parse(await legacy.start(actor, { schemaVersion: 1, commandId: randomUUID() }));
   const retained = createPersonalMatchPort(api, {
+    newMatchesAllowed: true,
     game: newGame,
     retainedGames: [game],
     clock: { nowMs: () => at },

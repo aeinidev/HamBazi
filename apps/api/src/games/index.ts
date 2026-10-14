@@ -7,3 +7,5 @@ export {
 } from "./infrastructure/catalog-http.js";
 export { createCatalogRate } from "./infrastructure/catalog-rate.js";
 export { catalogOpenApiDocument } from "./infrastructure/catalog-contract.js";
+
+export { lobbyAvailability } from "./application/availability.js";

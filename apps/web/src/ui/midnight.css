@@ -302,6 +302,27 @@ html:has(.midnight-shell) {
   opacity: 1;
   cursor: default;
 }
+.home-game-unavailable {
+  --card-line: #536075;
+  --card-glow: #273449;
+}
+.home-game-unavailable img {
+  filter: grayscale(1) saturate(0.2) brightness(0.72);
+}
+.home-game-unavailable::after {
+  inset: 0;
+  background: linear-gradient(#18202b1f, #131b2933 50%, #081326b3);
+}
+.home-game-unavailable .home-card-title {
+  color: #f4f6fa;
+}
+.home-recovery-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  color: #d3dcea;
+}
 .home-game-card:enabled {
   cursor: pointer;
 }
@@ -329,13 +350,20 @@ html:has(.midnight-shell) {
   top: 6px;
   right: 6px;
   padding: 2px 6px 3px;
-  border: 1px solid #b7a4fc80;
+  border: 1px solid #8792a580;
   border-radius: 20px;
-  background: #04142ad9;
-  color: #eee5ff;
+  background: #101c30ed;
+  color: #edf1f7;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font:
     10px/1.5 Tahoma,
     sans-serif;
+}
+.home-card-badge .midnight-icon {
+  width: 12px;
+  height: 12px;
 }
 .home-card-arrow {
   position: absolute;

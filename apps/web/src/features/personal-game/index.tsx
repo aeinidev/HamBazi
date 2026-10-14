@@ -7,8 +7,15 @@ import { Panel, ErrorNotice, useRuntime, useSession, useTask } from "../../ui/sh
 const currentSchema = z.strictObject({ schemaVersion: z.literal(1), matchId: z.uuid().nullable() });
 export function PersonalGame({
   startIntent,
+  canStart = false,
+  matchId: requestedMatchId,
   onStartConsumed,
-}: { startIntent?: string | undefined; onStartConsumed?: (() => void) | undefined } = {}) {
+}: {
+  startIntent?: string | undefined;
+  canStart?: boolean;
+  matchId?: string | undefined;
+  onStartConsumed?: (() => void) | undefined;
+} = {}) {
   const runtime = useRuntime(),
     task = useTask("fa"),
     lookup = useTask("fa"),
@@ -27,12 +34,21 @@ export function PersonalGame({
     };
   }, [runtime]);
   async function open(commandId?: string) {
+    if (requestedMatchId) {
+      setSelected(requestedMatchId);
+      await runtime.personal().subscribe(requestedMatchId);
+      if (!mounted.current) return;
+      setSelected(requestedMatchId);
+      setChecked(true);
+      onStartConsumed?.();
+      return;
+    }
     const r = await runtime
       .personal()
       .request("personal:current", { schemaVersion: 1 }, okValue(currentSchema));
     if (!mounted.current) return;
     let matchId = r.value.matchId;
-    if (!matchId && commandId) {
+    if (!matchId && commandId && canStart) {
       if (runtime.store.getState().connection !== "connected")
         throw new ClientError("NETWORK_ERROR", true);
       const started = await runtime
@@ -61,6 +77,7 @@ export function PersonalGame({
   }, [runtime, selected, connection]);
   const current = snapshot?.matchId === selected ? snapshot : null;
   function start() {
+    if (!canStart) return;
     const commandId = crypto.randomUUID();
     task.run(() => open(commandId));
   }
@@ -87,7 +104,12 @@ export function PersonalGame({
           <ErrorNotice language="fa" error={error} retry={() => runtime.personal().retry()} />
         )}
         {!checked && !lookup.error && !error && <p role="status">در حال آماده‌سازی بازی…</p>}
-        {checked &&
+        {!canStart && <p role="status">شروع بازی جدید در دسترس نیست؛ بازی موجود قابل ادامه است.</p>}
+        {checked && !selected && !canStart && (
+          <p role="status">بازی ناتمامی برای ادامه پیدا نشد.</p>
+        )}
+        {canStart &&
+        checked &&
         (!current || current.status === "FINISHED" || current.status === "TERMINATED") ? (
           <button disabled={blocked} onClick={start}>
             {task.pending ? "در حال شروع…" : "شروع بازی با ربات"}

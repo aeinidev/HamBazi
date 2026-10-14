@@ -8,19 +8,22 @@ server's verified numeric-ID policy, not a frontend username check.
 The [home presentation decision](../adr/063-responsive-home-presentation-and-availability.md)
 uses a responsive RTL identity header, separate art banner, six two-column cards
 and safe-area-aware bottom navigation. The title, chosen name, avatar, status
-labels and controls are live UI. Only Coup has an enabled route; Hokm, Kahroba,
-Chess, Domino and Ludo are disabled presentation entries with “به‌زودی” badges.
+labels and controls are live UI. [Temporary game availability](game-availability.md)
+now comes from authenticated `/v1/games/availability` metadata. Coup defaults to
+“موقتاً غیرفعال”; Hokm, Kahroba, Chess, Domino and Ludo retain “به‌زودی”. Inactive
+posters use CSS grayscale and charcoal overlays without dimming the text.
+Only an explicitly unpaused and already admitted Coup session has an enabled route.
 The CTA, all-games control, Friends, Leaderboard and notifications are visibly
 disabled. The Settings control continues to the existing editor.
 
-| Route                  | Screen                               | Entry side effects                                                           |
-| ---------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| `/games`               | Responsive home; Coup active         | None                                                                         |
-| `/profile`             | Existing profile editor              | Own profile read; explicit patch only                                        |
-| `/games/coup`          | Artwork, tutorial and start controls | None                                                                         |
-| `/games/coup/tutorial` | Current five-role tutorial           | None                                                                         |
-| `/settings`            | Existing profile preferences editor  | Own profile read; explicit patch only                                        |
-| `/games/coup/play`     | Existing personal game/table         | Personal connection/current lookup; creation only with explicit start intent |
+| Route                  | Screen                                 | Entry side effects                                                                         |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `/games`               | Responsive home; verified availability | Own profile and availability read                                                          |
+| `/profile`             | Existing profile editor                | Own profile read; explicit patch only                                                      |
+| `/games/coup`          | Availability-gated Coup entry          | None                                                                                       |
+| `/games/coup/tutorial` | Availability-gated tutorial            | None                                                                                       |
+| `/settings`            | Existing profile preferences editor    | Own profile read; explicit patch only                                                      |
+| `/games/coup/play`     | Existing personal game/table           | Personal connection/current lookup; creation only when unpaused with explicit start intent |
 
 Direct future-game routes show an unavailable screen without game requests. The
 ordinary Games API still registers only non-playable Coup under ADR-018; future
@@ -33,8 +36,10 @@ unavailable routes to home. Where a visible back control is present, it shares
 that destination. Leaving the table clears its UI timer but never
 sends personal close. The existing runtime owns reconnect and memory-only auth;
 no token, initData, hidden state, chat content or profile is logged or stored for
-UI diagnostics. The legacy personal `/match/<uuid>` route uses the current own
-match, never a URL-supplied identity.
+UI diagnostics. The personal `/match/<uuid>` route reads that specific match through authorized
+subscription; it never uses a URL-supplied user identity. The separate recovery
+link finds the current own match without creating one. When Coup is paused,
+native BackButton from recovery returns home.
 
 Start guards rapid taps before hash navigation. A failed current lookup cannot
 fall through to creation. Network retry uses the original command ID; a committed
@@ -76,7 +81,7 @@ Read the manifests before using these declared scripts/entry points:
 pnpm install --frozen-lockfile
 pnpm exec turbo run build --filter=@hambazi/contracts
 VITE_API_ORIGIN=https://api-staging.hambazi.top HAMBAZI_WEB_ORIGIN=https://staging.hambazi.top pnpm --filter @hambazi/web build
-pnpm --filter @hambazi/web exec playwright test --config midnight.playwright.config.ts
+pnpm --filter @hambazi/web test:midnight
 pnpm --filter @hambazi/web test:browser
 pnpm test:personal-http:local
 pnpm check

@@ -20,6 +20,7 @@ export function createPersonalMatchRepository(
   database: ReturnType<typeof createDatabase>,
   options: {
     game: MatchGame & MatchViewGame;
+    newMatchesAllowed?: boolean;
     retainedGames?: readonly (MatchGame & MatchViewGame)[];
     clock: { nowMs(): number };
     owner: { allowsUserId(id: string): Promise<boolean> };
@@ -94,6 +95,8 @@ export function createPersonalMatchRepository(
                   throw new MatchFault("FORBIDDEN");
                 return;
               }
+              // Checked after idempotent recovery, inside the serialized admission transaction.
+              if (options.newMatchesAllowed !== true) throw new MatchFault("GAME_UNAVAILABLE");
               const active = await db.match.findFirst({
                 where: {
                   matchType: personalMatchType,

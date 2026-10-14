@@ -1,8 +1,13 @@
 import { z } from "zod";
+import { lobbyAvailabilitySchema } from "../application/availability.js";
 import { gameSchema, slugSchema } from "../application/catalog.js";
 export const catalogResponseSchema = z.strictObject({
   schemaVersion: z.literal(1),
   games: z.array(gameSchema),
+});
+export const lobbyAvailabilityResponseSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  lobbyAvailability: lobbyAvailabilitySchema,
 });
 export const gameResponseSchema = z.strictObject({ schemaVersion: z.literal(1), game: gameSchema });
 export function catalogOpenApiDocument() {
@@ -46,6 +51,13 @@ export function catalogOpenApiDocument() {
     },
     paths: {
       "/v1/games": { get: operation("listGames", catalogResponseSchema) },
+      "/v1/games/availability": {
+        get: {
+          ...operation("readLobbyAvailability", lobbyAvailabilityResponseSchema),
+          description:
+            "Authenticated, rate-limited, no-store lobby metadata. Verified configuration and existing personal admission only; cannot grant admission. Unreleased games remain coming soon. Missing configuration or invalid durable catalog fails closed.",
+        },
+      },
       "/v1/games/{slug}": {
         get: {
           ...operation("readGame", gameResponseSchema),

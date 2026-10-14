@@ -1,4 +1,6 @@
 import { go } from "../../ui/shared.js";
+import { useLobbyAvailability, availabilityLabel } from "./availability.js";
+import { ErrorNotice } from "../../ui/shared.js";
 import { MidnightIcon } from "../../ui/midnight.js";
 
 /** The admitted personal Coup flow is separate from the read-only public catalog. */
@@ -6,22 +8,19 @@ export const personalLobbyCatalog = Object.freeze([
   {
     id: "kahroba",
     title: "کهربا",
-    enabled: false,
     artwork: "/assets/home/kahroba-94b0289f428c.webp",
   },
-  { id: "hokm", title: "حکم", enabled: false, artwork: "/assets/home/hokm-4a8999bf3214.webp" },
+  { id: "hokm", title: "حکم", artwork: "/assets/home/hokm-4a8999bf3214.webp" },
   {
     id: "domino",
     title: "دومینو",
-    enabled: false,
     artwork: "/assets/home/domino-068f68864add.webp",
   },
-  { id: "chess", title: "شطرنج", enabled: false, artwork: "/assets/home/chess-5f0c34b275df.webp" },
-  { id: "ludo", title: "منچ", enabled: false, artwork: "/assets/home/ludo-c8e10a82c8d8.webp" },
+  { id: "chess", title: "شطرنج", artwork: "/assets/home/chess-5f0c34b275df.webp" },
+  { id: "ludo", title: "منچ", artwork: "/assets/home/ludo-c8e10a82c8d8.webp" },
   {
     id: "coup",
     title: "کودتا",
-    enabled: true,
     artwork: "/assets/home/coup-2811ce0e87a8.webp",
     route: "/games/coup",
   },
@@ -53,6 +52,7 @@ export function HomeBottomNav({ active }: { active: "home" | "profile" }) {
 }
 
 export function PersonalLobby() {
+  const availability = useLobbyAvailability();
   return (
     <section className="home-screen" aria-labelledby="games-heading">
       <div className="home-banner">
@@ -81,28 +81,54 @@ export function PersonalLobby() {
           <small>به‌زودی</small>
         </button>
       </div>
+      {availability.error && (
+        <ErrorNotice
+          error={availability.error}
+          language="fa"
+          retry={() => {
+            void availability.refetch();
+          }}
+        />
+      )}
       <div className="home-game-grid" aria-label="فهرست بازی‌ها">
-        {personalLobbyCatalog.map((game) => (
-          <button
-            key={game.id}
-            className={`home-game-card home-game-${game.id}`}
-            disabled={!game.enabled}
-            aria-label={`${game.title}، ${game.enabled ? "فعال" : "به‌زودی"}`}
-            onClick={() => {
-              if (game.enabled && "route" in game) go(game.route);
-            }}
-          >
-            <img src={game.artwork} alt="" width="1200" height="660" />
-            <span className="home-card-title">{game.title}</span>
-            <span className="home-card-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="m9 5 7 7-7 7" />
-              </svg>
-            </span>
-            {!game.enabled && <span className="home-card-badge">به‌زودی</span>}
-          </button>
-        ))}
+        {personalLobbyCatalog.map((game) => {
+          const state = availability.error
+            ? undefined
+            : availability.data?.lobbyAvailability?.find((item) => item.id === game.id)?.state;
+          const enabled = state === "AVAILABLE" && "route" in game;
+          const label = availabilityLabel(state);
+          return (
+            <button
+              key={game.id}
+              className={`home-game-card home-game-${game.id}${enabled ? "" : " home-game-unavailable"}`}
+              disabled={!enabled}
+              aria-label={`${game.title}، ${label}`}
+              onClick={() => {
+                if (enabled && "route" in game) go(game.route);
+              }}
+            >
+              <img src={game.artwork} alt="" width="1200" height="660" />
+              <span className="home-card-title">{game.title}</span>
+              {enabled && (
+                <span className="home-card-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="m9 5 7 7-7 7" />
+                  </svg>
+                </span>
+              )}
+              {!enabled && (
+                <span className="home-card-badge">
+                  <MidnightIcon name="lock" />
+                  {label}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
+      <a className="home-recovery-link" href="#/games/coup/play">
+        ادامهٔ بازی موجود
+      </a>
     </section>
   );
 }
