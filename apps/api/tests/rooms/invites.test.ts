@@ -34,3 +34,24 @@ it.each(["evil/path", "evil?query", "evil#fragment", "evil\n", "@mybot", "evil.e
     expect(() => buildRoomDeepLink({ ...target, appName: value }, "A".repeat(43))).toThrow();
   },
 );
+
+it("round trips canonical Main Mini App links without changing named-app output", () => {
+  const code = randomBytes(32).toString("base64url");
+  const main = buildRoomDeepLink({ botUsername: "Hambazidev_bot", mainApp: true }, code);
+  const url = new URL(main);
+  expect(url.origin + url.pathname).toBe("https://t.me/Hambazidev_bot");
+  expect(parseRoomStartParam(url.searchParams.get("startapp"))).toBe(code);
+  expect(buildRoomDeepLink(target, code)).toBe(
+    `https://t.me/HamBaziBot/play?startapp=room_${code}`,
+  );
+  for (const bad of [
+    { botUsername: "evil/path", mainApp: true },
+    { botUsername: "Hambazidev_bot", mainApp: true, appName: "play" },
+    { botUsername: "Hambazidev_bot", mainApp: false },
+    { botUsername: "Hambazidev_bot" },
+  ])
+    expect(() => buildRoomDeepLink(bad as never, code)).toThrow();
+  expect(() =>
+    buildRoomDeepLink({ botUsername: "Hambazidev_bot", mainApp: true }, code + "\n"),
+  ).toThrow();
+});

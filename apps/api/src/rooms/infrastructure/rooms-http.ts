@@ -9,6 +9,7 @@ import {
   roomAckSchema,
   roomResponseSchema,
   inviteResponseSchema,
+  mainInviteResponseSchema,
   invitePreviewSchema,
 } from "./rooms-contract.js";
 export interface RoomsHttpDependencies {
@@ -90,7 +91,9 @@ export function createRoomsHttpModule(
       if (!result.ok) return fail(reply, result.error.code);
       const parsed = (
         operation === "shareInvite"
-          ? inviteResponseSchema
+          ? prefix === "v1/kahroba"
+            ? inviteResponseSchema.or(mainInviteResponseSchema)
+            : inviteResponseSchema
           : operation === "resolveInvite"
             ? invitePreviewSchema
             : operation === "create"

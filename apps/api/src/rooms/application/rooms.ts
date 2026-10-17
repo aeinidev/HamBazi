@@ -5,6 +5,7 @@ import {
   roomInviteCodePattern,
   createErrorEnvelope,
   type ErrorEnvelope,
+  type RoomLaunchTarget,
 } from "@hambazi/contracts";
 import type { UserIdentityPort } from "../../users/index.js";
 import type { CatalogPort } from "../../games/index.js";
@@ -63,7 +64,7 @@ export function roomsService(deps: {
   users: UserIdentityPort;
   games: CatalogPort;
   invites?: {
-    target: { botUsername: string; appName: string };
+    target: RoomLaunchTarget;
     consume(
       userId: string,
     ): Promise<{ allowed: true } | { allowed: false; reason: "unavailable" | "limited" }>;
@@ -151,7 +152,7 @@ export function roomsService(deps: {
         if (!value || value.room.hostUserId !== userId) throw new RoomFault("NOT_FOUND");
         return {
           ok: true as const,
-          schemaVersion: 1 as const,
+          schemaVersion: deps.invites!.target.mainApp ? (2 as const) : (1 as const),
           invite: {
             roomId: value.room.id,
             expiresAt: value.room.expiresAt,

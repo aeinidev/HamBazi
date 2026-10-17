@@ -51,3 +51,30 @@ it("requires a complete explicit invite target and budget without changing prior
       "Rooms configuration is invalid",
     );
 });
+
+it("selects the verified Main Mini App explicitly without a named short name", () => {
+  const input = {
+    ROOM_TTL_SECONDS: "900",
+    ROOM_READ_LIMIT: "60",
+    ROOM_CREATE_LIMIT: "5",
+    ROOM_BOT_USERNAME: "Hambazidev_bot",
+    ROOM_MAIN_APP: "true",
+    ROOM_INVITE_LIMIT: "10",
+  };
+  expect(parseRoomsConfig(input)).toMatchObject({
+    target: { botUsername: "Hambazidev_bot", mainApp: true },
+  });
+  expect(parseRoomsConfig(input)?.target).not.toHaveProperty("appName");
+  for (const patch of [
+    { ROOM_APP_NAME: "play" },
+    { ROOM_APP_NAME: "" },
+    { ROOM_MAIN_APP: "false" },
+    { ROOM_MAIN_APP: "TRUE" },
+    { ROOM_MAIN_APP: "true\n" },
+    { ROOM_BOT_USERNAME: undefined },
+    { ROOM_INVITE_LIMIT: undefined },
+  ])
+    expect(() => parseRoomsConfig({ ...input, ...patch })).toThrow(
+      "Rooms configuration is invalid",
+    );
+});

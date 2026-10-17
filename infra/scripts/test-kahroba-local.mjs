@@ -144,13 +144,15 @@ try {
     "personal-bots.test.ts",
     "kahroba.test.ts",
   ];
-  for (const file of process.argv.includes("--bot-regression")
-    ? ["sessions.test.ts", "bot-delivery.test.mjs"]
-    : process.argv.includes("--runtime")
-      ? ["kahroba-runtime.test.mjs"]
-      : process.argv.includes("--kahroba-only")
-        ? ["kahroba.test.ts"]
-        : apiSuites)
+  for (const file of process.argv.includes("--outbox-only")
+    ? []
+    : process.argv.includes("--bot-regression")
+      ? ["sessions.test.ts", "bot-delivery.test.mjs"]
+      : process.argv.includes("--runtime")
+        ? ["kahroba-runtime.test.mjs"]
+        : process.argv.includes("--kahroba-only")
+          ? ["kahroba.test.ts"]
+          : apiSuites)
     await suite("apps/api", `tests/integration/${file}`);
   // Rebuild before the existing outbox quarantine suite inserts deliberately corrupt truth.
   const workerSuites = [
@@ -161,13 +163,15 @@ try {
     "match-automation.test.ts",
     "personal-automation.test.ts",
   ];
-  for (const file of process.argv.includes("--bot-regression")
-    ? []
-    : process.argv.includes("--runtime")
-      ? ["kahroba.test.ts"]
-      : process.argv.includes("--kahroba-only")
+  for (const file of process.argv.includes("--outbox-only")
+    ? ["outbox.test.ts"]
+    : process.argv.includes("--bot-regression")
+      ? []
+      : process.argv.includes("--runtime")
         ? ["kahroba.test.ts"]
-        : workerSuites)
+        : process.argv.includes("--kahroba-only")
+          ? ["kahroba.test.ts"]
+          : workerSuites)
     await suite("apps/worker", `tests/integration/${file}`);
   console.info(
     "KAHROBA_K2_LOCAL_PASSED: fresh PostgreSQL/Redis, uncached API/Worker integration inventory; no deployment.",

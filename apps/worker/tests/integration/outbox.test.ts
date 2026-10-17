@@ -147,7 +147,7 @@ it("backs off, stops exhausted delivery, rejects released claims and redrives wi
   expect(await first.published(id, 3)).toBe(true);
   expect((await read(id)).publishedAt).not.toBeNull();
 });
-it("preserves legacy matchmaking.found v1 and quarantines malformed or unknown events", async () => {
+it("preserves legacy matchmaking.found v1 and quarantines explicitly owned unknown events", async () => {
   const row = data("matchmaking.found");
   await admin.forModule("matches").execute((db) =>
     db.outboxEvent.create({
@@ -163,12 +163,17 @@ it("preserves legacy matchmaking.found v1 and quarantines malformed or unknown e
     }),
   );
   await seed("unknown.event.v2");
-  const claims = await first.claim(10);
+  const owned = createMatchOutboxPort(a, {
+    clock,
+    policy,
+    eventTypes: ["matchmaking.found", "unknown.event.v2"],
+  });
+  const claims = await owned.claim(10);
   const legacy = claims.find((c) => c.eventId === row.id)!;
   expect(legacy.event?.type).toBe("matchmaking.found");
   expect(JSON.stringify(legacy.event)).not.toContain("SYNTHETIC_PRIVATE");
   const unknown = claims.find((c) => c.event === null)!;
-  await first.failed(unknown.eventId, unknown.attempt, true);
+  await owned.failed(unknown.eventId, unknown.attempt, true);
   expect((await read(unknown.eventId)).status).toBe("FAILED");
 });
 it("survives publish-before-mark failure and preserves eventId/context through real BullMQ deduplication", async () => {
@@ -350,7 +355,7 @@ it("keeps the database pending after an unavailable queue and recovers with the 
 it("restricts SQL claims to the outbox scope and Worker writes to delivery fields", async () => {
   const id = await seed();
   await expect(
-    a.forModule("outbox").execute((db) => db.lockDueOutbox(new Date(at), 1)),
+    a.forModule("outbox").execute((db) => db.lockDueOutbox(new Date(at), 1, ["MATCH_CHANGED_V1"])),
   ).rejects.toThrow();
   await expect(
     a
@@ -437,7 +442,12 @@ it("claims and publishes Chat delivery with no message content in BullMQ storage
       },
     }),
   );
-  const outbox = createMatchOutboxPort(a, { clock, policy, decode: decodeDelivery });
+  const outbox = createMatchOutboxPort(a, {
+    clock,
+    policy,
+    decode: decodeDelivery,
+    eventTypes: Object.keys(outboxQueueNames),
+  });
   const namespace = randomUUID();
   const redisUrl = { reveal: () => process.env.TEST_WORKER_REDIS_URL! };
   const publisher = await createBullMqDomainPublisher({
@@ -467,4 +477,45 @@ it("claims and publishes Chat delivery with no message content in BullMQ storage
     await queue.obliterate({ force: true });
     await queue.close();
   }
+});
+
+it("preserves 715 historical personal events and unowned future work without starving owned delivery", async () => {
+  const rows = Array.from({ length: 715 }, () => ({
+    ...data("PERSONAL_MATCH_CHANGED_V1"),
+    createdAt: new Date(0),
+    nextAttemptAt: new Date(0),
+  }));
+  const future = {
+    ...data("other.workflow.v3"),
+    createdAt: new Date(0),
+    nextAttemptAt: new Date(0),
+  };
+  await admin
+    .forModule("matches")
+    .execute((db) => db.outboxEvent.createMany({ data: [...rows, future] }));
+  const ids = [...rows.map((r) => r.id), future.id];
+  const before = await admin
+    .forModule("matches")
+    .execute((db) =>
+      db.outboxEvent.findMany({ where: { id: { in: ids } }, orderBy: { id: "asc" } }),
+    );
+  const good = await seed();
+  const bad = data();
+  bad.schemaVersion = 99;
+  await admin.forModule("matches").execute((db) => db.outboxEvent.create({ data: bad }));
+  const claims = await first.claim(2);
+  expect(claims.map((c) => c.eventId).sort()).toEqual([good, bad.id].sort());
+  const malformed = claims.find((c) => c.eventId === bad.id)!;
+  expect(malformed.event).toBeNull();
+  await first.failed(malformed.eventId, malformed.attempt, true);
+  expect((await read(bad.id)).status).toBe("FAILED");
+  expect(await first.failed(rows[0]!.id, 1, true)).toBe(false);
+  expect(await first.published(rows[0]!.id, 1)).toBe(false);
+  expect(await first.redrive(rows[0]!.id)).toBe(false);
+  const after = await admin
+    .forModule("matches")
+    .execute((db) =>
+      db.outboxEvent.findMany({ where: { id: { in: ids } }, orderBy: { id: "asc" } }),
+    );
+  expect(after).toEqual(before);
 });

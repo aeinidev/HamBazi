@@ -21,6 +21,7 @@ import {
 import {
   createOutboxDispatcher,
   decodeDelivery,
+  outboxQueueNames,
   createBullMqDomainPublisher,
   startOutboxLoop,
   type OutboxReporter,
@@ -202,6 +203,7 @@ export async function startWorker(
             clock: { nowMs: () => Date.now() },
             policy: outboxConfig.policy,
             decode: decodeDelivery,
+            eventTypes: Object.keys(outboxQueueNames),
           }),
           publisher,
           batchSize: outboxConfig.batchSize,

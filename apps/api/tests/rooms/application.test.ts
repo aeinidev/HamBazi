@@ -317,3 +317,29 @@ it("requires current identity, canonical invitation, strict DTO and configured l
     error: { code: "UNAUTHENTICATED" },
   });
 });
+
+it("versions only explicit Main invitations and retains host-only membership and budget guards", async () => {
+  const f = setup();
+  const service = roomsService({
+    repository: f.repository,
+    users: f.users,
+    games: f.games,
+    invites: { ...f.invites, target: { botUsername: "Hambazidev_bot", mainApp: true } },
+  });
+  expect(await service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    ok: true,
+    schemaVersion: 2,
+    invite: { deepLink: "https://t.me/Hambazidev_bot?startapp=room_" + "A".repeat(43) },
+  });
+  expect(await f.service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    ok: true,
+    schemaVersion: 1,
+  });
+  expect(await service.shareInvite(randomUUID(), f.room.id)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  f.invites.consume.mockResolvedValue({ allowed: false, reason: "unavailable" });
+  expect(await service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+});

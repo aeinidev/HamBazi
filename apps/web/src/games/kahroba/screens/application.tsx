@@ -14,12 +14,11 @@ import { ClientError } from "../../../platform/errors.js";
 import {
   roomAckSchema,
   roomResponseSchema,
-  inviteSchema,
   previewSchema,
   matchAckSchema,
   okValue,
 } from "../../../platform/contracts.js";
-import { createKahrobaRealtime } from "../runtime.js";
+import { createKahrobaRealtime, kahrobaInviteSchema as inviteSchema } from "../runtime.js";
 import { publicKahrobaSnapshot } from "../adapters/index.js";
 import { KahrobaSession } from "./match.js";
 const capabilities = z.strictObject({

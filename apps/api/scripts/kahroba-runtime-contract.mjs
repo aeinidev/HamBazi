@@ -4,7 +4,8 @@ import console from "node:console";
 import { readFile, writeFile } from "node:fs/promises";
 import { isDeepStrictEqual } from "node:util";
 import { z } from "zod";
-import { roomsOpenApiDocument } from "../dist/rooms/index.js";
+import { format } from "prettier";
+import { roomsOpenApiDocument, mainInviteResponseSchema } from "../dist/rooms/index.js";
 import { realtimeEventCatalog } from "../dist/realtime/index.js";
 import {
   kahrobaCapabilitiesSchema,
@@ -73,3 +74,31 @@ else if (
 )
   throw Error("Private Kahroba runtime contract drift");
 console.info("Private Kahroba runtime contract verified/generated");
+// Main launch responses are explicitly versioned; preserve the frozen named-app v1 contract.
+const mainDocument = JSON.parse(JSON.stringify(document));
+mainDocument.schemaVersion = 2;
+const invitation = mainDocument.paths["/v1/kahroba/rooms/{id}/invite"].get.responses[200];
+invitation.content["application/json"].schema = {
+  anyOf: [invitation.content["application/json"].schema, z.toJSONSchema(mainInviteResponseSchema)],
+};
+const mainBaseline = new URL(
+  "../../../docs/contracts/kahroba.runtime.v2.baseline.json",
+  import.meta.url,
+);
+const mainTarget = new URL("../../../docs/contracts/kahroba.runtime.v2.json", import.meta.url);
+const mainGenerated = await format(JSON.stringify(mainDocument), {
+  ...JSON.parse(await readFile(new URL("../../../.prettierrc.json", import.meta.url), "utf8")),
+  parser: "json",
+});
+if (process.argv.includes("--initialize-main-baseline"))
+  await writeFile(mainBaseline, mainGenerated, { flag: "wx" });
+else if (!isDeepStrictEqual(JSON.parse(await readFile(mainBaseline, "utf8")), mainDocument))
+  throw Error("Breaking private Kahroba v2 runtime contract change");
+if (process.argv.includes("--write") || process.argv.includes("--write-main"))
+  await writeFile(mainTarget, mainGenerated);
+else if (
+  !process.argv.includes("--initialize-main-baseline") &&
+  !isDeepStrictEqual(JSON.parse(await readFile(mainTarget, "utf8")), mainDocument)
+)
+  throw Error("Private Kahroba v2 runtime contract drift");
+console.info("Private Kahroba v2 Main Mini App contract verified/generated");

@@ -12,6 +12,10 @@ import { verifyBrowserPolicyArtifact } from "../../apps/web/security/browser-pol
 import { telegramSdkIntegrity } from "../../apps/web/src/platform/telegram-sdk.ts";
 import { operatorProfile, operatorLogging } from "./monitoring.mjs";
 import { stagingFreshnessContext } from "./staging-freshness.mjs";
+import {
+  validateStagingTestDeferral,
+  readStagingTestDeferralTarget,
+} from "./staging-test-deferral.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const invalid = () => {
@@ -147,6 +151,7 @@ groups.api.push(
   "ROOM_CREATE_LIMIT",
   "ROOM_BOT_USERNAME",
   "ROOM_APP_NAME",
+  "ROOM_MAIN_APP",
   "ROOM_INVITE_LIMIT",
 );
 groups.worker.push(
@@ -184,7 +189,7 @@ export function parseRoleFile(text, role) {
   return env;
 }
 
-export function validateInventory(manifest, report, stagingContext) {
+export function validateInventory(manifest, report, stagingContext, stagingTestTarget) {
   verifyBrowserPolicyArtifact(manifest?.browserPolicy, telegramSdkIntegrity);
   if (manifest?.features !== undefined) {
     exact(manifest.features, ["kahrobaPrivateRuntime"]);
@@ -230,6 +235,10 @@ export function validateInventory(manifest, report, stagingContext) {
     manifest.images.length !== 4
   )
     invalid();
+  if (stagingTestTarget) {
+    if (stagingContext) invalid();
+    return validateStagingTestDeferral(report, manifest, stagingTestTarget);
+  }
   const scan = projectScan(report, "application-images", stagingContext);
   for (const key of ["sourceCommit", "sourceDirty", "sourceSnapshotSha256", "buildInputSha256"])
     if (scan[key] !== manifest[key]) invalid();
@@ -463,6 +472,7 @@ export async function prepare(inputsPath, output) {
     ...(Object.hasOwn(inputs, "ownerAdmissionFile") ? ["ownerAdmissionFile"] : []),
     ...(Object.hasOwn(inputs, "stagingTestAdmissionFile") ? ["stagingTestAdmissionFile"] : []),
     ...(Object.hasOwn(inputs, "temporaryStagingFreshness") ? ["temporaryStagingFreshness"] : []),
+    ...(Object.hasOwn(inputs, "stagingTestScanDeferral") ? ["stagingTestScanDeferral"] : []),
   ]);
   for (const field of ["roleEnvFiles", "privateAddresses", "stopGraceSeconds"])
     exact(inputs[field], roles);
@@ -494,7 +504,21 @@ export async function prepare(inputsPath, output) {
   }
   const inventoryBytes = await privateFile(inputs.inventory),
     manifest = JSON.parse(inventoryBytes);
-  const scanBytes = await privateFile(`${inputs.inventory}.scan.json`);
+  if (inputs.stagingTestScanDeferral && inputs.temporaryStagingFreshness) invalid();
+  let deferralTarget;
+  const deferral = inputs.stagingTestScanDeferral;
+  if (deferral) {
+    exact(deferral, ["file", "sha256"]);
+    if (!/^[a-f0-9]{64}$/.test(deferral.sha256) || !isAbsolute(deferral.file)) invalid();
+  }
+  const scanBytes = await privateFile(deferral ? deferral.file : `${inputs.inventory}.scan.json`);
+  if (deferral && hash(scanBytes) !== deferral.sha256) invalid();
+  if (deferral)
+    deferralTarget = await readStagingTestDeferralTarget(
+      inputs,
+      privateFile,
+      JSON.parse(scanBytes),
+    );
   if (
     inputs.temporaryStagingFreshness &&
     (!inputs.ownerAdmissionFile || manifest.sourceDirty !== false)
@@ -503,7 +527,12 @@ export async function prepare(inputsPath, output) {
   const freshness = inputs.temporaryStagingFreshness
     ? await stagingFreshnessContext(inputs.temporaryStagingFreshness)
     : undefined;
-  const verifiedScan = validateInventory(manifest, JSON.parse(scanBytes), freshness);
+  const verifiedScan = validateInventory(
+    manifest,
+    JSON.parse(scanBytes),
+    freshness,
+    deferralTarget,
+  );
   const privateNetwork = JSON.parse(
     await runGate("deployment-private-network", "docker", [
       "network",
@@ -538,6 +567,12 @@ export async function prepare(inputsPath, output) {
   for (const role of roles)
     envs[role] = parseRoleFile((await privateFile(inputs.roleEnvFiles[role])).toString(), role);
   validateEnvironments(envs, inputs);
+  if (
+    deferral &&
+    (!config.parseKahrobaRuntimeConfig(envs.api, "api") ||
+      !config.parseKahrobaRuntimeConfig(envs.worker, "worker"))
+  )
+    invalid();
   if (inputs.ownerAdmissionFile)
     config.parseOwnerAdmissionPolicy((await privateFile(inputs.ownerAdmissionFile)).toString());
   let testUserPresent = false;
@@ -644,6 +679,11 @@ export async function prepare(inputsPath, output) {
     compose = stringify(definition);
   }
   if (Object.keys(definition.services).join() !== roles.join() || compose.includes("${")) invalid();
+  if (deferral) {
+    // Recheck the exact target/window after artifact/TLS checks; never certify moving controls.
+    const current = await readStagingTestDeferralTarget(inputs, privateFile, JSON.parse(scanBytes));
+    validateStagingTestDeferral(JSON.parse(scanBytes), manifest, current);
+  }
   await mkdir(output, { mode: 0o700 });
   let complete = false;
   try {
@@ -671,7 +711,13 @@ export async function prepare(inputsPath, output) {
       purpose: "portable-deployment-preparation",
       productionReleaseApproved: false,
       inventorySha256: hash(inventoryBytes),
-      scanSha256: hash(scanBytes),
+      ...(deferral
+        ? {
+            scanDeferralSha256: hash(scanBytes),
+            scanStatus: "deferred-not-passed",
+            stagingTestScanDeferral: verifiedScan,
+          }
+        : { scanSha256: hash(scanBytes) }),
       composeSha256: hash(compose),
       ...(freshness ? { advisoryFreshness: verifiedScan.database } : {}),
       ...(inputs.ownerAdmissionFile
