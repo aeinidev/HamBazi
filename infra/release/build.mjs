@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, X509Certificate } from "node:crypto";
 import { mkdir, readFile, lstat, readdir, rm, writeFile } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,8 +24,41 @@ export function verifyArchive(data, expected) {
     invalid();
 }
 
-export const buildIdentity = (sourceSnapshotSha256, browserPolicy, features) =>
-  hash(JSON.stringify({ sourceSnapshotSha256, browserPolicy, ...(features ? { features } : {}) }));
+export const buildIdentity = (sourceSnapshotSha256, browserPolicy, features, buildConfiguration) =>
+  hash(
+    JSON.stringify({
+      sourceSnapshotSha256,
+      browserPolicy,
+      ...(features ? { features } : {}),
+      ...(buildConfiguration ? { buildConfiguration } : {}),
+    }),
+  );
+
+/** Local sealed artifact service only; public Internet registries are never accepted here. */
+export function localBuildTransport(origin, caSha256, inputManifestSha256) {
+  if ([origin, caSha256, inputManifestSha256].every((v) => v === undefined)) return undefined;
+  let url;
+  try {
+    url = new URL(origin);
+  } catch {
+    invalid();
+  }
+  if (
+    url.protocol !== "https:" ||
+    !["127.0.0.1", "172.17.0.1"].includes(url.hostname) ||
+    !url.port ||
+    Number(url.port) < 1024 ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    !/^[a-f0-9]{64}$/.test(caSha256 ?? "") ||
+    !/^[a-f0-9]{64}$/.test(inputManifestSha256 ?? "")
+  )
+    invalid();
+  return Object.freeze({ origin: url.origin, caSha256, inputManifestSha256 });
+}
 
 export function kahrobaBuildFeatures(value, policy) {
   if (value === undefined || value === "false") return undefined;
@@ -83,7 +116,46 @@ export async function buildCandidates(directory, environment = process.env) {
   const dirty =
     (await runGate("packaging-status", "git", ["status", "--porcelain"], { cwd: root })).trim()
       .length > 0;
+  const epoch = (
+    await runGate("packaging-source-date", "git", ["show", "-s", "--format=%ct", "HEAD"], {
+      cwd: root,
+    })
+  ).trim();
+  if (!/^[0-9]{1,12}$/.test(epoch) || Number(epoch) < 1) invalid();
   const features = kahrobaBuildFeatures(environment.VITE_KAHROBA_RUNTIME, policy);
+  let transport, caFile, buildConfiguration;
+  if (
+    [
+      "HAMBAZI_BUILD_INPUT_ORIGIN",
+      "HAMBAZI_BUILD_INPUT_CA_FILE",
+      "HAMBAZI_BUILD_INPUT_MANIFEST_SHA256",
+    ].some((key) => environment[key] !== undefined)
+  ) {
+    caFile = environment.HAMBAZI_BUILD_INPUT_CA_FILE;
+    if (!isAbsolute(caFile ?? "")) invalid();
+    const caInfo = await lstat(caFile);
+    if (!caInfo.isFile() || caInfo.isSymbolicLink() || caInfo.size < 1 || caInfo.size > 65536)
+      invalid();
+    const caBytes = await readFile(caFile);
+    if (caBytes.includes(Buffer.from("PRIVATE KEY"))) invalid();
+    let certificate;
+    try {
+      certificate = new X509Certificate(caBytes);
+    } catch {
+      invalid();
+    }
+    if (!certificate.ca) invalid();
+    transport = localBuildTransport(
+      environment.HAMBAZI_BUILD_INPUT_ORIGIN,
+      hash(caBytes),
+      environment.HAMBAZI_BUILD_INPUT_MANIFEST_SHA256,
+    );
+    buildConfiguration = {
+      inputTransport: transport,
+      sourceDateEpoch: epoch,
+      rewriteTimestamp: true,
+    };
+  }
   await mkdir(directory, { mode: 0o700 });
   const context = join(directory, "context");
   await mkdir(context, { mode: 0o700 });
@@ -91,7 +163,7 @@ export async function buildCandidates(directory, environment = process.env) {
   try {
     await snapshotCandidate(context);
     const source = await hashContext(context);
-    const buildInputSha256 = buildIdentity(source.sha256, policy, features);
+    const buildInputSha256 = buildIdentity(source.sha256, policy, features, buildConfiguration);
     const baseLock = JSON.parse(
       await readFile(join(context, "infra/docker/apps/base-lock.json"), "utf8"),
     );
@@ -167,6 +239,22 @@ export async function buildCandidates(directory, environment = process.env) {
           "buildx",
           "build",
           "--platform=linux/amd64",
+          "--build-arg",
+          `SOURCE_DATE_EPOCH=${epoch}`,
+          ...(transport
+            ? [
+                "--secret",
+                `id=hambazi_build_ca,src=${caFile}`,
+                "--build-arg",
+                `NPM_CONFIG_REGISTRY=${transport.origin}/npm/`,
+                "--build-arg",
+                `COREPACK_NPM_REGISTRY=${transport.origin}/npm/`,
+                "--build-arg",
+                `PRISMA_ENGINES_MIRROR=${transport.origin}/prisma`,
+                "--build-arg",
+                "NODE_EXTRA_CA_CERTS=/run/secrets/hambazi-build-ca.pem",
+              ]
+            : []),
           "--file",
           join(context, "infra/docker/apps/Dockerfile"),
           "--target",
@@ -190,7 +278,7 @@ export async function buildCandidates(directory, environment = process.env) {
           "--build-arg",
           `HAMBAZI_WEB_FRAME_ANCESTORS=${JSON.stringify(policy.frameAncestors)}`,
           "--output",
-          `type=image,name=${tag},push=false,unpack=false`,
+          `type=image,name=${tag},push=false,unpack=false${transport ? ",rewrite-timestamp=true" : ""}`,
           context,
         ],
         { cwd: directory, env: safeEnvironment, timeout: 900000 },
@@ -256,6 +344,7 @@ export async function buildCandidates(directory, environment = process.env) {
       baseLockSha256: hash(await readFile(join(context, "infra/docker/apps/base-lock.json"))),
       browserPolicy: policy,
       ...(features ? { features } : {}),
+      ...(buildConfiguration ? { buildConfiguration } : {}),
       images,
     };
     await writeFile(join(directory, "images.json"), JSON.stringify(manifest, null, 2) + "\n", {

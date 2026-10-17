@@ -5,7 +5,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse, stringify } from "yaml";
 import * as config from "../../packages/config/dist/index.js";
-import { roles, buildIdentity, kahrobaBuildFeatures } from "./build.mjs";
+import { roles, buildIdentity, kahrobaBuildFeatures, localBuildTransport } from "./build.mjs";
 import { projectScan } from "../ci/scan-evidence.mjs";
 import { runGate } from "../ci/gates.mjs";
 import { verifyBrowserPolicyArtifact } from "../../apps/web/security/browser-policy.ts";
@@ -191,6 +191,27 @@ export function validateInventory(manifest, report, stagingContext) {
     if (manifest.features.kahrobaPrivateRuntime !== true) invalid();
     kahrobaBuildFeatures("true", manifest.browserPolicy);
   }
+  const configuration = manifest?.buildConfiguration;
+  if (configuration !== undefined) {
+    exact(configuration, ["inputTransport", "sourceDateEpoch", "rewriteTimestamp"]);
+    exact(configuration.inputTransport, ["origin", "caSha256", "inputManifestSha256"]);
+    try {
+      localBuildTransport(
+        configuration.inputTransport.origin,
+        configuration.inputTransport.caSha256,
+        configuration.inputTransport.inputManifestSha256,
+      );
+    } catch {
+      invalid();
+    }
+    if (
+      typeof configuration.sourceDateEpoch !== "string" ||
+      !/^[0-9]{1,12}$/.test(configuration.sourceDateEpoch) ||
+      Number(configuration.sourceDateEpoch) < 1 ||
+      configuration.rewriteTimestamp !== true
+    )
+      invalid();
+  }
   if (
     manifest?.schemaVersion !== 1 ||
     manifest.purpose !== "local-packaging-candidate" ||
@@ -199,8 +220,12 @@ export function validateInventory(manifest, report, stagingContext) {
     !/^[a-f0-9]{40}$/.test(manifest.sourceCommit ?? "") ||
     typeof manifest.sourceDirty !== "boolean" ||
     !/^[a-f0-9]{64}$/.test(manifest.sourceSnapshotSha256 ?? "") ||
-    buildIdentity(manifest.sourceSnapshotSha256, manifest.browserPolicy, manifest.features) !==
-      manifest.buildInputSha256 ||
+    buildIdentity(
+      manifest.sourceSnapshotSha256,
+      manifest.browserPolicy,
+      manifest.features,
+      configuration,
+    ) !== manifest.buildInputSha256 ||
     !Array.isArray(manifest.images) ||
     manifest.images.length !== 4
   )

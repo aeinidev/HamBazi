@@ -11,6 +11,7 @@ import {
   verifyArchive,
   buildIdentity,
   kahrobaBuildFeatures,
+  localBuildTransport,
 } from "../release/build.mjs";
 import { assessImage } from "../scripts/security-scan.mjs";
 import { projectScan } from "../ci/scan-evidence.mjs";
@@ -306,4 +307,57 @@ it("serves supplied JPEG bytes with their correct MIME under the immutable inven
   } finally {
     await server.close();
   }
+});
+
+it("accepts only explicit sealed local TLS input transports and binds them into image identity", () => {
+  const ca = "a".repeat(64),
+    input = "b".repeat(64);
+  expect(localBuildTransport()).toBeUndefined();
+  const transport = localBuildTransport("https://172.17.0.1:54439", ca, input);
+  expect(transport).toEqual({
+    origin: "https://172.17.0.1:54439",
+    caSha256: ca,
+    inputManifestSha256: input,
+  });
+  expect(localBuildTransport("https://127.0.0.1:54439", ca, input).origin).toBe(
+    "https://127.0.0.1:54439",
+  );
+  const config = {
+    inputTransport: transport,
+    sourceDateEpoch: "1790000000",
+    rewriteTimestamp: true,
+  };
+  expect(buildIdentity(ca, {}, undefined, config)).not.toBe(buildIdentity(ca, {}));
+  expect(buildIdentity(ca, {}, undefined, config)).not.toBe(
+    buildIdentity(ca, {}, undefined, { ...config, sourceDateEpoch: "1790000001" }),
+  );
+  expect(buildIdentity(ca, {}, undefined, config)).not.toBe(
+    buildIdentity(ca, {}, undefined, {
+      ...config,
+      inputTransport: { ...transport, inputManifestSha256: ca },
+    }),
+  );
+});
+it("refuses partial, remote, unencrypted, credentialed and malformed build-input transports", () => {
+  const ca = "a".repeat(64),
+    input = "b".repeat(64);
+  for (const origin of [
+    "http://127.0.0.1:54439",
+    "https://registry.npmjs.org:54439",
+    "https://api-staging.hambazi.top:54439",
+    "https://127.0.0.1",
+    "https://127.0.0.1:443",
+    "https://user:pass@127.0.0.1:54439",
+    "https://127.0.0.1:54439/path",
+    "https://127.0.0.1:54439?query=1",
+    "https://127.0.0.1:54439#fragment",
+  ])
+    expect(() => localBuildTransport(origin, ca, input)).toThrow("PACKAGING_INPUT_INVALID");
+  expect(() => localBuildTransport(undefined, ca, input)).toThrow("PACKAGING_INPUT_INVALID");
+  expect(() => localBuildTransport("https://127.0.0.1:54439", undefined, input)).toThrow(
+    "PACKAGING_INPUT_INVALID",
+  );
+  expect(() => localBuildTransport("https://127.0.0.1:54439", ca, "unbound")).toThrow(
+    "PACKAGING_INPUT_INVALID",
+  );
 });

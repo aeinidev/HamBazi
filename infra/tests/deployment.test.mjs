@@ -15,6 +15,7 @@ import {
 import { runGate } from "../ci/gates.mjs";
 import { deploymentFixture } from "./fixtures/deployment.mjs";
 import { operatorProfile, operatorLogging } from "../release/monitoring.mjs";
+import { buildIdentity } from "../release/build.mjs";
 
 const directories = [],
   networks = [];
@@ -475,3 +476,108 @@ it("renders a private candidate and validates real Compose without starting serv
       bind: { create_host_path: false },
     });
 }, 15000);
+
+function sealedInventoryFixture() {
+  const fixture = deploymentFixture();
+  fixture.manifest.buildConfiguration = {
+    inputTransport: {
+      origin: "https://172.17.0.1:54439",
+      caSha256: "c".repeat(64),
+      inputManifestSha256: "d".repeat(64),
+    },
+    sourceDateEpoch: "1790000000",
+    rewriteTimestamp: true,
+  };
+  bindSealedIdentity(fixture);
+  return fixture;
+}
+function bindSealedIdentity({ manifest, report }) {
+  manifest.buildInputSha256 = buildIdentity(
+    manifest.sourceSnapshotSha256,
+    manifest.browserPolicy,
+    manifest.features,
+    manifest.buildConfiguration,
+  );
+  report.buildInputSha256 = manifest.buildInputSha256;
+  for (const [index, entry] of manifest.images.entries()) {
+    entry.image = entry.image.replace(
+      /:[a-f0-9]{40}-[a-f0-9]{16}@/,
+      `:${manifest.sourceCommit}-${manifest.buildInputSha256.slice(0, 16)}@`,
+    );
+    report.images[index].image = entry.image;
+  }
+}
+it("accepts a sealed build identity bound to its exact fresh four-role scan", () => {
+  const { manifest, report } = sealedInventoryFixture();
+  expect(validateInventory(manifest, report).images).toHaveLength(4);
+});
+it("rejects sealed build configuration tampering without a new image and scan identity", () => {
+  for (const mutate of [
+    (c) => {
+      c.sourceDateEpoch = "1790000001";
+    },
+    (c) => {
+      c.inputTransport.caSha256 = "e".repeat(64);
+    },
+    (c) => {
+      c.inputTransport.inputManifestSha256 = "f".repeat(64);
+    },
+    (c) => {
+      c.inputTransport.origin = "https://127.0.0.1:54439";
+    },
+  ]) {
+    const { manifest, report } = sealedInventoryFixture();
+    mutate(manifest.buildConfiguration);
+    expect(() => validateInventory(manifest, report)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
+  }
+});
+it("rejects invalid or expanded sealed build policy even with a matching calculated hash", () => {
+  for (const mutate of [
+    (m) => {
+      m.buildConfiguration = null;
+    },
+    (m) => {
+      m.buildConfiguration.extra = true;
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.extra = true;
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://registry.npmjs.org";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "http://172.17.0.1:54439";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://172.17.0.1:443";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://user@172.17.0.1:54439";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.caSha256 = "invalid";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.inputManifestSha256 = "invalid";
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = 1790000000;
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = "0";
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = "1e9";
+    },
+    (m) => {
+      m.buildConfiguration.rewriteTimestamp = false;
+    },
+  ]) {
+    const fixture = sealedInventoryFixture();
+    mutate(fixture.manifest);
+    bindSealedIdentity(fixture);
+    expect(() => validateInventory(fixture.manifest, fixture.report)).toThrow(
+      "DEPLOYMENT_PREPARATION_INVALID",
+    );
+  }
+});
