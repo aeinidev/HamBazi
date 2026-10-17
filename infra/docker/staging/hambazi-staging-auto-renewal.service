@@ -1,0 +1,27 @@
+[Unit]
+Description=Restricted HamBazi staging renewal with fresh exact-image evidence
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=DOCKER_HOST=unix:///var/run/docker.sock
+ExecStart=/usr/bin/flock --nonblock /opt/hambazi-staging/private/execution-20261008/automatic-renewal-20261013/run.lock /opt/hambazi-staging/private/toolchain/node-v24.20.0-linux-x64/bin/node /opt/hambazi-staging/private/execution-20261008/automatic-renewal-20261013/staging-auto-renewal.mjs --run
+TimeoutStartSec=900
+TimeoutStopSec=15
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ReadWritePaths=/opt/hambazi-staging/private/execution-20261008/automatic-renewal-20261013 /etc/systemd/system/hambazi-staging-advisory-expiry.timer.d
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+StandardOutput=journal
+StandardError=journal
