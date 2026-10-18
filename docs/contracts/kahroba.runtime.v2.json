@@ -6,11 +6,7 @@
     "/v1/kahroba/rooms/{id}/invite": {
       "get": {
         "operationId": "shareRoomInvite",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "security": [{ "bearer": [] }],
         "description": "ACTIVE authenticated host only; waiting/full room. Stable bearer invitation and deadline; no-store. Uses shared per-user invite budget, fails closed on Redis outage.",
         "responses": {
           "200": {
@@ -23,14 +19,8 @@
                       "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "type": "object",
                       "properties": {
-                        "ok": {
-                          "type": "boolean",
-                          "const": true
-                        },
-                        "schemaVersion": {
-                          "type": "number",
-                          "const": 1
-                        },
+                        "ok": { "type": "boolean", "const": true },
+                        "schemaVersion": { "type": "number", "const": 1 },
                         "invite": {
                           "type": "object",
                           "properties": {
@@ -64,14 +54,8 @@
                       "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "type": "object",
                       "properties": {
-                        "ok": {
-                          "type": "boolean",
-                          "const": true
-                        },
-                        "schemaVersion": {
-                          "type": "number",
-                          "const": 2
-                        },
+                        "ok": { "type": "boolean", "const": true },
+                        "schemaVersion": { "type": "number", "const": 2 },
                         "invite": {
                           "type": "object",
                           "properties": {
@@ -114,10 +98,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -134,12 +115,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -159,10 +136,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -179,12 +153,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -204,10 +174,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -224,12 +191,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -249,10 +212,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -269,12 +229,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -294,10 +250,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -314,12 +267,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -339,10 +288,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -359,12 +305,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -384,10 +326,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -404,12 +343,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -429,10 +364,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -449,12 +381,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -474,10 +402,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -494,12 +419,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -519,10 +440,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -539,12 +457,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -575,11 +489,7 @@
     "/v1/kahroba/room-invites/resolve": {
       "post": {
         "operationId": "resolveRoomInvite",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "security": [{ "bearer": [] }],
         "description": "Authenticated read-only limited preview, no roster or membership effect. Malformed input is INVALID_INPUT; unknown, expired or no longer waiting/full invitations are NOT_FOUND. Shares invite budget with sharing and application join. No-store. Client retains startParam in memory through onboarding and sends parsed inviteCode with the later Socket join command; identity always comes from the authenticated session.",
         "responses": {
           "200": {
@@ -590,14 +500,8 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": true
-                    },
-                    "schemaVersion": {
-                      "type": "number",
-                      "const": 1
-                    },
+                    "ok": { "type": "boolean", "const": true },
+                    "schemaVersion": { "type": "number", "const": 1 },
                     "room": {
                       "type": "object",
                       "properties": {
@@ -606,23 +510,14 @@
                           "format": "uuid",
                           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                         },
-                        "gameId": {
-                          "type": "string"
-                        },
+                        "gameId": { "type": "string" },
                         "capacity": {
                           "type": "integer",
                           "exclusiveMinimum": 0,
                           "maximum": 9007199254740991
                         },
-                        "status": {
-                          "type": "string",
-                          "enum": ["WAITING", "FULL"]
-                        },
-                        "version": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
+                        "status": { "type": "string", "enum": ["WAITING", "FULL"] },
+                        "version": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
                         "expiresAt": {
                           "type": "integer",
                           "minimum": 0,
@@ -647,10 +542,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -667,12 +559,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -692,10 +580,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -712,12 +597,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -737,10 +618,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -757,12 +635,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -782,10 +656,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -802,12 +673,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -827,10 +694,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -847,12 +711,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -872,10 +732,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -892,12 +749,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -917,10 +770,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -937,12 +787,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -962,10 +808,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -982,12 +825,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1007,10 +846,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1027,12 +863,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1052,10 +884,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1072,12 +901,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1098,14 +923,8 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
-                  "schemaVersion": {
-                    "type": "number",
-                    "const": 1
-                  },
-                  "startParam": {
-                    "type": "string",
-                    "maxLength": 48
-                  }
+                  "schemaVersion": { "type": "number", "const": 1 },
+                  "startParam": { "type": "string", "maxLength": 48 }
                 },
                 "required": ["schemaVersion", "startParam"],
                 "additionalProperties": false
@@ -1118,11 +937,7 @@
     "/v1/kahroba/rooms": {
       "post": {
         "operationId": "createRoom",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "security": [{ "bearer": [] }],
         "description": "Opt-in room transport. Server-authenticated ACTIVE user; create requires eligible Games admission, reads require membership. Per-user Redis budgets fail closed on outage. No-store. Times are Unix milliseconds. Create retries use the same commandId and input and return the original minimal acknowledgement; GET reads current state. No invite code is exposed. Join/leave/start are application ports for future Socket adapters, not REST routes.",
         "responses": {
           "201": {
@@ -1133,14 +948,8 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": true
-                    },
-                    "schemaVersion": {
-                      "type": "number",
-                      "const": 1
-                    },
+                    "ok": { "type": "boolean", "const": true },
+                    "schemaVersion": { "type": "number", "const": 1 },
                     "commandId": {
                       "type": "string",
                       "format": "uuid",
@@ -1171,10 +980,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1191,12 +997,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1216,10 +1018,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1236,12 +1035,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1261,10 +1056,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1281,12 +1073,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1306,10 +1094,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1326,12 +1111,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1351,10 +1132,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1371,12 +1149,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1396,10 +1170,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1416,12 +1187,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1441,10 +1208,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1461,12 +1225,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1486,10 +1246,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1506,12 +1263,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1531,10 +1284,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1551,12 +1301,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1576,10 +1322,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1596,12 +1339,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1622,24 +1361,14 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
-                  "schemaVersion": {
-                    "type": "number",
-                    "const": 1
-                  },
+                  "schemaVersion": { "type": "number", "const": 1 },
                   "commandId": {
                     "type": "string",
                     "format": "uuid",
                     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
-                  "gameId": {
-                    "type": "string",
-                    "pattern": "^[a-z][a-z0-9-]{0,63}$"
-                  },
-                  "capacity": {
-                    "type": "integer",
-                    "minimum": 2,
-                    "maximum": 2147483647
-                  }
+                  "gameId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+                  "capacity": { "type": "integer", "minimum": 2, "maximum": 2147483647 }
                 },
                 "required": ["schemaVersion", "commandId", "gameId", "capacity"],
                 "additionalProperties": false
@@ -1652,11 +1381,7 @@
     "/v1/kahroba/rooms/{id}": {
       "get": {
         "operationId": "readRoom",
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
+        "security": [{ "bearer": [] }],
         "description": "Opt-in room transport. Server-authenticated ACTIVE user; create requires eligible Games admission, reads require membership. Per-user Redis budgets fail closed on outage. No-store. Times are Unix milliseconds. Create retries use the same commandId and input and return the original minimal acknowledgement; GET reads current state. No invite code is exposed. Join/leave/start are application ports for future Socket adapters, not REST routes.",
         "responses": {
           "200": {
@@ -1667,14 +1392,8 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": true
-                    },
-                    "schemaVersion": {
-                      "type": "number",
-                      "const": 1
-                    },
+                    "ok": { "type": "boolean", "const": true },
+                    "schemaVersion": { "type": "number", "const": 1 },
                     "room": {
                       "type": "object",
                       "properties": {
@@ -1683,9 +1402,7 @@
                           "format": "uuid",
                           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                         },
-                        "gameId": {
-                          "type": "string"
-                        },
+                        "gameId": { "type": "string" },
                         "hostUserId": {
                           "type": "string",
                           "format": "uuid",
@@ -1696,11 +1413,7 @@
                           "exclusiveMinimum": 0,
                           "maximum": 9007199254740991
                         },
-                        "version": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
+                        "version": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
                         "status": {
                           "type": "string",
                           "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
@@ -1717,9 +1430,7 @@
                               "format": "uuid",
                               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                             },
-                            {
-                              "type": "null"
-                            }
+                            { "type": "null" }
                           ]
                         },
                         "members": {
@@ -1781,10 +1492,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1801,12 +1509,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1826,10 +1530,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1846,12 +1547,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1871,10 +1568,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1891,12 +1585,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1916,10 +1606,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1936,12 +1623,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -1961,10 +1644,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -1981,12 +1661,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2006,10 +1682,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2026,12 +1699,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2051,10 +1720,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2071,12 +1737,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2096,10 +1758,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2116,12 +1775,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2141,10 +1796,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2161,12 +1813,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2186,10 +1834,7 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "const": false
-                    },
+                    "ok": { "type": "boolean", "const": false },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2206,12 +1851,8 @@
                             "INTERNAL_ERROR"
                           ]
                         },
-                        "message": {
-                          "type": "string"
-                        },
-                        "retryable": {
-                          "type": "boolean"
-                        }
+                        "message": { "type": "string" },
+                        "retryable": { "type": "boolean" }
                       },
                       "required": ["code", "message", "retryable"],
                       "additionalProperties": false
@@ -2247,61 +1888,24 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
-        "gameId": {
-          "type": "string",
-          "const": "kahroba"
-        },
-        "registered": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "admission": {
-          "type": "boolean"
-        },
-        "minPlayers": {
-          "type": "number",
-          "const": 2
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
+        "gameId": { "type": "string", "const": "kahroba" },
+        "registered": { "type": "boolean" },
+        "enabled": { "type": "boolean" },
+        "admission": { "type": "boolean" },
+        "minPlayers": { "type": "number", "const": 2 },
         "maxPlayers": {
           "anyOf": [
-            {
-              "type": "number",
-              "const": 2
-            },
-            {
-              "type": "number",
-              "const": 4
-            }
+            { "type": "number", "const": 2 },
+            { "type": "number", "const": 4 }
           ]
         },
-        "engineVersion": {
-          "type": "string",
-          "const": "kahroba-v1"
-        },
-        "stateSchemaVersion": {
-          "type": "number",
-          "const": 1
-        },
-        "rulesetVersion": {
-          "type": "string",
-          "const": "kahroba-base-v1"
-        },
-        "viewSchemaVersion": {
-          "type": "number",
-          "const": 1
-        },
-        "turnDurationMs": {
-          "type": "null"
-        },
-        "timeoutPolicyVersion": {
-          "type": "null"
-        }
+        "engineVersion": { "type": "string", "const": "kahroba-v1" },
+        "stateSchemaVersion": { "type": "number", "const": 1 },
+        "rulesetVersion": { "type": "string", "const": "kahroba-base-v1" },
+        "viewSchemaVersion": { "type": "number", "const": 1 },
+        "turnDurationMs": { "type": "null" },
+        "timeoutPolicyVersion": { "type": "null" }
       },
       "required": [
         "schemaVersion",
@@ -2329,10 +1933,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
         "players": {
           "maxItems": 4,
           "type": "array",
@@ -2344,11 +1945,7 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
-              "displayName": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              }
+              "displayName": { "type": "string", "minLength": 1, "maxLength": 256 }
             },
             "required": ["userId", "displayName"],
             "additionalProperties": false
@@ -2367,15 +1964,8 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
-        "accessToken": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 4096
-        }
+        "schemaVersion": { "type": "number", "const": 1 },
+        "accessToken": { "type": "string", "minLength": 1, "maxLength": 4096 }
       },
       "required": ["schemaVersion", "accessToken"],
       "additionalProperties": false
@@ -2385,10 +1975,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "roomId": {
             "type": "string",
             "format": "uuid",
@@ -2402,10 +1989,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "commandId": {
             "type": "string",
             "format": "uuid",
@@ -2416,11 +2000,7 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483646
-          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 },
           "inviteCode": {
             "type": "string",
             "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
@@ -2433,10 +2013,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "commandId": {
             "type": "string",
             "format": "uuid",
@@ -2447,11 +2024,7 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483646
-          }
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 }
         },
         "required": ["schemaVersion", "commandId", "roomId", "expectedVersion"],
         "additionalProperties": false
@@ -2460,10 +2033,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "commandId": {
             "type": "string",
             "format": "uuid",
@@ -2474,11 +2044,7 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483646
-          }
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 }
         },
         "required": ["schemaVersion", "commandId", "roomId", "expectedVersion"],
         "additionalProperties": false
@@ -2487,23 +2053,10 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "gameId": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]{0,63}$"
-          },
-          "mode": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]{0,63}$"
-          },
-          "capacity": {
-            "type": "integer",
-            "minimum": 2,
-            "maximum": 64
-          },
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "gameId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+          "mode": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+          "capacity": { "type": "integer", "minimum": 2, "maximum": 64 },
+          "schemaVersion": { "type": "number", "const": 1 },
           "commandId": {
             "type": "string",
             "format": "uuid",
@@ -2517,10 +2070,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -2534,10 +2084,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -2551,10 +2098,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "ticketId": {
             "type": "string",
             "format": "uuid",
@@ -2568,20 +2112,13 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "ticketId": {
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "admissionToken": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4096
-          }
+          "admissionToken": { "type": "string", "minLength": 1, "maxLength": 4096 }
         },
         "required": ["schemaVersion", "ticketId", "admissionToken"],
         "additionalProperties": false
@@ -2590,10 +2127,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
@@ -2607,10 +2141,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
@@ -2624,20 +2155,13 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "afterSeq": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          }
+          "afterSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
         },
         "required": ["schemaVersion", "matchId", "afterSeq"],
         "additionalProperties": false
@@ -2646,10 +2170,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "actionId": {
             "type": "string",
             "format": "uuid",
@@ -2660,11 +2181,7 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          }
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
         },
         "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
         "additionalProperties": false
@@ -2673,10 +2190,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "actionId": {
             "type": "string",
             "format": "uuid",
@@ -2687,46 +2201,23 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "expectedVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "command": {
-            "$ref": "#/$defs/__schema0"
-          }
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+          "command": { "$ref": "#/$defs/__schema0" }
         },
         "required": ["schemaVersion", "actionId", "matchId", "expectedVersion", "command"],
         "additionalProperties": false,
         "$defs": {
           "__schema0": {
             "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/__schema0"
-                }
-              },
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "null" },
+              { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
               {
                 "type": "object",
-                "propertyNames": {
-                  "type": "string"
-                },
-                "additionalProperties": {
-                  "$ref": "#/$defs/__schema0"
-                }
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "$ref": "#/$defs/__schema0" }
               }
             ]
           }
@@ -2735,12 +2226,7 @@
       "presence:ping": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
-        "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          }
-        },
+        "properties": { "schemaVersion": { "type": "number", "const": 1 } },
         "required": ["schemaVersion"],
         "additionalProperties": false
       },
@@ -2748,10 +2234,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
@@ -2762,10 +2245,7 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "text": {
-            "type": "string",
-            "maxLength": 4096
-          }
+          "text": { "type": "string", "maxLength": 4096 }
         },
         "required": ["schemaVersion", "matchId", "commandId", "text"],
         "additionalProperties": false
@@ -2774,30 +2254,15 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 50
-          },
-          "beforeSeq": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "afterSeq": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          }
+          "limit": { "type": "integer", "minimum": 1, "maximum": 50 },
+          "beforeSeq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+          "afterSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
         },
         "required": ["schemaVersion", "matchId"],
         "additionalProperties": false
@@ -2808,25 +2273,14 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "stateVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "lastEventSeq": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
+          "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+          "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
           "status": {
             "type": "string",
             "enum": [
@@ -2839,34 +2293,12 @@
               "TERMINATED"
             ]
           },
-          "role": {
-            "type": "string",
-            "enum": ["PLAYER", "SPECTATOR"]
-          },
-          "gameId": {
-            "type": "string"
-          },
-          "engineVersion": {
-            "type": "string"
-          },
-          "stateSchemaVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "rulesetVersion": {
-            "type": "string"
-          },
-          "view": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/__schema0"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
+          "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+          "gameId": { "type": "string" },
+          "engineVersion": { "type": "string" },
+          "stateSchemaVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+          "rulesetVersion": { "type": "string" },
+          "view": { "anyOf": [{ "$ref": "#/$defs/__schema0" }, { "type": "null" }] }
         },
         "required": [
           "schemaVersion",
@@ -2885,32 +2317,15 @@
         "$defs": {
           "__schema0": {
             "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/__schema0"
-                }
-              },
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "null" },
+              { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
               {
                 "type": "object",
-                "propertyNames": {
-                  "type": "string"
-                },
-                "additionalProperties": {
-                  "$ref": "#/$defs/__schema0"
-                }
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "$ref": "#/$defs/__schema0" }
               }
             ]
           }
@@ -2920,10 +2335,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "eventId": {
             "type": "string",
             "format": "uuid",
@@ -2934,25 +2346,10 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "type": {
-            "type": "string",
-            "const": "MATCH_INVALIDATED_V1"
-          },
-          "seq": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "stateVersion": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "payload": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": false
-          }
+          "type": { "type": "string", "const": "MATCH_INVALIDATED_V1" },
+          "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+          "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+          "payload": { "type": "object", "properties": {}, "additionalProperties": false }
         },
         "required": [
           "schemaVersion",
@@ -2969,10 +2366,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "schemaVersion": {
-            "type": "number",
-            "const": 1
-          },
+          "schemaVersion": { "type": "number", "const": 1 },
           "matchId": {
             "type": "string",
             "format": "uuid",
@@ -2988,20 +2382,9 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
-          "seq": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 4096
-          },
-          "createdAt": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 8640000000000000
-          }
+          "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+          "text": { "type": "string", "maxLength": 4096 },
+          "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
         },
         "required": ["schemaVersion", "matchId", "messageId", "userId", "seq", "text", "createdAt"],
         "additionalProperties": false
@@ -3011,10 +2394,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
         "matchId": {
           "type": "string",
           "format": "uuid",
@@ -3030,20 +2410,9 @@
           "format": "uuid",
           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
         },
-        "seq": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 2147483647
-        },
-        "text": {
-          "type": "string",
-          "maxLength": 4096
-        },
-        "createdAt": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 8640000000000000
-        }
+        "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "text": { "type": "string", "maxLength": 4096 },
+        "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
       },
       "required": ["schemaVersion", "matchId", "messageId", "userId", "seq", "text", "createdAt"],
       "additionalProperties": false
@@ -3052,37 +2421,22 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
         "matchId": {
           "type": "string",
           "format": "uuid",
           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
         },
-        "role": {
-          "type": "string",
-          "enum": ["PLAYER", "SPECTATOR"]
-        },
-        "canSend": {
-          "type": "boolean"
-        },
-        "messageLimit": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 500
-        },
+        "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+        "canSend": { "type": "boolean" },
+        "messageLimit": { "type": "integer", "minimum": 1, "maximum": 500 },
         "messages": {
           "maxItems": 50,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "schemaVersion": {
-                "type": "number",
-                "const": 1
-              },
+              "schemaVersion": { "type": "number", "const": 1 },
               "matchId": {
                 "type": "string",
                 "format": "uuid",
@@ -3098,20 +2452,9 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
-              "seq": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 2147483647
-              },
-              "text": {
-                "type": "string",
-                "maxLength": 4096
-              },
-              "createdAt": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 8640000000000000
-              }
+              "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+              "text": { "type": "string", "maxLength": 4096 },
+              "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
             },
             "required": [
               "schemaVersion",
@@ -3125,14 +2468,8 @@
             "additionalProperties": false
           }
         },
-        "lastSeq": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 2147483647
-        },
-        "hasMore": {
-          "type": "boolean"
-        }
+        "lastSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "hasMore": { "type": "boolean" }
       },
       "required": [
         "schemaVersion",
@@ -3150,24 +2487,15 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
-        "mode": {
-          "type": "string",
-          "enum": ["EVENTS", "SNAPSHOT"]
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
+        "mode": { "type": "string", "enum": ["EVENTS", "SNAPSHOT"] },
         "events": {
           "maxItems": 100,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "schemaVersion": {
-                "type": "number",
-                "const": 1
-              },
+              "schemaVersion": { "type": "number", "const": 1 },
               "eventId": {
                 "type": "string",
                 "format": "uuid",
@@ -3178,25 +2506,10 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
-              "type": {
-                "type": "string",
-                "const": "MATCH_INVALIDATED_V1"
-              },
-              "seq": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 2147483647
-              },
-              "stateVersion": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 2147483647
-              },
-              "payload": {
-                "type": "object",
-                "properties": {},
-                "additionalProperties": false
-              }
+              "type": { "type": "string", "const": "MATCH_INVALIDATED_V1" },
+              "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "payload": { "type": "object", "properties": {}, "additionalProperties": false }
             },
             "required": [
               "schemaVersion",
@@ -3213,25 +2526,14 @@
         "snapshot": {
           "type": "object",
           "properties": {
-            "schemaVersion": {
-              "type": "number",
-              "const": 1
-            },
+            "schemaVersion": { "type": "number", "const": 1 },
             "matchId": {
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
             },
-            "stateVersion": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            },
-            "lastEventSeq": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            },
+            "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
             "status": {
               "type": "string",
               "enum": [
@@ -3244,34 +2546,12 @@
                 "TERMINATED"
               ]
             },
-            "role": {
-              "type": "string",
-              "enum": ["PLAYER", "SPECTATOR"]
-            },
-            "gameId": {
-              "type": "string"
-            },
-            "engineVersion": {
-              "type": "string"
-            },
-            "stateSchemaVersion": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            },
-            "rulesetVersion": {
-              "type": "string"
-            },
-            "view": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/__schema0"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
+            "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+            "gameId": { "type": "string" },
+            "engineVersion": { "type": "string" },
+            "stateSchemaVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "rulesetVersion": { "type": "string" },
+            "view": { "anyOf": [{ "$ref": "#/$defs/__schema0" }, { "type": "null" }] }
           },
           "required": [
             "schemaVersion",
@@ -3294,32 +2574,15 @@
       "$defs": {
         "__schema0": {
           "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/__schema0"
-              }
-            },
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "null" },
+            { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
             {
               "type": "object",
-              "propertyNames": {
-                "type": "string"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/__schema0"
-              }
+              "propertyNames": { "type": "string" },
+              "additionalProperties": { "$ref": "#/$defs/__schema0" }
             }
           ]
         }
@@ -3362,10 +2625,7 @@
     "rulesetVersion": "kahroba-base-v1",
     "viewSchemaVersion": 1
   },
-  "policy": {
-    "turnDurationMs": null,
-    "timeoutPolicyVersion": null
-  },
+  "policy": { "turnDurationMs": null, "timeoutPolicyVersion": null },
   "roomNames": {
     "path": "/v1/kahroba/rooms/{id}/players",
     "method": "GET",
@@ -3374,10 +2634,7 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "schemaVersion": {
-          "type": "number",
-          "const": 1
-        },
+        "schemaVersion": { "type": "number", "const": 1 },
         "players": {
           "maxItems": 4,
           "type": "array",
@@ -3389,11 +2646,7 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
-              "displayName": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              }
+              "displayName": { "type": "string", "minLength": 1, "maxLength": 256 }
             },
             "required": ["userId", "displayName"],
             "additionalProperties": false
