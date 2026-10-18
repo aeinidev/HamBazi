@@ -1,5 +1,6 @@
 import type { createMatchAutomationPort } from "./module.js";
 export { createPrivateRoomMatchPort } from "./module.js";
+export { privateRoomReadinessSchema } from "./application/private-room.js";
 export type { PrivateRoomMatchPort } from "./application/private-room.js";
 export { createMatchAdmissionPort } from "./module.js";
 export type {

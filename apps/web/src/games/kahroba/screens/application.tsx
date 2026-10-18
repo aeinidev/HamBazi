@@ -7,7 +7,6 @@ import { ClientError } from "../../../platform/errors.js";
 import { roomResponseSchema } from "../../../platform/contracts.js";
 import { createKahrobaRealtime } from "../runtime.js";
 import { KahrobaLobby } from "./lobby.js";
-import { KahrobaTesting } from "./testing.js";
 import { kahrobaLaunch } from "../launch.js";
 import { publicKahrobaSnapshot } from "../adapters/index.js";
 import { KahrobaSession } from "./match.js";
@@ -58,7 +57,7 @@ function PrivateRoom({ id }: { id: string }) {
     queryKey: ["kahroba-room", id],
     queryFn: ({ signal }) =>
       r.http(`/v1/kahroba/rooms/${id}`, roomResponseSchema, undefined, "GET", true, signal),
-    refetchInterval: 10000,
+    refetchInterval: 1500,
   });
   const matchId = room.data?.room.startedMatchId;
   useEffect(() => {
@@ -87,7 +86,7 @@ function PrivateApplication({ startParam }: { startParam?: string | undefined })
   useEffect(() => {
     if (launch && !location.hash.slice(1).startsWith("/restricted/kahroba"))
       go(
-        `/restricted/kahroba/testing${launch.kind === "testing" && launch.roomId ? `/room/${launch.roomId}` : ""}`,
+        `/restricted/kahroba${launch.kind === "testing" && launch.roomId ? `/room/${launch.roomId}` : launch.kind === "invite" ? "/invite" : ""}`,
       );
   }, [startParam]);
   const [route, setRoute] = useState(location.hash.slice(1));
@@ -101,17 +100,21 @@ function PrivateApplication({ startParam }: { startParam?: string | undefined })
   return (
     <main className="kh-app" dir="rtl">
       {parts[3] === "testing" ? (
-        <KahrobaTesting
-          key={validId(parts[5]) ?? "entry"}
-          roomId={parts[4] === "room" ? (validId(parts[5]) ?? undefined) : undefined}
-          startParam={launch?.kind === "invite" ? launch.startParam : undefined}
-        />
+        parts[4] === "room" && validId(parts[5]) ? (
+          <PrivateRoom id={validId(parts[5])!} />
+        ) : (
+          <KahrobaLobby startParam={launch?.kind === "invite" ? launch.startParam : undefined} />
+        )
       ) : parts[3] === "match" && id ? (
         <RoutedTable id={id} />
       ) : parts[3] === "room" && id ? (
         <PrivateRoom id={id} />
       ) : (
-        <KahrobaLobby />
+        <KahrobaLobby
+          startParam={
+            route.endsWith("/invite") && launch?.kind === "invite" ? launch.startParam : undefined
+          }
+        />
       )}
     </main>
   );

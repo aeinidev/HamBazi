@@ -151,13 +151,13 @@ for (const mode of ["guest", "expired", "forbidden", "unauthenticated"]) {
   });
 }
 
-test("missing room reports the prerequisite and never fabricates a code or creates a room", async ({
+test("missing room offers authenticated creation without fabricating a code or creating automatically", async ({
   page,
   request,
 }) => {
   await fixture(page, request, "host", 2, false);
   await expect(page.locator(".khl-room-code bdi")).toHaveText("هنوز انتخاب نشده");
-  await expect(page.getByText(/اتاق معتبری انتخاب نشده/)).toBeVisible();
+  await expect(page.getByText(/برای آغاز، یک اتاق خصوصی دو نفره ایجاد کنید/)).toBeVisible();
   await expect(page.locator(".khl-lobby button:enabled")).toHaveCount(0);
   await expect(page.locator(".khl-player")).toHaveCount(0);
 });

@@ -42,6 +42,8 @@ export function createMatchProcessingRepository(
   database: ReturnType<typeof createDatabase>,
   options: {
     personal?: boolean;
+    /** Hold durable readiness in WAITING until an explicit trusted host launch. */
+    deferReadyTransition?: boolean;
     clock: { nowMs(): number };
     games: readonly MatchGame[];
   },
@@ -173,12 +175,19 @@ export function createMatchProcessingRepository(
         schemaVersion: 1,
         payload: { userId: player.userId, occurredAt: at },
       });
-      if (players.every((p) => p.userId === actor || p.readyAt !== null)) transition("READY");
+      if (
+        !options.deferReadyTransition &&
+        players.every((p) => p.userId === actor || p.readyAt !== null)
+      )
+        transition("READY");
     } else if (request.kind === "LIFECYCLE") {
       if (request.operation === "WAIT") transition("WAITING_FOR_PLAYERS");
       else if (request.operation === "START") {
         if (!players.every((p) => p.readyAt !== null)) throw conflict();
         game();
+        // Both transitions commit with this guarded host intent. Older APIs
+        // safely hold the preceding WAITING state, including all readyAt values.
+        if (options.deferReadyTransition && status === "WAITING_FOR_PLAYERS") transition("READY");
         transition("STARTING");
       } else if (request.operation === "ACTIVATE") {
         if (status !== "STARTING" || state !== null) throw conflict();

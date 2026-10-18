@@ -8,3 +8,5 @@ export { mainInviteResponseSchema } from "./infrastructure/rooms-contract.js";
 export { createRoomDiagnostics } from "./module.js";
 export { roomStartSnapshotSchema, roomStartPageSchema } from "./application/start.js";
 export type { RoomStartSnapshot } from "./application/start.js";
+
+export { roomResponseSchema } from "./infrastructure/rooms-contract.js";

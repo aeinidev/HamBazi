@@ -59,7 +59,7 @@ export function createKahrobaRuntimePorts(
     voiceEnabled: false,
   });
   const users = createUserIdentityPort(database);
-  const rooms = createRoomsPort(
+  const roomPort = createRoomsPort(
     database,
     { clock, ttlSeconds: options.roomConfig.ttlSeconds },
     {
@@ -71,12 +71,31 @@ export function createKahrobaRuntimePorts(
       },
     },
   );
-  const matches = createMatchProcessingPort(database, { clock, games: [game] }, users);
+  async function canCreate(userId: string) {
+    const telegramId = await options.owner.telegramId();
+    if (!telegramId || !(await options.owner.allowsUserId(userId))) return false;
+    const owner = await users.findActiveByTelegramId(telegramId);
+    return owner?.userId === userId && (await options.owner.telegramId()) === telegramId;
+  }
+  const rooms = Object.freeze({
+    ...roomPort,
+    create: async (identity: unknown, input: unknown) => {
+      if (typeof identity !== "string" || !(await canCreate(identity)))
+        return createErrorEnvelope("FORBIDDEN");
+      return roomPort.create(identity, input);
+    },
+  });
+  const matches = createMatchProcessingPort(
+    database,
+    { clock, games: [game], deferReadyTransition: true },
+    users,
+  );
   const privateRooms = createPrivateRoomMatchPort(
     database,
     { clock },
     {
       rooms,
+      manualStart: true,
       processing: matches,
       users,
       games: catalog,
@@ -116,6 +135,7 @@ export function createKahrobaRuntimePorts(
     },
   };
   return {
+    canCreate,
     game,
     catalog,
     rooms,

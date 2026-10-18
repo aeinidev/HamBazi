@@ -784,3 +784,17 @@ body:has(.khl-lobby) {
     font-size: 8px !important;
   }
 }
+
+.khl-lobby .khl-ready {
+  margin-block: 8px;
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid #37dfff;
+  border-radius: 12px;
+  color: #c5f8ff;
+  background: linear-gradient(135deg, #07506c, #102549);
+  box-shadow:
+    inset 0 0 16px #00cfff22,
+    0 0 10px #00cfff33;
+  font: inherit;
+}

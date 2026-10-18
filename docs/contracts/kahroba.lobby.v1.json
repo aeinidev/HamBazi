@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "access": "existing authenticated two-account cohort only",
+  "paths": {
+    "/v1/kahroba/current-room": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "schemaVersion": { "type": "number", "const": 1 },
+          "room": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "gameId": { "type": "string" },
+                  "hostUserId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "version": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  "status": {
+                    "type": "string",
+                    "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
+                  },
+                  "expiresAt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  "startedMatchId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "members": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "seat": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                        "joinedAt": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "joinedVersion": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["userId", "seat", "joinedAt", "joinedVersion"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "gameId",
+                  "hostUserId",
+                  "capacity",
+                  "version",
+                  "status",
+                  "expiresAt",
+                  "startedMatchId",
+                  "members"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["ok", "schemaVersion", "room"],
+        "additionalProperties": false
+      },
+      "authorization": "authenticated membership; latest nonclosed Kahroba room only; no invitation secret"
+    },
+    "/v1/kahroba/lobby-permissions": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "canCreate": { "type": "boolean" }
+        },
+        "required": ["schemaVersion", "canCreate"],
+        "additionalProperties": false
+      },
+      "authorization": "owner-only creation; tester invitation join"
+    },
+    "/v1/kahroba/rooms/{id}/readiness": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "roomId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "matchId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "stateVersion": {
+                "anyOf": [
+                  { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  { "type": "null" }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "CREATED",
+                      "WAITING_FOR_PLAYERS",
+                      "READY",
+                      "STARTING",
+                      "ACTIVE",
+                      "FINISHED",
+                      "TERMINATED"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "canStart": { "type": "boolean" },
+              "players": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ready": { "type": "boolean" }
+                  },
+                  "required": ["userId", "ready"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "roomId",
+              "matchId",
+              "stateVersion",
+              "status",
+              "canStart",
+              "players"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      },
+      "authorization": "room membership"
+    },
+    "/v1/kahroba/rooms/{id}/start": {
+      "method": "POST",
+      "request": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "actionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+        },
+        "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "actionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "actionId",
+              "stateVersion",
+              "lastEventSeq",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      },
+      "authorization": "host + bound private match + all durable readyAt + expectedVersion + actionId"
+    }
+  },
+  "policy": {
+    "prepare": "host room:start freezes full roster into WAITING_FOR_PLAYERS",
+    "ready": "match:ready persists readiness in WAITING_FOR_PLAYERS; canStart requires every durable readyAt",
+    "start": "explicit authenticated host start; recovery completes STARTING",
+    "rollback": "fully ready new rooms remain WAITING_FOR_PLAYERS and retained APIs hold them; preserve readyAt and compatible v2 Worker; no DB rewind"
+  }
+}

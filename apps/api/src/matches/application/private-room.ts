@@ -26,10 +26,20 @@ export const privateRoomMatchSchema = z.strictObject({
   stateVersion: z.number().int().min(0).max(2147483647),
   status: z.enum(matchStatuses),
   descriptor: executableDescriptorSchema,
+  readyUserIds: z.array(uuid).max(64).optional(),
   players: z
     .array(z.strictObject({ userId: uuid, seat: z.number().int().nonnegative() }))
     .min(2)
     .max(64),
+});
+export const privateRoomReadinessSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  roomId: uuid,
+  matchId: uuid.nullable(),
+  stateVersion: z.number().int().nonnegative().nullable(),
+  status: z.enum(matchStatuses).nullable(),
+  canStart: z.boolean(),
+  players: z.array(z.strictObject({ userId: uuid, ready: z.boolean() })).max(64),
 });
 export type PrivateRoomMatch = z.infer<typeof privateRoomMatchSchema>;
 type Code = Parameters<typeof createErrorEnvelope>[0];
@@ -58,6 +68,8 @@ function actionId(match: PrivateRoomMatch, operation: string) {
 }
 export function privateRoomMatchService(deps: {
   repository: PrivateRoomMatchRepository;
+  /** Explicit host launch after durable readiness; opt-in, defaults preserve existing games. */
+  manualStart?: boolean;
   rooms: Pick<
     RoomsPort,
     "start" | "read" | "startSnapshot" | "listStartWork" | "confirmStarted" | "closeStarted"
@@ -165,7 +177,7 @@ export function privateRoomMatchService(deps: {
           accepted(result);
         } else if (room.status === "CLOSED" && !["FINISHED", "TERMINATED"].includes(match.status))
           fault("ROOM_CONFLICT");
-        if (match.status === "READY") operation = "START";
+        if (match.status === "READY" && !deps.manualStart) operation = "START";
         else if (match.status === "STARTING") operation = "ACTIVATE";
         else if (["FINISHED", "TERMINATED"].includes(match.status)) {
           accepted(await deps.rooms.closeStarted(roomId, match.matchId));
@@ -189,6 +201,59 @@ export function privateRoomMatchService(deps: {
     if (roomId !== null) await advance(roomId);
   }
   return Object.freeze({
+    readiness: (identity: unknown, roomId: unknown) =>
+      safe(async () => {
+        const room = accepted(await deps.rooms.read(identity, roomId)).room;
+        const match = await deps.repository.read(room.id);
+        return {
+          ok: true as const,
+          value: privateRoomReadinessSchema.parse({
+            schemaVersion: 1,
+            roomId: room.id,
+            matchId: match?.matchId ?? null,
+            stateVersion: match?.stateVersion ?? null,
+            status: match?.status ?? null,
+            canStart:
+              !!match &&
+              ["WAITING_FOR_PLAYERS", "READY"].includes(match.status) &&
+              match.players.length === room.members.length &&
+              match.players.every((p) => match.readyUserIds?.includes(p.userId)),
+            players: room.members.map((p) => ({
+              userId: p.userId,
+              ready: match?.readyUserIds?.includes(p.userId) ?? false,
+            })),
+          }),
+        };
+      }),
+    begin: (identity: unknown, input: unknown) =>
+      safe(async () => {
+        const request = matchReadySchema.safeParse(input),
+          actor = uuid.safeParse(identity);
+        if (!deps.manualStart || !request.success || !actor.success) fault("INVALID_INPUT");
+        const roomId = await deps.repository.roomForMatch(request.data.matchId);
+        if (!roomId) fault("NOT_FOUND");
+        const room = accepted(await deps.rooms.read(actor.data, roomId)).room;
+        if (room.hostUserId !== actor.data) fault("FORBIDDEN");
+        if (
+          room.startedMatchId !== request.data.matchId ||
+          !["STARTED", "CLOSED"].includes(room.status)
+        )
+          fault("ROOM_CONFLICT");
+        const snapshot = roomStartSnapshotSchema.parse(
+          accepted(await deps.rooms.startSnapshot(roomId)).snapshot,
+        );
+        const match = await deps.repository.read(roomId);
+        if (!match) fault("NOT_FOUND");
+        verify(snapshot, match);
+        if (snapshot.status === "CLOSED" && !["FINISHED", "TERMINATED"].includes(match.status))
+          fault("ROOM_CONFLICT");
+        // Match owner locks the row, verifies version and every durable readyAt,
+        // and records an idempotent receipt before activation/recovery follows.
+        const result = await deps.processing.lifecycle({ ...request.data, operation: "START" });
+        if (!result.ok) return result;
+        await advance(roomId);
+        return result;
+      }),
     start: (identity: unknown, input: unknown) =>
       safe(async () => {
         const parsed = roomCommandSchema.safeParse(input);

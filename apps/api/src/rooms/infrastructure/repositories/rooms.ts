@@ -300,6 +300,27 @@ export function createRoomsRepository(
         return record(db, actor, "create", input, room);
       }),
     read: (id) => transaction((db) => current(db, id)),
+    latestForMember: (userId, gameId) =>
+      transaction(async (db) => {
+        const memberships = await db.roomMember.findMany({
+          where: { userId },
+          select: { roomId: true },
+        });
+        if (!memberships.length) return null;
+        const row = await db.room.findFirst({
+          where: {
+            gameId,
+            id: { in: memberships.map((member) => member.roomId) },
+            OR: [
+              { status: { in: ["WAITING", "FULL"] }, expiresAt: { gt: new Date(now()) } },
+              { status: { in: ["STARTING", "STARTED"] } },
+            ],
+          },
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          select: { id: true },
+        });
+        return row ? current(db, row.id) : null;
+      }),
     invitation: (input) =>
       transaction(async (db) => {
         const row =

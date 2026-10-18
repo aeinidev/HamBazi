@@ -297,3 +297,132 @@ it("passes matchmaking commands through without private-room lifecycle effects",
   expect((await f.service.ready(f.host, input)).ok).toBe(true);
   expect(f.rooms.confirmStarted).toHaveBeenCalledTimes(1);
 });
+
+// The opt-in policy changes lobby orchestration only; engine rules and the default policy stay pinned.
+it("holds a fully ready manual-start room during ready follow-up and recovery until the host begins", async () => {
+  const f = fixture();
+  const service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.match().status = "READY";
+  f.match().readyUserIds = [f.host, f.guest];
+  f.processing.lifecycle.mockClear();
+  await service.ready(f.guest, {
+    schemaVersion: 1,
+    actionId: randomUUID(),
+    matchId: f.matchId,
+    expectedVersion: f.match().stateVersion,
+  });
+  await service.resume(f.roomId);
+  expect(f.match().status).toBe("READY");
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  expect(
+    (
+      await service.begin(f.host, {
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId: f.matchId,
+        expectedVersion: f.match().stateVersion,
+      })
+    ).ok,
+  ).toBe(true);
+  expect(f.match().status).toBe("ACTIVE");
+  expect(
+    f.processing.lifecycle.mock.calls.map(([r]) => (r as { operation: string }).operation),
+  ).toEqual(["START", "ACTIVATE"]);
+});
+it("denies non-host launches, unknown bindings and malformed commands without lifecycle writes", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.processing.lifecycle.mockClear();
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  const input = {
+    schemaVersion: 1,
+    actionId: randomUUID(),
+    matchId: f.matchId,
+    expectedVersion: 1,
+  };
+  expect(await service.begin(f.guest, input)).toMatchObject({ error: { code: "FORBIDDEN" } });
+  expect(await service.begin(f.host, { ...input, userId: f.host })).toMatchObject({
+    error: { code: "INVALID_INPUT" },
+  });
+  expect(await f.service.begin(f.host, input)).toMatchObject({ error: { code: "INVALID_INPUT" } });
+  expect(await service.begin(f.host, { ...input, matchId: randomUUID() })).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+});
+it("returns membership-guarded durable readiness and never hidden state or invitations", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  expect(await service.readiness(f.guest, f.roomId)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  await service.resume(f.roomId);
+  f.match().readyUserIds = [f.host];
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, members: [{ userId: f.host }, { userId: f.guest }] },
+  } as never);
+  expect(await service.readiness(f.host, f.roomId)).toEqual({
+    ok: true,
+    value: {
+      schemaVersion: 1,
+      roomId: f.roomId,
+      matchId: f.matchId,
+      stateVersion: 1,
+      status: "WAITING_FOR_PLAYERS",
+      canStart: false,
+      players: [
+        { userId: f.host, ready: true },
+        { userId: f.guest, ready: false },
+      ],
+    },
+  });
+});
+it("preserves a rejected or stale host-start intent without activation", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  f.processing.lifecycle.mockResolvedValue(createErrorEnvelope("GAME_STATE_CONFLICT") as never);
+  expect(
+    await service.begin(f.host, {
+      schemaVersion: 1,
+      actionId: randomUUID(),
+      matchId: f.matchId,
+      expectedVersion: 0,
+    }),
+  ).toMatchObject({ error: { code: "GAME_STATE_CONFLICT" } });
+  expect(f.match().status).toBe("WAITING_FOR_PLAYERS");
+});
+it("validates the frozen roster before any host-start lifecycle write", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  f.match().startVersion++;
+  f.processing.lifecycle.mockClear();
+  expect(
+    await service.begin(f.host, {
+      schemaVersion: 1,
+      actionId: randomUUID(),
+      matchId: f.matchId,
+      expectedVersion: f.match().stateVersion,
+    }),
+  ).toMatchObject({ error: { code: "ROOM_CONFLICT" } });
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+});

@@ -104,6 +104,8 @@ const http = createServer(async (req, res) => {
       version: 1,
       settings: { locale: "fa", theme: "dark" },
     });
+  if (req.url === "/v1/kahroba/current-room")
+    return send(res, 200, { ok: true, schemaVersion: 1, room: null });
   if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}`) {
     if (lobbyMode === "forbidden" || lobbyMode === "unauthenticated")
       return send(res, lobbyMode === "forbidden" ? 403 : 401, {

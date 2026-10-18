@@ -72,6 +72,7 @@ export function KahrobaLobbyView({
   invite,
   message,
   error,
+  actions,
 }: {
   room: KahrobaLobbyRoom | undefined;
   userId: string | undefined;
@@ -85,6 +86,18 @@ export function KahrobaLobbyView({
   invite: KahrobaLobbyInvite | null;
   message: string;
   error: boolean;
+  actions?: {
+    createEnabled: boolean;
+    joinEnabled: boolean;
+    readyEnabled: boolean;
+    startEnabled: boolean;
+    selfReady: boolean;
+    readyUserIds: readonly string[];
+    onCreate(): void;
+    onJoin(): void;
+    onReady(): void;
+    onStart(): void;
+  };
 }) {
   const host = !!room && room.hostUserId === userId,
     count = room?.members.length ?? 0,
@@ -119,7 +132,12 @@ export function KahrobaLobbyView({
       </section>
 
       <div className="khl-entry-actions">
-        <button type="button" disabled className="khl-create">
+        <button
+          type="button"
+          disabled={!actions?.createEnabled || pending}
+          onClick={actions?.createEnabled && !pending ? actions.onCreate : undefined}
+          className="khl-create"
+        >
           <LobbyIcon name="plus" />
           <span>
             <strong>ایجاد اتاق</strong>
@@ -127,10 +145,15 @@ export function KahrobaLobbyView({
           </span>
           <span aria-hidden="true">‹</span>
         </button>
-        <button type="button" disabled className="khl-join">
+        <button
+          type="button"
+          disabled={!actions?.joinEnabled || pending}
+          onClick={actions?.joinEnabled && !pending ? actions.onJoin : undefined}
+          className="khl-join"
+        >
           <MidnightIcon name="friends" />
           <span>
-            <strong>ورود با کد</strong>
+            <strong>{actions?.joinEnabled ? "پیوستن با دعوت" : "ورود با کد"}</strong>
             <small>به اتاق موجود بپیوندید</small>
           </span>
           <span aria-hidden="true">‹</span>
@@ -226,7 +249,8 @@ export function KahrobaLobbyView({
                     </strong>
                     {isHost && <span className="khl-host-badge">میزبان</span>}
                     <small className="khl-member-state">
-                      عضو اتاق <span aria-hidden="true">✓</span>
+                      {actions?.readyUserIds.includes(member.userId) ? "آماده است" : "عضو اتاق"}{" "}
+                      <span aria-hidden="true">✓</span>
                     </small>
                     {!self && !names[member.userId] && (
                       <bdi className="khl-member-id" title={member.userId}>
@@ -266,7 +290,22 @@ export function KahrobaLobbyView({
           )}
         </div>
 
-        <button type="button" disabled className="khl-start">
+        {actions && room && (
+          <button
+            type="button"
+            className="khl-ready"
+            disabled={!actions.readyEnabled || pending}
+            onClick={actions.readyEnabled && !pending ? actions.onReady : undefined}
+          >
+            {actions.selfReady ? "آماده هستید ✓" : "آماده‌ام"}
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={!actions?.startEnabled || pending}
+          onClick={actions?.startEnabled && !pending ? actions.onStart : undefined}
+          className="khl-start"
+        >
           <MidnightIcon name="play" />
           <span>
             <strong>شروع بازی</strong>

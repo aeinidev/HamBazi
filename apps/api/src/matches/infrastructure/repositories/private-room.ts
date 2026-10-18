@@ -33,7 +33,7 @@ export function createPrivateRoomMatchRepository(
     if (row.matchType !== "PRIVATE_ROOM") throw new PrivateRoomMatchFault("ROOM_CONFLICT");
     const players = await db.matchPlayer.findMany({
       where: { matchId: row.id },
-      select: { userId: true, seat: true },
+      select: { userId: true, seat: true, readyAt: true },
       orderBy: { seat: "asc" },
     });
     return privateRoomMatchSchema.parse({
@@ -49,7 +49,8 @@ export function createPrivateRoomMatchRepository(
         stateSchemaVersion: row.stateSchemaVersion,
         rulesetVersion: row.rulesetVersion,
       },
-      players,
+      players: players.map(({ userId, seat }) => ({ userId, seat })),
+      readyUserIds: players.filter((p) => p.readyAt !== null).map((p) => p.userId),
     });
   }
   async function transaction<T>(operation: (db: Client) => Promise<T>): Promise<T> {

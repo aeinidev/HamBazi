@@ -255,6 +255,8 @@ export async function startApi(
                 sessions,
                 admission: ownerAdmission,
                 config: kahrobaConfig,
+                canCreate: kahroba.canCreate,
+                privateRooms: kahroba.privateRooms,
                 resync: kahroba.resync,
                 names: kahroba.names,
                 rooms: kahroba.rooms,

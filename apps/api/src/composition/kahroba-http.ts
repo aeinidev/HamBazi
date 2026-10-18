@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import { Controller, Get, Module, Req, Res } from "@nestjs/common";
+import { Controller, Get, Post, Body, Module, Req, Res } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AuthSessions, OwnerAdmission } from "../auth/index.js";
 import type { PublicNamesPort } from "../users/index.js";
 import type { RoomsPort } from "../rooms/index.js";
-import type { MatchResyncPort } from "../matches/index.js";
+import type { PrivateRoomMatchPort, MatchResyncPort } from "../matches/index.js";
 import type { KahrobaRuntimeConfig } from "@hambazi/config";
 import { kahrobaPlayerViewSchema, kahrobaSpectatorViewSchema } from "@hambazi/kahroba-engine";
 export const kahrobaCapabilitiesSchema = z.strictObject({
@@ -35,8 +35,10 @@ export function createKahrobaHttpModule(deps: {
   admission: OwnerAdmission;
   config: KahrobaRuntimeConfig;
   resync: MatchResyncPort;
+  privateRooms?: Pick<PrivateRoomMatchPort, "readiness" | "begin">;
+  canCreate?: (userId: string) => Promise<boolean>;
   names: PublicNamesPort;
-  rooms?: Pick<RoomsPort, "read">;
+  rooms?: Pick<RoomsPort, "read"> & Partial<Pick<RoomsPort, "current">>;
   rate(userId: string): Promise<{ allowed: boolean }>;
 }) {
   async function auth(req: FastifyRequest) {
@@ -125,10 +127,95 @@ export function createKahrobaHttpModule(deps: {
       return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     }
   }
+  async function currentRoom(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      const result = await deps.rooms?.current?.(userId, "kahroba");
+      if (!result?.ok) return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+      return reply.send(result);
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
+  async function permissions(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      return reply.send({
+        schemaVersion: 1,
+        canCreate:
+          deps.config.enabled && deps.config.admission && !!(await deps.canCreate?.(userId)),
+      });
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
+  async function lobby(req: FastifyRequest, reply: FastifyReply, body?: unknown) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      const id = z.uuid().safeParse((req.params as { id?: unknown }).id);
+      if (!id.success) return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+      const room = await deps.rooms?.read(userId, id.data);
+      if (!room?.ok || room.room.gameId !== "kahroba")
+        return reply.code(404).send(createErrorEnvelope("NOT_FOUND"));
+      if (!deps.privateRooms) return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+      if (body !== undefined && (!deps.config.enabled || !deps.config.admission))
+        return reply.code(403).send(createErrorEnvelope("FORBIDDEN"));
+      if (
+        body !== undefined &&
+        (!body ||
+          typeof body !== "object" ||
+          !("matchId" in body) ||
+          body.matchId !== room.room.startedMatchId)
+      )
+        return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+      const result =
+        body === undefined
+          ? await deps.privateRooms.readiness(userId, id.data)
+          : await deps.privateRooms.begin(userId, body);
+      if (!result.ok)
+        return reply
+          .code(
+            result.error.code === "FORBIDDEN"
+              ? 403
+              : result.error.code === "INVALID_INPUT"
+                ? 400
+                : 409,
+          )
+          .send(result);
+      return reply.code(200).send(result);
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
   @Controller("v1/kahroba")
   class KahrobaController {
     @Get("capabilities") capabilities(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return read(req, reply);
+    }
+    @Get("current-room") current(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return currentRoom(req, reply);
+    }
+    @Get("lobby-permissions") permissions(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return permissions(req, reply);
+    }
+    @Get("rooms/:id/readiness") readiness(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return lobby(req, reply);
+    }
+    @Post("rooms/:id/start") start(
+      @Req() req: FastifyRequest,
+      @Res() reply: FastifyReply,
+      @Body() body: unknown,
+    ) {
+      return lobby(req, reply, body ?? null);
     }
     @Get("rooms/:id/players") roomPlayers(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return roomNames(req, reply);
