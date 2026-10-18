@@ -14,6 +14,7 @@ import {
 import { join } from "node:path";
 import { createHash, X509Certificate, createPrivateKey } from "node:crypto";
 import { assessImage, assertFreshDatabase, verifyTool } from "../scripts/security-scan.mjs";
+import { componentSourceCommit } from "./component-provenance.mjs";
 const execute = promisify(execFile);
 const root = "/opt/hambazi-staging/private/execution-20261008";
 const environment = { PATH: process.env.PATH, HOME: "/root", LANG: "C.UTF-8" };
@@ -59,7 +60,8 @@ try {
     check(
       identity.Id === item.image.split("@")[1] &&
         identity.Architecture === "amd64" &&
-        identity.Config.Labels["org.opencontainers.image.revision"] === inventory.sourceCommit &&
+        identity.Config.Labels["org.opencontainers.image.revision"] ===
+          componentSourceCommit(inventory, item) &&
         identity.Config.Labels["io.hambazi.component-input-sha256"] === item.buildInputSha256,
     );
   }

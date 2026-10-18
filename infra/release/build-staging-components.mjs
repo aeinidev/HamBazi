@@ -3,12 +3,14 @@ import { readFile, writeFile, mkdir, lstat } from "node:fs/promises";
 import { resolve, join, isAbsolute, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runGate } from "../ci/gates.mjs";
+import { selectedComponentRoles } from "./component-provenance.mjs";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const hash = (b) => createHash("sha256").update(b).digest("hex");
 const invalid = () => {
   throw new Error("STAGING_COMPONENT_BUILD_INVALID");
 };
-export async function buildStagingComponents(output, archives) {
+export async function buildStagingComponents(output, archives, roles) {
+  const selected = selectedComponentRoles(roles);
   if (
     !isAbsolute(output) ||
     !isAbsolute(archives) ||
@@ -30,7 +32,7 @@ export async function buildStagingComponents(output, archives) {
   if (lock.schemaVersion !== 1 || lock.platform !== "linux/amd64") invalid();
   await mkdir(output, { mode: 0o700 });
   const images = [];
-  for (const role of ["ingress", "acme"]) {
+  for (const role of selected) {
     const context = join(output, role);
     await mkdir(context, { mode: 0o700 });
     await mkdir(join(context, "inputs"), { mode: 0o700 });
@@ -91,7 +93,7 @@ export async function buildStagingComponents(output, archives) {
       identity.Config.Labels["io.hambazi.component-input-sha256"] !== buildInputSha256
     )
       invalid();
-    images.push({ role, image: tag + "@" + identity.Id, buildInputSha256 });
+    images.push({ role, image: tag + "@" + identity.Id, buildInputSha256, sourceCommit: source });
   }
   const result = {
     schemaVersion: 1,
@@ -111,8 +113,12 @@ export async function buildStagingComponents(output, archives) {
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    if (process.argv.length !== 4) invalid();
-    const result = await buildStagingComponents(resolve(process.argv[2]), resolve(process.argv[3]));
+    if (![4, 5].includes(process.argv.length)) invalid();
+    const result = await buildStagingComponents(
+      resolve(process.argv[2]),
+      resolve(process.argv[3]),
+      process.argv[4] ? [process.argv[4]] : undefined,
+    );
     console.info(JSON.stringify(result));
   } catch {
     console.error("STAGING_COMPONENT_BUILD_FAILED");

@@ -3,49 +3,28 @@
   "platform": "linux/amd64",
   "components": {
     "ingress": {
-      "base": "nginx:1.30.5-alpine@sha256:8f84ed99befc3891b8f329c5c202785278a2cfb7c25107d57fb2a134a3117433",
+      "base": "hambazi-staging/ingress:d6eb25b049d251bd6e2f82bf428396b37486b6fa-f59e015968b3b4f9@sha256:d82fb564f36c55dce03ceb11c7329882b2588a3508058746c8e1aa8b4ae6bbcb",
       "apkPatches": [
         {
           "package": "libexpat",
-          "version": "2.8.5-r0",
-          "filename": "libexpat-2.8.5-r0.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libexpat-2.8.5-r0.apk",
-          "sha256": "2e56946bc495cbed9eb1ad70859a79cba9db6420016453e065a0628848b32c7e"
+          "version": "2.9.0-r0",
+          "filename": "libexpat-2.9.0-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libexpat-2.9.0-r0.apk",
+          "sha256": "32b127f31e0a919110a18a7f0bb3780d8fb66ba4d8d61b2d301d633f0e319d0e"
         },
         {
-          "package": "libpng",
-          "version": "1.6.59-r0",
-          "filename": "libpng-1.6.59-r0.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libpng-1.6.59-r0.apk",
-          "sha256": "d16aeb0597f2bc43e0583ac9ff779388ec160c3e22568b640122e94ba55be6d7"
+          "package": "libx11",
+          "version": "1.8.14-r0",
+          "filename": "libx11-1.8.14-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libx11-1.8.14-r0.apk",
+          "sha256": "016efc189c6d566061ffe206ed0780e32686c1a8c832a3917d35d2c66d61a40f"
         },
         {
-          "package": "nghttp2-libs",
-          "version": "1.70.0-r0",
-          "filename": "nghttp2-libs-1.70.0-r0.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/nghttp2-libs-1.70.0-r0.apk",
-          "sha256": "f0c4014eb2f10308dcdfd84cd49c121673c7b78cb8182b6e7a1388d8ae112a3b"
-        },
-        {
-          "package": "pcre2",
-          "version": "10.49-r0",
-          "filename": "pcre2-10.49-r0.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/pcre2-10.49-r0.apk",
-          "sha256": "2919897914820f42a17a8d7d37df310d2dfad1c82ebe5f539cc5c765f916752a"
-        },
-        {
-          "package": "tiff",
-          "version": "4.7.2-r0",
-          "filename": "tiff-4.7.2-r0.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/tiff-4.7.2-r0.apk",
-          "sha256": "757ce87ebe4923a6be9869d026e250958ca09696529c464781e8a91d2b81670b"
-        },
-        {
-          "package": "zlib",
-          "version": "1.3.2-r1",
-          "filename": "zlib-1.3.2-r1.apk",
-          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/zlib-1.3.2-r1.apk",
-          "sha256": "63aeea03c15a2f9018f81805cfc8aa926bdf5cd68921f22149c2fbb5d0ee9f47"
+          "package": "libxpm",
+          "version": "3.5.20-r0",
+          "filename": "libxpm-3.5.20-r0.apk",
+          "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libxpm-3.5.20-r0.apk",
+          "sha256": "1ed312a00abac5a5840c1f3721921ea8183e664566c19763ed00aa9f35bb2178"
         }
       ],
       "wheels": []

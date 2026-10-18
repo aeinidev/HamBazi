@@ -84,3 +84,23 @@ binding records this authorization; after scheduled renewals consult `state.json
 and the actual expiry timer for the current date rather than a Git snapshot.
 Future scheduled runs remain future behavior; real systemd service execution and
 the installed enabled/persistent schedule have been verified.
+
+## Continuous operation after the Kahroba test window
+
+The owner's 2026-10-19 Tehran instruction resumes indefinite normal renewal for
+the current Kahroba API/Worker/Web and retained Bot. The expired four-hour scan
+deferral and its overriding timer were archived, after all eight exact images
+passed normal fresh scans and ingress X11 libraries were repaired. See the
+[operation and verification report](../incidents/2026-10-19-continuous-restricted-staging.md).
+
+The installed policy now points at a private runtime observation that combines
+the current three-role preparation with the retained Bot definition. It is only
+for read-only inspection. Historical deployment preparations and deferral records
+remain historical. Do not reapply their expired four-hour override during routine
+renewal. Future deployments must rebind their exact evidence before renewing.
+
+Docker is enabled at boot and the seven installed containers use `unless-stopped`.
+Explicit maintenance/containment stops remain stopped. Both existing timers are
+enabled and persistent; renewal still cannot automatically start contained apps
+or reopen routes. Authorization has no fixed end date until owner revocation;
+each security evidence window remains finite and must continue to pass.
