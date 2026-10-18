@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AuthSessions, OwnerAdmission } from "../auth/index.js";
 import type { PublicNamesPort } from "../users/index.js";
+import type { RoomsPort } from "../rooms/index.js";
 import type { MatchResyncPort } from "../matches/index.js";
 import type { KahrobaRuntimeConfig } from "@hambazi/config";
 import { kahrobaPlayerViewSchema, kahrobaSpectatorViewSchema } from "@hambazi/kahroba-engine";
@@ -35,6 +36,7 @@ export function createKahrobaHttpModule(deps: {
   config: KahrobaRuntimeConfig;
   resync: MatchResyncPort;
   names: PublicNamesPort;
+  rooms?: Pick<RoomsPort, "read">;
   rate(userId: string): Promise<{ allowed: boolean }>;
 }) {
   async function auth(req: FastifyRequest) {
@@ -102,10 +104,34 @@ export function createKahrobaHttpModule(deps: {
       return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     }
   }
+  async function roomNames(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      const id = z.uuid().safeParse((req.params as { id?: unknown }).id);
+      if (!id.success) return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+      const result = await deps.rooms?.read(userId, id.data);
+      if (!result?.ok || result.room.gameId !== "kahroba")
+        return reply.code(404).send(createErrorEnvelope("NOT_FOUND"));
+      return reply.send(
+        kahrobaPublicNamesSchema.parse({
+          schemaVersion: 1,
+          players: await deps.names.find(result.room.members.map((m) => m.userId)),
+        }),
+      );
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
   @Controller("v1/kahroba")
   class KahrobaController {
     @Get("capabilities") capabilities(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return read(req, reply);
+    }
+    @Get("rooms/:id/players") roomPlayers(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return roomNames(req, reply);
     }
     @Get("matches/:id/players") players(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return read(req, reply, true);

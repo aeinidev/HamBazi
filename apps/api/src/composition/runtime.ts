@@ -257,6 +257,7 @@ export async function startApi(
                 config: kahrobaConfig,
                 resync: kahroba.resync,
                 names: kahroba.names,
+                rooms: kahroba.rooms,
                 rate: (userId) => roomsRate.consume("read", userId),
               },
             },

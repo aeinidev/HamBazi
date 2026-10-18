@@ -65,6 +65,7 @@ void loadTelegramSdk((state) => {
   root.render(
     <App
       runtime={runtime}
+      kahrobaStartParam={new URLSearchParams(telegram.initData).get("start_param") ?? undefined}
       telegram={telegram.app}
       localPreview={localPreview}
       kahrobaEnabled={

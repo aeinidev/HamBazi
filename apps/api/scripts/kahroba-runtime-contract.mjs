@@ -77,6 +77,13 @@ console.info("Private Kahroba runtime contract verified/generated");
 // Main launch responses are explicitly versioned; preserve the frozen named-app v1 contract.
 const mainDocument = JSON.parse(JSON.stringify(document));
 mainDocument.schemaVersion = 2;
+// Additive, private member-only roster read. Frozen public/named-app v1 is unchanged.
+mainDocument.roomNames = {
+  path: "/v1/kahroba/rooms/{id}/players",
+  method: "GET",
+  authorization: "active admitted user + room membership; public display names only",
+  response: z.toJSONSchema(kahrobaPublicNamesSchema),
+};
 const invitation = mainDocument.paths["/v1/kahroba/rooms/{id}/invite"].get.responses[200];
 invitation.content["application/json"].schema = {
   anyOf: [invitation.content["application/json"].schema, z.toJSONSchema(mainInviteResponseSchema)],

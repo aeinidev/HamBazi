@@ -1,6 +1,6 @@
 import process from "node:process";
 import { createServer } from "node:http";
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import { Server } from "socket.io";
 import { z } from "zod";
 import { fixture, engine, ids, names, cases } from "./fixtures.mjs";
@@ -14,6 +14,34 @@ let current = fixture(),
   caseName = "initial",
   failNext = false,
   delayNext = false;
+// Loopback-only lobby fixtures. Never imported by a production entry.
+const lobbyRoomId = "77777777-7777-4777-8777-777777777777",
+  lobbyCode = randomBytes(32).toString("base64url");
+let lobbyMode = "host",
+  lobbyCapacity = 2,
+  lobbyInvites = 0,
+  lobbyExpiresAt = Date.now() + 900000;
+const lobbyActor = () => ids[0];
+function lobbyRoom() {
+  return {
+    id: lobbyRoomId,
+    gameId: "kahroba",
+    hostUserId: lobbyMode === "guest" ? ids[1] : ids[0],
+    capacity: lobbyCapacity,
+    version: 3,
+    status: lobbyMode === "expired" ? "EXPIRED" : lobbyMode === "full" ? "FULL" : "WAITING",
+    expiresAt: lobbyMode === "expired" ? Date.now() - 1000 : lobbyExpiresAt,
+    startedMatchId: null,
+    members: (lobbyMode === "reference-layout"
+      ? ids.slice(0, 3)
+      : lobbyMode === "full"
+        ? ids.slice(0, lobbyCapacity)
+        : lobbyMode === "guest"
+          ? ids.slice(0, 2)
+          : ids.slice(0, 1)
+    ).map((userId, seat) => ({ userId, seat, joinedAt: 1000, joinedVersion: seat + 1 })),
+  };
+}
 const receipts = new Map(),
   commands = [];
 function snapshot() {
@@ -56,7 +84,7 @@ const http = createServer(async (req, res) => {
       session: {
         schemaVersion: 1,
         sessionId: "11111111-1111-4111-8111-111111111111",
-        userId: ids[0],
+        userId: lobbyActor(),
         expiresAt: Math.floor(Date.now() / 1000) + 900,
       },
     });
@@ -65,12 +93,54 @@ const http = createServer(async (req, res) => {
   if (req.url === "/v1/me")
     return send(res, 200, {
       schemaVersion: 1,
-      userId: ids[0],
-      displayName: "مهدی",
+      userId: lobbyActor(),
+      displayName:
+        lobbyMode === "long-name"
+          ? "نام بسیار بلند آزمایشی با حروف فارسی و English 123"
+          : lobbyMode === "guest"
+            ? "حساب دوم آزمایشی"
+            : "مهدی",
       publicHandle: "mehdi",
       version: 1,
       settings: { locale: "fa", theme: "dark" },
     });
+  if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}`) {
+    if (lobbyMode === "forbidden" || lobbyMode === "unauthenticated")
+      return send(res, lobbyMode === "forbidden" ? 403 : 401, {
+        ok: false,
+        error: {
+          code: lobbyMode === "forbidden" ? "FORBIDDEN" : "UNAUTHENTICATED",
+          retryable: false,
+        },
+      });
+    return send(res, 200, { ok: true, schemaVersion: 1, room: lobbyRoom() });
+  }
+  if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}/players`) {
+    if (["forbidden", "unauthenticated"].includes(lobbyMode))
+      return send(res, 403, { ok: false, error: { code: "FORBIDDEN", retryable: false } });
+    return send(res, 200, {
+      schemaVersion: 1,
+      players: lobbyRoom().members.map((m) => ({ userId: m.userId, displayName: names[m.userId] })),
+    });
+  }
+  if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}/invite`) {
+    if (req.method !== "GET") return send(res, 405, {});
+    if (lobbyMode === "guest" || lobbyMode === "expired")
+      return send(res, 404, { ok: false, error: { code: "NOT_FOUND", retryable: false } });
+    lobbyInvites++;
+    const room = lobbyRoom();
+    return send(res, 200, {
+      ok: true,
+      schemaVersion: 2,
+      invite: {
+        roomId: room.id,
+        expiresAt: room.expiresAt,
+        startParam: `room_${lobbyCode}`,
+        deepLink: `https://t.me/Hambazidev_bot?startapp=room_${lobbyCode}`,
+      },
+    });
+  }
+  if (req.url === "/__preview/lobby-stats") return send(res, 200, { lobbyInvites });
   if (req.url === "/__preview/meta")
     return send(res, 200, { schemaVersion: 1, names, cases, caseName });
   if (req.url === "/__preview/stats")
@@ -95,7 +165,41 @@ const http = createServer(async (req, res) => {
   } catch {
     return send(res, 400, {});
   }
+  if (req.url === "/v1/kahroba/room-invites/resolve") {
+    if (body.startParam !== `room_${lobbyCode}` || lobbyMode === "expired")
+      return send(res, 404, { ok: false, error: { code: "NOT_FOUND", retryable: false } });
+    const { id, gameId, capacity, version, expiresAt, status } = lobbyRoom();
+    return send(res, 200, {
+      ok: true,
+      schemaVersion: 1,
+      room: { id, gameId, capacity, version, expiresAt, status },
+    });
+  }
+  if (req.url === "/__preview/lobby") {
+    const value = z
+      .strictObject({
+        mode: z.enum([
+          "host",
+          "guest",
+          "full",
+          "expired",
+          "forbidden",
+          "unauthenticated",
+          "long-name",
+          "reference-layout",
+        ]),
+        capacity: z.union([z.literal(2), z.literal(3), z.literal(4)]).default(2),
+      })
+      .safeParse(body);
+    if (!value.success) return send(res, 400, {});
+    lobbyMode = value.data.mode;
+    lobbyCapacity = value.data.capacity;
+    lobbyInvites = 0;
+    lobbyExpiresAt = Date.now() + 900000;
+    return send(res, 200, { ok: true, schemaVersion: 1 });
+  }
   if (req.url === "/__preview/case") {
+    lobbyMode = "host";
     const parsed = z
       .strictObject({
         case: z.enum(cases),
