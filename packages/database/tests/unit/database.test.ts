@@ -290,7 +290,7 @@ it("restricts outbox locks and consumer effects to their owning transaction boun
   try {
     await database.forModule("outbox").execute(async (db) => {
       expect("$queryRaw" in db).toBe(false);
-      await expect(db.lockDueOutbox(new Date(0), 1)).rejects.toMatchObject({
+      await expect(db.lockDueOutbox(new Date(0), 1, ["MATCH_CHANGED_V1"])).rejects.toMatchObject({
         code: "DATABASE_LOCK_INVALID",
       });
     });

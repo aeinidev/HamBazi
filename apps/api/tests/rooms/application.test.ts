@@ -317,3 +317,62 @@ it("requires current identity, canonical invitation, strict DTO and configured l
     error: { code: "UNAUTHENTICATED" },
   });
 });
+
+it("versions only explicit Main invitations and retains host-only membership and budget guards", async () => {
+  const f = setup();
+  const service = roomsService({
+    repository: f.repository,
+    users: f.users,
+    games: f.games,
+    invites: { ...f.invites, target: { botUsername: "Hambazidev_bot", mainApp: true } },
+  });
+  expect(await service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    ok: true,
+    schemaVersion: 2,
+    invite: { deepLink: "https://t.me/Hambazidev_bot?startapp=room_" + "A".repeat(43) },
+  });
+  expect(await f.service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    ok: true,
+    schemaVersion: 1,
+  });
+  expect(await service.shareInvite(randomUUID(), f.room.id)).toMatchObject({
+    error: { code: "NOT_FOUND" },
+  });
+  f.invites.consume.mockResolvedValue({ allowed: false, reason: "unavailable" });
+  expect(await service.shareInvite(f.actor, f.room.id)).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+});
+
+it("recovers only the active authenticated member's requested game through the Rooms owner", async () => {
+  const f = setup();
+  f.repository.latestForMember = vi.fn(async () => f.room);
+  expect(await f.service.current(f.actor, "coup")).toEqual({
+    ok: true,
+    schemaVersion: 1,
+    room: f.room,
+  });
+  expect(f.repository.latestForMember).toHaveBeenCalledWith(f.actor, "coup");
+  f.room.members = [];
+  expect(await f.service.current(f.actor, "coup")).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+  expect(await f.service.current(f.actor, "invalid/game")).toMatchObject({
+    error: { code: "INVALID_INPUT" },
+  });
+});
+it("denies unauthenticated recovery and never treats unavailable storage as an empty room", async () => {
+  const f = setup();
+  expect(await f.service.current("invalid", "coup")).toMatchObject({
+    error: { code: "UNAUTHENTICATED" },
+  });
+  expect(await f.service.current(f.actor, "coup")).toMatchObject({
+    error: { code: "INTERNAL_ERROR" },
+  });
+  f.repository.latestForMember = vi.fn(async () => null);
+  expect(await f.service.current(f.actor, "coup")).toEqual({
+    ok: true,
+    schemaVersion: 1,
+    room: null,
+  });
+});

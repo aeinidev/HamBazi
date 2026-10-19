@@ -33,7 +33,7 @@ const db = createDatabase({
   transactionMaxWaitMs: 5000,
   transactionTimeoutMs: 10000,
 });
-const artifacts = join(root, "test-results/kahroba-k4a");
+const artifacts = process.env.KAHROBA_RUNTIME_EVIDENCE ?? join(root, "test-results/kahroba-k4a");
 beforeAll(async () => {
   await db.connect();
   await mkdir(artifacts, { recursive: true });
@@ -176,7 +176,7 @@ async function setup() {
     ROOM_READ_LIMIT: "300",
     ROOM_CREATE_LIMIT: "30",
     ROOM_BOT_USERNAME: "LocalKahrobaBot",
-    ROOM_APP_NAME: "play",
+    ROOM_MAIN_APP: "true",
     ROOM_INVITE_LIMIT: "300",
     BOT_INTERNAL_ENABLED: "false",
     KAHROBA_RUNTIME_PROFILE: "local-private-v1",
@@ -223,6 +223,7 @@ async function setup() {
     ADMISSION_SUBSCRIPTIONS: "10",
   }))
     env[k] = v;
+  delete env.ROOM_APP_NAME;
   const workers = launch(join(root, "apps/worker/dist/composition/main.js"), env);
   let api, web;
   const clients = [];
@@ -427,6 +428,15 @@ async function roomGame(f, count) {
   });
   if (!started.ok) throw new Error("Private start failed");
   const matchId = (await f.http(0, `/v1/kahroba/rooms/${id}`)).data.room.startedMatchId;
+  const waiting = await f.http(0, `/v1/kahroba/rooms/${id}/readiness`);
+  expect(waiting.status).toBe(200);
+  const premature = await f.http(0, `/v1/kahroba/rooms/${id}/start`, {
+    schemaVersion: 1,
+    actionId: randomUUID(),
+    matchId,
+    expectedVersion: waiting.data.value.stateVersion,
+  });
+  expect(premature.status).toBe(409);
   for (let i = 0; i < count; i++) {
     await f.request(sockets[i], "match:subscribe", { schemaVersion: 1, matchId });
     const s = await f.snapshot(sockets[i], matchId);
@@ -438,6 +448,30 @@ async function roomGame(f, count) {
     });
     if (!r.ok) throw new Error("Private readiness failed");
   }
+  const ready = await f.snapshot(sockets[0], matchId);
+  expect(ready.status).toBe("WAITING_FOR_PLAYERS");
+  const held = await f.http(0, `/v1/kahroba/rooms/${id}/readiness`);
+  expect(held.data.value.canStart).toBe(true);
+  expect(held.data.value.players.every((p) => p.ready)).toBe(true);
+  expect(
+    (
+      await f.http(1, `/v1/kahroba/rooms/${id}/start`, {
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId,
+        expectedVersion: ready.stateVersion,
+      })
+    ).status,
+  ).toBe(403);
+  const launch = {
+    schemaVersion: 1,
+    actionId: randomUUID(),
+    matchId,
+    expectedVersion: ready.stateVersion,
+  };
+  const launched = await f.http(0, `/v1/kahroba/rooms/${id}/start`, launch);
+  expect(launched.status).toBe(200);
+  expect(await f.http(0, `/v1/kahroba/rooms/${id}/start`, launch)).toEqual(launched);
   return { matchId, sockets };
 }
 async function finish(f, matchId, sockets) {
@@ -533,49 +567,161 @@ for (const browserName of ["chromium", "webkit"])
       await f.browserStart();
       const env = { ...process.env };
       delete env.GIO_MODULE_DIR;
-      browser = await playwright[browserName].launch({ env });
+      browser = await playwright[browserName].launch({
+        env,
+        ...(browserName === "webkit" && process.env.TEST_KAHROBA_WEBKIT_EXECUTABLE_PATH
+          ? { executablePath: process.env.TEST_KAHROBA_WEBKIT_EXECUTABLE_PATH }
+          : {}),
+      });
       const pages = [];
+      function mainEntry(i, startParam = "") {
+        const data = new URLSearchParams(f.launches[i]);
+        data.delete("hash");
+        if (startParam) data.set("start_param", startParam);
+        data.set("auth_date", String(Math.floor(Date.now() / 1000)));
+        const check = [...data]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([a, b]) => `${a}=${b}`)
+          .join("\n");
+        data.set(
+          "hash",
+          createHmac(
+            "sha256",
+            createHmac("sha256", "WebAppData").update(f.env.TELEGRAM_BOT_TOKEN).digest(),
+          )
+            .update(check)
+            .digest("hex"),
+        );
+        return `${f.origin}/?${new URLSearchParams({ tgWebAppData: data.toString(), tgWebAppVersion: "8.0", tgWebAppPlatform: "ios" })}`;
+      }
       for (let i = 0; i < 2; i++) {
         const context = await browser.newContext({
           viewport: { width: 375, height: 667 },
           hasTouch: true,
         });
+        // Guest VM has no NIC; browser interception additionally fails closed.
+        await context.route("**/*", (route) => {
+          const origin = new URL(route.request().url()).origin;
+          return [f.origin, f.apiOrigin].includes(origin)
+            ? route.continue()
+            : route.abort("blockedbyclient");
+        });
         const page = await context.newPage();
         pages.push(page);
-        const q = new URLSearchParams({
-          tgWebAppData: f.launches[i],
-          tgWebAppVersion: "8.0",
-          tgWebAppPlatform: "ios",
-        });
-        await page.goto(`${f.origin}/?${q}`);
-        await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+        await page.goto(mainEntry(i));
+        await until(
+          async () =>
+            (await page
+              .getByRole("button", { name: "Continue with Telegram", exact: true })
+              .isVisible()) ||
+            (await page.getByRole("link", { name: "میز خصوصی کهربا" }).isVisible()),
+        );
+        if (
+          await page
+            .getByRole("button", { name: "Continue with Telegram", exact: true })
+            .isVisible()
+        )
+          await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
         await page.getByRole("link", { name: "میز خصوصی کهربا" }).click();
-        try {
-          await page.getByRole("button", { name: "ساخت اتاق خصوصی" }).waitFor({ timeout: 10000 });
-        } catch (error) {
-          await page.screenshot({
-            path: join(artifacts, `${browserName}-runtime-entry-failure.png`),
-            fullPage: true,
-          });
-          throw error;
-        }
+        await page.getByRole("region", { name: "لابی کهربا" }).waitFor();
       }
-      await pages[0].getByRole("button", { name: "ساخت اتاق خصوصی" }).click();
-      await pages[0].getByRole("button", { name: "دریافت دعوت" }).click();
-      const invite = await pages[0]
-        .getByRole("textbox", { name: "کد دعوت", exact: true })
-        .inputValue();
-      await pages[1].getByRole("textbox", { name: "دعوت میزبان" }).fill(invite);
-      await pages[1].getByRole("button", { name: "پیوستن به اتاق" }).click();
-      await pages[1].getByRole("heading", { name: "اتاق خصوصی کهربا" }).waitFor();
-      await pages[0].getByRole("button", { name: "به‌روز کردن اتاق" }).click();
-      await until(() => pages[0].getByRole("button", { name: "شروع بازی" }).isEnabled());
-      await pages[0].getByRole("button", { name: "شروع بازی" }).click();
-      await pages[1].getByRole("button", { name: "به‌روز کردن اتاق" }).click();
-      await pages[0].getByRole("button", { name: "آماده‌ام" }).waitFor();
-      await pages[0].getByRole("button", { name: "آماده‌ام" }).click();
-      await pages[1].getByRole("button", { name: "آماده‌ام" }).waitFor();
-      await pages[1].getByRole("button", { name: "آماده‌ام" }).click();
+      await until(() =>
+        pages[0].getByRole("button", { name: "ایجاد اتاق", exact: false }).isEnabled(),
+      );
+      expect(await pages[1].locator(".khl-create").isDisabled()).toBe(true);
+      // A tester cannot manufacture owner creation authority through the API.
+      expect(
+        (
+          await f.http(1, "/v1/kahroba/rooms", {
+            schemaVersion: 1,
+            commandId: randomUUID(),
+            gameId: "kahroba",
+            capacity: 2,
+          })
+        ).status,
+      ).toBe(403);
+      await pages[0].locator(".khl-create").click();
+      await pages[0].locator(".khl-share").waitFor();
+      await until(() => pages[0].locator(".khl-share").isEnabled());
+      await pages[0].evaluate(() => {
+        globalThis.__testShareCalls = [];
+        globalThis.Telegram.WebApp.openTelegramLink = (url) =>
+          globalThis.__testShareCalls.push(url);
+      });
+      await pages[0].locator(".khl-share").click();
+      await pages[0].locator(".khl-invite bdi").waitFor();
+      const deepLink = await pages[0].locator(".khl-invite bdi").innerText(),
+        invite = new URL(deepLink).searchParams.get("startapp");
+      expect(new URL(deepLink).pathname).toBe("/LocalKahrobaBot");
+      expect(invite).toMatch(/^room_[A-Za-z0-9_-]{43}$/);
+      await pages[1].goto(mainEntry(1, invite));
+      await until(
+        async () =>
+          (await pages[1]
+            .getByRole("button", { name: "Continue with Telegram", exact: true })
+            .isVisible()) || (await pages[1].locator(".khl-lobby").isVisible()),
+      );
+      if (
+        await pages[1]
+          .getByRole("button", { name: "Continue with Telegram", exact: true })
+          .isVisible()
+      )
+        await pages[1].getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+      await until(() =>
+        pages[1].getByRole("button", { name: "پیوستن با دعوت", exact: false }).isEnabled(),
+      );
+      await pages[1].getByRole("button", { name: "پیوستن با دعوت", exact: false }).click();
+      for (const page of pages)
+        await until(() => page.getByRole("button", { name: "آماده‌ام", exact: true }).isEnabled());
+      for (const page of pages) expect(await page.locator(".khl-start").isDisabled()).toBe(true);
+      await pages[1].getByRole("button", { name: "آماده‌ام", exact: true }).click();
+      await until(() =>
+        pages[0]
+          .locator(".khl-players")
+          .innerText()
+          .then((x) => x.includes("آماده است")),
+      );
+      expect(await pages[0].locator(".khl-start").isDisabled()).toBe(true);
+      await pages[0].getByRole("button", { name: "آماده‌ام", exact: true }).click();
+      await until(() => pages[0].locator(".khl-start").isEnabled());
+      expect(await pages[1].locator(".khl-start").isDisabled()).toBe(true);
+      for (const page of pages)
+        expect(await page.locator(".khl-player-info > strong").allTextContents()).toEqual(
+          expect.arrayContaining(["K4 actor 1", "K4 actor 2"]),
+        );
+      // A real Telegram reopen supplies new signed launch data. The SDK scrubs
+      // URL initData, so a naked desktop reload is not a native Mini App launch.
+      // Re-enter through Home: server membership restores the room, with no UUID input.
+      await pages[0].goto(mainEntry(0));
+      await until(
+        async () =>
+          (await pages[0]
+            .getByRole("button", { name: "Continue with Telegram", exact: true })
+            .isVisible()) ||
+          (await pages[0].getByRole("link", { name: "میز خصوصی کهربا" }).isVisible()),
+      );
+      if (
+        await pages[0]
+          .getByRole("button", { name: "Continue with Telegram", exact: true })
+          .isVisible()
+      )
+        await pages[0].getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+      await pages[0].getByRole("link", { name: "میز خصوصی کهربا" }).click();
+      await until(() => pages[0].locator(".khl-start").isEnabled());
+      for (const width of [320, 375, 390, 768]) {
+        await pages[0].setViewportSize({ width, height: 844 });
+        expect(
+          await pages[0].evaluate(
+            () => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth,
+          ),
+        ).toBe(true);
+        await pages[0].screenshot({
+          path: join(artifacts, `${browserName}-playable-lobby-${width}.png`),
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+      await pages[0].locator(".khl-start").click();
       for (const p of pages) await p.locator(".kh-market-cards").first().waitFor();
       const matchId = (await pages[0].evaluate(() => globalThis.location.hash)).split("/").at(-1),
         sockets = [];
@@ -583,14 +729,20 @@ for (const browserName of ["chromium", "webkit"])
         sockets.push(await f.connect(i));
         await f.request(sockets[i], "match:subscribe", { schemaVersion: 1, matchId });
       }
+      // New observer subscriptions legitimately append presence events. Assert
+      // both browsers converge on the latest durable version, not a snapshot
+      // captured before those subscriptions finish connecting.
+      await until(async () => {
+        const current = await f.snapshot(sockets[0], matchId);
+        const versions = await Promise.all(
+          pages.map((page) =>
+            page.locator('[aria-label="میز کهربا"]').getAttribute("data-state-version"),
+          ),
+        );
+        return versions.every((version) => version === String(current.stateVersion));
+      });
       let s = await f.snapshot(sockets[0], matchId),
         actor = f.ids.indexOf(s.view.turnPlayerId);
-      for (const page of pages)
-        await until(
-          async () =>
-            (await page.locator('[aria-label="میز کهربا"]').getAttribute("data-state-version")) ===
-            String(s.stateVersion),
-        );
       expect(await pages[actor].locator(".kh-market-cards .kh-card").count()).toBe(12);
       await pages[actor].getByRole("button", { name: "گرفتن ژتون", exact: true }).click();
       await pages[actor].locator(".kh-collection-choice").first().click();
@@ -709,6 +861,17 @@ for (const browserName of ["chromium", "webkit"])
             globalThis.sessionStorage.length,
           ]),
         ).toEqual([0, 0]);
+      await pages[0].getByRole("button", { name: "بستن", exact: true }).click();
+      const recovered = pages[0].waitForResponse(
+        (response) =>
+          response.url().endsWith("/v1/kahroba/current-room") && response.status() === 200,
+      );
+      await pages[0].getByRole("button", { name: "بازگشت", exact: true }).click();
+      expect((await (await recovered).json()).room).toBeNull();
+      await until(async () =>
+        (await pages[0].locator(".khl-room-code bdi").innerText()).includes("هنوز انتخاب نشده"),
+      );
+      await until(() => pages[0].locator(".khl-create").isDisabled());
       await writeFile(
         join(artifacts, `${browserName}-runtime-e2e.json`),
         JSON.stringify({

@@ -9,3 +9,5 @@ export {
 export type { KahrobaView, KahrobaCommand } from "./adapters/index.js";
 
 export { createKahrobaRealtime } from "./runtime.js";
+
+export { KahrobaLobby } from "./screens/lobby.js";

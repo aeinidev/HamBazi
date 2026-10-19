@@ -83,3 +83,42 @@ it("retains no offline command and discards private intent after spectator/sessi
   await lifecycle.execute();
   expect(request).not.toHaveBeenCalled();
 });
+
+it("accepts only the explicit private Main invitation version and keeps legacy named links", async () => {
+  const { kahrobaInviteSchema } = await import("../../src/games/kahroba/runtime.js");
+  const { inviteSchema } = await import("../../src/platform/contracts.js");
+  const code = "A".repeat(43);
+  const main = {
+    ok: true,
+    schemaVersion: 2,
+    invite: {
+      roomId: ids[0],
+      expiresAt: 1000,
+      startParam: "room_" + code,
+      deepLink: "https://t.me/Hambazidev_bot?startapp=room_" + code,
+    },
+  };
+  expect(kahrobaInviteSchema.safeParse(main).success).toBe(true);
+  expect(inviteSchema.safeParse(main).success).toBe(false);
+  expect(kahrobaInviteSchema.safeParse({ ...main, schemaVersion: 1 }).success).toBe(false);
+  for (const link of [
+    main.invite.deepLink + "\n",
+    main.invite.deepLink + "&userId=forged",
+    main.invite.deepLink.replace("t.me", "evil.example"),
+    main.invite.deepLink.replace(/A$/, "B"),
+  ])
+    expect(
+      kahrobaInviteSchema.safeParse({ ...main, invite: { ...main.invite, deepLink: link } })
+        .success,
+    ).toBe(false);
+  expect(
+    kahrobaInviteSchema.safeParse({
+      ...main,
+      schemaVersion: 1,
+      invite: {
+        ...main.invite,
+        deepLink: "https://t.me/Hambazidev_bot/play?startapp=room_" + code,
+      },
+    }).success,
+  ).toBe(true);
+});

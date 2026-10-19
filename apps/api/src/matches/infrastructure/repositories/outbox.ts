@@ -15,11 +15,28 @@ export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainE
     clock: { nowMs(): number };
     policy: OutboxPolicy;
     decode?: (input: unknown) => T | null;
+    /** Claim only this consumer's event types; leave other durable workflows untouched. */
+    eventTypes?: readonly string[];
   },
 ): MatchOutboxPort<T> {
   const policy = outboxPolicySchema.safeParse(options.policy);
   if (!policy.success) throw new Error("Invalid outbox policy");
   const { leaseMs, maxAttempts, backoffMs, maxBackoffMs } = policy.data;
+  const eventTypes = [
+    ...(options.eventTypes ?? [
+      "matchmaking.found",
+      "MATCH_CHANGED_V1",
+      "MATCH_FINISHED_V1",
+      "MATCH_FINISHED_V2",
+    ]),
+  ];
+  if (
+    eventTypes.length < 1 ||
+    eventTypes.length > 32 ||
+    eventTypes.some((type) => !/^[A-Za-z][A-Za-z0-9_.-]{0,63}$/.test(type)) ||
+    new Set(eventTypes).size !== eventTypes.length
+  )
+    throw new Error("Invalid outbox event ownership");
   const scope = database.forModule("outbox");
   function now() {
     const at = options.clock.nowMs();
@@ -42,7 +59,7 @@ export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainE
         throw new Error("Invalid outbox batch");
       return scope.transaction(async (db) => {
         const at = now();
-        const ids = await db.lockDueOutbox(at, limit);
+        const ids = await db.lockDueOutbox(at, limit, eventTypes);
         const claims: OutboxClaim<T>[] = [];
         for (const id of ids) {
           const row = await db.outboxEvent.findUniqueOrThrow({ where: { id } });
@@ -96,7 +113,13 @@ export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainE
       const at = now();
       const result = await scope.execute((db) =>
         db.outboxEvent.updateMany({
-          where: { id: eventId, status: "PENDING", attempts: attempt, claimedUntil: { gt: at } },
+          where: {
+            id: eventId,
+            type: { in: eventTypes },
+            status: "PENDING",
+            attempts: attempt,
+            claimedUntil: { gt: at },
+          },
           data: { status: "PUBLISHED", publishedAt: at, claimedUntil: null },
         }),
       );
@@ -108,7 +131,13 @@ export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainE
       const delay = Math.min(maxBackoffMs, backoffMs * 2 ** Math.min(attempt - 1, 30));
       const result = await scope.execute((db) =>
         db.outboxEvent.updateMany({
-          where: { id: eventId, status: "PENDING", attempts: attempt, claimedUntil: { gt: at } },
+          where: {
+            id: eventId,
+            type: { in: eventTypes },
+            status: "PENDING",
+            attempts: attempt,
+            claimedUntil: { gt: at },
+          },
           data: {
             status: permanent || attempt >= maxAttempts ? "FAILED" : "PENDING",
             claimedUntil: null,
@@ -124,6 +153,7 @@ export function createMatchOutboxRepository<T extends OutboxEvent = MatchDomainE
         db.outboxEvent.updateMany({
           where: {
             id: eventId,
+            type: { in: eventTypes },
             status: { in: ["FAILED", "PUBLISHED"] },
             attempts: { lt: 2147483647 },
           },

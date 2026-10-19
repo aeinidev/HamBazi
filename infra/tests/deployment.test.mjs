@@ -15,6 +15,7 @@ import {
 import { runGate } from "../ci/gates.mjs";
 import { deploymentFixture } from "./fixtures/deployment.mjs";
 import { operatorProfile, operatorLogging } from "../release/monitoring.mjs";
+import { buildIdentity } from "../release/build.mjs";
 
 const directories = [],
   networks = [];
@@ -29,75 +30,83 @@ const lines = (env) =>
     .map(([key, value]) => `${key}=${value}\n`)
     .join("");
 
-it("prepares dormant restricted Kahroba profiles only with paired owner/tester, private rooms and v2 consumers", () => {
-  const { envs, inputs } = deploymentFixture();
-  inputs.ownerAdmissionFile = "/private/owner.json";
-  inputs.stagingTestAdmissionFile = "/private/tester.json";
-  for (const role of ["api", "bot"])
-    Object.assign(envs[role], {
-      AUTH_ADMISSION_POLICY: "telegram-owner-only-v1",
-      OWNER_ADMISSION_FILE: "/run/hambazi/owner-admission.json",
-      STAGING_TEST_ADMISSION_FILE: "/run/hambazi/staging-test-admission.json",
+it.each(["named", "main"])(
+  "prepares dormant restricted Kahroba with paired owner/tester and v2 consumers (%s)",
+  (target) => {
+    const { envs, inputs } = deploymentFixture();
+    inputs.ownerAdmissionFile = "/private/owner.json";
+    inputs.stagingTestAdmissionFile = "/private/tester.json";
+    for (const role of ["api", "bot"])
+      Object.assign(envs[role], {
+        AUTH_ADMISSION_POLICY: "telegram-owner-only-v1",
+        OWNER_ADMISSION_FILE: "/run/hambazi/owner-admission.json",
+        STAGING_TEST_ADMISSION_FILE: "/run/hambazi/staging-test-admission.json",
+      });
+    envs.api.ALLOWED_ORIGINS = "https://staging.hambazi.top";
+    envs.bot.BOT_MINI_APP_URL = "https://staging.hambazi.top/";
+    const flags = {
+      PERSONAL_GAMEPLAY_PROFILE: "owner-bots-v1",
+      KAHROBA_RUNTIME_PROFILE: "restricted-staging-v1",
+      KAHROBA_ENGINE_REGISTERED: "false",
+      KAHROBA_RUNTIME_ENABLED: "false",
+      KAHROBA_ROUTES_ENABLED: "false",
+      KAHROBA_ADMISSION_ENABLED: "false",
+      KAHROBA_QUEUE_NAMESPACE: "fixture",
+      KAHROBA_RECONNECT_LEASE_MS: "30000",
+      KAHROBA_RECONNECT_GRACE_MS: "30000",
+    };
+    Object.assign(envs.api, flags, {
+      ROOM_TTL_SECONDS: "900",
+      ROOM_READ_LIMIT: "60",
+      ROOM_CREATE_LIMIT: "6",
+      ROOM_BOT_USERNAME: "HamBaziFixtureBot",
+      ROOM_APP_NAME: "play",
+      ROOM_INVITE_LIMIT: "60",
     });
-  envs.api.ALLOWED_ORIGINS = "https://staging.hambazi.top";
-  envs.bot.BOT_MINI_APP_URL = "https://staging.hambazi.top/";
-  const flags = {
-    PERSONAL_GAMEPLAY_PROFILE: "owner-bots-v1",
-    KAHROBA_RUNTIME_PROFILE: "restricted-staging-v1",
-    KAHROBA_ENGINE_REGISTERED: "false",
-    KAHROBA_RUNTIME_ENABLED: "false",
-    KAHROBA_ROUTES_ENABLED: "false",
-    KAHROBA_ADMISSION_ENABLED: "false",
-    KAHROBA_QUEUE_NAMESPACE: "fixture",
-    KAHROBA_RECONNECT_LEASE_MS: "30000",
-    KAHROBA_RECONNECT_GRACE_MS: "30000",
-  };
-  Object.assign(envs.api, flags, {
-    ROOM_TTL_SECONDS: "900",
-    ROOM_READ_LIMIT: "60",
-    ROOM_CREATE_LIMIT: "6",
-    ROOM_BOT_USERNAME: "HamBaziFixtureBot",
-    ROOM_APP_NAME: "play",
-    ROOM_INVITE_LIMIT: "60",
-  });
-  Object.assign(envs.worker, flags, {
-    STATS_ENABLED: "true",
-    STATS_CONCURRENCY: "1",
-    STATS_DRAIN_TIMEOUT_MS: "15000",
-    MATCH_OUTBOX_ENABLED: "true",
-    MATCH_OUTBOX_INTERVAL_MS: "1000",
-    MATCH_OUTBOX_BATCH_SIZE: "10",
-    MATCH_OUTBOX_LEASE_MS: "10000",
-    MATCH_OUTBOX_ATTEMPTS: "5",
-    MATCH_OUTBOX_BACKOFF_MS: "1000",
-    MATCH_OUTBOX_MAX_BACKOFF_MS: "60000",
-    MATCH_OUTBOX_PUBLISH_TIMEOUT_MS: "2000",
-  });
-  for (const role of ["api", "worker"]) envs[role] = parseRoleFile(lines(envs[role]), role);
-  expect(() => validateEnvironments(envs, inputs)).not.toThrow();
-  for (const patch of [
-    (e) => {
-      e.worker.KAHROBA_QUEUE_NAMESPACE = "other";
-    },
-    (e) => {
-      e.api.KAHROBA_RUNTIME_PROFILE = "local-private-v1";
-    },
-    (e) => {
-      e.worker.STATS_ENABLED = "false";
-    },
-    (e) => {
-      delete e.api.ROOM_APP_NAME;
-    },
-    (_e, i) => {
-      delete i.stagingTestAdmissionFile;
-    },
-  ]) {
-    const e = structuredClone(envs),
-      i = structuredClone(inputs);
-    patch(e, i);
-    expect(() => validateEnvironments(e, i)).toThrow();
-  }
-});
+    Object.assign(envs.worker, flags, {
+      STATS_ENABLED: "true",
+      STATS_CONCURRENCY: "1",
+      STATS_DRAIN_TIMEOUT_MS: "15000",
+      MATCH_OUTBOX_ENABLED: "true",
+      MATCH_OUTBOX_INTERVAL_MS: "1000",
+      MATCH_OUTBOX_BATCH_SIZE: "10",
+      MATCH_OUTBOX_LEASE_MS: "10000",
+      MATCH_OUTBOX_ATTEMPTS: "5",
+      MATCH_OUTBOX_BACKOFF_MS: "1000",
+      MATCH_OUTBOX_MAX_BACKOFF_MS: "60000",
+      MATCH_OUTBOX_PUBLISH_TIMEOUT_MS: "2000",
+    });
+    if (target === "main") {
+      delete envs.api.ROOM_APP_NAME;
+      envs.api.ROOM_MAIN_APP = "true";
+    }
+    for (const role of ["api", "worker"]) envs[role] = parseRoleFile(lines(envs[role]), role);
+    expect(() => validateEnvironments(envs, inputs)).not.toThrow();
+    for (const patch of [
+      (e) => {
+        e.worker.KAHROBA_QUEUE_NAMESPACE = "other";
+      },
+      (e) => {
+        e.api.KAHROBA_RUNTIME_PROFILE = "local-private-v1";
+      },
+      (e) => {
+        e.worker.STATS_ENABLED = "false";
+      },
+      (e) => {
+        delete e.api.ROOM_APP_NAME;
+        delete e.api.ROOM_MAIN_APP;
+      },
+      (_e, i) => {
+        delete i.stagingTestAdmissionFile;
+      },
+    ]) {
+      const e = structuredClone(envs),
+        i = structuredClone(inputs);
+      patch(e, i);
+      expect(() => validateEnvironments(e, i)).toThrow();
+    }
+  },
+);
 
 it("pairs the regular tester reference across API/Bot without replacing owner admission or opening another origin", () => {
   const { envs, inputs } = deploymentFixture();
@@ -475,3 +484,108 @@ it("renders a private candidate and validates real Compose without starting serv
       bind: { create_host_path: false },
     });
 }, 15000);
+
+function sealedInventoryFixture() {
+  const fixture = deploymentFixture();
+  fixture.manifest.buildConfiguration = {
+    inputTransport: {
+      origin: "https://172.17.0.1:54439",
+      caSha256: "c".repeat(64),
+      inputManifestSha256: "d".repeat(64),
+    },
+    sourceDateEpoch: "1790000000",
+    rewriteTimestamp: true,
+  };
+  bindSealedIdentity(fixture);
+  return fixture;
+}
+function bindSealedIdentity({ manifest, report }) {
+  manifest.buildInputSha256 = buildIdentity(
+    manifest.sourceSnapshotSha256,
+    manifest.browserPolicy,
+    manifest.features,
+    manifest.buildConfiguration,
+  );
+  report.buildInputSha256 = manifest.buildInputSha256;
+  for (const [index, entry] of manifest.images.entries()) {
+    entry.image = entry.image.replace(
+      /:[a-f0-9]{40}-[a-f0-9]{16}@/,
+      `:${manifest.sourceCommit}-${manifest.buildInputSha256.slice(0, 16)}@`,
+    );
+    report.images[index].image = entry.image;
+  }
+}
+it("accepts a sealed build identity bound to its exact fresh four-role scan", () => {
+  const { manifest, report } = sealedInventoryFixture();
+  expect(validateInventory(manifest, report).images).toHaveLength(4);
+});
+it("rejects sealed build configuration tampering without a new image and scan identity", () => {
+  for (const mutate of [
+    (c) => {
+      c.sourceDateEpoch = "1790000001";
+    },
+    (c) => {
+      c.inputTransport.caSha256 = "e".repeat(64);
+    },
+    (c) => {
+      c.inputTransport.inputManifestSha256 = "f".repeat(64);
+    },
+    (c) => {
+      c.inputTransport.origin = "https://127.0.0.1:54439";
+    },
+  ]) {
+    const { manifest, report } = sealedInventoryFixture();
+    mutate(manifest.buildConfiguration);
+    expect(() => validateInventory(manifest, report)).toThrow("DEPLOYMENT_PREPARATION_INVALID");
+  }
+});
+it("rejects invalid or expanded sealed build policy even with a matching calculated hash", () => {
+  for (const mutate of [
+    (m) => {
+      m.buildConfiguration = null;
+    },
+    (m) => {
+      m.buildConfiguration.extra = true;
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.extra = true;
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://registry.npmjs.org";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "http://172.17.0.1:54439";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://172.17.0.1:443";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.origin = "https://user@172.17.0.1:54439";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.caSha256 = "invalid";
+    },
+    (m) => {
+      m.buildConfiguration.inputTransport.inputManifestSha256 = "invalid";
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = 1790000000;
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = "0";
+    },
+    (m) => {
+      m.buildConfiguration.sourceDateEpoch = "1e9";
+    },
+    (m) => {
+      m.buildConfiguration.rewriteTimestamp = false;
+    },
+  ]) {
+    const fixture = sealedInventoryFixture();
+    mutate(fixture.manifest);
+    bindSealedIdentity(fixture);
+    expect(() => validateInventory(fixture.manifest, fixture.report)).toThrow(
+      "DEPLOYMENT_PREPARATION_INVALID",
+    );
+  }
+});

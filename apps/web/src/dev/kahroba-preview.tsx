@@ -6,7 +6,7 @@ import { z } from "zod";
 import { RuntimeContext, useSession, useRuntime } from "../ui/shared.js";
 import { createRuntime } from "../platform/runtime.js";
 import { bootstrapTelegram } from "../platform/telegram.js";
-import { KahrobaSession, publicKahrobaSnapshot } from "../games/kahroba/index.js";
+import { KahrobaSession, KahrobaLobby, publicKahrobaSnapshot } from "../games/kahroba/index.js";
 import "../styles.css";
 const guarded =
   import.meta.env.DEV &&
@@ -51,6 +51,12 @@ function Preview() {
       .then(setMeta)
       .catch(() => setFailure(true));
   }, [r]);
+  if (new URLSearchParams(location.search).get("lobby") === "1")
+    return (
+      <main className="kh-app" dir="rtl">
+        <KahrobaLobby roomId={new URLSearchParams(location.search).get("room") ?? undefined} />
+      </main>
+    );
   return (
     <>
       <div

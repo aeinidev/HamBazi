@@ -157,18 +157,20 @@ export function App({
   localPreview = false,
   directCoupPreviewMatchId,
   kahrobaEnabled = false,
+  kahrobaStartParam,
 }: {
   runtime: Runtime;
   telegram?: TelegramApp | undefined;
   localPreview?: boolean;
   directCoupPreviewMatchId?: string | undefined;
   kahrobaEnabled?: boolean;
+  kahrobaStartParam?: string | undefined;
 }) {
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
         {kahrobaEnabled ? (
-          <KahrobaRouteBoundary runtime={runtime}>
+          <KahrobaRouteBoundary runtime={runtime} startParam={kahrobaStartParam}>
             {runtime.scope === "owner-auth" ? (
               <PersonalLobbyShell telegram={telegram} />
             ) : (

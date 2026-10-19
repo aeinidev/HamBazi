@@ -55,6 +55,17 @@ export const invitePreviewSchema = z.strictObject({
     expiresAt: z.number().int().nonnegative(),
   }),
 });
+/** Private Main Mini App response; the public named-app v1 contract is unchanged. */
+export const mainInviteResponseSchema = inviteResponseSchema.extend({
+  schemaVersion: z.literal(2),
+  invite: inviteResponseSchema.shape.invite.extend({
+    deepLink: z
+      .string()
+      .regex(
+        /^https:\/\/t\.me\/[A-Za-z][A-Za-z0-9_]{4,31}\?startapp=room_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\s\S])/,
+      ),
+  }),
+});
 export function roomsOpenApiDocument() {
   const json = (schema: z.ZodType) =>
     z.toJSONSchema(schema, { target: "draft-2020-12", io: "input" });

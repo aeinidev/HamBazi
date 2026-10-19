@@ -1,6 +1,7 @@
 import type { GemColor } from "./adapters/index.js";
 const root = "/assets/kahroba";
 export const kahrobaAssets = {
+  lobbyDecoration: `${root}/lobby-decoration-c33ac6f3c92c.png`,
   background: `${root}/palace-background.webp`,
   logo: `${root}/kahroba-logo.webp`,
   art: (color: GemColor) => `${root}/card-art-${color}.webp`,

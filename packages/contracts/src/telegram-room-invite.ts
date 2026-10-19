@@ -5,12 +5,19 @@ export function parseRoomStartParam(value: unknown): string | undefined {
   const code = value.slice(5);
   return roomInviteCodePattern.test(code) ? code : undefined;
 }
-export function buildRoomDeepLink(target: { botUsername: string; appName: string }, code: string) {
+export type RoomLaunchTarget =
+  | { botUsername: string; appName: string; mainApp?: never }
+  | { botUsername: string; mainApp: true; appName?: never };
+export function buildRoomDeepLink(target: RoomLaunchTarget, code: string) {
   if (
     !/^[A-Za-z][A-Za-z0-9_]{4,31}(?![\s\S])/.test(target.botUsername) ||
-    !/^[A-Za-z0-9_]{1,64}(?![\s\S])/.test(target.appName) ||
+    (target.mainApp === true
+      ? target.appName !== undefined
+      : target.mainApp !== undefined ||
+        typeof target.appName !== "string" ||
+        !/^[A-Za-z0-9_]{1,64}(?![\s\S])/.test(target.appName)) ||
     !roomInviteCodePattern.test(code)
   )
     throw new Error("Invalid room link input");
-  return `https://t.me/${target.botUsername}/${target.appName}?startapp=room_${code}`;
+  return `https://t.me/${target.botUsername}${target.mainApp ? "" : `/${target.appName}`}?startapp=room_${code}`;
 }

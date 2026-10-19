@@ -1,25 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useQuery, QueryClientProvider } from "@tanstack/react-query";
 import { z } from "zod";
-import {
-  RuntimeContext,
-  useRuntime,
-  useSession,
-  useTask,
-  ErrorNotice,
-  go,
-} from "../../../ui/shared.js";
+import { RuntimeContext, useRuntime, useSession, go } from "../../../ui/shared.js";
 import type { Runtime } from "../../../platform/runtime.js";
 import { ClientError } from "../../../platform/errors.js";
-import {
-  roomAckSchema,
-  roomResponseSchema,
-  inviteSchema,
-  previewSchema,
-  matchAckSchema,
-  okValue,
-} from "../../../platform/contracts.js";
+import { roomResponseSchema } from "../../../platform/contracts.js";
 import { createKahrobaRealtime } from "../runtime.js";
+import { KahrobaLobby } from "./lobby.js";
+import { kahrobaLaunch } from "../launch.js";
 import { publicKahrobaSnapshot } from "../adapters/index.js";
 import { KahrobaSession } from "./match.js";
 const capabilities = z.strictObject({
@@ -63,16 +51,13 @@ function RoutedTable({ id }: { id: string }) {
 }
 function PrivateRoom({ id }: { id: string }) {
   const r = useRuntime(),
-    userId = useSession((s) => s.session?.userId),
     connection = useSession((s) => s.connection),
-    snapshot = useSession((s) => s.snapshot),
-    task = useTask("fa"),
-    [invite, setInvite] = useState("");
+    snapshot = useSession((s) => s.snapshot);
   const room = useQuery({
     queryKey: ["kahroba-room", id],
     queryFn: ({ signal }) =>
       r.http(`/v1/kahroba/rooms/${id}`, roomResponseSchema, undefined, "GET", true, signal),
-    refetchInterval: 10000,
+    refetchInterval: 1500,
   });
   const matchId = room.data?.room.startedMatchId;
   useEffect(() => {
@@ -94,198 +79,16 @@ function PrivateRoom({ id }: { id: string }) {
     )
       go(`/restricted/kahroba/match/${matchId}`);
   }, [matchId, snapshot?.matchId, snapshot?.status]);
-  if (room.isPending) return <p role="status">در حال دریافت اتاق…</p>;
-  if (room.error)
-    return <ErrorNotice error={room.error} language="fa" retry={() => void room.refetch()} />;
-  const value = room.data.room,
-    waiting = ["WAITING", "FULL"].includes(value.status),
-    host = value.hostUserId === userId;
-  return (
-    <section className="kh-game" dir="rtl">
-      <h1>اتاق خصوصی کهربا</h1>
-      <p>
-        {value.members.length} / {value.capacity} بازیکن
-      </p>
-      <ol>
-        {value.members.map((m) => (
-          <li key={m.userId}>
-            {m.userId === userId ? "شما" : `بازیکن ${m.seat + 1}`}
-            {m.userId === value.hostUserId ? " · میزبان" : ""}
-          </li>
-        ))}
-      </ol>
-      {host && waiting && (
-        <button
-          onClick={() =>
-            task.run(async () => {
-              const response = await r.http(`/v1/kahroba/rooms/${id}/invite`, inviteSchema);
-              setInvite(response.invite.startParam);
-            })
-          }
-        >
-          دریافت دعوت
-        </button>
-      )}
-      {invite && (
-        <label>
-          کد دعوت
-          <input
-            aria-label="کد دعوت"
-            dir="ltr"
-            value={invite}
-            readOnly
-            onFocus={(e) => e.target.select()}
-          />
-        </label>
-      )}
-      {host && waiting && (
-        <button
-          disabled={task.blocked || connection !== "connected" || value.status !== "FULL"}
-          onClick={() => {
-            const input = {
-              schemaVersion: 1,
-              commandId: crypto.randomUUID(),
-              roomId: id,
-              expectedVersion: value.version,
-            };
-            task.run(async () => {
-              await r.realtime().request("room:start", input, roomAckSchema);
-              await room.refetch();
-            });
-          }}
-        >
-          شروع بازی
-        </button>
-      )}
-      {matchId && snapshot?.matchId === matchId && snapshot.status === "WAITING_FOR_PLAYERS" && (
-        <button
-          disabled={task.blocked || connection !== "connected"}
-          onClick={() => {
-            const input = {
-              schemaVersion: 1,
-              actionId: crypto.randomUUID(),
-              matchId,
-              expectedVersion: snapshot.stateVersion,
-            };
-            task.run(async () => {
-              await r.realtime().request("match:ready", input, okValue(matchAckSchema));
-              await r.realtime().sync();
-            });
-          }}
-        >
-          آماده‌ام
-        </button>
-      )}
-      {task.notice}
-      <button onClick={() => void room.refetch()}>به‌روز کردن اتاق</button>
-      <button onClick={() => go("/restricted/kahroba")}>بازگشت</button>
-    </section>
-  );
+  return <KahrobaLobby roomId={id} />;
 }
-function PrivateLobby() {
-  const r = useRuntime(),
-    task = useTask("fa"),
-    connection = useSession((s) => s.connection),
-    [capacity, setCapacity] = useState(2),
-    [invite, setInvite] = useState("");
-  const cap = useQuery({
-    queryKey: ["kahroba-capabilities"],
-    queryFn: ({ signal }) =>
-      r.http("/v1/kahroba/capabilities", capabilities, undefined, "GET", true, signal),
-  });
-  if (cap.isPending) return <p role="status">در حال دریافت کهربا…</p>;
-  if (cap.error)
-    return <ErrorNotice error={cap.error} language="fa" retry={() => void cap.refetch()} />;
-  return (
-    <section className="kh-game" dir="rtl">
-      <h1>کهربا</h1>
-      <p>میز خصوصی</p>
-      <label>
-        تعداد بازیکنان
-        <select
-          aria-label="تعداد بازیکنان"
-          value={capacity}
-          onChange={(e) => setCapacity(Number(e.target.value))}
-        >
-          {Array.from({ length: cap.data.maxPlayers - 1 }, (_, i) => (
-            <option key={i + 2} value={i + 2}>
-              {i + 2}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        disabled={task.blocked || !cap.data.admission || connection !== "connected"}
-        onClick={() => {
-          const input = {
-            schemaVersion: 1,
-            commandId: crypto.randomUUID(),
-            gameId: "kahroba",
-            capacity,
-          };
-          task.run(async () => {
-            const result = await r.http("/v1/kahroba/rooms", roomAckSchema, input);
-            go(`/restricted/kahroba/room/${result.roomId}`);
-          });
-        }}
-      >
-        ساخت اتاق خصوصی
-      </button>
-      <label>
-        دعوت میزبان
-        <input
-          aria-label="دعوت میزبان"
-          value={invite}
-          dir="ltr"
-          onChange={(e) => setInvite(e.target.value)}
-        />
-      </label>
-      <button
-        disabled={
-          task.blocked ||
-          !cap.data.admission ||
-          connection !== "connected" ||
-          !/^room_[A-Za-z0-9_-]{43}$/.test(invite)
-        }
-        onClick={() => {
-          const code = invite,
-            commandId = crypto.randomUUID();
-          let input:
-            | {
-                schemaVersion: number;
-                commandId: string;
-                roomId: string;
-                expectedVersion: number;
-                inviteCode: string;
-              }
-            | undefined;
-          task.run(async () => {
-            if (!input) {
-              const preview = await r.http("/v1/kahroba/room-invites/resolve", previewSchema, {
-                schemaVersion: 1,
-                startParam: code,
-              });
-              input = {
-                schemaVersion: 1,
-                commandId,
-                roomId: preview.room.id,
-                expectedVersion: preview.room.version,
-                inviteCode: code.slice(5),
-              };
-            }
-            await r.realtime().request("room:join", input, roomAckSchema);
-            go(`/restricted/kahroba/room/${input.roomId}`);
-          });
-        }}
-      >
-        پیوستن به اتاق
-      </button>
-      {task.notice}
-      <button onClick={() => go("/games")}>خانه</button>
-    </section>
-  );
-}
-function PrivateApplication() {
+function PrivateApplication({ startParam }: { startParam?: string | undefined }) {
+  const launch = kahrobaLaunch(startParam);
+  useEffect(() => {
+    if (launch && !location.hash.slice(1).startsWith("/restricted/kahroba"))
+      go(
+        `/restricted/kahroba${launch.kind === "testing" && launch.roomId ? `/room/${launch.roomId}` : launch.kind === "invite" ? "/invite" : ""}`,
+      );
+  }, [startParam]);
   const [route, setRoute] = useState(location.hash.slice(1));
   useEffect(() => {
     const change = () => setRoute(location.hash.slice(1));
@@ -296,17 +99,33 @@ function PrivateApplication() {
     id = validId(parts[4]);
   return (
     <main className="kh-app" dir="rtl">
-      {parts[3] === "match" && id ? (
+      {parts[3] === "testing" ? (
+        parts[4] === "room" && validId(parts[5]) ? (
+          <PrivateRoom id={validId(parts[5])!} />
+        ) : (
+          <KahrobaLobby startParam={launch?.kind === "invite" ? launch.startParam : undefined} />
+        )
+      ) : parts[3] === "match" && id ? (
         <RoutedTable id={id} />
       ) : parts[3] === "room" && id ? (
         <PrivateRoom id={id} />
       ) : (
-        <PrivateLobby />
+        <KahrobaLobby
+          startParam={
+            route.endsWith("/invite") && launch?.kind === "invite" ? launch.startParam : undefined
+          }
+        />
       )}
     </main>
   );
 }
-function TransportSession({ parent }: { parent: Runtime }) {
+function TransportSession({
+  parent,
+  startParam,
+}: {
+  parent: Runtime;
+  startParam?: string | undefined;
+}) {
   const session = useSession((s) => s.session);
   const [runtime, setRuntime] = useState<Runtime | null>(null);
   useEffect(() => {
@@ -318,7 +137,7 @@ function TransportSession({ parent }: { parent: Runtime }) {
   return (
     <RuntimeContext.Provider value={runtime}>
       <QueryClientProvider client={runtime.query}>
-        <PrivateApplication />
+        <PrivateApplication startParam={startParam} />
       </QueryClientProvider>
     </RuntimeContext.Provider>
   );
@@ -327,9 +146,11 @@ function TransportSession({ parent }: { parent: Runtime }) {
 export function KahrobaRouteBoundary({
   runtime,
   children,
+  startParam,
 }: {
   runtime: Runtime;
   children: ReactNode;
+  startParam?: string | undefined;
 }) {
   const session = useSession((s) => s.session),
     [route, setRoute] = useState(location.hash.slice(1));
@@ -344,8 +165,12 @@ export function KahrobaRouteBoundary({
       runtime.http("/v1/kahroba/capabilities", capabilities, undefined, "GET", true, signal),
     enabled: !!session,
   });
-  if (session && route.startsWith("/restricted/kahroba") && cap.data?.enabled)
-    return <TransportSession key={session.sessionId} parent={runtime} />;
+  if (
+    session &&
+    cap.data?.enabled &&
+    (route.startsWith("/restricted/kahroba") || kahrobaLaunch(startParam))
+  )
+    return <TransportSession key={session.sessionId} parent={runtime} startParam={startParam} />;
   return (
     <>
       {children}

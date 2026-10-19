@@ -5,6 +5,7 @@ import {
   roomInviteCodePattern,
   createErrorEnvelope,
   type ErrorEnvelope,
+  type RoomLaunchTarget,
 } from "@hambazi/contracts";
 import type { UserIdentityPort } from "../../users/index.js";
 import type { CatalogPort } from "../../games/index.js";
@@ -49,6 +50,7 @@ export interface RoomsRepository {
   ): Promise<Ack | null>;
   create(actor: string, input: CreateRoomInput): Promise<Ack>;
   read(roomId: string): Promise<Room | null>;
+  latestForMember?(userId: string, gameId: string): Promise<Room | null>;
   invitation(
     input: { roomId: string } | { inviteCode: string },
   ): Promise<{ room: Room; inviteCode: string } | null>;
@@ -63,7 +65,7 @@ export function roomsService(deps: {
   users: UserIdentityPort;
   games: CatalogPort;
   invites?: {
-    target: { botUsername: string; appName: string };
+    target: RoomLaunchTarget;
     consume(
       userId: string,
     ): Promise<{ allowed: true } | { allowed: false; reason: "unavailable" | "limited" }>;
@@ -143,6 +145,17 @@ export function roomsService(deps: {
         return { ok: true as const, schemaVersion: 1 as const, room };
       });
     },
+    current(identity: unknown, gameId: unknown) {
+      return safe(async () => {
+        const userId = await actor(identity);
+        const game = parse(z.string().regex(/^[a-z][a-z0-9-]{0,63}$/), gameId);
+        if (!deps.repository.latestForMember) throw new RoomFault("INTERNAL_ERROR");
+        const room = await deps.repository.latestForMember(userId, game);
+        if (room && (room.gameId !== game || !room.members.some((p) => p.userId === userId)))
+          throw new RoomFault("INTERNAL_ERROR");
+        return { ok: true as const, schemaVersion: 1 as const, room };
+      });
+    },
     shareInvite(identity: unknown, roomId: unknown) {
       return safe(async () => {
         const userId = await actor(identity);
@@ -151,7 +164,7 @@ export function roomsService(deps: {
         if (!value || value.room.hostUserId !== userId) throw new RoomFault("NOT_FOUND");
         return {
           ok: true as const,
-          schemaVersion: 1 as const,
+          schemaVersion: deps.invites!.target.mainApp ? (2 as const) : (1 as const),
           invite: {
             roomId: value.room.id,
             expiresAt: value.room.expiresAt,
