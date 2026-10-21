@@ -1,5 +1,12 @@
 # Telegram Bot runtime and development operations
 
+> An optional Cloudflare transport adapter is now implemented for the replacement
+> VPS's blocked Telegram egress. It is prepared, not live. See
+> [ADR-074](../adr/074-cloudflare-telegram-gateway.md) and the
+> [gateway activation runbook](../operations/cloudflare-telegram-gateway.md).
+> It retains the existing VPS Bot, private API and receipt workflow; it does not
+> expose the internal Bot listener or move account/game state to Cloudflare.
+
 Phase 6B2B3B implements the Bot adapter in [ADR-016](../adr/016-onboarding-transports.md).
 Users/Auth own accounts, receipts and conversations; Bot owns Telegram input,
 fixed reply rendering and transport. It has no database or Redis client and

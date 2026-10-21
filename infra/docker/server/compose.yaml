@@ -1,0 +1,343 @@
+# Replacement restricted staging on 89.46.217.9. Private role files are not in Git.
+name: hambazi-server
+services:
+  postgres-staging:
+    platform: linux/amd64
+    pull_policy: never
+    restart: unless-stopped
+    logging:
+      driver: none
+    security_opt:
+      - no-new-privileges:true
+    image: hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a
+    entrypoint:
+      - /bin/sh
+      - /usr/local/bin/hambazi-postgres.sh
+    command:
+      - postgres
+      - -c
+      - config_file=/run/hambazi/postgresql.conf
+    env_file:
+      - path: /opt/hambazi/private/postgres-bootstrap.env
+        format: raw
+    stop_grace_period: 45s
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql
+      - type: bind
+        source: /opt/hambazi/private/postgres-start.sh
+        target: /usr/local/bin/hambazi-postgres.sh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/postgres-10-roles.sh
+        target: /docker-entrypoint-initdb.d/10-roles.sh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/postgres-99-image-policy.sh
+        target: /docker-entrypoint-initdb.d/99-image-policy.sh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/postgresql.proposed.conf
+        target: /run/hambazi/postgresql.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/pg_hba.proposed.conf
+        target: /run/hambazi/pg_hba.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/postgres-key.pem
+        target: /run/hambazi/tls/postgres-key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/postgres-cert.pem
+        target: /run/hambazi/tls/postgres-cert.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/data-ca.pem
+        target: /run/hambazi/tls/data-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      private:
+        ipv4_address: 10.89.18.20
+        aliases:
+          - postgres-staging
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+  redis-staging:
+    platform: linux/amd64
+    pull_policy: never
+    restart: unless-stopped
+    logging:
+      driver: none
+    security_opt:
+      - no-new-privileges:true
+    image: redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+    user: redis
+    read_only: true
+    cap_drop:
+      - ALL
+    entrypoint:
+      - /bin/sh
+      - /usr/local/bin/hambazi-redis-tls.sh
+    env_file:
+      - path: /opt/hambazi/private/redis-bootstrap.env
+        format: raw
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m,mode=1777
+      - /data:rw,nosuid,noexec,size=16m,mode=1777
+    volumes:
+      - type: bind
+        source: /opt/hambazi/private/start-redis-tls.sh
+        target: /usr/local/bin/hambazi-redis-tls.sh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/redis.proposed.conf
+        target: /run/hambazi/redis.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/redis-key.pem
+        target: /run/hambazi/tls/redis-key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/redis-cert.pem
+        target: /run/hambazi/tls/redis-cert.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/data-ca.pem
+        target: /run/hambazi/tls/data-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+    stop_grace_period: 45s
+    networks:
+      private:
+        ipv4_address: 10.89.18.21
+        aliases:
+          - redis-staging
+  api:
+    image: hambazi-candidate/api:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:baf2cbd0e7f7a656ec9b5df13c3a7435eec2eb7141715849b7934898964f92dd
+    platform: linux/amd64
+    pull_policy: never
+    user: 1000:1000
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 40s
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m,mode=1777
+    env_file:
+      - path: /opt/hambazi/private/api.env
+        format: raw
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+        compress: "true"
+    networks:
+      private:
+        ipv4_address: 10.89.18.10
+    volumes:
+      - type: bind
+        source: /opt/hambazi/private/tls/data-ca.pem
+        target: /run/hambazi/tls/data-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/api-key.pem
+        target: /run/hambazi/tls/key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/api-cert.pem
+        target: /run/hambazi/tls/cert.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/owner-admission.json
+        target: /run/hambazi/owner-admission.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/staging-test-admission.json
+        target: /run/hambazi/staging-test-admission.json
+        read_only: true
+        bind:
+          create_host_path: false
+  bot:
+    image: hambazi-candidate/bot:5a507c0e95a076fde2c2140021cdd6ced1020433-dac8f88a032e9cae@sha256:ca8742cfa47df5cddba65ebb14f90aaea465979ebd90a89d3091dcd33dcc6a06
+    platform: linux/amd64
+    pull_policy: never
+    user: 1000:1000
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 45s
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m,mode=1777
+    env_file:
+      - path: /opt/hambazi/private/bot.env
+        format: raw
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+        compress: "true"
+    networks:
+      private:
+        ipv4_address: 10.89.18.11
+      egress:
+        ipv4_address: 10.89.19.2
+        gw_priority: 1
+    volumes:
+      - type: bind
+        source: /opt/hambazi/private/tls/bot-key.pem
+        target: /run/hambazi/tls/key.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/bot-cert.pem
+        target: /run/hambazi/tls/cert.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/owner-admission.json
+        target: /run/hambazi/owner-admission.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/staging-test-admission.json
+        target: /run/hambazi/staging-test-admission.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/hambazi/private/tls/api-ca.pem
+        target: /run/hambazi/tls/api-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+  worker:
+    image: hambazi-candidate/worker:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:b129716e7249fe8cf5879ef3e03c32a4f0bb5f12bd657b50426f7434722eb5f0
+    platform: linux/amd64
+    pull_policy: never
+    user: 1000:1000
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 70s
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m,mode=1777
+    env_file:
+      - path: /opt/hambazi/private/worker.env
+        format: raw
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+        compress: "true"
+    networks:
+      private:
+        ipv4_address: 10.89.18.12
+    volumes:
+      - type: bind
+        source: /opt/hambazi/private/tls/data-ca.pem
+        target: /run/hambazi/tls/data-ca.pem
+        read_only: true
+        bind:
+          create_host_path: false
+  web:
+    image: hambazi-candidate/web:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:38c3bf2912339d4e2b6faf1f2fabc0e3593b58d65a3680160851a519d0b82327
+    platform: linux/amd64
+    pull_policy: never
+    user: 1000:1000
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 10s
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m,mode=1777
+    env_file:
+      - path: /opt/hambazi/private/web.env
+        format: raw
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+        compress: "true"
+    networks:
+      private:
+        ipv4_address: 10.89.18.13
+    volumes: []
+volumes:
+  postgres-data:
+    name: hambazi-server-postgres-20261020
+networks:
+  private:
+    name: hambazi-server-private
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.89.18.0/24
+  egress:
+    name: hambazi-server-bot-egress
+    ipam:
+      config:
+        - subnet: 10.89.19.0/24

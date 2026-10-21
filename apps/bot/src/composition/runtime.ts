@@ -64,6 +64,7 @@ export async function startBot(
       token: config.botToken,
       miniAppUrl: config.miniAppUrl,
       timeoutMs: config.sendTimeoutMs,
+      ...(config.telegramProxy ? { telegramProxy: config.telegramProxy } : {}),
     });
     const observeIdentity = createStagingTestResolution(env, config.botId, config.botUsername);
     const deliver = createDeliveryHandler({

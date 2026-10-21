@@ -89,6 +89,7 @@ export function KahrobaLobbyView({
   actions?: {
     createEnabled: boolean;
     joinEnabled: boolean;
+    invitationDetected: boolean;
     readyEnabled: boolean;
     startEnabled: boolean;
     selfReady: boolean;
@@ -153,7 +154,7 @@ export function KahrobaLobbyView({
         >
           <MidnightIcon name="friends" />
           <span>
-            <strong>{actions?.joinEnabled ? "پیوستن با دعوت" : "ورود با کد"}</strong>
+            <strong>{actions?.invitationDetected ? "پیوستن با دعوت" : "ورود با کد"}</strong>
             <small>به اتاق موجود بپیوندید</small>
           </span>
           <span aria-hidden="true">‹</span>

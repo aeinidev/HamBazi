@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly normal security renewal for replacement restricted staging
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+Unit=hambazi-server-security-renew.service
+
+[Install]
+WantedBy=timers.target

@@ -84,7 +84,7 @@ function PrivateRoom({ id }: { id: string }) {
 function PrivateApplication({ startParam }: { startParam?: string | undefined }) {
   const launch = kahrobaLaunch(startParam);
   useEffect(() => {
-    if (launch && !location.hash.slice(1).startsWith("/restricted/kahroba"))
+    if (launch)
       go(
         `/restricted/kahroba${launch.kind === "testing" && launch.roomId ? `/room/${launch.roomId}` : launch.kind === "invite" ? "/invite" : ""}`,
       );

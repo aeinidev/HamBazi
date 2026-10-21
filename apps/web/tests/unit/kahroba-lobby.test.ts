@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { KahrobaLobbyView } from "../../src/games/kahroba/components/lobby.js";
 import {
   canShareKahrobaRoom,
   verifiedKahrobaInvite,
@@ -33,6 +36,43 @@ const owner = "11111111-1111-4111-8111-111111111111",
   };
 
 describe("Kahroba lobby secure invitation", () => {
+  it("keeps the detected invitation action visible but disabled until server and transport checks pass", () => {
+    const onJoin = vi.fn();
+    const html = renderToStaticMarkup(
+      createElement(KahrobaLobbyView, {
+        room: undefined,
+        userId: guest,
+        displayName: "Synthetic guest",
+        photoUrl: null,
+        names: {},
+        connection: "connecting",
+        pending: false,
+        shareEnabled: false,
+        onShare: vi.fn(),
+        invite: null,
+        message: "",
+        error: false,
+        actions: {
+          invitationDetected: true,
+          createEnabled: false,
+          joinEnabled: false,
+          readyEnabled: false,
+          startEnabled: false,
+          selfReady: false,
+          readyUserIds: [],
+          onCreate: vi.fn(),
+          onJoin,
+          onReady: vi.fn(),
+          onStart: vi.fn(),
+        },
+      }),
+    );
+    const button = html.match(/<button[^>]*class="khl-join"[^>]*>[\s\S]*?<\/button>/)?.[0];
+    expect(button).toContain("پیوستن با دعوت");
+    expect(button).toContain('disabled=""');
+    expect(onJoin).not.toHaveBeenCalled();
+  });
+
   it("requires an authenticated current host, membership, Kahroba, open state and unexpired room", () => {
     expect(canShareKahrobaRoom(room, owner, 1000)).toBe(true);
     expect(canShareKahrobaRoom({ ...room, status: "FULL" }, owner, 1000)).toBe(true);

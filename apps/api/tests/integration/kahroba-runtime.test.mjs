@@ -574,10 +574,10 @@ for (const browserName of ["chromium", "webkit"])
           : {}),
       });
       const pages = [];
-      function mainEntry(i, startParam = "") {
+      function mainEntry(i, startParam = "", surface = "signed") {
         const data = new URLSearchParams(f.launches[i]);
         data.delete("hash");
-        if (startParam) data.set("start_param", startParam);
+        if (startParam && surface === "signed") data.set("start_param", startParam);
         data.set("auth_date", String(Math.floor(Date.now() / 1000)));
         const check = [...data]
           .sort(([a], [b]) => a.localeCompare(b))
@@ -592,7 +592,13 @@ for (const browserName of ["chromium", "webkit"])
             .update(check)
             .digest("hex"),
         );
-        return `${f.origin}/?${new URLSearchParams({ tgWebAppData: data.toString(), tgWebAppVersion: "8.0", tgWebAppPlatform: "ios" })}`;
+        const launch = new URLSearchParams({
+          tgWebAppData: data.toString(),
+          tgWebAppVersion: "8.0",
+          tgWebAppPlatform: "ios",
+          ...(startParam && surface !== "signed" ? { tgWebAppStartParam: startParam } : {}),
+        });
+        return surface === "fragment" ? `${f.origin}/#${launch}` : `${f.origin}/?${launch}`;
       }
       for (let i = 0; i < 2; i++) {
         const context = await browser.newContext({
@@ -654,7 +660,66 @@ for (const browserName of ["chromium", "webkit"])
         invite = new URL(deepLink).searchParams.get("startapp");
       expect(new URL(deepLink).pathname).toBe("/LocalKahrobaBot");
       expect(invite).toMatch(/^room_[A-Za-z0-9_-]{43}$/);
-      await pages[1].goto(mainEntry(1, invite));
+      let reauthenticationRequests = 0;
+      pages[1].on("request", (request) => {
+        if (
+          request.method() === "POST" &&
+          new URL(request.url()).pathname.endsWith("/registered-session-photo")
+        )
+          reauthenticationRequests++;
+      });
+      // Telegram may reopen an already authenticated document with a hint only.
+      // Keep its live session, show the action during preview loading, and still
+      // leave joining disabled until the server verifies the invitation.
+      let releasePreview;
+      const previewGate = new Promise((resolve) => (releasePreview = resolve));
+      const previewPattern = "**/v1/kahroba/room-invites/resolve";
+      await pages[1].route(previewPattern, async (route) => {
+        await previewGate;
+        await route.continue();
+      });
+      const documentStartedAt = await pages[1].evaluate(() => globalThis.performance.timeOrigin);
+      await pages[1].goto(`${f.origin}/#tgWebAppStartParam=${invite}`);
+      try {
+        await pages[1].getByRole("button", { name: "پیوستن با دعوت", exact: false }).waitFor();
+        expect(await pages[1].locator(".khl-join").isDisabled()).toBe(true);
+      } finally {
+        releasePreview();
+      }
+      await until(() => pages[1].locator(".khl-join").isEnabled());
+      expect(await pages[1].evaluate(() => globalThis.performance.timeOrigin)).toBe(
+        documentStartedAt,
+      );
+      expect(reauthenticationRequests).toBe(0);
+      await pages[1].unroute(previewPattern);
+
+      // Supplying new credentials must discard that session. A forged relaunch
+      // cannot borrow the previous account's token to resolve or join a room.
+      const forged = new URL(mainEntry(1, invite, "fragment")),
+        forgedFields = new URLSearchParams(forged.hash.slice(1)),
+        forgedData = new URLSearchParams(forgedFields.get("tgWebAppData"));
+      forgedData.set("hash", "0".repeat(64));
+      forgedFields.set("tgWebAppData", forgedData.toString());
+      forged.hash = forgedFields.toString();
+      await pages[1].goto(forged.href);
+      const rejected = pages[1].waitForResponse(
+        (response) =>
+          response.request().method() === "POST" &&
+          new URL(response.url()).pathname.endsWith("/registered-session-photo"),
+      );
+      await pages[1].getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+      expect((await rejected).status()).toBe(401);
+      expect(await pages[1].locator(".khl-lobby").count()).toBe(0);
+
+      // Reproduce Telegram entry with a separate hint and no start_param in the
+      // real HMAC-verified credential. Never append a hint to signed bytes.
+      // Delayed SDK delivery must not let bootstrap discard that hint first.
+      await pages[1].route("**/telegram-sdk/*.js", async (route) => {
+        await delay(150);
+        await route.continue();
+      });
+      const invitationSurface = browserName === "chromium" ? "query" : "fragment";
+      await pages[1].goto(mainEntry(1, invite, invitationSurface));
       await until(
         async () =>
           (await pages[1]
@@ -671,6 +736,11 @@ for (const browserName of ["chromium", "webkit"])
         pages[1].getByRole("button", { name: "پیوستن با دعوت", exact: false }).isEnabled(),
       );
       await pages[1].getByRole("button", { name: "پیوستن با دعوت", exact: false }).click();
+      await until(() => pages[1].url().includes("/room/"));
+      const joinedRoomId = (await pages[1].evaluate(() => globalThis.location.hash))
+        .split("/")
+        .at(-1);
+      expect(joinedRoomId).toBe(new URL(pages[0].url()).hash.split("/").at(-1));
       for (const page of pages)
         await until(() => page.getByRole("button", { name: "آماده‌ام", exact: true }).isEnabled());
       for (const page of pages) expect(await page.locator(".khl-start").isDisabled()).toBe(true);
@@ -880,6 +950,13 @@ for (const browserName of ["chromium", "webkit"])
           actualMainEntryPoints: true,
           realSignedVerifier: true,
           syntheticTelegramIdentities: true,
+          invitationSurface,
+          signedCredentialsWithoutStartParam: true,
+          delayedSdkDelivery: true,
+          correctInvitedRoom: true,
+          sameDocumentHintKeepsSession: true,
+          invitationVisibleWhilePending: true,
+          forgedRelaunchRejected: true,
           workerReadyAt: f.workerReadyAt,
           consumerBeforeProducer: true,
           duplicateCommandSameIdentity: true,

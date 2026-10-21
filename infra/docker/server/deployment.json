@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "purpose": "replacement-restricted-staging",
+  "target": {
+    "ipv4": "89.46.217.9",
+    "dockerDaemonId": "c0bfe494-c3e9-44ec-b376-58e81cc012bb",
+    "platform": "linux/amd64"
+  },
+  "applicationSourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
+  "originalLocalHead": "70515e433d7da350a6c4d8746041134a68831f3f",
+  "localChangesIncluded": true,
+  "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
+  "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68",
+  "images": [
+    {
+      "role": "api",
+      "image": "hambazi-candidate/api:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:baf2cbd0e7f7a656ec9b5df13c3a7435eec2eb7141715849b7934898964f92dd"
+    },
+    {
+      "role": "bot",
+      "image": "hambazi-candidate/bot:5a507c0e95a076fde2c2140021cdd6ced1020433-dac8f88a032e9cae@sha256:ca8742cfa47df5cddba65ebb14f90aaea465979ebd90a89d3091dcd33dcc6a06"
+    },
+    {
+      "role": "worker",
+      "image": "hambazi-candidate/worker:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:b129716e7249fe8cf5879ef3e03c32a4f0bb5f12bd657b50426f7434722eb5f0"
+    },
+    {
+      "role": "web",
+      "image": "hambazi-candidate/web:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:38c3bf2912339d4e2b6faf1f2fabc0e3593b58d65a3680160851a519d0b82327"
+    }
+  ],
+  "dataRecovery": {
+    "previousServerAvailable": false,
+    "previousUsersMatchesRecovered": false,
+    "database": "fresh"
+  },
+  "admission": {
+    "humanAccounts": 2,
+    "publicAdmission": false,
+    "identityFiles": "private"
+  },
+  "productionReleaseApproved": false,
+  "privateDeploymentDirectory": "/opt/hambazi/private",
+  "privateEvidenceDirectory": "/opt/hambazi/evidence",
+  "dataImages": [
+    {
+      "role": "postgres-staging",
+      "image": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a"
+    },
+    {
+      "role": "redis-staging",
+      "image": "redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0"
+    }
+  ],
+  "ingress": {
+    "management": "ubuntu-host-packages",
+    "nginxVersion": "1.24.0",
+    "certbotVersion": "2.9.0",
+    "origins": [
+      "https://staging.hambazi.top",
+      "https://api-staging.hambazi.top",
+      "https://bot-staging.hambazi.top"
+    ]
+  },
+  "verification": {
+    "applicationReadiness": "passed",
+    "migrationsCompleted": 15,
+    "telegramOutbound": "passed-through-authenticated-cloudflare-relay",
+    "nativeTwoPlayerAcceptance": "pending",
+    "packagedBrowserSuite": "one-passed-one-failed",
+    "builtImagePrivacyProbe": "two-passed",
+    "nativeBotChatAcceptance": "passed-owner-start-reply-and-durable-DONE-receipt",
+    "repositoryDevelopmentAudit": "blocked-vite-two-moderate-one-high",
+    "botProductionDependencyAudit": "passed-zero-findings"
+  },
+  "securityRenewal": {
+    "policy": "normal-24-hour-exact-image",
+    "images": 6,
+    "hourlyTimer": "hambazi-server-security-renew.timer",
+    "independentExpiryTimer": "hambazi-server-security-expiry.timer",
+    "scheduledRunVerifiedAtUTC": "2026-10-20T15:01:09Z",
+    "observedDeadlineUTC": "2026-10-22T07:13:45Z",
+    "automaticApplicationStart": false,
+    "automaticIngressReopen": false,
+    "botReplacementRenewalVerifiedAtUTC": "2026-10-21T08:01:52.650939+00:00",
+    "gatewayAcceptanceFreshDatabaseRenewal": "passed-six-active-images"
+  },
+  "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
+  "currentApplicationSources": {
+    "api": {
+      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
+      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
+      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+    },
+    "bot": {
+      "sourceCommit": "5a507c0e95a076fde2c2140021cdd6ced1020433",
+      "sourceSnapshotSha256": "1d7d903ea3f7ec34331c51addaebc73b17eeb1a22de16b945ca004a815f6839b",
+      "buildInputSha256": "dac8f88a032e9caec9736b741864ddc845f37ec217773bec661aa8fcd0642b88"
+    },
+    "worker": {
+      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
+      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
+      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+    },
+    "web": {
+      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
+      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
+      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+    }
+  },
+  "cloudflareGateway": {
+    "origin": "https://telegram-bot-server.aeinidev77.workers.dev",
+    "vpsWebhookURL": "https://bot-staging.hambazi.top/v1/telegram/webhook",
+    "botInstalledAtUTC": "2026-10-21T08:01:52.650939+00:00",
+    "workerForwardingActivation": "enabled-and-native-start-accepted",
+    "runtimeSDKProbe": "passed",
+    "databaseMigrationRequired": false,
+    "otherFiveContainersUnchanged": true,
+    "nativeAcceptanceObservedAtUTC": "2026-10-21T11:26:05.442Z"
+  }
+}

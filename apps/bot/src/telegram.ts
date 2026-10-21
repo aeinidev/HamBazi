@@ -1,18 +1,14 @@
-import { Api, GrammyError } from "grammy";
+import { type Api, GrammyError } from "grammy";
 import type { Delivery, SupportDelivery } from "./backend.js";
+import { createTelegramApi, type TelegramApiOptions } from "./telegram-api.js";
 import { RetryDelivery } from "./backend.js";
 export interface Sender {
   send(delivery: Delivery, signal: AbortSignal): Promise<number>;
   sendSupport?(delivery: SupportDelivery, signal: AbortSignal): Promise<number>;
 }
 export function createTelegramSender(
-  options: { token: { reveal(): string }; miniAppUrl: string; timeoutMs: number },
-  api = new Api(options.token.reveal(), {
-    timeoutSeconds: options.timeoutMs / 1000,
-    canUseWebhookReply: () => false,
-    sensitiveLogs: false,
-    baseFetchConfig: { redirect: "error", size: 65536 },
-  }),
+  options: TelegramApiOptions & { miniAppUrl: string },
+  api = createTelegramApi(options),
 ): Sender {
   return {
     async sendSupport(delivery, signal) {

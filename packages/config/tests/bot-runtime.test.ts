@@ -71,4 +71,45 @@ describe("Bot-only runtime settings", () => {
     expect(() =>
       parseBotRuntimeConfig({ ...env, BOT_SERVICE_KEY: env.TELEGRAM_WEBHOOK_SECRET }),
     ).toThrow());
+  it("enables the relay only as a complete, redacted pair", () => {
+    const key = "p".repeat(43);
+    const config = parseBotRuntimeConfig({
+      ...env,
+      TELEGRAM_API_PROXY_URL: "https://relay.example/",
+      TELEGRAM_API_PROXY_KEY: key,
+    });
+    expect(config.telegramProxy?.origin).toBe("https://relay.example");
+    expect(config.telegramProxy?.key.reveal()).toBe(key);
+    expect(JSON.stringify(config)).not.toContain(key);
+    expect(inspect(config)).not.toContain(key);
+    expect(parseBotRuntimeConfig(env).telegramProxy).toBeUndefined();
+    for (const values of [
+      { TELEGRAM_API_PROXY_URL: "https://relay.example" },
+      { TELEGRAM_API_PROXY_KEY: key },
+      { TELEGRAM_API_PROXY_URL: "https://relay.example", TELEGRAM_API_PROXY_KEY: "short" },
+      {
+        TELEGRAM_API_PROXY_URL: "https://relay.example",
+        TELEGRAM_API_PROXY_KEY: env.BOT_SERVICE_KEY,
+      },
+    ])
+      expect(() => parseBotRuntimeConfig({ ...env, ...values })).toThrow();
+  });
+  it.each([
+    "http://relay.example",
+    "https://relay.example/v1",
+    "https://relay.example?token=x",
+    "https://user:secret@relay.example",
+    "https://127.0.0.1",
+    "https://relay.local",
+    "https://relay.example:8443",
+    "https://relay.example/#fragment",
+  ])("rejects unsafe relay target %s", (target) => {
+    expect(() =>
+      parseBotRuntimeConfig({
+        ...env,
+        TELEGRAM_API_PROXY_URL: target,
+        TELEGRAM_API_PROXY_KEY: "p".repeat(43),
+      }),
+    ).toThrow();
+  });
 });

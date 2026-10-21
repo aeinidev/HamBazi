@@ -1,0 +1,18 @@
+[Unit]
+Description=Renew exact-image security evidence for replacement restricted staging
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/hambazi/ops/replacement-security.py --renew
+TimeoutStartSec=30min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/hambazi/security /etc/systemd/system/hambazi-server-security-expiry.timer
+

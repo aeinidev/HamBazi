@@ -466,6 +466,7 @@ export function KahrobaLobby({
         message={message}
         error={error}
         actions={{
+          invitationDetected: !!parseRoomStartParam(startParam),
           createEnabled:
             !!session &&
             !!permissions.data?.canCreate &&

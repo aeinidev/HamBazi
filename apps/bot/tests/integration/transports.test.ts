@@ -3,6 +3,8 @@ import { request as plainRequest } from "node:http";
 import { createServer as netServer } from "node:net";
 import { Api } from "grammy";
 import { createTelegramSender } from "../../src/telegram.js";
+import { createRelayTransport } from "../../src/relay-transport.js";
+import { createTelegramApi } from "../../src/telegram-api.js";
 import { startBot } from "../../src/composition/runtime.js";
 import type { AddressInfo } from "node:net";
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
@@ -329,6 +331,75 @@ describe("private backend HTTPS client", () => {
     await expect(sender.send(delivery, AbortSignal.timeout(2000))).rejects.toMatchObject({
       retryAfterSeconds: 7,
     });
+  });
+  it("runs the relay SDK over verified TLS without putting the bot token on that hop", async () => {
+    let path: string | undefined;
+    let key: unknown;
+    let payload: unknown;
+    const origin = await backendServer((req, res) => {
+      path = req.url;
+      key = req.headers["x-hambazi-proxy-key"];
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        payload = JSON.parse(body);
+        res.setHeader("content-type", "application/json");
+        res.end(
+          JSON.stringify({
+            ok: true,
+            result: { message_id: 900, chat: { id: 100, type: "private" } },
+          }),
+        );
+      });
+    });
+    const options = {
+      token: { reveal: () => `123:${"a".repeat(32)}` },
+      timeoutMs: 1000,
+      telegramProxy: { origin, key: { reveal: () => "p".repeat(43) } },
+    };
+    const api = createTelegramApi(options, createRelayTransport({ ca: tls.cert }));
+    expect(
+      await createTelegramSender({ ...options, miniAppUrl: "https://mini.example" }, api).send(
+        delivery,
+        AbortSignal.timeout(2000),
+      ),
+    ).toBe(900);
+    expect(path).toBe("/v1/sendMessage");
+    expect(key).toBe("p".repeat(43));
+    expect(payload).toMatchObject({ chat_id: "100" });
+    expect(JSON.stringify([path, payload])).not.toContain(options.token.reveal());
+    // The same self-signed endpoint must fail with ordinary system trust.
+    await expect(createTelegramApi(options).getMe()).rejects.toThrow();
+  });
+  it("aborts a stalled real HTTPS relay and never follows its redirects", async () => {
+    let requests = 0;
+    let redirect = true;
+    const origin = await backendServer((_req, res) => {
+      requests++;
+      if (redirect) {
+        res.writeHead(302, {
+          location: "https://other.example",
+          "content-type": "application/json",
+        });
+        res.end("{}");
+      }
+    });
+    const options = {
+      token: { reveal: () => `123:${"a".repeat(32)}` },
+      timeoutMs: 100,
+      telegramProxy: { origin, key: { reveal: () => "p".repeat(43) } },
+    };
+    await expect(
+      createTelegramApi(options, createRelayTransport({ ca: tls.cert })).getMe(),
+    ).rejects.toThrow();
+    expect(requests).toBe(1);
+    redirect = false;
+    await expect(
+      createTelegramApi(options, createRelayTransport({ ca: tls.cert })).getMe(),
+    ).rejects.toThrow();
+    expect(requests).toBe(2);
   });
   it("sends initial and repeated starts as text only with the correct bottom keyboard", async () => {
     const received: { method: string; contentType: string; payload: Record<string, unknown> }[] =

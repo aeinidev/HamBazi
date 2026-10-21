@@ -116,12 +116,24 @@ try {
   const vitest = join(dirname(require.resolve("vitest/package.json")), "vitest.mjs");
   async function suite(owner, file) {
     stage = `${owner} ${file}`;
-    const r = await run(process.execPath, [vitest, "run", file], {
-      cwd: resolve(owner),
-      env: childEnv,
-      timeout: process.argv.includes("--runtime") ? 600000 : 180000,
-      maxBuffer: 8 * 1024 * 1024,
-    });
+    const r = await run(
+      process.execPath,
+      [
+        vitest,
+        "run",
+        file,
+        ...(file === "tests/integration/kahroba-runtime.test.mjs" &&
+        process.argv.includes("--runtime-browser-only")
+          ? ["--testNamePattern", "actual Web/API/Worker"]
+          : []),
+      ],
+      {
+        cwd: resolve(owner),
+        env: childEnv,
+        timeout: process.argv.includes("--runtime") ? 600000 : 180000,
+        maxBuffer: 8 * 1024 * 1024,
+      },
+    );
     console.info(r.stdout);
   }
   await suite("packages/database", "tests/integration");

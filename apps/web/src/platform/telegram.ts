@@ -1,5 +1,6 @@
 export interface TelegramApp {
   initData: string;
+  initDataUnsafe?: { start_param?: unknown };
   colorScheme?: string;
   viewportStableHeight?: number;
   isFullscreen?: boolean;
@@ -19,6 +20,34 @@ export interface TelegramApp {
     hide(): void;
     onClick(callback: () => void): void;
     offClick(callback: () => void): void;
+  };
+}
+/** Capture this launch before URL cleanup. Hints never authenticate or authorize a room. */
+export function readTelegramLaunch(app: TelegramApp | undefined) {
+  if (!app) return { initData: "", startParam: undefined };
+  const url = new URL(window.location.href),
+    fragment = new URLSearchParams(url.hash.startsWith("#/") ? "" : url.hash.slice(1));
+  const single = (params: URLSearchParams, key: string) => {
+    const values = params.getAll(key);
+    // Ambiguous/empty current launch fields must not restore a cached SDK value.
+    return values.length > 1 ? "" : values[0];
+  };
+  const currentData = single(fragment, "tgWebAppData") ?? single(url.searchParams, "tgWebAppData"),
+    initData = currentData ?? app.initData,
+    currentStart = single(new URLSearchParams(currentData), "start_param"),
+    urlStart =
+      single(fragment, "tgWebAppStartParam") ?? single(url.searchParams, "tgWebAppStartParam"),
+    hint =
+      currentStart ??
+      urlStart ??
+      (currentData === undefined
+        ? (single(new URLSearchParams(app.initData), "start_param") ??
+          app.initDataUnsafe?.start_param)
+        : undefined);
+  return {
+    initData,
+    startParam:
+      typeof hint === "string" && /^[A-Za-z0-9_-]{1,512}(?![\s\S])/.test(hint) ? hint : undefined,
   };
 }
 const presentationRequested = new WeakSet<TelegramApp>();
@@ -45,19 +74,13 @@ declare global {
   }
 }
 export function bootstrapTelegram(app: TelegramApp | undefined) {
-  const queryInitData = app
-    ? new URL(window.location.href).searchParams.get("tgWebAppData") || ""
-    : "";
+  const launch = readTelegramLaunch(app);
   // SDK has consumed launch parameters; keep credentials out of browser history/referrers.
   const url = new URL(window.location.href);
   for (const key of [...url.searchParams.keys()])
     if (key.startsWith("tgWebApp")) url.searchParams.delete(key);
   if (!url.hash.startsWith("#/")) url.hash = "";
   window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-  // The SDK consumes fragments. Some launch surfaces preserve data in the query.
-  // Treat it only as an untrusted, memory-only credential for server validation,
-  // and never grant this fallback when loading/privacy protection failed.
-  const initData = app ? app.initData || queryInitData : "";
   const update = () => {
     const root = document.documentElement;
     root.dataset.telegramTheme = app?.colorScheme === "dark" ? "dark" : "light";
@@ -84,7 +107,7 @@ export function bootstrapTelegram(app: TelegramApp | undefined) {
   requestLaunchPresentation(app);
   return {
     app,
-    initData,
+    ...launch,
     dispose: () => {
       for (const event of events) app?.offEvent(event, update);
     },

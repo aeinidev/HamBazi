@@ -65,6 +65,29 @@ const shape = {
   BOT_SEND_TIMEOUT_MS: integer(100, 5000),
   BOT_ONBOARDING_LEASE_MS: integer(1000, 60000),
   BOT_MAX_IN_FLIGHT: integer(1, 100),
+  TELEGRAM_API_PROXY_URL: z
+    .string()
+    .max(256)
+    .refine((v) => {
+      try {
+        const u = new URL(v);
+        return (
+          url(false)(v) &&
+          u.pathname === "/" &&
+          !u.port &&
+          !isIP(u.hostname.replace(/^\[|\]$/g, "")) &&
+          u.hostname.includes(".") &&
+          !u.hostname.endsWith(".local")
+        );
+      } catch {
+        return false;
+      }
+    })
+    .optional(),
+  TELEGRAM_API_PROXY_KEY: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{43,128}$/)
+    .optional(),
 };
 export class BotRuntimeConfigurationError extends Error {
   readonly code = "INVALID_CONFIGURATION";
@@ -80,6 +103,13 @@ export function parseBotRuntimeConfig(env: Readonly<Record<string, string | unde
   if (!parsed.success)
     throw new BotRuntimeConfigurationError(parsed.error.issues.map((i) => String(i.path[0])));
   const v = parsed.data;
+  if (Boolean(v.TELEGRAM_API_PROXY_URL) !== Boolean(v.TELEGRAM_API_PROXY_KEY))
+    throw new BotRuntimeConfigurationError(["TELEGRAM_API_PROXY_URL", "TELEGRAM_API_PROXY_KEY"]);
+  if (
+    v.TELEGRAM_API_PROXY_KEY &&
+    [v.TELEGRAM_WEBHOOK_SECRET, v.BOT_SERVICE_KEY].includes(v.TELEGRAM_API_PROXY_KEY)
+  )
+    throw new BotRuntimeConfigurationError(["TELEGRAM_API_PROXY_KEY"]);
   const bytes = Buffer.from(v.BOT_SERVICE_KEY, "base64url");
   if (
     bytes.length < 32 ||
@@ -101,6 +131,14 @@ export function parseBotRuntimeConfig(env: Readonly<Record<string, string | unde
     botToken: new SecretValue(v.TELEGRAM_BOT_TOKEN),
     botId: v.TELEGRAM_BOT_TOKEN.split(":")[0]!,
     botUsername: v.TELEGRAM_BOT_USERNAME,
+    ...(v.TELEGRAM_API_PROXY_URL && v.TELEGRAM_API_PROXY_KEY
+      ? {
+          telegramProxy: Object.freeze({
+            origin: new URL(v.TELEGRAM_API_PROXY_URL).origin,
+            key: new SecretValue(v.TELEGRAM_API_PROXY_KEY),
+          }),
+        }
+      : {}),
     webhookSecret: new SecretValue(v.TELEGRAM_WEBHOOK_SECRET),
     serviceBearer: new SecretValue(`Bearer ${v.BOT_SERVICE_KEY_ID}.${v.BOT_SERVICE_KEY}`),
     apiOrigin: v.BOT_API_ORIGIN,

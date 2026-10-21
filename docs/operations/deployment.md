@@ -1,12 +1,13 @@
 # Portable deployment preparation
 
-> Current staging admits the unchanged owner and one verified ordinary tester
-> under [ADR-058](../adr/058-narrow-staging-regular-test-user.md). See the
-> [current binding](../../infra/docker/staging/staging-test-user-current.json) and
-> [operation/retest instructions](staging-test-user.md). Public admission remains
-> disabled; registration is required and support goes to the original owner.
-> Earlier onboarding/closure/native/rollback evidence below is historical and
-> applies only to its recorded source. Production remains HOLD.
+> The current replacement staging server is **89.46.217.9**. See the
+> [2026-10-20 deployment record](replacement-server-20261020.md),
+> [replacement binding](../../infra/docker/server/deployment.json) and
+> [operator instructions](../../infra/docker/server/README.md).
+> It admits the owner and one tester, has a fresh database, and currently cannot
+> reach Telegram outbound. Production remains HOLD. The earlier server bindings,
+> acceptance results and operating instructions below are historical and apply
+> only to their recorded source and host.
 
 [ADR-043](../adr/043-portable-deployment-preparation.md) covers Phase 18B2.
 This prepares application assets and local evidence. It does not approve a

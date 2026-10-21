@@ -137,9 +137,146 @@ describe("guarded SDK loading", () => {
     expect(await loadTelegramSdk()).toBeUndefined();
     expect(vi.getTimerCount()).toBe(0);
   });
+
+  it("waits for delayed bridge initialization after the reviewed script loads", async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const result = loadTelegramSdk();
+    f.script.onload!();
+    await vi.advanceTimersByTimeAsync(150);
+    f.host.Telegram = { WebApp: app };
+    await vi.advanceTimersByTimeAsync(50);
+    expect(await result).toBe(app);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("waits for delayed initData when an invitation arrives before SDK initialization", async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    f.host.location.href = `https://app.example/?tgWebAppStartParam=room_${"A".repeat(43)}`;
+    const delayed = { ...app, initData: "" };
+    f.host.Telegram = { WebApp: delayed };
+    const result = loadTelegramSdk();
+    let settled = false;
+    void result.then(() => (settled = true));
+    await vi.advanceTimersByTimeAsync(150);
+    expect(settled).toBe(false);
+    delayed.initData = "SYNTHETIC_PRIVATE";
+    await vi.advanceTimersByTimeAsync(50);
+    expect(await result).toBe(delayed);
+    expect(f.appendChild).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("bounds missing invitation credentials and ignores a late initialized bridge", async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    f.host.location.href = `https://app.example/?tgWebAppStartParam=room_${"A".repeat(43)}`;
+    const delayed = { ...app, initData: "" };
+    f.host.Telegram = { WebApp: delayed };
+    const report = vi.fn();
+    const result = loadTelegramSdk(report);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await result).toBeUndefined();
+    delayed.initData = "SYNTHETIC_PRIVATE";
+    await vi.advanceTimersByTimeAsync(100);
+    expect(report).toHaveBeenCalledExactlyOnceWith("sdk-timeout");
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
 
 describe("bootstrap credential cleanup", () => {
+  it.each(["query", "fragment"])(
+    "preserves the separate %s invitation launch hint before privacy cleanup",
+    (surface) => {
+      const f = fixture(),
+        startParam = `room_${"A".repeat(43)}`,
+        fields = new URLSearchParams({
+          tgWebAppData: "SYNTHETIC_SIGNED_CREDENTIAL_WITHOUT_START_PARAM",
+          tgWebAppStartParam: startParam,
+        });
+      f.host.location.href =
+        surface === "query"
+          ? `https://app.example/?lang=fa&${fields}#/restricted/kahroba`
+          : `https://app.example/?lang=fa#${fields}`;
+      const result = bootstrapTelegram({ ...app, initData: "" });
+      expect(result.startParam).toBe(startParam);
+      expect(result.initData).toBe("SYNTHETIC_SIGNED_CREDENTIAL_WITHOUT_START_PARAM");
+      expect(f.host.history.replaceState).toHaveBeenCalledWith(
+        null,
+        "",
+        surface === "query" ? "/?lang=fa#/restricted/kahroba" : "/?lang=fa",
+      );
+      result.dispose();
+    },
+  );
+
+  it("prefers current launch credentials over a cached SDK and preserves signed bytes exactly", () => {
+    const f = fixture(),
+      startParam = `room_${"E".repeat(43)}`,
+      initData = `query_id=SYNTHETIC%2BQUERY&start_param=${startParam}&hash=SYNTHETIC`;
+    f.host.location.href = `https://app.example/?${new URLSearchParams({ tgWebAppData: initData, tgWebAppStartParam: `room_${"A".repeat(43)}` })}`;
+    const result = bootstrapTelegram({
+      ...app,
+      initData: `start_param=room_${"I".repeat(43)}`,
+    });
+    expect(result.initData).toBe(initData);
+    expect(result.startParam).toBe(startParam);
+    result.dispose();
+  });
+
+  it("uses a current URL hint ahead of a cached SDK hint without editing authentication data", () => {
+    const f = fixture(),
+      startParam = `room_${"E".repeat(43)}`,
+      initData = `start_param=room_${"A".repeat(43)}&hash=SYNTHETIC`;
+    f.host.location.href = `https://app.example/?tgWebAppStartParam=${startParam}`;
+    const result = bootstrapTelegram({ ...app, initData });
+    expect(result.initData).toBe(initData);
+    expect(result.startParam).toBe(startParam);
+    result.dispose();
+  });
+
+  it("treats SDK unsafe start_param only as a routing hint and never as credentials", () => {
+    const f = fixture(),
+      startParam = `room_${"A".repeat(43)}`;
+    f.host.location.href = "https://app.example/";
+    const result = bootstrapTelegram({
+      ...app,
+      initData: "",
+      initDataUnsafe: { start_param: startParam },
+    });
+    expect(result.startParam).toBe(startParam);
+    expect(result.initData).toBe("");
+    result.dispose();
+  });
+
+  it("rejects ambiguous current hints instead of using a cached room", () => {
+    const f = fixture();
+    f.host.location.href = `https://app.example/?tgWebAppStartParam=room_${"A".repeat(43)}&tgWebAppStartParam=room_${"E".repeat(43)}`;
+    const result = bootstrapTelegram({ ...app, initData: `start_param=room_${"I".repeat(43)}` });
+    expect(result.startParam).toBeUndefined();
+    result.dispose();
+  });
+
+  it.each(["room_bad%0A", "room_bad\n", "x".repeat(513), ""])(
+    "rejects malformed launch hints instead of restoring a cached invitation (%s)",
+    (hint) => {
+      const f = fixture();
+      f.host.location.href = `https://app.example/?${new URLSearchParams({ tgWebAppStartParam: hint })}`;
+      const result = bootstrapTelegram({ ...app, initData: `start_param=room_${"A".repeat(43)}` });
+      expect(result.startParam).toBeUndefined();
+      result.dispose();
+    },
+  );
+
+  it("discards launch hints as well as credentials when the privacy boundary failed", () => {
+    const f = fixture();
+    f.host.location.href = `https://app.example/?tgWebAppStartParam=room_${"A".repeat(43)}&tgWebAppData=SYNTHETIC_PRIVATE`;
+    const result = bootstrapTelegram(undefined);
+    expect(result.initData).toBe("");
+    expect(result.startParam).toBeUndefined();
+  });
+
   it("preserves query-only launch data in memory after a guarded SDK load", () => {
     const f = fixture();
     const queryApp = { ...app, initData: "" };
