@@ -499,6 +499,123 @@ async function credited(matchId, count) {
   return rows;
 }
 
+for (const capacity of [2, 3, 4])
+  it(`palace public runtime: ${capacity} humans search/cancel/recover/ready/host-start and play with real storage`, async () => {
+    const f = await setup();
+    try {
+      let sockets = [];
+      for (let i = 0; i < capacity; i++) sockets.push(await f.connect(i));
+      const intent = () => ({
+        schemaVersion: 1,
+        commandId: randomUUID(),
+        gameId: "kahroba",
+        mode: "standard",
+        capacity,
+      });
+      const first = await f.request(sockets[0], "matchmaking:search", intent());
+      expect(first.ok).toBe(true);
+      const abandoned = { schemaVersion: 1, ticketId: first.value.ticketId };
+      const recovered = await f.http(0, "/v1/kahroba/matchmaking/current");
+      expect(recovered.status).toBe(200);
+      expect(recovered.data.value).toMatchObject({
+        ticketId: first.value.ticketId,
+        capacity,
+        status: "SEARCHING",
+      });
+      const cancelled = await f.request(sockets[0], "matchmaking:cancel", abandoned);
+      expect(cancelled.value.status).toBe("CANCELLED");
+      expect((await f.request(sockets[0], "matchmaking:cancel", abandoned)).value.status).toBe(
+        "CANCELLED",
+      );
+      expect((await f.http(0, "/v1/kahroba/matchmaking/current")).data.value).toBeNull();
+      const tickets = [];
+      for (let i = 0; i < capacity; i++) {
+        const result = await f.request(sockets[i], "matchmaking:search", intent());
+        expect(result.ok).toBe(true);
+        tickets.push(result.value.ticketId);
+      }
+      await until(async () => {
+        const status = await f.request(sockets[0], "matchmaking:status", {
+          schemaVersion: 1,
+          ticketId: tickets[0],
+        });
+        return status.ok && status.value.status === "MATCHED";
+      });
+      let matchId;
+      for (let i = 0; i < capacity; i++) {
+        const reference = { schemaVersion: 1, ticketId: tickets[i] };
+        const found = await f.request(sockets[i], "matchmaking:found", reference);
+        expect(found.ok).toBe(true);
+        const admitted = await f.request(sockets[i], "matchmaking:admit", {
+          ...reference,
+          admissionToken: found.value.admissionToken,
+        });
+        expect(admitted.ok).toBe(true);
+        matchId = admitted.value.matchId;
+      }
+      const path = `/v1/kahroba/matches/${matchId}`;
+      const waiting = await f.http(0, path + "/lobby");
+      expect(waiting.status).toBe(200);
+      expect(waiting.data.value).toMatchObject({
+        status: "WAITING_FOR_PLAYERS",
+        players: expect.any(Array),
+      });
+      expect(waiting.data.value.players).toHaveLength(capacity);
+      expect(JSON.stringify(waiting.data)).not.toMatch(
+        /stateJsonb|decks|myReserved|admissionToken/,
+      );
+      const host = f.ids.indexOf(waiting.data.value.hostUserId),
+        guest = (host + 1) % capacity;
+      const command = (version) => ({
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId,
+        expectedVersion: version,
+      });
+      expect(
+        (await f.http(guest, path + "/start", command(waiting.data.value.stateVersion))).status,
+      ).toBe(403);
+      expect(
+        (await f.http(host, path + "/start", command(waiting.data.value.stateVersion))).status,
+      ).toBe(409);
+      if (capacity < 4) expect((await f.http(3, path + "/lobby")).status).toBe(404);
+      for (let i = 0; i < capacity; i++) {
+        const state = (await f.http(i, path + "/lobby")).data.value;
+        expect((await f.request(sockets[i], "match:ready", command(state.stateVersion))).ok).toBe(
+          true,
+        );
+      }
+      const ready = (await f.http(host, path + "/lobby")).data.value;
+      expect(ready.status).toBe("WAITING_FOR_PLAYERS");
+      expect(ready.players.every((p) => p.ready)).toBe(true);
+      await f.restart(true);
+      sockets = [];
+      for (let i = 0; i < capacity; i++) sockets.push(await f.connect(i));
+      const afterRestart = (await f.http(host, path + "/lobby")).data.value;
+      expect(afterRestart.status).toBe("WAITING_FOR_PLAYERS");
+      expect((await f.http(host, "/v1/kahroba/matchmaking/current")).data.value.matchId).toBe(
+        matchId,
+      );
+      const start = command(afterRestart.stateVersion);
+      expect((await f.http(host, path + "/start", start)).data.value.status).toBe("ACTIVE");
+      expect((await f.http(host, path + "/start", start)).data.value.status).toBe("ACTIVE");
+      expect(
+        (await f.http(host, path + "/cancel", command((await f.stored(matchId)).stateVersion)))
+          .status,
+      ).toBe(409);
+      for (const socket of sockets)
+        expect((await f.request(socket, "match:subscribe", { schemaVersion: 1, matchId })).ok).toBe(
+          true,
+        );
+      expect((await f.snapshot(sockets[0], matchId)).view.players).toHaveLength(capacity);
+      const done = await finish(f, matchId, sockets, capacity);
+      expect(done.status).toBe("FINISHED");
+      expect((await f.http(host, "/v1/kahroba/matchmaking/current")).data.value).toBeNull();
+    } finally {
+      await f.close();
+    }
+  }, 180000);
+
 for (const capacity of [3, 4])
   it(`real main API/Worker: ${capacity} synthetic humans create/join/ready/play/finish with v2 persistence`, async () => {
     const f = await setup();
@@ -558,6 +675,109 @@ it("real runtime: shared v2 edge credits both winners through the live Worker", 
     await f.close();
   }
 }, 60000);
+
+async function openPalaceUI(f, browser, index, page) {
+  if (!page) {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+    });
+    await context.route("**/*", (route) =>
+      [f.origin, f.apiOrigin].includes(new URL(route.request().url()).origin)
+        ? route.continue()
+        : route.abort("blockedbyclient"),
+    );
+    page = await context.newPage();
+  }
+  const launch = new URLSearchParams({
+    tgWebAppData: f.launches[index],
+    tgWebAppVersion: "8.0",
+    tgWebAppPlatform: "ios",
+  });
+  await page.goto(`${f.origin}/?${launch}`);
+  const login = page.getByRole("button", { name: "Continue with Telegram", exact: true }),
+    entry = page.getByRole("button", { name: "کهربا، فعال", exact: true });
+  await until(async () => (await login.isVisible()) || (await entry.isVisible()));
+  if (await login.isVisible()) await login.click();
+  expect(await page.getByRole("link", { name: "میز خصوصی کهربا" }).count()).toBe(0);
+  await entry.click();
+  await page.locator(".khl-lobby").waitFor();
+  return page;
+}
+for (const browserName of ["chromium", "webkit"])
+  it(`actual palace public UI ${browserName}: three-human search, cancel, relaunch recovery and host start`, async () => {
+    const f = await setup();
+    let browser;
+    try {
+      await f.browserStart();
+      const env = { ...process.env };
+      delete env.GIO_MODULE_DIR;
+      browser = await playwright[browserName].launch({
+        env,
+        ...(browserName === "webkit" && process.env.TEST_KAHROBA_WEBKIT_EXECUTABLE_PATH
+          ? { executablePath: process.env.TEST_KAHROBA_WEBKIT_EXECUTABLE_PATH }
+          : {}),
+      });
+      const pages = [];
+      for (let i = 0; i < 3; i++) pages.push(await openPalaceUI(f, browser, i));
+      async function publicSearch(page) {
+        await page.getByRole("button", { name: /ایجاد اتاق جدید/ }).click();
+        await page.getByRole("button", { name: "۳ نفره", exact: true }).click();
+        await page.getByRole("button", { name: /^عمومی/ }).click();
+        await page.getByRole("button", { name: "ایجاد اتاق", exact: true }).click();
+        await page.locator(".khl-search").waitFor();
+      }
+      await publicSearch(pages[0]);
+      await pages[0].getByRole("button", { name: "لغو جستجو", exact: true }).click();
+      await pages[0].getByRole("button", { name: /ایجاد اتاق جدید/ }).waitFor();
+      await publicSearch(pages[0]);
+      pages[0] = await openPalaceUI(f, browser, 0, pages[0]);
+      await pages[0].locator(".khl-search").waitFor();
+      await pages[0].screenshot({
+        path: join(artifacts, `${browserName}-palace-public-search.png`),
+        fullPage: true,
+        animations: "disabled",
+      });
+      for (let i = 1; i < 3; i++) await publicSearch(pages[i]);
+      for (const page of pages)
+        await page.getByRole("heading", { name: "اتاق عمومی کهربا", exact: true }).waitFor();
+      for (const page of pages)
+        await until(async () => (await page.locator(".khl-player").count()) === 3);
+      for (let i = 0; i < 3; i++) {
+        await until(() =>
+          pages[i].getByRole("button", { name: "آماده‌ام", exact: true }).isEnabled(),
+        );
+        await pages[i].getByRole("button", { name: "آماده‌ام", exact: true }).click();
+        for (const page of pages)
+          await until(
+            async () =>
+              (await page.locator(".khl-player small").allTextContents()).filter((s) =>
+                s.includes("آماده است"),
+              ).length ===
+              i + 1,
+          );
+      }
+      let host = -1;
+      for (let i = 0; i < 3; i++) if (await pages[i].locator(".khl-start").isEnabled()) host = i;
+      expect(host).toBeGreaterThanOrEqual(0);
+      await pages[host].screenshot({
+        path: join(artifacts, `${browserName}-palace-public-ready.png`),
+        fullPage: true,
+        animations: "disabled",
+      });
+      await pages[host].locator(".khl-start").click();
+      for (const page of pages) await page.locator(".kh-market-cards").first().waitFor();
+      for (const page of pages)
+        expect(
+          await page.evaluate(
+            () => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth,
+          ),
+        ).toBe(true);
+    } finally {
+      await browser?.close();
+      await f.close();
+    }
+  }, 120000);
 
 for (const browserName of ["chromium", "webkit"])
   it(`actual Web/API/Worker ${browserName}: two-human UI room, ready, turns, reservation privacy and reconnect`, async () => {
@@ -620,7 +840,7 @@ for (const browserName of ["chromium", "webkit"])
             (await page
               .getByRole("button", { name: "Continue with Telegram", exact: true })
               .isVisible()) ||
-            (await page.getByRole("link", { name: "میز خصوصی کهربا" }).isVisible()),
+            (await page.getByRole("button", { name: "کهربا، فعال", exact: true }).isVisible()),
         );
         if (
           await page
@@ -628,25 +848,17 @@ for (const browserName of ["chromium", "webkit"])
             .isVisible()
         )
           await page.getByRole("button", { name: "Continue with Telegram", exact: true }).click();
-        await page.getByRole("link", { name: "میز خصوصی کهربا" }).click();
+        await page.getByRole("button", { name: "کهربا، فعال", exact: true }).click();
         await page.getByRole("region", { name: "لابی کهربا" }).waitFor();
       }
       await until(() =>
         pages[0].getByRole("button", { name: "ایجاد اتاق", exact: false }).isEnabled(),
       );
-      expect(await pages[1].locator(".khl-create").isDisabled()).toBe(true);
-      // A tester cannot manufacture owner creation authority through the API.
-      expect(
-        (
-          await f.http(1, "/v1/kahroba/rooms", {
-            schemaVersion: 1,
-            commandId: randomUUID(),
-            gameId: "kahroba",
-            capacity: 2,
-          })
-        ).status,
-      ).toBe(403);
+      await until(() => pages[1].locator(".khl-create").isEnabled());
+      // Every admitted player may create rooms under the approved public-lobby scope.
+      expect((await f.http(1, "/v1/kahroba/lobby-permissions")).data.canCreate).toBe(true);
       await pages[0].locator(".khl-create").click();
+      await pages[0].getByRole("button", { name: "ایجاد اتاق", exact: true }).click();
       await pages[0].locator(".khl-share").waitFor();
       await until(() => pages[0].locator(".khl-share").isEnabled());
       await pages[0].evaluate(() => {
@@ -701,13 +913,12 @@ for (const browserName of ["chromium", "webkit"])
       forgedData.set("hash", "0".repeat(64));
       forgedFields.set("tgWebAppData", forgedData.toString());
       forged.hash = forgedFields.toString();
-      await pages[1].goto(forged.href);
       const rejected = pages[1].waitForResponse(
         (response) =>
           response.request().method() === "POST" &&
           new URL(response.url()).pathname.endsWith("/registered-session-photo"),
       );
-      await pages[1].getByRole("button", { name: "Continue with Telegram", exact: true }).click();
+      await pages[1].goto(forged.href);
       expect((await rejected).status()).toBe(401);
       expect(await pages[1].locator(".khl-lobby").count()).toBe(0);
 
@@ -768,7 +979,7 @@ for (const browserName of ["chromium", "webkit"])
           (await pages[0]
             .getByRole("button", { name: "Continue with Telegram", exact: true })
             .isVisible()) ||
-          (await pages[0].getByRole("link", { name: "میز خصوصی کهربا" }).isVisible()),
+          (await pages[0].getByRole("button", { name: "کهربا، فعال", exact: true }).isVisible()),
       );
       if (
         await pages[0]
@@ -776,7 +987,7 @@ for (const browserName of ["chromium", "webkit"])
           .isVisible()
       )
         await pages[0].getByRole("button", { name: "Continue with Telegram", exact: true }).click();
-      await pages[0].getByRole("link", { name: "میز خصوصی کهربا" }).click();
+      await pages[0].getByRole("button", { name: "کهربا، فعال", exact: true }).click();
       await until(() => pages[0].locator(".khl-start").isEnabled());
       for (const width of [320, 375, 390, 768]) {
         await pages[0].setViewportSize({ width, height: 844 });
@@ -938,9 +1149,7 @@ for (const browserName of ["chromium", "webkit"])
       );
       await pages[0].getByRole("button", { name: "بازگشت", exact: true }).click();
       expect((await (await recovered).json()).room).toBeNull();
-      await until(async () =>
-        (await pages[0].locator(".khl-room-code bdi").innerText()).includes("هنوز انتخاب نشده"),
-      );
+      await until(async () => (await pages[0].locator(".khl-room-code").count()) === 0);
       await until(() => pages[0].locator(".khl-create").isDisabled());
       await writeFile(
         join(artifacts, `${browserName}-runtime-e2e.json`),

@@ -106,6 +106,26 @@ const http = createServer(async (req, res) => {
     });
   if (req.url === "/v1/kahroba/current-room")
     return send(res, 200, { ok: true, schemaVersion: 1, room: null });
+  if (req.url === "/v1/kahroba/matchmaking/current")
+    return send(res, 200, { ok: true, value: null });
+  if (req.url === "/v1/kahroba/lobby-permissions")
+    return send(res, 200, {
+      schemaVersion: 1,
+      canCreate: !["guest", "forbidden", "unauthenticated"].includes(lobbyMode),
+    });
+  if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}/readiness`)
+    return send(res, 200, {
+      ok: true,
+      value: {
+        schemaVersion: 1,
+        roomId: lobbyRoomId,
+        matchId: null,
+        stateVersion: null,
+        status: null,
+        canStart: false,
+        players: lobbyRoom().members.map((m) => ({ userId: m.userId, ready: false })),
+      },
+    });
   if (req.url === `/v1/kahroba/rooms/${lobbyRoomId}`) {
     if (lobbyMode === "forbidden" || lobbyMode === "unauthenticated")
       return send(res, lobbyMode === "forbidden" ? 403 : 401, {
@@ -175,6 +195,26 @@ const http = createServer(async (req, res) => {
       ok: true,
       schemaVersion: 1,
       room: { id, gameId, capacity, version, expiresAt, status },
+    });
+  }
+  if (req.url === "/v1/kahroba/rooms" && req.method === "POST") {
+    const parsed = z
+      .strictObject({
+        schemaVersion: z.literal(1),
+        commandId: z.uuid(),
+        gameId: z.literal("kahroba"),
+        capacity: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+      })
+      .safeParse(body);
+    if (!parsed.success)
+      return send(res, 400, { ok: false, error: { code: "INVALID_INPUT", retryable: false } });
+    lobbyCapacity = parsed.data.capacity;
+    return send(res, 200, {
+      ok: true,
+      schemaVersion: 1,
+      roomId: lobbyRoomId,
+      commandId: parsed.data.commandId,
+      appliedVersion: 0,
     });
   }
   if (req.url === "/__preview/lobby") {

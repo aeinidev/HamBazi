@@ -84,11 +84,13 @@ function fixture() {
     lifecycle: vi.fn(async (input: unknown) => {
       const { actionId, operation } = input as { actionId: string; operation: string };
       match!.status =
-        operation === "WAIT"
-          ? "WAITING_FOR_PLAYERS"
-          : operation === "START"
-            ? "STARTING"
-            : "ACTIVE";
+        operation === "TERMINATE"
+          ? "TERMINATED"
+          : operation === "WAIT"
+            ? "WAITING_FOR_PLAYERS"
+            : operation === "START"
+              ? "STARTING"
+              : "ACTIVE";
       match!.stateVersion++;
       return ack(actionId);
     }),
@@ -424,5 +426,47 @@ it("validates the frozen roster before any host-start lifecycle write", async ()
       expectedVersion: f.match().stateVersion,
     }),
   ).toMatchObject({ error: { code: "ROOM_CONFLICT" } });
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+});
+
+it("allows only the host to cancel a prepared waiting room, then closes its durable binding", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  f.processing.lifecycle.mockClear();
+  const input = {
+    schemaVersion: 1,
+    actionId: randomUUID(),
+    matchId: f.matchId,
+    expectedVersion: f.match().stateVersion,
+  };
+  expect(await service.cancel(f.guest, input)).toMatchObject({ error: { code: "FORBIDDEN" } });
+  expect(f.processing.lifecycle).not.toHaveBeenCalled();
+  expect((await service.cancel(f.host, input)).ok).toBe(true);
+  expect(f.match().status).toBe("TERMINATED");
+  expect(f.rooms.closeStarted).toHaveBeenCalledWith(f.roomId, f.matchId);
+});
+it("does not allow a pregame cancellation command to terminate an active private game", async () => {
+  const f = fixture(),
+    service = privateRoomMatchService({ ...f.options, manualStart: true });
+  await service.resume(f.roomId);
+  f.match().status = "ACTIVE";
+  f.rooms.read.mockResolvedValue({
+    ok: true,
+    room: { id: f.roomId, hostUserId: f.host, startedMatchId: f.matchId, status: "STARTED" },
+  } as never);
+  f.processing.lifecycle.mockClear();
+  expect(
+    await service.cancel(f.host, {
+      schemaVersion: 1,
+      actionId: randomUUID(),
+      matchId: f.matchId,
+      expectedVersion: f.match().stateVersion,
+    }),
+  ).toMatchObject({ error: { code: "GAME_STATE_CONFLICT" } });
   expect(f.processing.lifecycle).not.toHaveBeenCalled();
 });

@@ -9,12 +9,14 @@ import {
   roomAckSchema,
   matchAckSchema,
   okValue,
+  ticketSchema,
 } from "../../../platform/contracts.js";
 import { ClientError, errorMessage } from "../../../platform/errors.js";
 import { useRuntime, useSession, useTask, go } from "../../../ui/shared.js";
 import { KahrobaLobbyView } from "../components/lobby.js";
 import { parseRoomStartParam } from "@hambazi/contracts";
 import { kahrobaInviteSchema } from "../runtime.js";
+import { currentKahrobaSearchSchema } from "../public-lobby.js";
 import {
   canShareKahrobaRoom,
   verifiedKahrobaInvite,
@@ -89,7 +91,54 @@ export function KahrobaLobby({
         signal,
       ),
     enabled: !!session && !roomId && !startParam,
+    refetchOnMount: "always",
   });
+  const search = useQuery({
+    queryKey: ["kahroba-current-search", session?.sessionId],
+    queryFn: ({ signal }) =>
+      runtime.http(
+        "/v1/kahroba/matchmaking/current",
+        okValue(currentKahrobaSearchSchema.nullable()),
+        undefined,
+        "GET",
+        true,
+        signal,
+      ),
+    enabled: !!session && !roomId && !startParam,
+    refetchOnMount: "always",
+  });
+  useEffect(() => {
+    const ticket = search.data?.value;
+    if (
+      !roomId &&
+      !startParam &&
+      ticket &&
+      session &&
+      search.isSuccess &&
+      !search.isFetching &&
+      current.isSuccess &&
+      !current.isFetching &&
+      current.data.room === null
+    ) {
+      runtime.store.setState({ ticket });
+      go(
+        ticket.status === "MATCHED" && ticket.matchId
+          ? `/restricted/kahroba/public/${ticket.matchId}`
+          : `/restricted/kahroba/search/${ticket.capacity}`,
+      );
+    }
+  }, [
+    runtime,
+    session,
+    roomId,
+    startParam,
+    search.data,
+    search.isSuccess,
+    search.isFetching,
+    current.data,
+    current.isSuccess,
+    current.isFetching,
+  ]);
   useEffect(() => {
     if (
       session &&
@@ -198,14 +247,53 @@ export function KahrobaLobby({
   async function refresh() {
     await Promise.all([room.refetch(), readiness.refetch()]);
   }
-  function create() {
-    if (!session || !permissions.data?.canCreate || roomId || task.blocked) return;
+  function findPlayers(capacity: number) {
+    if (
+      !session ||
+      !online ||
+      task.blocked ||
+      ![2, 3, 4].includes(capacity) ||
+      roomId ||
+      startParam ||
+      !current.isSuccess ||
+      current.data.room !== null ||
+      !search.isSuccess ||
+      search.data.value !== null
+    )
+      return;
     const identity = session.sessionId,
       payload = {
         schemaVersion: 1,
         commandId: crypto.randomUUID(),
         gameId: "kahroba",
-        capacity: 2,
+        mode: "standard",
+        capacity,
+      };
+    task.run(async () => {
+      const result = await runtime
+        .realtime()
+        .request("matchmaking:search", payload, okValue(ticketSchema));
+      if (live(identity)) {
+        runtime.store.setState({ ticket: result.value });
+        go(`/restricted/kahroba/search/${capacity}`);
+      }
+    });
+  }
+  function create(capacity: number) {
+    if (
+      !session ||
+      !permissions.data?.canCreate ||
+      ![2, 3, 4].includes(capacity) ||
+      roomId ||
+      task.blocked
+    )
+      return;
+    const identity = session.sessionId,
+      payload = {
+        schemaVersion: 1,
+        commandId: crypto.randomUUID(),
+        gameId: "kahroba",
+        capacity,
       };
     task.run(async () => {
       const result = await runtime.http("/v1/kahroba/rooms", roomAckSchema, payload);
@@ -334,6 +422,48 @@ export function KahrobaLobby({
       }
     });
   }
+  function exit() {
+    if (!session || !visibleRoom || !online || task.blocked) return;
+    const identity = session.sessionId;
+    if (["WAITING", "FULL"].includes(visibleRoom.status)) {
+      const payload = {
+        schemaVersion: 1,
+        commandId: crypto.randomUUID(),
+        roomId: visibleRoom.id,
+        expectedVersion: visibleRoom.version,
+      };
+      task.run(async () => {
+        await runtime.realtime().request("room:leave", payload, roomAckSchema);
+        if (live(identity)) {
+          runtime.query.removeQueries({ queryKey: ["kahroba-current-room"] });
+          go("/restricted/kahroba");
+        }
+      });
+    } else if (
+      visibleRoom.hostUserId === session.userId &&
+      lobby?.matchId &&
+      lobby.stateVersion !== null &&
+      ["WAITING_FOR_PLAYERS", "READY"].includes(lobby.status ?? "")
+    ) {
+      const payload = {
+        schemaVersion: 1,
+        actionId: crypto.randomUUID(),
+        matchId: lobby.matchId,
+        expectedVersion: lobby.stateVersion,
+      };
+      task.run(async () => {
+        await runtime.http(
+          `/v1/kahroba/rooms/${visibleRoom.id}/cancel`,
+          okValue(matchAckSchema),
+          payload,
+        );
+        if (live(identity)) {
+          runtime.query.removeQueries({ queryKey: ["kahroba-current-room"] });
+          go("/restricted/kahroba");
+        }
+      });
+    }
+  }
   async function share() {
     if (!allowed || !session || !roomId || flight.current) return;
     const controller = new AbortController(),
@@ -410,12 +540,15 @@ export function KahrobaLobby({
   else if (!roomId && !startParam && current.error) {
     message = `بازیابی اتاق در دسترس نیست. ${errorMessage(current.error, "fa")}`;
     error = true;
+  } else if (!roomId && !startParam && search.error) {
+    message = `بازیابی جستجو در دسترس نیست. ${errorMessage(search.error, "fa")}`;
+    error = true;
   } else if (!roomId)
     message = startParam
       ? preview.error
         ? "دعوت معتبر یا قابل دسترس نیست."
         : "برای ورود، پیوستن با دعوت را انتخاب کنید."
-      : "برای آغاز، یک اتاق خصوصی دو نفره ایجاد کنید.";
+      : "برای آغاز، یک اتاق ایجاد کنید.";
   else if (room.isPending) message = "در حال دریافت اطلاعات واقعی اتاق…";
   else if (room.error) {
     message = `اطلاعات اتاق در دسترس نیست. ${errorMessage(room.error, "fa")}`;
@@ -438,12 +571,12 @@ export function KahrobaLobby({
     error = true;
   }
   if (visibleRoom && lobby?.status === "WAITING_FOR_PLAYERS")
-    message = "هر دو بازیکن باید آماده‌ام را انتخاب کنند.";
+    message = "همهٔ بازیکنان باید آماده‌ام را انتخاب کنند.";
   if (visibleRoom && lobby?.canStart === true)
     message =
       visibleRoom.hostUserId === session?.userId
-        ? "هر دو بازیکن آماده‌اند؛ بازی را شروع کنید."
-        : "هر دو بازیکن آماده‌اند؛ در انتظار شروع میزبان…";
+        ? "همهٔ بازیکنان آماده‌اند؛ بازی را شروع کنید."
+        : "همهٔ بازیکنان آماده‌اند؛ در انتظار شروع میزبان…";
   return (
     <>
       <KahrobaLobbyView
@@ -466,6 +599,26 @@ export function KahrobaLobby({
         message={message}
         error={error}
         actions={{
+          exitEnabled:
+            online &&
+            !task.blocked &&
+            !!visibleRoom &&
+            (["WAITING", "FULL"].includes(visibleRoom.status) ||
+              (visibleRoom.hostUserId === session?.userId &&
+                ["WAITING_FOR_PLAYERS", "READY"].includes(lobby?.status ?? ""))),
+          onExit: exit,
+          searchEnabled:
+            online &&
+            !!permissions.data?.canCreate &&
+            !permissions.error &&
+            !roomId &&
+            !startParam &&
+            current.isSuccess &&
+            current.data.room === null &&
+            search.isSuccess &&
+            search.data.value === null &&
+            !task.blocked,
+          onSearch: findPlayers,
           invitationDetected: !!parseRoomStartParam(startParam),
           createEnabled:
             !!session &&
@@ -476,6 +629,8 @@ export function KahrobaLobby({
             current.isSuccess &&
             !current.isFetching &&
             current.data.room === null &&
+            search.isSuccess &&
+            search.data.value === null &&
             !task.blocked,
           joinEnabled:
             online &&

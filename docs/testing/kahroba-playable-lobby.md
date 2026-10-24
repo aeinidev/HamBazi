@@ -1,5 +1,7 @@
 # Kahroba playable private lobby
 
+Historical acceptance report. Current implementation: [palace lobby](kahroba-palace-lobby.md) and [ADR 075](../adr/075-kahroba-palace-lobby-public-matchmaking.md).
+
 The normal authenticated Mini App now follows Home → Kahroba → Create → Share → Join → Ready → host Start → Gameplay → Results. Main Mini App invitations retain server-issued opaque codes and the existing signed Telegram authentication/admission flow. No Named Mini App or manual UUID entry is needed.
 
 ## Authority and lifecycle

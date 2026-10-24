@@ -50,6 +50,7 @@ type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   (O extends "matches"
     ? {
         lockPersonalAdmission(): Promise<void>;
+        lockMatchAdmissions(ids: readonly string[]): Promise<void>;
         lockMatch(id: string): Promise<void>;
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
       }
@@ -88,6 +89,32 @@ function failure(error: unknown): DatabaseError {
       const code = "code" in error ? error.code : undefined;
       if (typeof code === "string" && Object.hasOwn(safeCodes, code))
         return new DatabaseError(safeCodes[code]);
+      // Fixed raw row locks can surface PostgreSQL's known aborted-transaction
+      // SQLSTATE through P2010. Only those two states are safe to retry.
+      if (
+        code === "P2010" &&
+        "meta" in error &&
+        error.meta &&
+        typeof error.meta === "object" &&
+        "code" in error.meta &&
+        (error.meta.code === "40001" || error.meta.code === "40P01")
+      )
+        return new DatabaseError("DATABASE_TRANSACTION_CONFLICT");
+      if (
+        code === "P2010" &&
+        "meta" in error &&
+        error.meta &&
+        typeof error.meta === "object" &&
+        "driverAdapterError" in error.meta &&
+        error.meta.driverAdapterError &&
+        typeof error.meta.driverAdapterError === "object" &&
+        "cause" in error.meta.driverAdapterError &&
+        error.meta.driverAdapterError.cause &&
+        typeof error.meta.driverAdapterError.cause === "object" &&
+        "kind" in error.meta.driverAdapterError.cause &&
+        error.meta.driverAdapterError.cause.kind === "TransactionWriteConflict"
+      )
+        return new DatabaseError("DATABASE_TRANSACTION_CONFLICT");
       // Prisma 7 maps statement conflicts to P2034, but COMMIT can reject with
       // its adapter error directly. This kind denotes an aborted transaction;
       // connection failures or an ambiguous commit must remain generic failures.
@@ -166,6 +193,20 @@ function scope<O extends DatabaseOwner>(
           async lockPersonalAdmission(): Promise<void> {
             if (!inTransaction) throw new DatabaseError("DATABASE_LOCK_INVALID");
             await client.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(181803)`;
+          },
+          async lockMatchAdmissions(ids: readonly string[]): Promise<void> {
+            if (
+              !inTransaction ||
+              ids.length < 1 ||
+              ids.length > 64 ||
+              ids.some((id) => !matchIdPattern.test(id)) ||
+              new Set(ids).size !== ids.length
+            )
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            // Match-owned rows only. A fixed lock order serializes reservation
+            // against cancellation without exposing arbitrary SQL or a global lane.
+            await client.$queryRaw`SELECT id FROM match_admissions
+              WHERE id = ANY(${[...ids].sort()}::uuid[]) ORDER BY id FOR UPDATE`;
           },
           async lockMatch(id: string): Promise<void> {
             if (!inTransaction || !matchIdPattern.test(id))

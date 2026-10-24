@@ -6,7 +6,7 @@ import { createErrorEnvelope } from "@hambazi/contracts";
 import type { AuthSessions, OwnerAdmission } from "../auth/index.js";
 import type { PublicNamesPort } from "../users/index.js";
 import type { RoomsPort } from "../rooms/index.js";
-import type { PrivateRoomMatchPort, MatchResyncPort } from "../matches/index.js";
+import type { PrivateRoomMatchPort, MatchResyncPort, PublicLobbyPort } from "../matches/index.js";
 import type { KahrobaRuntimeConfig } from "@hambazi/config";
 import { kahrobaPlayerViewSchema, kahrobaSpectatorViewSchema } from "@hambazi/kahroba-engine";
 export const kahrobaCapabilitiesSchema = z.strictObject({
@@ -35,7 +35,8 @@ export function createKahrobaHttpModule(deps: {
   admission: OwnerAdmission;
   config: KahrobaRuntimeConfig;
   resync: MatchResyncPort;
-  privateRooms?: Pick<PrivateRoomMatchPort, "readiness" | "begin">;
+  privateRooms?: Pick<PrivateRoomMatchPort, "readiness" | "begin" | "cancel">;
+  publicLobby?: PublicLobbyPort;
   canCreate?: (userId: string) => Promise<boolean>;
   names: PublicNamesPort;
   rooms?: Pick<RoomsPort, "read"> & Partial<Pick<RoomsPort, "current">>;
@@ -92,7 +93,17 @@ export function createKahrobaHttpModule(deps: {
           .send(createErrorEnvelope(result.error.code === "FORBIDDEN" ? "FORBIDDEN" : "NOT_FOUND"));
       const s = result.value;
       if (s.gameId !== "kahroba") return reply.code(404).send(createErrorEnvelope("NOT_FOUND"));
-      if (s.view === null) return reply.send({ schemaVersion: 1, players: [] });
+      if (s.view === null) {
+        const lobby = await deps.publicLobby?.read(userId, matchId.data);
+        return reply.send(
+          kahrobaPublicNamesSchema.parse({
+            schemaVersion: 1,
+            players: lobby?.ok
+              ? await deps.names.find(lobby.value.players.map((p) => p.userId))
+              : [],
+          }),
+        );
+      }
       const view = (
         s.role === "PLAYER" ? kahrobaPlayerViewSchema : kahrobaSpectatorViewSchema
       ).parse(s.view);
@@ -155,7 +166,20 @@ export function createKahrobaHttpModule(deps: {
       return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     }
   }
-  async function lobby(req: FastifyRequest, reply: FastifyReply, body?: unknown) {
+  async function currentSearch(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      const result = await deps.publicLobby?.current(userId);
+      if (!result) return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+      return reply.code(result.ok ? 200 : 503).send(result);
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
+  async function lobby(req: FastifyRequest, reply: FastifyReply, body?: unknown, cancel = false) {
     try {
       const userId = await auth(req);
       if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
@@ -180,7 +204,9 @@ export function createKahrobaHttpModule(deps: {
       const result =
         body === undefined
           ? await deps.privateRooms.readiness(userId, id.data)
-          : await deps.privateRooms.begin(userId, body);
+          : cancel
+            ? await deps.privateRooms.cancel(userId, body)
+            : await deps.privateRooms.begin(userId, body);
       if (!result.ok)
         return reply
           .code(
@@ -196,8 +222,68 @@ export function createKahrobaHttpModule(deps: {
       return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
     }
   }
+  async function publicMatch(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    body?: unknown,
+    cancel = false,
+  ) {
+    try {
+      const userId = await auth(req);
+      if (!userId) return reply.code(401).send(createErrorEnvelope("UNAUTHENTICATED"));
+      if (!(await deps.rate(userId)).allowed)
+        return reply.code(429).send(createErrorEnvelope("RATE_LIMITED"));
+      const id = z.uuid().safeParse((req.params as { id?: unknown }).id);
+      if (!id.success) return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+      const existing = await deps.publicLobby?.read(userId, id.data);
+      if (!existing?.ok || existing.value.gameId !== "kahroba")
+        return reply.code(404).send(createErrorEnvelope("NOT_FOUND"));
+      if (body !== undefined) {
+        if (!deps.config.enabled || !deps.config.admission)
+          return reply.code(403).send(createErrorEnvelope("FORBIDDEN"));
+        if (!body || typeof body !== "object" || !("matchId" in body) || body.matchId !== id.data)
+          return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));
+        const result = await (cancel
+          ? deps.publicLobby!.cancel(userId, body)
+          : deps.publicLobby!.begin(userId, body));
+        return reply
+          .code(result.ok ? 200 : result.error.code === "FORBIDDEN" ? 403 : 409)
+          .send(result);
+      }
+      return reply.send(existing);
+    } catch {
+      return reply.code(503).send(createErrorEnvelope("INTERNAL_ERROR"));
+    }
+  }
   @Controller("v1/kahroba")
   class KahrobaController {
+    @Get("matchmaking/current") search(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return currentSearch(req, reply);
+    }
+    @Post("matches/:id/cancel") publicCancel(
+      @Req() req: FastifyRequest,
+      @Res() reply: FastifyReply,
+      @Body() body: unknown,
+    ) {
+      return publicMatch(req, reply, body ?? null, true);
+    }
+    @Post("rooms/:id/cancel") privateCancel(
+      @Req() req: FastifyRequest,
+      @Res() reply: FastifyReply,
+      @Body() body: unknown,
+    ) {
+      return lobby(req, reply, body ?? null, true);
+    }
+    @Get("matches/:id/lobby") publicLobby(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
+      return publicMatch(req, reply);
+    }
+    @Post("matches/:id/start") publicStart(
+      @Req() req: FastifyRequest,
+      @Res() reply: FastifyReply,
+      @Body() body: unknown,
+    ) {
+      return publicMatch(req, reply, body ?? null);
+    }
     @Get("capabilities") capabilities(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       return read(req, reply);
     }

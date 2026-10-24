@@ -108,3 +108,13 @@ export function createPersonalMatchPort(
 ) {
   return createPersonalMatchRepository(database, options);
 }
+
+import { publicLobbyService } from "./application/public-lobby.js";
+import { createPublicLobbyRepository } from "./infrastructure/repositories/public-lobby.js";
+export function createPublicLobbyPort(
+  database: Parameters<typeof createPublicLobbyRepository>[0],
+  processing: Parameters<typeof publicLobbyService>[1],
+  options: Parameters<typeof publicLobbyService>[2],
+) {
+  return publicLobbyService(createPublicLobbyRepository(database), processing, options);
+}

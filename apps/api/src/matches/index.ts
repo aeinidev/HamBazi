@@ -91,3 +91,10 @@ export {
   personalCurrentResultSchema,
 } from "./application/personal.js";
 export { matchAckSchema } from "./application/processing.js";
+
+export { createPublicLobbyPort } from "./module.js";
+export {
+  publicLobbySchema,
+  publicSearchSchema,
+  type PublicLobbyPort,
+} from "./application/public-lobby.js";

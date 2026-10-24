@@ -892,18 +892,3 @@ body:has(.kh-app) {
 .kh-summary-resources .kh-bonus {
   max-width: 100%;
 }
-.kh-private-entry {
-  position: fixed;
-  inset-inline: 16px;
-  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
-  z-index: 35;
-  min-height: 44px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #247489;
-  border-radius: 12px;
-  background: #091c30;
-  color: #defaff;
-  font-family: Vazirmatn, sans-serif;
-  text-decoration: none;
-}

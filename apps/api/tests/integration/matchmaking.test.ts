@@ -233,15 +233,16 @@ it("repeats real Redis/PostgreSQL cancel-versus-match races with one durable win
     else expect(value(run).matchId).toBeNull();
     value(await f.first.cancel(f.actors[1]!.token, f.ref(second.ticketId)));
   }
-});
+}, 20000);
 it("recovers abandoned Redis claims after TTL and preserves queue order on release", async () => {
-  const f = await fixture(3, 100);
+  // A real lock/reserve/commit tick must fit inside the fresh claim lease.
+  const f = await fixture(3, 500);
   const one = await f.enqueue(0),
     two = await f.enqueue(1);
   const claim = await f.qa.queue.claim(f.partition);
   expect(claim).not.toBeNull();
   await f.enqueue(2);
-  await new Promise((r) => setTimeout(r, 130));
+  await new Promise((r) => setTimeout(r, 550));
   expect(value(await f.second.run(f.partition)).matchId).toBeNull();
   const found = value(await f.second.run(f.partition));
   expect(found.matchId).not.toBeNull();
@@ -452,20 +453,21 @@ it("keeps durable cancellation and found credentials available during actual Red
   const name = process.env.TEST_AUTH_REDIS_CONTAINER;
   if (!name || !name.startsWith("hambazi-auth-http-"))
     throw new Error("Expected isolated Redis container");
-  const f = await fixture(3);
+  const f = await fixture(4);
   const one = await f.enqueue(0);
   await f.enqueue(1);
-  const waiting = await f.enqueue(2);
+  const waiting = await f.enqueue(3);
+  const recovering = await f.enqueue(2);
   const found = value(await f.second.run(f.partition));
   try {
     await promisify(execFile)("docker", ["stop", "--time", "1", name]);
-    expect(value(await f.first.cancel(f.actors[2]!.token, f.ref(waiting.ticketId))).status).toBe(
+    expect(value(await f.first.cancel(f.actors[3]!.token, f.ref(waiting.ticketId))).status).toBe(
       "CANCELLED",
     );
     expect(value(await f.first.found(f.actors[0]!.token, f.ref(one.ticketId))).matchId).toBe(
       found.matchId,
     );
-    expect(await f.first.search(f.actors[2]!.token, f.input())).toMatchObject({
+    expect(await f.first.search(f.actors[3]!.token, f.input())).toMatchObject({
       error: { code: "MATCHMAKING_UNAVAILABLE" },
     });
   } finally {
@@ -486,5 +488,12 @@ it("keeps durable cancellation and found credentials available during actual Red
   expect(value(await f.first.read(f.actors[0]!.token, f.ref(one.ticketId))).matchId).toBe(
     found.matchId,
   );
-  expect((await f.first.search(f.actors[2]!.token, f.input())).ok).toBe(true);
+  expect(value(await f.first.read(f.actors[2]!.token, f.ref(recovering.ticketId))).status).toBe(
+    "SEARCHING",
+  );
+  const fresh = value(await f.first.search(f.actors[3]!.token, f.input()));
+  const restored = value(await f.second.run(f.partition));
+  expect(restored.matchId).not.toBeNull();
+  expect((await f.durable(2, recovering.ticketId)).matchId).toBe(restored.matchId);
+  expect((await f.durable(3, fresh.ticketId)).matchId).toBe(restored.matchId);
 }, 20000);

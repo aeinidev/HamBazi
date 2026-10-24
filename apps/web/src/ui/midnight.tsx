@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { profileSchema } from "../platform/contracts.js";
 import { useRuntime, useSession } from "./shared.js";
+import { LobbyIcon } from "./lobby-icon.js";
 
 export function AccountAvatar({ photoUrl }: { photoUrl: string | null }) {
   const [failed, setFailed] = useState(false);
@@ -148,10 +149,10 @@ export function MidnightHeader({
         </div>
         <div className="home-header-actions">
           <button disabled aria-label="اعلان‌ها، به‌زودی" title="اعلان‌ها، به‌زودی">
-            <MidnightIcon name="bell" />
+            <LobbyIcon name="bell" />
           </button>
           <button onClick={onSettings} aria-label="تنظیمات">
-            <MidnightIcon name="gear" />
+            <LobbyIcon name="gear" />
           </button>
         </div>
       </header>

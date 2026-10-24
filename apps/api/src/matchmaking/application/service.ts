@@ -133,7 +133,12 @@ export function createMatchmaking(options: {
         if (!parsed.success) throw new Fault(createErrorEnvelope("INVALID_INPUT"));
         const actor = await session(token);
         await limit(actor.userId, "read");
-        const ticket = unwrap(await matches.read(actor.userId, parsed.data));
+        let ticket = unwrap(await matches.read(actor.userId, parsed.data));
+        try {
+          ticket = await sync(ticket);
+        } catch {
+          /* Durable reads survive Redis loss. */
+        }
         return view(ticket);
       }),
     cancel: (token: unknown, input: unknown) =>

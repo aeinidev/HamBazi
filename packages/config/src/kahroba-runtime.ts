@@ -95,7 +95,7 @@ export function parseKahrobaRuntimeConfig(
   return Object.freeze({
     profile: v.KAHROBA_RUNTIME_PROFILE,
     local,
-    maxPlayers: local ? 4 : 2,
+    maxPlayers: 4,
     registered: v.KAHROBA_ENGINE_REGISTERED,
     enabled: v.KAHROBA_RUNTIME_ENABLED,
     routes: v.KAHROBA_ROUTES_ENABLED,

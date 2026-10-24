@@ -1,4 +1,4 @@
-import { hash, randomUUID } from "node:crypto";
+import { hash, randomInt, randomUUID } from "node:crypto";
 import { DatabaseError, type createDatabase } from "@hambazi/database";
 import {
   AdmissionFault,
@@ -48,6 +48,11 @@ export function createAdmissionRepository(
           attempt >= 4
         )
           throw error;
+        // Let the competing cancellation/commit finish before starting a fresh
+        // serializable snapshot. All waits happen after rollback, outside DB I/O.
+        // Match the existing Rooms policy: five attempts, 150–300 ms total waits.
+        const backoffMs = 10 * 2 ** attempt;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs + randomInt(backoffMs + 1)));
       }
     }
   }
@@ -148,6 +153,7 @@ export function createAdmissionRepository(
     read: (actor, id) => transaction(async (db) => project(await owned(db, actor, id))),
     cancel: (actor, id) =>
       transaction(async (db) => {
+        await db.lockMatchAdmissions([id]);
         const row = await owned(db, actor, id);
         if (!["SEARCHING", "RESERVED"].includes(row.status)) return project(row);
         return project(
@@ -184,6 +190,7 @@ export function createAdmissionRepository(
     reserve: (input) =>
       transaction(async (db) => {
         const refs = [...input.tickets].sort((a, b) => a.ticketId.localeCompare(b.ticketId));
+        await db.lockMatchAdmissions(refs.map((ref) => ref.ticketId));
         const digest = hash(
           "sha256",
           JSON.stringify([1, refs.map((r) => [r.ticketId, r.generation])]),

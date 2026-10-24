@@ -72,6 +72,27 @@ const begin = vi.fn(async (userId: unknown) =>
       }
     : createErrorEnvelope("FORBIDDEN"),
 );
+function publicValue() {
+  return {
+    schemaVersion: 1 as const,
+    matchId: id,
+    gameId,
+    stateVersion: 3,
+    status: "WAITING_FOR_PLAYERS" as const,
+    hostUserId: owner,
+    players: [
+      { userId: owner, seat: 0, ready: true },
+      { userId: tester, seat: 1, ready: false },
+    ],
+  };
+}
+const publicRead = vi.fn(async () =>
+  member ? { ok: true as const, value: publicValue() } : createErrorEnvelope("NOT_FOUND"),
+);
+const publicCurrent = vi.fn(async () => ({ ok: true as const, value: null }));
+const publicBegin = vi.fn(async (userId: unknown) =>
+  userId === owner ? { ok: true as const, value: publicValue() } : createErrorEnvelope("FORBIDDEN"),
+);
 beforeAll(async () => {
   const module = createKahrobaHttpModule({
     sessions: {
@@ -97,7 +118,7 @@ beforeAll(async () => {
     config: {
       profile: "restricted-staging-v1",
       local: false,
-      maxPlayers: 2,
+      maxPlayers: 4,
       registered: true,
       enabled: true,
       routes: true,
@@ -111,7 +132,13 @@ beforeAll(async () => {
     },
     names: { find },
     canCreate: async (userId) => userId === owner,
-    privateRooms: { readiness, begin },
+    privateRooms: { readiness, begin, cancel: begin },
+    publicLobby: {
+      read: publicRead,
+      current: publicCurrent,
+      begin: publicBegin,
+      cancel: publicBegin,
+    },
     rooms: {
       read,
       current: async () => ({ ok: true as const, schemaVersion: 1 as const, room: null }),
@@ -134,6 +161,9 @@ beforeEach(() => {
   begin.mockClear();
   find.mockClear();
   read.mockClear();
+  publicRead.mockClear();
+  publicCurrent.mockClear();
+  publicBegin.mockClear();
 });
 it.each([undefined, "Bearer bad", "Bearer g.h.i"])(
   "denies anonymous, malformed and non-admitted roster access %s",
@@ -188,6 +218,11 @@ it.each([undefined, "Bearer bad", "Bearer g.h.i"])(
     for (const [method, url] of [
       ["GET", "/v1/kahroba/lobby-permissions"],
       ["GET", "/v1/kahroba/current-room"],
+      ["GET", "/v1/kahroba/matchmaking/current"],
+      ["GET", `/v1/kahroba/matches/${id}/lobby`],
+      ["POST", `/v1/kahroba/matches/${id}/start`],
+      ["POST", `/v1/kahroba/matches/${id}/cancel`],
+      ["POST", `/v1/kahroba/rooms/${id}/cancel`],
       ["GET", `/v1/kahroba/rooms/${id}/readiness`],
       ["POST", `/v1/kahroba/rooms/${id}/start`],
     ] as const) {
@@ -283,4 +318,71 @@ it("returns a real nullable current-room response without requiring a player-sup
   });
   expect(r.statusCode).toBe(200);
   expect(r.json()).toEqual({ ok: true, schemaVersion: 1, room: null });
+});
+
+it("uses authenticated actor identity for search recovery and public host commands", async () => {
+  const headers = { authorization: "Bearer a.b.c" };
+  expect(
+    (
+      await app.inject({
+        method: "GET",
+        url: "/v1/kahroba/matchmaking/current?userId=" + outsider,
+        headers,
+      })
+    ).json(),
+  ).toEqual({ ok: true, value: null });
+  expect(publicCurrent).toHaveBeenCalledWith(owner);
+  const input = { schemaVersion: 1, matchId: id, actionId: id, expectedVersion: 3 };
+  for (const operation of ["start", "cancel"]) {
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: `/v1/kahroba/matches/${id}/${operation}`,
+          headers,
+          payload: input,
+        })
+      ).statusCode,
+    ).toBe(200);
+    expect(publicBegin).toHaveBeenLastCalledWith(owner, input);
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: `/v1/kahroba/matches/${id}/${operation}`,
+          headers: { authorization: "Bearer d.e.f" },
+          payload: input,
+        })
+      ).statusCode,
+    ).toBe(403);
+  }
+});
+it("denies public starts for a foreign game, missing membership, malformed paths or mismatched bound match", async () => {
+  for (const mode of ["game", "membership", "path", "binding"]) {
+    gameId = mode === "game" ? "coup" : "kahroba";
+    member = mode !== "membership";
+    const r = await app.inject({
+      method: "POST",
+      url: `/v1/kahroba/matches/${mode === "path" ? "invalid" : id}/start`,
+      headers: { authorization: "Bearer a.b.c" },
+      payload: {
+        schemaVersion: 1,
+        matchId: mode === "binding" ? tester : id,
+        actionId: id,
+        expectedVersion: 3,
+      },
+    });
+    expect(r.statusCode).toBe(["path", "binding"].includes(mode) ? 400 : 404);
+    expect(publicBegin).not.toHaveBeenCalled();
+  }
+});
+it("rate limits the new public surfaces before invoking a projection", async () => {
+  allowed = false;
+  for (const path of ["/v1/kahroba/matchmaking/current", `/v1/kahroba/matches/${id}/lobby`])
+    expect(
+      (await app.inject({ method: "GET", url: path, headers: { authorization: "Bearer a.b.c" } }))
+        .statusCode,
+    ).toBe(429);
+  expect(publicRead).not.toHaveBeenCalled();
+  expect(publicCurrent).not.toHaveBeenCalled();
 });

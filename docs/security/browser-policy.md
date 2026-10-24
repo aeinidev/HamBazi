@@ -63,7 +63,12 @@ payment/USB are disabled. No CSP report-uri/report-to/report-sample, session
 replay or raw browser error exporter is configured: launch URLs, snippets and
 private payloads must not be sent to a collector. Production HSTS covers this
 host only; owner-approved TLS, subdomain and preload decisions remain external.
-No-store applies consistently in preview; CDN caching needs later release review.
+No-store applies consistently in preview. Production static delivery follows
+[ADR-077](../adr/077-public-static-asset-delivery.md): only public image/font/JS/CSS
+build assets under `/assets/` may be cached. Hash-named assets are immutable;
+mutable asset names require ETag revalidation. HTML, JSON, SDK, errors, health and
+authenticated responses retain no-store. Other generated security headers remain
+unchanged. Compression negotiation and validators must survive static ingress.
 
 The edge must omit credential-bearing query strings/request bodies and sensitive
 headers from access/error logs; URL cleanup in browser code cannot erase an

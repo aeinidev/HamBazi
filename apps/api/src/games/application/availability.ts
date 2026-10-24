@@ -8,13 +8,15 @@ export const lobbyAvailabilitySchema = z.array(
 );
 export type LobbyAvailability = z.infer<typeof lobbyAvailabilitySchema>;
 
-/** Presentation metadata cannot grant admission. Unreleased games remain dormant. */
+/** Presentation metadata reflects runtime admission; it cannot grant admission. */
 export function lobbyAvailability(
   config: { coupTemporarilyDisabled: boolean },
   personalAdmitted: boolean,
+  kahrobaAdmitted = false,
 ): LobbyAvailability {
   return [
-    ...(["kahroba", "hokm", "domino", "chess", "ludo"] as const).map((id) => ({
+    { id: "kahroba", state: kahrobaAdmitted ? "AVAILABLE" : "COMING_SOON" },
+    ...(["hokm", "domino", "chess", "ludo"] as const).map((id) => ({
       id,
       state: "COMING_SOON" as const,
     })),

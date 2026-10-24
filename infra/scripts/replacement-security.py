@@ -12,6 +12,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 import time
 
 ROOT = Path('/opt/hambazi/security')
@@ -124,6 +125,16 @@ def write_timer(deadline):
     run(['systemctl', 'restart', TIMER.name])
 
 
+def refresh_database(tool, cache):
+    # Trivy can skip download-db-only until cached NextUpdate, which may be
+    # later than this deployment's finite evidence deadline. Fetch into an
+    # empty cache so every renewal actually consults the official feed.
+    with tempfile.TemporaryDirectory(prefix='advisory-', dir=ROOT) as temporary:
+        run([tool, 'image', '--download-db-only', '--db-repository', 'ghcr.io/aquasecurity/trivy-db:2',
+             '--cache-dir', temporary, '--quiet', '--timeout', '10m'], 660)
+        shutil.copytree(Path(temporary) / 'db', Path(cache) / 'db', dirs_exist_ok=True)
+
+
 def renew(control):
     require(digest(ROOT / 'trivy') == TOOL_SHA)
     state = private_json(ROOT / 'state.json')
@@ -131,8 +142,7 @@ def renew(control):
     before = verify(control)
     tool = str(ROOT / 'trivy')
     cache = str(ROOT / 'cache')
-    run([tool, 'image', '--download-db-only', '--db-repository', 'ghcr.io/aquasecurity/trivy-db:2',
-         '--cache-dir', cache, '--quiet', '--timeout', '10m'], 660)
+    refresh_database(tool, cache)
     reports = {}
     for role, image in control['pins'].items():
         path = ROOT / (role + '.scan.private.json')

@@ -14,19 +14,19 @@
   "images": [
     {
       "role": "api",
-      "image": "hambazi-candidate/api:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:baf2cbd0e7f7a656ec9b5df13c3a7435eec2eb7141715849b7934898964f92dd"
+      "image": "hambazi-security/api:20261024-zod466-026b1f826a9c@sha256:0c500843ddda1359451e410db6e93df8cee7c99aa359afb8aac495e6deeb558a"
     },
     {
       "role": "bot",
-      "image": "hambazi-candidate/bot:5a507c0e95a076fde2c2140021cdd6ced1020433-dac8f88a032e9cae@sha256:ca8742cfa47df5cddba65ebb14f90aaea465979ebd90a89d3091dcd33dcc6a06"
+      "image": "hambazi-security/bot:20261024-zod466-026b1f826a9c@sha256:a92fcbfdeec4e754d90bdf75f9884e6916bdba147520650a1d271fbec92263cc"
     },
     {
       "role": "worker",
-      "image": "hambazi-candidate/worker:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:b129716e7249fe8cf5879ef3e03c32a4f0bb5f12bd657b50426f7434722eb5f0"
+      "image": "hambazi-security/worker:20261024-zod466-026b1f826a9c@sha256:5ae0219afa0a9912729990789f9fb2739d6e883e6b37b9f1e06036730d7dd783"
     },
     {
       "role": "web",
-      "image": "hambazi-candidate/web:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:38c3bf2912339d4e2b6faf1f2fabc0e3593b58d65a3680160851a519d0b82327"
+      "image": "hambazi-home-list/web:20261024-c3e6cabe6c75b356@sha256:86a2e87cfcf309ea14cd0049c66b0007642007c00ffad84998540811ebd04b3f"
     }
   ],
   "dataRecovery": {
@@ -45,11 +45,11 @@
   "dataImages": [
     {
       "role": "postgres-staging",
-      "image": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a"
+      "image": "hambazi-security/postgres-staging:20261024-brotli@sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa"
     },
     {
       "role": "redis-staging",
-      "image": "redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0"
+      "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
     }
   ],
   "ingress": {
@@ -71,7 +71,15 @@
     "builtImagePrivacyProbe": "two-passed",
     "nativeBotChatAcceptance": "passed-owner-start-reply-and-durable-DONE-receipt",
     "repositoryDevelopmentAudit": "blocked-vite-two-moderate-one-high",
-    "botProductionDependencyAudit": "passed-zero-findings"
+    "botProductionDependencyAudit": "passed-zero-findings",
+    "restoredHomeAndCompactWeb": "superseded-by-original-page-layout-restoration-20261024",
+    "staticAssetDelivery": "passed-real-https-brotli-immutable-assets-and-etag-304",
+    "fantasyMainLobby": "passed-chromium-and-webkit-real-https-five-item-fixed-dock-header-icons-stat-placeholders-and-settings-kahroba-navigation",
+    "originalPageLayouts": "superseded-by-content-aware-short-page-layout-20261024",
+    "contentAwarePageLayout": "passed-chromium-and-webkit-30-production-page-size-checks-no-overflow-six-unchanged-table-geometries",
+    "fittedPageScroll": "passed-chromium-webkit-fitted-vertical-touch-cancellation-overflow-release-long-sheet-edges-and-game-cleanup",
+    "mainLobbyGameList": "passed-chromium-webkit-fixed-chrome-internal-catalog-scroll-and-touch-edge-containment",
+    "zodSecurityPatch": "passed-signed-registry-package-integrity-unchanged-application-runtime-contracts-integration-and-six-fresh-image-scans"
   },
   "securityRenewal": {
     "policy": "normal-24-hour-exact-image",
@@ -79,18 +87,26 @@
     "hourlyTimer": "hambazi-server-security-renew.timer",
     "independentExpiryTimer": "hambazi-server-security-expiry.timer",
     "scheduledRunVerifiedAtUTC": "2026-10-20T15:01:09Z",
-    "observedDeadlineUTC": "2026-10-22T07:13:45Z",
+    "observedDeadlineUTC": "2026-10-25T07:11:13Z",
     "automaticApplicationStart": false,
     "automaticIngressReopen": false,
     "botReplacementRenewalVerifiedAtUTC": "2026-10-21T08:01:52.650939+00:00",
-    "gatewayAcceptanceFreshDatabaseRenewal": "passed-six-active-images"
+    "gatewayAcceptanceFreshDatabaseRenewal": "passed-six-active-images",
+    "securityPatchRenewalVerifiedAtUTC": "2026-10-23T07:25:36.104272+00:00",
+    "palaceReleaseBindingVerifiedAtUTC": "2026-10-23T09:42:22.887119+00:00",
+    "compactWebReleaseBindingVerifiedAtUTC": "2026-10-23T13:47:07.923700+00:00",
+    "fantasyLobbyReleaseBindingVerifiedAtUTC": "2026-10-23T15:41:54.349628+00:00",
+    "layoutRestoreBindingVerifiedAtUTC": "2026-10-23T23:54:03.513359+00:00",
+    "contentAwareWebReleaseBindingVerifiedAtUTC": "2026-10-24T00:22:33.869484+00:00",
+    "fittedScrollWebReleaseBindingVerifiedAtUTC": "2026-10-24T00:37:24.055806+00:00",
+    "homeGameListReleaseBindingVerifiedAtUTC": "2026-10-24T09:04:39.839977+00:00"
   },
   "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
   "currentApplicationSources": {
     "api": {
-      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
-      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
-      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+      "sourceCommit": "6da9f12eb8a2fb99020b5d57960c9deaaa5b7217",
+      "sourceSnapshotSha256": "a29353ca34c0c7f6a2414c6f08ad1741d65b111edde0abdc9d3df992253487e7",
+      "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
     },
     "bot": {
       "sourceCommit": "5a507c0e95a076fde2c2140021cdd6ced1020433",
@@ -98,14 +114,14 @@
       "buildInputSha256": "dac8f88a032e9caec9736b741864ddc845f37ec217773bec661aa8fcd0642b88"
     },
     "worker": {
-      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
-      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
-      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+      "sourceCommit": "6da9f12eb8a2fb99020b5d57960c9deaaa5b7217",
+      "sourceSnapshotSha256": "a29353ca34c0c7f6a2414c6f08ad1741d65b111edde0abdc9d3df992253487e7",
+      "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
     },
     "web": {
-      "sourceCommit": "e86843ee62fd65ff080da0383c78c662763689f7",
-      "sourceSnapshotSha256": "c19b2aee68fb04c10f670d00ee0f519e488cd67f9f4bf0e29c4fc8546570c253",
-      "buildInputSha256": "7671cfba7678f92900774fedf20156aaa120dbcae64d9f419e581aa3a40edc68"
+      "sourceCommit": "72a942e7bde1979c0b0f04dfc5915c2861325b35",
+      "sourceSnapshotSha256": "90ab2d70069e53ba4777222190f7ef1a023c7ca655d412c6adca34be71c1682c",
+      "buildInputSha256": "c3e6cabe6c75b35618ce18a4a83de93f5eda565e4e47a37992d57fc7a513cb11"
     }
   },
   "cloudflareGateway": {
@@ -117,5 +133,199 @@
     "databaseMigrationRequired": false,
     "otherFiveContainersUnchanged": true,
     "nativeAcceptanceObservedAtUTC": "2026-10-21T11:26:05.442Z"
+  },
+  "securityPatch": {
+    "appliedAtUTC": "2026-10-23T07:24:27.243686+00:00",
+    "reason": "CVE-2026-107891 musl remediation",
+    "packageChanges": "musl and musl-utils upgraded from signed Alpine repositories; application source unchanged",
+    "parentImages": {
+      "api": "hambazi-candidate/api:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:baf2cbd0e7f7a656ec9b5df13c3a7435eec2eb7141715849b7934898964f92dd",
+      "bot": "hambazi-candidate/bot:5a507c0e95a076fde2c2140021cdd6ced1020433-dac8f88a032e9cae@sha256:ca8742cfa47df5cddba65ebb14f90aaea465979ebd90a89d3091dcd33dcc6a06",
+      "worker": "hambazi-candidate/worker:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:b129716e7249fe8cf5879ef3e03c32a4f0bb5f12bd657b50426f7434722eb5f0",
+      "web": "hambazi-candidate/web:e86843ee62fd65ff080da0383c78c662763689f7-7671cfba7678f929@sha256:38c3bf2912339d4e2b6faf1f2fabc0e3593b58d65a3680160851a519d0b82327",
+      "postgres-staging": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a",
+      "redis-staging": "redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0"
+    },
+    "backup": "private local pg_dump custom archive; archive list verified; restore not rehearsed",
+    "postgresVolumePreserved": true,
+    "freshScans": "six passed existing gate; Moderate/Low retained",
+    "controllerFix": "download advisories into empty temporary cache before scanning",
+    "privateEvidenceDirectory": "/opt/hambazi/security/recovery-20261023"
+  },
+  "palaceLobby": {
+    "deployedAtUTC": "2026-10-23T09:28:36.144221+00:00",
+    "webSocketCorrectionAtUTC": "2026-10-23T09:42:22.887119+00:00",
+    "mainLobbyCard": "enabled-with-existing-admission",
+    "separatePrivateEntry": "removed",
+    "capacities": [2, 3, 4],
+    "publicMatchmaking": "enabled-within-existing-admission",
+    "botAndDataImagesUnchanged": true,
+    "databaseAndAdmissionPreserved": true,
+    "migrationRequired": false,
+    "privateReadiness": "passed-four-applications",
+    "productionHTTPS": "passed-two-admitted-accounts",
+    "deployedBrowserSmoke": "passed-chromium-and-webkit-with-authenticated-websocket",
+    "nativeTelegramGameplay": "not-performed",
+    "securityQualification": "fresh-six-current-image-scans-and-rollback-web-scan-passed",
+    "privateEvidenceDirectory": "/opt/hambazi/releases/kahroba-palace-20261023",
+    "record": "docs/operations/kahroba-palace-deployment-20261023.md"
+  },
+  "fantasyLobby": {
+    "deployedAtUTC": "2026-10-23T15:41:54.349628+00:00",
+    "onlyWebRecreated": true,
+    "statistics": "owner-approved-unavailable-placeholders",
+    "bottomNavigation": ["games", "friends", "chat", "leaders", "profile"],
+    "unconditionalRecoveryLink": "removed",
+    "previousActiveGame": "terminated-through-guarded-application-lifecycle-at-owner-request",
+    "migrationRequired": false,
+    "securityQualification": "fresh-six-images-and-rollback-web-scan-passed",
+    "privateEvidenceDirectory": "/opt/hambazi/releases/fantasy-lobby-20261023",
+    "record": "docs/operations/fantasy-main-lobby-deployment-20261023.md"
+  },
+  "layoutRestoration": {
+    "deployedAtUTC": "2026-10-23T23:54:03.513359+00:00",
+    "onlyWebRecreated": false,
+    "mainLobby": "current-fantasy-layout-preserved",
+    "otherScreens": "pre-compact-layouts-restored",
+    "assetDelivery": "optimized-images-compression-etag-caching-preserved",
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/layout-restore-20261024",
+    "record": "docs/operations/layout-restoration-deployment-20261024.md",
+    "recreatedRoles": ["web", "postgres-staging"],
+    "postgresSecurityPatch": {
+      "cve": "CVE-2026-111497",
+      "package": "brotli-libs",
+      "fromVersion": "1.2.0-r1",
+      "toVersion": "1.2.1-r0",
+      "parent": "hambazi-security/postgres-staging:20261023-musl@sha256:ba73ca06ac6056db8eafee4c565a892e03bb964872307d9c472cedefd33582e9",
+      "image": "hambazi-security/postgres-staging:20261024-brotli@sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa",
+      "postgresVersion": "postgres (PostgreSQL) 18.6",
+      "onlyPackageChanged": true,
+      "dockerfileSha256": "cb49d7ae04477ed9f1145a1c7c34d9bab3bcdb01f3237fba5c6d3024544c9f99",
+      "officialSignedAlpineRepositories": true
+    }
+  },
+  "naturalPageLayout": {
+    "deployedAtUTC": "2026-10-24T00:22:33.869484+00:00",
+    "onlyWebRecreated": true,
+    "simplePages": "fit-available-height",
+    "additionalContent": "natural-scrolling",
+    "kahrobaGame": "unchanged-source-styles-and-geometry",
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/natural-layout-20261024",
+    "record": "docs/operations/natural-page-layout-deployment-20261024.md"
+  },
+  "fittedPageScroll": {
+    "deployedAtUTC": "2026-10-24T00:37:24.055806+00:00",
+    "onlyWebRecreated": true,
+    "fittedPages": "vertical-elastic-drag-suppressed",
+    "overflowContent": "natural-scrolling-preserved",
+    "kahrobaGame": "unchanged",
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/fixed-scroll-20261024",
+    "record": "docs/operations/fitted-page-scroll-deployment-20261024.md"
+  },
+  "mainLobbyGameList": {
+    "deployedAtUTC": "2026-10-24T09:04:39.839977+00:00",
+    "onlyWebRecreated": false,
+    "recreatedRoles": ["api", "bot", "worker", "web"],
+    "extraGames": "independent-list-scrolling",
+    "kahrobaGame": "unchanged-layout-and-engine-application-code",
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/home-game-list-publish-20261024",
+    "record": "docs/operations/main-lobby-game-scroll-deployment-20261024.md"
+  },
+  "zodSecurityPatch": {
+    "deployedAtUTC": "2026-10-24T09:04:39.839977+00:00",
+    "package": "zod",
+    "from": "4.6.2",
+    "to": "4.6.6",
+    "reason": "CVE-2023-54404 HIGH",
+    "registrySignatureVerified": true,
+    "packageIntegrity": "sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==",
+    "packageSha256": "312553620ac82cbb25d505100fbb41c1e219b3cd6979cf93c3a1b4dd5b79e039",
+    "roles": [
+      {
+        "role": "api",
+        "image": "hambazi-security/api:20261024-zod466-026b1f826a9c@sha256:0c500843ddda1359451e410db6e93df8cee7c99aa359afb8aac495e6deeb558a",
+        "parent": "hambazi-palace/api:20261023-d4902d5b5d3b0f1f@sha256:d98bc01020054b2bf191790ad1939c5e3a5ec1eca1f6ccc87592359a617cca0d",
+        "securityPatchSha256": "026b1f826a9c895febe9f41f8573a2e10fdd4301f556725ea737fccf0cfa03d8",
+        "dependencyProof": {
+          "oldVersion": "4.6.2",
+          "version": "4.6.6",
+          "sourceSha256": "312553620ac82cbb25d505100fbb41c1e219b3cd6979cf93c3a1b4dd5b79e039",
+          "registrySignatureVerified": true,
+          "unchangedRuntimeFiles": 10895,
+          "runtimeSha256": "63ef503e16dcc6410a8b47bdfa2f2dd177eaed59000e31d7b9d50b3508d035bb",
+          "changedManifests": [
+            "/app/node_modules/.pnpm/@hambazi+config@file++++source+packages+config/node_modules/@hambazi/config/package.json",
+            "/app/node_modules/.pnpm/@hambazi+coup-engine@file++++source+packages+games+coup-engine/node_modules/@hambazi/coup-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+game-core@file++++source+packages+game-core/node_modules/@hambazi/game-core/package.json",
+            "/app/node_modules/.pnpm/@hambazi+kahroba-engine@file++++source+packages+games+kahroba-engine/node_modules/@hambazi/kahroba-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+validation@file++++source+packages+validation/node_modules/@hambazi/validation/package.json",
+            "/app/node_modules/.pnpm/lock.yaml",
+            "/app/package.json",
+            "/app/pnpm-lock.yaml"
+          ],
+          "changedLinks": 6,
+          "unrelatedRegularFilesUnchanged": true
+        }
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-security/bot:20261024-zod466-026b1f826a9c@sha256:a92fcbfdeec4e754d90bdf75f9884e6916bdba147520650a1d271fbec92263cc",
+        "parent": "hambazi-security/bot:20261023-musl@sha256:bd4fd540d5edb9b2bc71dab2935f477595728fe756d276e78387439b908bb1b9",
+        "securityPatchSha256": "026b1f826a9c895febe9f41f8573a2e10fdd4301f556725ea737fccf0cfa03d8",
+        "dependencyProof": {
+          "oldVersion": "4.6.2",
+          "version": "4.6.6",
+          "sourceSha256": "312553620ac82cbb25d505100fbb41c1e219b3cd6979cf93c3a1b4dd5b79e039",
+          "registrySignatureVerified": true,
+          "unchangedRuntimeFiles": 10976,
+          "runtimeSha256": "17ebe941f646ceb6e90d8d753e6fd673797ca863e2e0b60160b3316aee381ed0",
+          "changedManifests": [
+            "/app/node_modules/.pnpm/@hambazi+api@file++++source+apps+api/node_modules/@hambazi/api/package.json",
+            "/app/node_modules/.pnpm/@hambazi+config@file++++source+packages+config/node_modules/@hambazi/config/package.json",
+            "/app/node_modules/.pnpm/@hambazi+coup-engine@file++++source+packages+games+coup-engine/node_modules/@hambazi/coup-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+game-core@file++++source+packages+game-core/node_modules/@hambazi/game-core/package.json",
+            "/app/node_modules/.pnpm/@hambazi+kahroba-engine@file++++source+packages+games+kahroba-engine/node_modules/@hambazi/kahroba-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+validation@file++++source+packages+validation/node_modules/@hambazi/validation/package.json",
+            "/app/node_modules/.pnpm/lock.yaml",
+            "/app/package.json",
+            "/app/pnpm-lock.yaml"
+          ],
+          "changedLinks": 7,
+          "unrelatedRegularFilesUnchanged": true
+        }
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-security/worker:20261024-zod466-026b1f826a9c@sha256:5ae0219afa0a9912729990789f9fb2739d6e883e6b37b9f1e06036730d7dd783",
+        "parent": "hambazi-palace/worker:20261023-d4902d5b5d3b0f1f@sha256:bdbd38828d77fd6de867baf7714c2dc4b2a34fa92fa155d755609f5c5138d4a8",
+        "securityPatchSha256": "026b1f826a9c895febe9f41f8573a2e10fdd4301f556725ea737fccf0cfa03d8",
+        "dependencyProof": {
+          "oldVersion": "4.6.2",
+          "version": "4.6.6",
+          "sourceSha256": "312553620ac82cbb25d505100fbb41c1e219b3cd6979cf93c3a1b4dd5b79e039",
+          "registrySignatureVerified": true,
+          "unchangedRuntimeFiles": 10931,
+          "runtimeSha256": "0e731942a484d27401333e7cfefa735d084915c8c223f131c4691fe3500eb72c",
+          "changedManifests": [
+            "/app/node_modules/.pnpm/@hambazi+api@file++++source+apps+api/node_modules/@hambazi/api/package.json",
+            "/app/node_modules/.pnpm/@hambazi+config@file++++source+packages+config/node_modules/@hambazi/config/package.json",
+            "/app/node_modules/.pnpm/@hambazi+coup-engine@file++++source+packages+games+coup-engine/node_modules/@hambazi/coup-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+game-core@file++++source+packages+game-core/node_modules/@hambazi/game-core/package.json",
+            "/app/node_modules/.pnpm/@hambazi+kahroba-engine@file++++source+packages+games+kahroba-engine/node_modules/@hambazi/kahroba-engine/package.json",
+            "/app/node_modules/.pnpm/@hambazi+validation@file++++source+packages+validation/node_modules/@hambazi/validation/package.json",
+            "/app/node_modules/.pnpm/lock.yaml",
+            "/app/package.json",
+            "/app/pnpm-lock.yaml"
+          ],
+          "changedLinks": 7,
+          "unrelatedRegularFilesUnchanged": true
+        }
+      }
+    ],
+    "rollback": "patched-backend-images-and-previous-qualified-web"
   }
 }

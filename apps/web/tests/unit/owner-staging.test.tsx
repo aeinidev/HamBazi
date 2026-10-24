@@ -79,9 +79,13 @@ describe("temporary staging account scope", () => {
     expect(html).toContain("کودتا، موقتاً غیرفعال");
     for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
       expect(html).toContain(`${name}، به‌زودی`);
-    expect(html).toContain("بازی پیدا کن، به‌زودی");
+    expect(html).not.toContain("بازی پیدا کن");
+    expect(html).not.toContain("ادامهٔ بازی موجود");
+    expect(html).toContain("نفر آنلاین");
+    expect(html).toContain("آمار هنوز در دسترس نیست");
     expect(html).toContain("همه را ببینید، به‌زودی");
-    expect(html).toContain("جدول، به‌زودی");
+    expect(html).toContain("برترین‌ها، به‌زودی");
+    expect(html).toContain("چت، به‌زودی");
     expect(html).toContain("دوستان، به‌زودی");
     expect(html.match(/disabled=""/g)).toHaveLength(11);
     expect(html).toContain('href="#/profile"');
@@ -89,6 +93,38 @@ describe("temporary staging account scope", () => {
     expect(html).not.toContain('aria-label="Main navigation"');
     expect(html).not.toContain("Reconnect");
     expect(html).not.toContain("Match session");
+    runtime.dispose();
+  });
+  it("opens Kahroba from its available main card without the separate private entry", () => {
+    vi.stubGlobal("window", { location: { hash: "#/games" } });
+    vi.stubGlobal("location", { hash: "#/games" });
+    const runtime = createRuntime(
+      "https://api-staging.hambazi.top",
+      "",
+      vi.fn(),
+      vi.fn(),
+      "owner-auth",
+    );
+    runtime.store.setState({
+      session: { schemaVersion: 1, sessionId: id, userId: id, expiresAt: 9999999999 },
+    });
+    runtime.query.setQueryData(["profile"], {
+      displayName: "Chosen",
+      settings: { theme: "system" },
+    });
+    runtime.query.setQueryData(["lobby-availability", id], {
+      schemaVersion: 1,
+      lobbyAvailability: [
+        { id: "kahroba", state: "AVAILABLE" },
+        { id: "coup", state: "TEMPORARILY_DISABLED" },
+      ],
+    });
+    runtime.query.setQueryData(["kahroba-private-entry"], { enabled: true });
+    vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
+    const html = renderToStaticMarkup(<App runtime={runtime} kahrobaEnabled />);
+    expect(html).toContain('aria-label="کهربا، فعال"');
+    expect(html).not.toContain("میز خصوصی کهربا");
+    expect(html).not.toContain("kh-private-entry");
     runtime.dispose();
   });
   it("renders the session photo beside the authenticated saved name", () => {

@@ -1,7 +1,7 @@
 import { test } from "./fixture.js";
 import { expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { setup, launch, fixtureOrigin } from "./fixture.js";
+import { setup, launch, nativeEvent, fixtureOrigin } from "./fixture.js";
 
 for (const size of [
   { width: 320, height: 568 },
@@ -36,6 +36,16 @@ for (const size of [
     await launch(page);
     await expect(page.locator(".hambazi-loading")).toHaveCount(0);
     await expect(page.locator(".home-identity")).toContainText("الکس");
+    await expect(page.locator(".home-recovery-link")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /بازی پیدا کن/ })).toHaveCount(0);
+    await expect(page.locator(".home-activity dd")).toHaveText(["—", "—", "—"]);
+    await expect(page.locator(".home-bottom-nav > *")).toHaveText([
+      "بازی‌ها",
+      "دوستان",
+      "چت",
+      "برترین‌ها",
+      "پروفایل",
+    ]);
     await page.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all(
@@ -68,10 +78,9 @@ for (const size of [
       homeRight: true,
       noOverflow: true,
     });
-    expect(layout.bannerRatio).toBeCloseTo(2.17, 1);
-    expect(layout.cardRatio).toBeCloseTo(1.82, 1);
-    expect(layout.chessRatio).toBeCloseTo(1.77, 1);
-    expect(layout.coupRatio).toBeCloseTo(1.63, 1);
+    // Artwork adapts to the available height while retaining a landscape composition.
+    for (const ratio of [layout.bannerRatio, layout.cardRatio, layout.chessRatio, layout.coupRatio])
+      expect(ratio).toBeGreaterThan(1);
     await expect(page.locator(".home-card-arrow svg")).toHaveCount(1);
     await expect(page.locator(".home-card-badge")).toHaveCount(5);
     const art = await page
@@ -79,10 +88,20 @@ for (const size of [
       .evaluateAll((imgs) => imgs.map((img) => img.getAttribute("src")));
     expect(art).toHaveLength(7);
     expect(art.every((src) => /^\/assets\/home\/[a-z]+-[a-f0-9]{12}\.webp$/.test(src!))).toBe(true);
+    const delivered = await page.locator(".home-screen img").evaluateAll((imgs) =>
+      imgs.map((img) => ({
+        source: (img as HTMLImageElement).currentSrc,
+        width: (img as HTMLImageElement).naturalWidth,
+      })),
+    );
+    for (const img of delivered) expect(img.source).toMatch(/-compact-[a-f0-9]{12}\.webp$/);
+    await expect(page.locator(".home-banner img")).toHaveAttribute("fetchpriority", "high");
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.screenshot({ path: info.outputPath(`home-${size.width}.png`), fullPage: true });
     await page.screenshot({ path: info.outputPath(`home-top-${size.width}.png`) });
+    const navBeforeScroll = await page.locator(".home-bottom-nav").boundingBox();
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    expect(await page.locator(".home-bottom-nav").boundingBox()).toEqual(navBeforeScroll);
     const overlap = await page.evaluate(
       () =>
         document.querySelector(".home-game-coup")!.getBoundingClientRect().bottom -
@@ -92,6 +111,40 @@ for (const size of [
     await page.screenshot({ path: info.outputPath(`home-bottom-${size.width}.png`) });
   });
 }
+
+test("fantasy header stays below native controls and the dock respects bottom insets", async ({
+  page,
+  request,
+}) => {
+  await setup(page, request);
+  await launch(page);
+  await expect(page.locator(".home-header")).toBeVisible();
+  await nativeEvent(page, "safe_area_changed", { top: 47, bottom: 34, left: 0, right: 0 });
+  await nativeEvent(page, "content_safe_area_changed", { top: 56, bottom: 0, left: 0, right: 0 });
+  const geometry = await page.evaluate(async () => {
+    const header = document.querySelector(".home-header")!.getBoundingClientRect();
+    const actions = [...document.querySelectorAll(".home-header-actions button")].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { top: r.top, width: r.width, height: r.height };
+    });
+    const dock = document.querySelector(".home-bottom-nav")!.getBoundingClientRect();
+    const icon = document.querySelector(".lobby-icon")!;
+    const url = /url\(["']?([^"')]+)/.exec(getComputedStyle(icon).backgroundImage)![1]!;
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    return {
+      headerTop: header.top,
+      actions,
+      bottomSpace: innerHeight - dock.bottom,
+      iconLoaded: true,
+    };
+  });
+  expect(geometry.headerTop).toBeGreaterThanOrEqual(111);
+  expect(geometry.actions[0]).toEqual(geometry.actions[1]);
+  expect(geometry.bottomSpace).toBeGreaterThanOrEqual(34);
+  expect(geometry.iconLoaded).toBe(true);
+});
 
 test("auth and profile loading never reveal a guessed home identity", async ({ page, request }) => {
   await setup(page, request);

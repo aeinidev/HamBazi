@@ -202,3 +202,11 @@ it("rejects expired sessions and hides internal dependency errors", async () => 
   expect(result).toMatchObject({ error: { code: "MATCHMAKING_UNAVAILABLE" } });
   expect(JSON.stringify(result)).not.toContain("synthetic secret");
 });
+
+it("re-enqueues a durable searching ticket on status after Redis loses queue state", async () => {
+  const f = fixture();
+  expect(await f.service.read("token", f.ref)).toMatchObject({ value: { status: "SEARCHING" } });
+  expect(f.queue.enqueue).toHaveBeenCalledWith(f.ticket);
+  vi.mocked(f.queue.enqueue).mockRejectedValue(new Error("Redis unavailable"));
+  expect(await f.service.read("token", f.ref)).toMatchObject({ value: { status: "SEARCHING" } });
+});

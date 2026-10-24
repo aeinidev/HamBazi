@@ -12,7 +12,7 @@ it.each([true, false])(
     ).toBe(true);
   },
 );
-it("unpausing does not widen admission and never rolls out Kahroba", () => {
+it("unpausing Coup does not implicitly enable Kahroba", () => {
   expect(
     lobbyAvailability({ coupTemporarilyDisabled: false }, false).find((game) => game.id === "coup")
       ?.state,
@@ -27,3 +27,21 @@ it("unpausing does not widen admission and never rolls out Kahroba", () => {
     )?.state,
   ).toBe("COMING_SOON");
 });
+
+it.each([true, false])(
+  "Kahroba entry follows its own admission, independent of Coup pause %s",
+  (paused) => {
+    const games = lobbyAvailability({ coupTemporarilyDisabled: paused }, false, true);
+    expect(games.find((game) => game.id === "kahroba")?.state).toBe("AVAILABLE");
+    expect(
+      games
+        .filter((game) => !["coup", "kahroba"].includes(game.id))
+        .every((game) => game.state === "COMING_SOON"),
+    ).toBe(true);
+    expect(
+      lobbyAvailability({ coupTemporarilyDisabled: paused }, true, false).find(
+        (game) => game.id === "kahroba",
+      )?.state,
+    ).toBe("COMING_SOON");
+  },
+);

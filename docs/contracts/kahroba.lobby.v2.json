@@ -1,0 +1,1336 @@
+{
+  "schemaVersion": 2,
+  "access": "authenticated users admitted by the existing runtime policy",
+  "paths": {
+    "/v1/kahroba/current-room": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "schemaVersion": { "type": "number", "const": 1 },
+          "room": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "gameId": { "type": "string" },
+                  "hostUserId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "capacity": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "version": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  "status": {
+                    "type": "string",
+                    "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
+                  },
+                  "expiresAt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  "startedMatchId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "members": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "seat": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                        "joinedAt": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "joinedVersion": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["userId", "seat", "joinedAt", "joinedVersion"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "gameId",
+                  "hostUserId",
+                  "capacity",
+                  "version",
+                  "status",
+                  "expiresAt",
+                  "startedMatchId",
+                  "members"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["ok", "schemaVersion", "room"],
+        "additionalProperties": false
+      },
+      "authorization": "authenticated membership; latest nonclosed Kahroba room only; no invitation secret"
+    },
+    "/v1/kahroba/lobby-permissions": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "canCreate": { "type": "boolean" }
+        },
+        "required": ["schemaVersion", "canCreate"],
+        "additionalProperties": false
+      },
+      "authorization": "any currently admitted user may create a room"
+    },
+    "/v1/kahroba/rooms/{id}/readiness": {
+      "method": "GET",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "roomId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "matchId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "stateVersion": {
+                "anyOf": [
+                  { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  { "type": "null" }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "CREATED",
+                      "WAITING_FOR_PLAYERS",
+                      "READY",
+                      "STARTING",
+                      "ACTIVE",
+                      "FINISHED",
+                      "TERMINATED"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "canStart": { "type": "boolean" },
+              "players": {
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "ready": { "type": "boolean" }
+                  },
+                  "required": ["userId", "ready"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "roomId",
+              "matchId",
+              "stateVersion",
+              "status",
+              "canStart",
+              "players"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      },
+      "authorization": "room membership"
+    },
+    "/v1/kahroba/rooms/{id}/start": {
+      "method": "POST",
+      "request": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "actionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+        },
+        "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "actionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "actionId",
+              "stateVersion",
+              "lastEventSeq",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      },
+      "authorization": "host + bound private match + all durable readyAt + expectedVersion + actionId"
+    },
+    "/v1/kahroba/matchmaking/current": {
+      "method": "GET",
+      "authorization": "authenticated actor's own unexpired search or active matched seat only",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "schemaVersion": { "type": "number", "const": 1 },
+                  "ticketId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "status": { "type": "string", "enum": ["SEARCHING", "RESERVED", "MATCHED"] },
+                  "capacity": { "type": "integer", "minimum": 2, "maximum": 64 },
+                  "expiresAt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                  "matchId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": [
+                  "schemaVersion",
+                  "ticketId",
+                  "status",
+                  "capacity",
+                  "expiresAt",
+                  "matchId"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      }
+    },
+    "/v1/kahroba/matches/{id}/lobby": {
+      "method": "GET",
+      "authorization": "admitted match member; pregame human seat; active replaced seats recover spectator table; Kahroba MATCHMAKING only; no hidden state",
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "gameId": { "type": "string" },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              },
+              "hostUserId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "players": {
+                "minItems": 2,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "seat": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                    "ready": { "type": "boolean" }
+                  },
+                  "required": ["userId", "seat", "ready"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "gameId",
+              "stateVersion",
+              "status",
+              "hostUserId",
+              "players"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      }
+    },
+    "/v1/kahroba/matches/{id}/start": {
+      "method": "POST",
+      "authorization": "persisted host; expectedVersion/actionId; cancellation restricted to pregame",
+      "request": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "actionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+        },
+        "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "gameId": { "type": "string" },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              },
+              "hostUserId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "players": {
+                "minItems": 2,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "seat": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                    "ready": { "type": "boolean" }
+                  },
+                  "required": ["userId", "seat", "ready"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "gameId",
+              "stateVersion",
+              "status",
+              "hostUserId",
+              "players"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      }
+    },
+    "/v1/kahroba/matches/{id}/cancel": {
+      "method": "POST",
+      "authorization": "persisted host; expectedVersion/actionId; cancellation restricted to pregame",
+      "request": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "actionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+        },
+        "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "gameId": { "type": "string" },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              },
+              "hostUserId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "players": {
+                "minItems": 2,
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "seat": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                    "ready": { "type": "boolean" }
+                  },
+                  "required": ["userId", "seat", "ready"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "gameId",
+              "stateVersion",
+              "status",
+              "hostUserId",
+              "players"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      }
+    },
+    "/v1/kahroba/rooms/{id}/cancel": {
+      "method": "POST",
+      "authorization": "room host + bound waiting match; expectedVersion/actionId; closes room after commit",
+      "request": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "actionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+        },
+        "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+        "additionalProperties": false
+      },
+      "response": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean", "const": true },
+          "value": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "actionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "actionId",
+              "stateVersion",
+              "lastEventSeq",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["ok", "value"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "policy": {
+    "prepare": "host room:start freezes full roster into WAITING_FOR_PLAYERS",
+    "ready": "match:ready persists readiness in WAITING_FOR_PLAYERS; canStart requires every durable readyAt",
+    "start": "explicit authenticated host start; recovery completes STARTING",
+    "rollback": "fully ready new rooms remain WAITING_FOR_PLAYERS and retained APIs hold them; preserve readyAt and compatible v2 Worker; no DB rewind",
+    "host": "private room host; public match seat zero",
+    "searchLifetimeSeconds": 300,
+    "reservationLifetimeSeconds": 10,
+    "admissionLifetimeSeconds": 60,
+    "queueRecovery": "one bounded own-partition tick per successful authenticated search/status; durable status re-enqueues after Redis recovery"
+  },
+  "supersedes": "kahroba.lobby.v1.json",
+  "capacity": { "min": 2, "max": 4 },
+  "socket": {
+    "path": "/v1/kahroba/socket.io",
+    "namespace": "/kahroba-v1",
+    "supportedMatchmakingEvents": [
+      "matchmaking:search",
+      "matchmaking:status",
+      "matchmaking:cancel",
+      "matchmaking:found",
+      "matchmaking:admit"
+    ],
+    "eventSchemas": {
+      "schemaVersion": 1,
+      "path": "/v1/socket.io",
+      "namespace": "/v1",
+      "handshake": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "accessToken": { "type": "string", "minLength": 1, "maxLength": 4096 }
+        },
+        "required": ["schemaVersion", "accessToken"],
+        "additionalProperties": false
+      },
+      "clientEvents": {
+        "room:subscribe": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "roomId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "roomId"],
+          "additionalProperties": false
+        },
+        "room:join": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "roomId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 },
+            "inviteCode": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
+            }
+          },
+          "required": ["schemaVersion", "commandId", "roomId", "expectedVersion", "inviteCode"],
+          "additionalProperties": false
+        },
+        "room:leave": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "roomId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 }
+          },
+          "required": ["schemaVersion", "commandId", "roomId", "expectedVersion"],
+          "additionalProperties": false
+        },
+        "room:start": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "roomId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483646 }
+          },
+          "required": ["schemaVersion", "commandId", "roomId", "expectedVersion"],
+          "additionalProperties": false
+        },
+        "matchmaking:search": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "gameId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+            "mode": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+            "capacity": { "type": "integer", "minimum": 2, "maximum": 64 },
+            "schemaVersion": { "type": "number", "const": 1 },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["gameId", "mode", "capacity", "schemaVersion", "commandId"],
+          "additionalProperties": false
+        },
+        "matchmaking:status": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "ticketId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "ticketId"],
+          "additionalProperties": false
+        },
+        "matchmaking:cancel": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "ticketId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "ticketId"],
+          "additionalProperties": false
+        },
+        "matchmaking:found": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "ticketId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "ticketId"],
+          "additionalProperties": false
+        },
+        "matchmaking:admit": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "ticketId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "admissionToken": { "type": "string", "minLength": 1, "maxLength": 4096 }
+          },
+          "required": ["schemaVersion", "ticketId", "admissionToken"],
+          "additionalProperties": false
+        },
+        "match:subscribe": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "matchId"],
+          "additionalProperties": false
+        },
+        "match:snapshot": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          "required": ["schemaVersion", "matchId"],
+          "additionalProperties": false
+        },
+        "match:catchup": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "afterSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+          },
+          "required": ["schemaVersion", "matchId", "afterSeq"],
+          "additionalProperties": false
+        },
+        "match:ready": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "actionId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+          },
+          "required": ["schemaVersion", "actionId", "matchId", "expectedVersion"],
+          "additionalProperties": false
+        },
+        "game:command": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "actionId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "expectedVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "command": { "$ref": "#/$defs/__schema0" }
+          },
+          "required": ["schemaVersion", "actionId", "matchId", "expectedVersion", "command"],
+          "additionalProperties": false,
+          "$defs": {
+            "__schema0": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                { "type": "null" },
+                { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
+                {
+                  "type": "object",
+                  "propertyNames": { "type": "string" },
+                  "additionalProperties": { "$ref": "#/$defs/__schema0" }
+                }
+              ]
+            }
+          }
+        },
+        "presence:ping": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": { "schemaVersion": { "type": "number", "const": 1 } },
+          "required": ["schemaVersion"],
+          "additionalProperties": false
+        },
+        "chat:send": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "commandId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "text": { "type": "string", "maxLength": 4096 }
+          },
+          "required": ["schemaVersion", "matchId", "commandId", "text"],
+          "additionalProperties": false
+        },
+        "chat:list": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "limit": { "type": "integer", "minimum": 1, "maximum": 50 },
+            "beforeSeq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+            "afterSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+          },
+          "required": ["schemaVersion", "matchId"],
+          "additionalProperties": false
+        }
+      },
+      "serverEvents": {
+        "match:snapshot": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "status": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "WAITING_FOR_PLAYERS",
+                "READY",
+                "STARTING",
+                "ACTIVE",
+                "FINISHED",
+                "TERMINATED"
+              ]
+            },
+            "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+            "gameId": { "type": "string" },
+            "engineVersion": { "type": "string" },
+            "stateSchemaVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "rulesetVersion": { "type": "string" },
+            "view": { "anyOf": [{ "$ref": "#/$defs/__schema0" }, { "type": "null" }] }
+          },
+          "required": [
+            "schemaVersion",
+            "matchId",
+            "stateVersion",
+            "lastEventSeq",
+            "status",
+            "role",
+            "gameId",
+            "engineVersion",
+            "stateSchemaVersion",
+            "rulesetVersion",
+            "view"
+          ],
+          "additionalProperties": false,
+          "$defs": {
+            "__schema0": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" },
+                { "type": "null" },
+                { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
+                {
+                  "type": "object",
+                  "propertyNames": { "type": "string" },
+                  "additionalProperties": { "$ref": "#/$defs/__schema0" }
+                }
+              ]
+            }
+          }
+        },
+        "match:event": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "eventId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "type": { "type": "string", "const": "MATCH_INVALIDATED_V1" },
+            "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+            "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+            "payload": { "type": "object", "properties": {}, "additionalProperties": false }
+          },
+          "required": [
+            "schemaVersion",
+            "eventId",
+            "matchId",
+            "type",
+            "seq",
+            "stateVersion",
+            "payload"
+          ],
+          "additionalProperties": false
+        },
+        "chat:message": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "type": "number", "const": 1 },
+            "matchId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "messageId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "userId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+            "text": { "type": "string", "maxLength": 4096 },
+            "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
+          },
+          "required": [
+            "schemaVersion",
+            "matchId",
+            "messageId",
+            "userId",
+            "seq",
+            "text",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "chatSendResult": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+          "text": { "type": "string", "maxLength": 4096 },
+          "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
+        },
+        "required": ["schemaVersion", "matchId", "messageId", "userId", "seq", "text", "createdAt"],
+        "additionalProperties": false
+      },
+      "chatListResult": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "matchId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+          "canSend": { "type": "boolean" },
+          "messageLimit": { "type": "integer", "minimum": 1, "maximum": 500 },
+          "messages": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "schemaVersion": { "type": "number", "const": 1 },
+                "matchId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "messageId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "userId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+                "text": { "type": "string", "maxLength": 4096 },
+                "createdAt": { "type": "integer", "minimum": 0, "maximum": 8640000000000000 }
+              },
+              "required": [
+                "schemaVersion",
+                "matchId",
+                "messageId",
+                "userId",
+                "seq",
+                "text",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "lastSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+          "hasMore": { "type": "boolean" }
+        },
+        "required": [
+          "schemaVersion",
+          "matchId",
+          "role",
+          "canSend",
+          "messageLimit",
+          "messages",
+          "lastSeq",
+          "hasMore"
+        ],
+        "additionalProperties": false
+      },
+      "catchupResult": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "number", "const": 1 },
+          "mode": { "type": "string", "enum": ["EVENTS", "SNAPSHOT"] },
+          "events": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "schemaVersion": { "type": "number", "const": 1 },
+                "eventId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "matchId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "type": { "type": "string", "const": "MATCH_INVALIDATED_V1" },
+                "seq": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+                "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+                "payload": { "type": "object", "properties": {}, "additionalProperties": false }
+              },
+              "required": [
+                "schemaVersion",
+                "eventId",
+                "matchId",
+                "type",
+                "seq",
+                "stateVersion",
+                "payload"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "number", "const": 1 },
+              "matchId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "stateVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "lastEventSeq": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATED",
+                  "WAITING_FOR_PLAYERS",
+                  "READY",
+                  "STARTING",
+                  "ACTIVE",
+                  "FINISHED",
+                  "TERMINATED"
+                ]
+              },
+              "role": { "type": "string", "enum": ["PLAYER", "SPECTATOR"] },
+              "gameId": { "type": "string" },
+              "engineVersion": { "type": "string" },
+              "stateSchemaVersion": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+              "rulesetVersion": { "type": "string" },
+              "view": { "anyOf": [{ "$ref": "#/$defs/__schema0" }, { "type": "null" }] }
+            },
+            "required": [
+              "schemaVersion",
+              "matchId",
+              "stateVersion",
+              "lastEventSeq",
+              "status",
+              "role",
+              "gameId",
+              "engineVersion",
+              "stateSchemaVersion",
+              "rulesetVersion",
+              "view"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["schemaVersion", "mode", "events", "snapshot"],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "null" },
+              { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
+              {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": { "$ref": "#/$defs/__schema0" }
+              }
+            ]
+          }
+        }
+      },
+      "reservedServerEvents": [
+        "room:player_joined",
+        "room:player_left",
+        "room:host_changed",
+        "room:ready",
+        "matchmaking:started",
+        "matchmaking:cancelled",
+        "matchmaking:found",
+        "match:started",
+        "match:snapshot",
+        "match:event",
+        "match:finished",
+        "player:disconnected",
+        "player:reconnected",
+        "player:bot_takeover",
+        "chat:message"
+      ],
+      "acknowledgement": {
+        "success": "{ok:true,value:<owner result>}",
+        "failure": "{ok:false,error:{code,message,retryable}}"
+      }
+    }
+  }
+}

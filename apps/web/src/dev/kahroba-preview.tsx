@@ -7,6 +7,7 @@ import { RuntimeContext, useSession, useRuntime } from "../ui/shared.js";
 import { createRuntime } from "../platform/runtime.js";
 import { bootstrapTelegram } from "../platform/telegram.js";
 import { KahrobaSession, KahrobaLobby, publicKahrobaSnapshot } from "../games/kahroba/index.js";
+import { KahrobaSearch, KahrobaPublicLobby } from "../games/kahroba/index.js";
 import "../styles.css";
 const guarded =
   import.meta.env.DEV &&
@@ -40,6 +41,12 @@ const metaSchema = z.object({
 });
 const ack = z.object({ schemaVersion: z.literal(1), ok: z.literal(true) });
 function Preview() {
+  const [route, setRoute] = useState(location.hash.slice(1));
+  useEffect(() => {
+    const change = () => setRoute(location.hash.slice(1));
+    window.addEventListener("hashchange", change);
+    return () => window.removeEventListener("hashchange", change);
+  }, []);
   const session = useSession((s) => s.session),
     r = useRuntime(),
     [meta, setMeta] = useState<z.infer<typeof metaSchema> | null>(null),
@@ -54,7 +61,20 @@ function Preview() {
   if (new URLSearchParams(location.search).get("lobby") === "1")
     return (
       <main className="kh-app" dir="rtl">
-        <KahrobaLobby roomId={new URLSearchParams(location.search).get("room") ?? undefined} />
+        {route.startsWith("/restricted/kahroba/search/") ? (
+          <KahrobaSearch initialCapacity={Number(route.split("/")[4])} />
+        ) : route.startsWith("/restricted/kahroba/public/") ? (
+          <KahrobaPublicLobby id={route.split("/")[4]!} />
+        ) : (
+          <KahrobaLobby
+            key={route}
+            roomId={
+              route.startsWith("/restricted/kahroba/room/")
+                ? route.split("/")[4]
+                : (new URLSearchParams(location.search).get("room") ?? undefined)
+            }
+          />
+        )}
       </main>
     );
   return (

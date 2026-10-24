@@ -33,6 +33,51 @@ const assess = (value) =>
   ).trim();
 
 describe("replacement server normal security renewal", () => {
+  it("fetches advisories despite a future cached NextUpdate and preserves cache on download failure", () => {
+    const result = execFileSync(
+      "python3",
+      [
+        "-c",
+        `
+import importlib.util,json,tempfile
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('security','infra/scripts/replacement-security.py')
+s=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(s)
+with tempfile.TemporaryDirectory() as root:
+    s.ROOT=Path(root)
+    cache=s.ROOT/'cache'
+    (cache/'db').mkdir(parents=True)
+    (cache/'db/metadata.json').write_text('{"NextUpdate":"2099-01-01T00:00:00Z"}')
+    (cache/'db/trivy.db').write_text('old')
+    def download(args, timeout):
+        destination=Path(args[args.index('--cache-dir')+1])
+        assert destination != cache and not (destination/'db').exists()
+        assert args[args.index('--db-repository')+1]=='ghcr.io/aquasecurity/trivy-db:2'
+        (destination/'db').mkdir()
+        (destination/'db/metadata.json').write_text('{"UpdatedAt":"2026-10-23T01:00:00Z"}')
+        (destination/'db/trivy.db').write_text('fresh')
+    s.run=download
+    s.refresh_database('trivy',str(cache))
+    assert (cache/'db/trivy.db').read_text()=='fresh'
+    assert json.loads((cache/'db/metadata.json').read_text())['UpdatedAt']=='2026-10-23T01:00:00Z'
+    def fail(args, timeout):
+        raise RuntimeError('download unavailable')
+    s.run=fail
+    try:
+        s.refresh_database('trivy',str(cache))
+        raise AssertionError('failure must propagate')
+    except RuntimeError:
+        pass
+    assert (cache/'db/trivy.db').read_text()=='fresh'
+    assert list(s.ROOT.iterdir())==[cache]
+print('passed')
+`,
+      ],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    ).trim();
+    expect(result).toBe("passed");
+  });
   it("uses the earlier genuine timestamp and never download time alone", () => {
     expect(assess(fixture())).toBe("2026-10-21T13:00:00Z");
     const v = fixture();

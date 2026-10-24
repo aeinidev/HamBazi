@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "purpose": "Display-only coming-soon lobby entries. No game routes or engine registration.",
+  "prompts": {
+    "uno": "Use case: stylized-concept. Create a landscape 1200x660 game catalog cover for UNO in a polished playful 3D fantasy mobile game hub. A large fan of UNO-style red yellow green blue cards, white oval centers, clearly readable 7, 2, +2 and reverse-arrow symbols, dynamic tilted floating composition. Rich violet/navy background, luminous colored rim light, subtle magical particles, premium glossy tactile cards. Main recognizable objects centered in upper two thirds, dark navy lower quarter for app-rendered Persian title overlay. No title, no logo, no watermark, no border. Strong small-thumbnail readability. Full bleed landscape artwork.",
+    "battleship": "Use case: stylized-concept. Landscape 1200x660 game catalog cover for Battleship board game in a polished playful 3D fantasy mobile game hub. A large stylized steel blue battleship miniature with readable twin turrets and radar mast cutting diagonally through turquoise ocean on a luminous square tactical grid, one smaller distant ship, tiny red and white board-game targeting pegs. Rich midnight navy and violet atmosphere, cyan rim lights, warm amber highlights, soft mist and restrained magical particles, premium tactile toy-like render, no real military insignia. Main subject centered upper two thirds, dark navy lower quarter for app-rendered Persian title. Strong silhouette and small-thumbnail readability. No text, logo, watermark or border. Full bleed."
+  },
+  "assets": {
+    "uno": {
+      "artwork": "/assets/home/uno-032fab4de19d.webp",
+      "compactArtwork": "/assets/home/uno-compact-f8ca2a02a989.webp"
+    },
+    "battleship": {
+      "artwork": "/assets/home/battleship-e991e7dd5b2b.webp",
+      "compactArtwork": "/assets/home/battleship-compact-d643f71a20aa.webp"
+    }
+  }
+}

@@ -40,7 +40,8 @@ export function createRealtime(
     `${origin}/${transport?.namespace ?? (personal ? "personal-v1" : "v1")}`,
     {
       path: transport?.path ?? (personal ? "/v1/personal/socket.io" : "/v1/socket.io"),
-      ...(personal ? { transports: ["websocket"] } : {}),
+      // Both admitted gateways expose WebSocket upgrades only at the ingress.
+      ...(personal || transport ? { transports: ["websocket"] } : {}),
       auth: { schemaVersion: 1, accessToken },
       autoConnect: false,
       reconnection: true,

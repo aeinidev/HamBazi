@@ -19,6 +19,8 @@ import {
   privateRoomReadinessSchema,
   matchReadySchema,
   matchAckSchema,
+  publicLobbySchema,
+  publicSearchSchema,
 } from "../dist/matches/index.js";
 const rooms = roomsOpenApiDocument(),
   socket = realtimeEventCatalog();
@@ -175,3 +177,80 @@ if (process.argv.includes("--write-lobby")) await writeFile(lobbyTarget, lobbyGe
 else if (!isDeepStrictEqual(JSON.parse(await readFile(lobbyTarget, "utf8")), lobbyDocument))
   throw Error("Private Kahroba lobby contract drift");
 console.info("Private Kahroba playable lobby contract verified/generated");
+
+// Current additive palace lobby surface; prior snapshots above are historical contracts.
+const palaceDocument = {
+  ...lobbyDocument,
+  schemaVersion: 2,
+  supersedes: "kahroba.lobby.v1.json",
+  access: "authenticated users admitted by the existing runtime policy",
+  capacity: { min: 2, max: 4 },
+  paths: {
+    ...lobbyDocument.paths,
+    "/v1/kahroba/lobby-permissions": {
+      ...lobbyDocument.paths["/v1/kahroba/lobby-permissions"],
+      authorization: "any currently admitted user may create a room",
+    },
+    "/v1/kahroba/matchmaking/current": {
+      method: "GET",
+      authorization: "authenticated actor's own unexpired search or active matched seat only",
+      response: z.toJSONSchema(
+        z.strictObject({ ok: z.literal(true), value: publicSearchSchema.nullable() }),
+      ),
+    },
+    "/v1/kahroba/matches/{id}/lobby": {
+      method: "GET",
+      authorization:
+        "admitted match member; pregame human seat; active replaced seats recover spectator table; Kahroba MATCHMAKING only; no hidden state",
+      response: z.toJSONSchema(z.strictObject({ ok: z.literal(true), value: publicLobbySchema })),
+    },
+    ...Object.fromEntries(
+      ["start", "cancel"].map((operation) => [
+        `/v1/kahroba/matches/{id}/${operation}`,
+        {
+          method: "POST",
+          authorization:
+            "persisted host; expectedVersion/actionId; cancellation restricted to pregame",
+          request: z.toJSONSchema(matchReadySchema, { io: "input" }),
+          response: z.toJSONSchema(
+            z.strictObject({ ok: z.literal(true), value: publicLobbySchema }),
+          ),
+        },
+      ]),
+    ),
+    "/v1/kahroba/rooms/{id}/cancel": {
+      method: "POST",
+      authorization:
+        "room host + bound waiting match; expectedVersion/actionId; closes room after commit",
+      request: z.toJSONSchema(matchReadySchema, { io: "input" }),
+      response: z.toJSONSchema(z.strictObject({ ok: z.literal(true), value: matchAckSchema }), {
+        io: "input",
+      }),
+    },
+  },
+  socket: {
+    path: "/v1/kahroba/socket.io",
+    namespace: "/kahroba-v1",
+    supportedMatchmakingEvents: unsupported.filter((name) => name.startsWith("matchmaking:")),
+    eventSchemas: socket,
+  },
+  policy: {
+    ...lobbyDocument.policy,
+    host: "private room host; public match seat zero",
+    searchLifetimeSeconds: 300,
+    reservationLifetimeSeconds: 10,
+    admissionLifetimeSeconds: 60,
+    queueRecovery:
+      "one bounded own-partition tick per successful authenticated search/status; durable status re-enqueues after Redis recovery",
+  },
+};
+const palaceTarget = new URL("../../../docs/contracts/kahroba.lobby.v2.json", import.meta.url);
+const palaceGenerated = await format(JSON.stringify(palaceDocument), {
+  ...JSON.parse(await readFile(new URL("../../../.prettierrc.json", import.meta.url), "utf8")),
+  parser: "json",
+});
+if (process.argv.includes("--write-palace") || process.argv.includes("--write"))
+  await writeFile(palaceTarget, palaceGenerated);
+else if (!isDeepStrictEqual(JSON.parse(await readFile(palaceTarget, "utf8")), palaceDocument))
+  throw Error("Kahroba palace lobby contract drift");
+console.info("Kahroba palace lobby contract verified/generated");

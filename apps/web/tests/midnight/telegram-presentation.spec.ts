@@ -74,7 +74,9 @@ test("fullscreen exit/failure preserves scrolling, touch, safe areas and navigat
       const css = getComputedStyle(shell);
       return {
         top: parseFloat(css.paddingTop),
-        bottom: parseFloat(css.paddingBottom),
+        bottom:
+          parseFloat(css.paddingBottom) +
+          parseFloat(getComputedStyle(shell.querySelector("main")!).paddingBottom),
         headerTop: shell.querySelector("header")!.getBoundingClientRect().top + scrollY,
       };
     });

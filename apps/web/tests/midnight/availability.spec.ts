@@ -21,7 +21,7 @@ for (const size of [
     for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
       await expect(page.getByRole("button", { name: `${name}، به‌زودی` })).toBeDisabled();
     await expect(page.locator(".home-card-arrow")).toHaveCount(0);
-    await expect(page.locator(".home-card-badge .icon-lock")).toHaveCount(6);
+    await expect(page.locator(".home-card-badge .icon-lock")).toHaveCount(8);
     await page.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all(
@@ -64,12 +64,14 @@ for (const size of [
     const settings = page.getByRole("button", { name: "تنظیمات", exact: true });
     await settings.focus();
     await page.keyboard.press("Tab");
-    await expect(page.getByRole("link", { name: "ادامهٔ بازی موجود" })).toBeFocused();
+    await expect(page.getByRole("region", { name: "فهرست بازی‌ها" })).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: "بازی‌ها", exact: true })).toBeFocused();
     expect(state.starts).toEqual([]);
     expect(state.events).toEqual([]);
     await page.getByRole("link", { name: "پروفایل" }).tap();
     await expect(page.getByRole("heading", { name: "پروفایل" })).toBeVisible();
-    await page.getByRole("link", { name: "خانه" }).tap();
+    await page.getByRole("link", { name: "بازی‌ها", exact: true }).tap();
     await expect(coup).toBeDisabled();
   });
 }
@@ -81,8 +83,7 @@ test("pause preserves recovery, reconnect, legal play and historical direct view
   const state = await setup(page, request);
   state.coupPaused = true;
   state.current = matchId;
-  await launch(page);
-  await page.getByRole("link", { name: "ادامهٔ بازی موجود" }).click();
+  await launch(page, "/games/coup/play");
   await expect(page.getByLabel("میز کودتا")).toBeVisible();
   expect(state.starts).toEqual([]);
   await state.sockets.at(-1)!.close({ code: 1011, reason: "synthetic reconnect" });
@@ -128,7 +129,7 @@ test("missing server availability fails closed; available Coup keeps colorful ar
   state.availabilityMissing = true;
   await launch(page);
   await expect(page.getByRole("button", { name: "کودتا، در حال بررسی" })).toBeDisabled();
-  await expect(page.locator(".home-game-unavailable")).toHaveCount(6);
+  await expect(page.locator(".home-game-unavailable")).toHaveCount(8);
   expect(state.starts).toEqual([]);
   state.availabilityMissing = false;
   await launch(page);

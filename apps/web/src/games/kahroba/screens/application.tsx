@@ -6,6 +6,7 @@ import type { Runtime } from "../../../platform/runtime.js";
 import { ClientError } from "../../../platform/errors.js";
 import { roomResponseSchema } from "../../../platform/contracts.js";
 import { createKahrobaRealtime } from "../runtime.js";
+import { KahrobaSearch, KahrobaPublicLobby } from "./public-lobby.js";
 import { KahrobaLobby } from "./lobby.js";
 import { kahrobaLaunch } from "../launch.js";
 import { publicKahrobaSnapshot } from "../adapters/index.js";
@@ -61,6 +62,12 @@ function PrivateRoom({ id }: { id: string }) {
   });
   const matchId = room.data?.room.startedMatchId;
   useEffect(() => {
+    if (["CLOSED", "EXPIRED"].includes(room.data?.room.status ?? "")) {
+      r.query.removeQueries({ queryKey: ["kahroba-current-room"] });
+      go("/restricted/kahroba");
+    }
+  }, [r, room.data?.room.status]);
+  useEffect(() => {
     if (connection === "connected" && matchId)
       void r
         .realtime()
@@ -105,6 +112,10 @@ function PrivateApplication({ startParam }: { startParam?: string | undefined })
         ) : (
           <KahrobaLobby startParam={launch?.kind === "invite" ? launch.startParam : undefined} />
         )
+      ) : parts[3] === "search" ? (
+        <KahrobaSearch initialCapacity={Number(parts[4])} />
+      ) : parts[3] === "public" && id ? (
+        <KahrobaPublicLobby id={id} />
       ) : parts[3] === "match" && id ? (
         <RoutedTable id={id} />
       ) : parts[3] === "room" && id ? (
@@ -171,14 +182,5 @@ export function KahrobaRouteBoundary({
     (route.startsWith("/restricted/kahroba") || kahrobaLaunch(startParam))
   )
     return <TransportSession key={session.sessionId} parent={runtime} startParam={startParam} />;
-  return (
-    <>
-      {children}
-      {session && cap.data?.enabled && (
-        <a className="kh-private-entry" href="#/restricted/kahroba">
-          میز خصوصی کهربا
-        </a>
-      )}
-    </>
-  );
+  return children;
 }

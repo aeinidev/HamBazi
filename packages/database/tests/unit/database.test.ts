@@ -28,6 +28,108 @@ describe("database infrastructure boundary", () => {
       await database.disconnect();
     }
   });
+  it("restricts admission row locks to Matches transactions without a raw SQL escape hatch", async () => {
+    const database = createDatabase(options);
+    try {
+      await database.forModule("matches").execute(async (db) => {
+        expect("$queryRaw" in db).toBe(false);
+        await expect(
+          db.lockMatchAdmissions(["11111111-1111-4111-8111-111111111111"]),
+        ).rejects.toMatchObject({ code: "DATABASE_LOCK_INVALID" });
+      });
+      for (const owner of [
+        "auth",
+        "users",
+        "rooms",
+        "games",
+        "chat",
+        "outbox",
+        "leaderboard",
+      ] as const)
+        await database.forModule(owner).execute(async (db) => {
+          expect("lockMatchAdmissions" in db).toBe(false);
+        });
+    } finally {
+      await database.disconnect();
+    }
+  });
+  it.each(["40001", "40P01"])(
+    "retries only a known aborted raw-lock transaction %s without exposing metadata",
+    async (code) => {
+      const database = createDatabase(options);
+      try {
+        try {
+          await database.forModule("matches").execute(async () => {
+            throw {
+              code: "P2010",
+              meta: { code, message: "PRIVATE_LOCK_CANARY", query: "PRIVATE_SQL_CANARY" },
+            };
+          });
+          throw new Error("Expected rejection");
+        } catch (error) {
+          expect(error).toMatchObject({ code: "DATABASE_TRANSACTION_CONFLICT" });
+          expect(inspect(error)).not.toContain("PRIVATE_");
+          expect(JSON.stringify(error)).not.toContain("PRIVATE_");
+        }
+      } finally {
+        await database.disconnect();
+      }
+    },
+  );
+  it("recognizes wrapped adapter transaction conflicts on a fixed raw lock", async () => {
+    const database = createDatabase(options);
+    try {
+      await expect(
+        database.forModule("matches").execute(async () => {
+          throw {
+            code: "P2010",
+            meta: {
+              driverAdapterError: {
+                cause: {
+                  kind: "TransactionWriteConflict",
+                  originalCode: "40001",
+                  originalMessage: "PRIVATE_CANARY",
+                },
+              },
+            },
+          };
+        }),
+      ).rejects.toMatchObject({ code: "DATABASE_TRANSACTION_CONFLICT" });
+      await expect(
+        database.forModule("matches").execute(async () => {
+          throw {
+            code: "P2010",
+            meta: {
+              driverAdapterError: {
+                cause: {
+                  kind: "ConnectionClosed",
+                  originalCode: "08006",
+                  originalMessage: "PRIVATE_CANARY",
+                },
+              },
+            },
+          };
+        }),
+      ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+    } finally {
+      await database.disconnect();
+    }
+  });
+  it.each(["08006", "23505", "P0001", undefined])(
+    "does not retry an uncertain or unrelated raw-query failure %s",
+    async (code) => {
+      const database = createDatabase(options);
+      try {
+        await expect(
+          database.forModule("matches").execute(async () => {
+            throw { code: "P2010", meta: { code, message: "PRIVATE_CANARY" } };
+          }),
+        ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+      } finally {
+        await database.disconnect();
+      }
+    },
+  );
   it("sanitizes an unavailable read-only probe without exposing connection data", async () => {
     const database = createDatabase(options);
     try {

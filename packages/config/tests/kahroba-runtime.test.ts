@@ -43,7 +43,7 @@ it.each([
     "KAHROBA_RUNTIME_CONFIGURATION_INVALID",
   ),
 );
-it("restricted staging requires the existing exact owner/tester policy and only two seats", () => {
+it("restricted staging requires the existing exact owner/tester policy with two-to-four-seat engine support", () => {
   const stage = {
     ...local,
     NODE_ENV: "production",
@@ -55,7 +55,7 @@ it("restricted staging requires the existing exact owner/tester policy and only 
     ALLOWED_ORIGINS: "https://staging.hambazi.top",
     KAHROBA_LOCAL_ADMISSION_FILE: undefined,
   };
-  expect(parseKahrobaRuntimeConfig(stage, "api")).toMatchObject({ local: false, maxPlayers: 2 });
+  expect(parseKahrobaRuntimeConfig(stage, "api")).toMatchObject({ local: false, maxPlayers: 4 });
   expect(() =>
     parseKahrobaRuntimeConfig({ ...stage, STAGING_TEST_ADMISSION_FILE: undefined }, "api"),
   ).toThrow();

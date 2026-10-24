@@ -11,6 +11,16 @@ import { createLocalEnvironment } from "./create-local-env.mjs";
 import { startIsolatedPostgres } from "./isolated-postgres.mjs";
 
 const run = promisify(execFile);
+const testNameIndex = process.argv.indexOf("--runtime-test-name");
+const selectedRuntimeTest = testNameIndex < 0 ? undefined : process.argv[testNameIndex + 1];
+if (
+  testNameIndex >= 0 &&
+  (!process.argv.includes("--runtime") ||
+    !selectedRuntimeTest ||
+    !/^[\x20-\x7e]{1,256}$/.test(selectedRuntimeTest) ||
+    selectedRuntimeTest.startsWith("--"))
+)
+  throw new Error("Invalid runtime test selection");
 async function reservePort() {
   const server = createServer();
   await new Promise((resolve, reject) => {
@@ -122,10 +132,12 @@ try {
         vitest,
         "run",
         file,
-        ...(file === "tests/integration/kahroba-runtime.test.mjs" &&
-        process.argv.includes("--runtime-browser-only")
-          ? ["--testNamePattern", "actual Web/API/Worker"]
-          : []),
+        ...(file === "tests/integration/kahroba-runtime.test.mjs" && selectedRuntimeTest
+          ? ["--testNamePattern", selectedRuntimeTest.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")]
+          : file === "tests/integration/kahroba-runtime.test.mjs" &&
+              process.argv.includes("--runtime-browser-only")
+            ? ["--testNamePattern", "actual (Web/API/Worker|palace public UI)"]
+            : []),
       ],
       {
         cwd: resolve(owner),
@@ -160,11 +172,13 @@ try {
     ? []
     : process.argv.includes("--bot-regression")
       ? ["sessions.test.ts", "bot-delivery.test.mjs"]
-      : process.argv.includes("--runtime")
-        ? ["kahroba-runtime.test.mjs"]
-        : process.argv.includes("--kahroba-only")
-          ? ["kahroba.test.ts"]
-          : apiSuites)
+      : process.argv.includes("--matchmaking-only")
+        ? ["matchmaking.test.ts"]
+        : process.argv.includes("--runtime")
+          ? ["kahroba-runtime.test.mjs"]
+          : process.argv.includes("--kahroba-only")
+            ? ["kahroba.test.ts"]
+            : apiSuites)
     await suite("apps/api", `tests/integration/${file}`);
   // Rebuild before the existing outbox quarantine suite inserts deliberately corrupt truth.
   const workerSuites = [
@@ -179,11 +193,13 @@ try {
     ? ["outbox.test.ts"]
     : process.argv.includes("--bot-regression")
       ? []
-      : process.argv.includes("--runtime")
-        ? ["kahroba.test.ts"]
-        : process.argv.includes("--kahroba-only")
+      : process.argv.includes("--matchmaking-only")
+        ? []
+        : process.argv.includes("--runtime")
           ? ["kahroba.test.ts"]
-          : workerSuites)
+          : process.argv.includes("--kahroba-only")
+            ? ["kahroba.test.ts"]
+            : workerSuites)
     await suite("apps/worker", `tests/integration/${file}`);
   console.info(
     "KAHROBA_K2_LOCAL_PASSED: fresh PostgreSQL/Redis, uncached API/Worker integration inventory; no deployment.",
@@ -196,7 +212,10 @@ try {
   const diagnostic =
     error && typeof error === "object" && "stderr" in error ? String(error.stderr) : "";
   for (const line of diagnostic.split("\n")) {
-    if (/^Error: [A-Za-z]+ fixture failed(?:: [A-Z_]+)?$/.test(line)) console.error(line);
+    if (
+      /^Error: (?:[A-Za-z]+ fixture failed|Fixture operation failed)(?:: [A-Z0-9_]+)?$/.test(line)
+    )
+      console.error(line);
     if (
       /^(?:Error: (?:Local command failed: [A-Z_]+|Local snapshot unavailable|Private [A-Za-z ]+ failed|Signed local authentication failed|Local runtime condition timed out)|TimeoutError: (?:locator\.[A-Za-z]+|page\.[A-Za-z]+): Timeout \d+ms exceeded\.)$/.test(
         line,

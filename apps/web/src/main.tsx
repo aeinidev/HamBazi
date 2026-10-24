@@ -92,9 +92,12 @@ function mount(app: TelegramApp | undefined) {
       import.meta.env.VITE_KAHROBA_RUNTIME === "true"
       ? createKahrobaRealtime
       : createRealtime,
-    import.meta.env.PROD &&
-      window.location.origin === "https://staging.hambazi.top" &&
-      import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top"
+    (import.meta.env.DEV &&
+      window.location.hostname === "127.0.0.1" &&
+      import.meta.env.VITE_KAHROBA_RUNTIME === "true") ||
+      (import.meta.env.PROD &&
+        window.location.origin === "https://staging.hambazi.top" &&
+        import.meta.env.VITE_API_ORIGIN === "https://api-staging.hambazi.top")
       ? "owner-auth"
       : "full",
     {

@@ -11,6 +11,7 @@ import { CoupEntry, CoupTutorial } from "../../games/coup/index.js";
 import { MidnightHeader } from "../../ui/midnight.js";
 import { ErrorNotice, go, useRuntime, useSession } from "../../ui/shared.js";
 import { HomeBottomNav, PersonalLobby } from "./personal-lobby.js";
+import { useFittedPageScroll } from "../../ui/fitted-page-scroll.js";
 
 export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | undefined }) {
   const session = useSession((s) => s.session);
@@ -36,6 +37,9 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   const profile = route === "/profile";
   const home = route === "/games";
   const homeFrame = home || profile;
+  const pageRef = useFittedPageScroll<HTMLDivElement>(
+    !session || home || profile || settings || entry,
+  );
   const unavailable = !home && !profile && !settings && !entry && !tutorial && !playing;
   const backPath = (tutorial || playing) && canStart ? "/games/coup" : "/games";
   const hasBack = !!session && !home;
@@ -90,7 +94,21 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   }
   return (
     <div
+      ref={pageRef}
       className={`app-shell midnight-shell ${homeFrame && session ? "home-shell" : ""}`}
+      data-screen={
+        !session
+          ? "auth"
+          : home
+            ? "home"
+            : profile
+              ? "profile"
+              : settings
+                ? "settings"
+                : entry
+                  ? "entry"
+                  : undefined
+      }
       dir="rtl"
       lang="fa"
     >

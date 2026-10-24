@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { lstat, readFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 import { parseBrowserPolicyArtifact } from "../security/browser-policy.ts";
 import { telegramSdkIntegrity } from "../src/platform/telegram-sdk.ts";
 
@@ -25,6 +27,31 @@ const port = (value) => {
   if (!/^\d{1,5}$/.test(value ?? "") || Number(value) < 1024 || Number(value) > 65535) invalid();
   return Number(value);
 };
+
+// Only public build assets may be cached; documents, errors and health stay no-store.
+const cachePolicy = (path, type) => {
+  if (!path.startsWith("/assets/") || !/^(text\/(javascript|css)|image\/|font\/)/.test(type))
+    return "no-store";
+  return /-[A-Za-z0-9_-]{8}\.(js|css)$/.test(path) ||
+    /-[a-f0-9]{12,64}\.(webp|png|jpe?g|svg|woff2?|ttf)$/.test(path)
+    ? "public, max-age=31536000, immutable"
+    : "public, no-cache";
+};
+function preferredEncoding(header) {
+  const qualities = new Map();
+  for (const entry of (header ?? "").toLowerCase().split(",")) {
+    const [name, ...parameters] = entry.trim().split(";");
+    const parameter = parameters
+      .map((value) => value.trim())
+      .find((value) => value.startsWith("q="));
+    const quality = parameter === undefined ? 1 : Number(parameter.slice(2));
+    qualities.set(name, Number.isFinite(quality) && quality >= 0 && quality <= 1 ? quality : 0);
+  }
+  const quality = (name) => qualities.get(name) ?? qualities.get("*") ?? 0;
+  return ["br", "gzip"]
+    .filter((name) => quality(name) > 0)
+    .sort((a, b) => quality(b) - quality(a))[0];
+}
 
 /** Serve only an immutable, prevalidated public asset inventory. No request logging. */
 export async function startStaticWeb(
@@ -56,17 +83,41 @@ export async function startStaticWeb(
       const data = await readFile(resolve(directory, path));
       bytes += data.length;
       if (bytes > 64 * 1024 * 1024) invalid();
-      files.set(`/${path}`, { data, type });
+      const headers = { "Cache-Control": cachePolicy(`/${path}`, type) };
+      if (headers["Cache-Control"] !== "no-store")
+        headers.ETag = `W/"${createHash("sha256").update(data).digest("hex")}"`;
+      const encodings = new Map();
+      if (data.length >= 1024 && /^(text\/|image\/svg\+xml)/.test(type)) {
+        headers.Vary = "Accept-Encoding";
+        for (const [name, compressed] of [
+          ["br", brotliCompressSync(data, { params: { [constants.BROTLI_PARAM_QUALITY]: 5 } })],
+          ["gzip", gzipSync(data, { level: 6 })],
+        ]) {
+          if (compressed.length >= data.length) continue;
+          bytes += compressed.length;
+          if (bytes > 64 * 1024 * 1024) invalid();
+          encodings.set(name, compressed);
+        }
+      }
+      files.set(`/${path}`, { data, type, headers, encodings });
     }
   }
   await collect();
   if (!files.has("/index.html")) invalid();
   let stopping = false;
-  const send = (response, status, body, type = "text/plain; charset=utf-8", head = false) => {
+  const send = (
+    response,
+    status,
+    body,
+    type = "text/plain; charset=utf-8",
+    head = false,
+    headers = {},
+  ) => {
     response.writeHead(status, {
       ...policy.headers,
       "Content-Type": type,
-      "Content-Length": body.length,
+      ...(status === 304 ? {} : { "Content-Length": body.length }),
+      ...headers,
     });
     response.end(head ? undefined : body);
   };
@@ -91,7 +142,22 @@ export async function startStaticWeb(
       }
       const file = files.get(path === "/" ? "/index.html" : path);
       if (!file) return send(response, 404, Buffer.from("Not found"));
-      send(response, 200, file.data, file.type, request.method === "HEAD");
+      const validators = request.headers["if-none-match"]
+        ?.split(",")
+        .map((value) => value.trim().replace(/^W\//, ""));
+      if (
+        file.headers.ETag &&
+        validators?.some(
+          (value) => value === "*" || value === file.headers.ETag.replace(/^W\//, ""),
+        )
+      )
+        return send(response, 304, Buffer.alloc(0), file.type, true, file.headers);
+      const encoding = preferredEncoding(request.headers["accept-encoding"]);
+      const compressed = file.encodings.get(encoding);
+      send(response, 200, compressed ?? file.data, file.type, request.method === "HEAD", {
+        ...file.headers,
+        ...(compressed ? { "Content-Encoding": encoding } : {}),
+      });
     },
   );
   const health = createServer({ maxHeaderSize: 4096 }, (request, response) => {

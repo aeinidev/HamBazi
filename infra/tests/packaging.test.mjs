@@ -2,6 +2,7 @@ import { createServer } from "node:net";
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 import { afterEach, expect, it } from "vitest";
 import { startStaticWeb } from "../../apps/web/server/serve.mjs";
 import { createBrowserPolicy } from "../../apps/web/security/browser-policy.ts";
@@ -104,6 +105,116 @@ it("rejects traversal, private/unknown assets and non-read methods without echoi
     expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
   }
   expect((await fetch(origin, { method: "POST", body: "synthetic" })).status).toBe(405);
+});
+it("caches public versioned assets and revalidates mutable artwork without caching documents or errors", async () => {
+  const { directory, environment } = await fixture();
+  for (const name of ["index-abCD12_-.js", "hero-123456789abc.webp", "gem-sapphire.webp"])
+    await writeFile(join(directory, "assets", name), "synthetic public bytes");
+  servers.push(await startStaticWeb(environment, directory));
+  const origin = `http://127.0.0.1:${environment.WEB_PORT}`;
+  for (const name of ["index-abCD12_-.js", "hero-123456789abc.webp", "gem-sapphire.webp"]) {
+    const url = `${origin}/assets/${name}`;
+    const response = await fetch(url);
+    expect(response.headers.get("cache-control")).toBe(
+      name === "gem-sapphire.webp" ? "public, no-cache" : "public, max-age=31536000, immutable",
+    );
+    const etag = response.headers.get("etag");
+    expect(etag).toMatch(/^W\/"[a-f0-9]{64}"$/);
+    const cached = await fetch(url, { headers: { "If-None-Match": `"other", ${etag}` } });
+    expect(cached.status).toBe(304);
+    expect(cached.headers.get("etag")).toBe(etag);
+    expect(cached.headers.get("content-security-policy")).toBe(
+      response.headers.get("content-security-policy"),
+    );
+    expect(await cached.text()).toBe("");
+    expect((await fetch(url, { headers: { "If-None-Match": 'W/"old-release"' } })).status).toBe(
+      200,
+    );
+  }
+  for (const path of ["/", "/index.html", "/missing.webp", "/security-headers.json"]) {
+    const response = await fetch(origin + path, { headers: { "If-None-Match": "*" } });
+    expect(response.status).not.toBe(304);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("etag")).toBeNull();
+  }
+  const health = await fetch(`http://127.0.0.1:${environment.WEB_HEALTH_PORT}/v1/health/ready`);
+  expect(health.headers.get("cache-control")).toBe("no-store");
+});
+it("precompresses public text, negotiates br/gzip and preserves HEAD, validators and identity fallback", async () => {
+  const { directory, environment } = await fixture();
+  const body = "/* synthetic public application */\n".repeat(1000);
+  await writeFile(join(directory, "assets/index-12345678.js"), body);
+  servers.push(await startStaticWeb(environment, directory));
+  const url = `http://127.0.0.1:${environment.WEB_PORT}/assets/index-12345678.js`;
+  const identity = await fetch(url, { headers: { "Accept-Encoding": "identity" } });
+  expect(identity.headers.get("content-encoding")).toBeNull();
+  expect(Number(identity.headers.get("content-length"))).toBe(Buffer.byteLength(body));
+  for (const [accept, encoding] of [
+    ["br, gzip", "br"],
+    ["gzip", "gzip"],
+    ["br;q=0, gzip", "gzip"],
+    ["br;q=0.5, gzip;q=1", "gzip"],
+    ["BR", "br"],
+    ["br;q=0, gzip;q=0", null],
+    ["deflate", null],
+  ]) {
+    const headers = { "Accept-Encoding": accept };
+    const response = await fetch(url, { headers });
+    expect(response.headers.get("content-encoding")).toBe(encoding);
+    expect(response.headers.get("vary")).toBe("Accept-Encoding");
+    expect(response.headers.get("etag")).toBe(identity.headers.get("etag"));
+    expect(await response.text()).toBe(body);
+    if (encoding)
+      expect(Number(response.headers.get("content-length"))).toBeLessThan(body.length / 5);
+    const head = await fetch(url, { method: "HEAD", headers });
+    expect(head.headers.get("content-length")).toBe(response.headers.get("content-length"));
+    expect(head.headers.get("content-encoding")).toBe(encoding);
+    expect(await head.text()).toBe("");
+    const cached = await fetch(url, {
+      headers: { ...headers, "If-None-Match": identity.headers.get("etag") },
+    });
+    expect(cached.status).toBe(304);
+    expect(cached.headers.get("vary")).toBe("Accept-Encoding");
+  }
+});
+it("forwards only public compression and cache validators through each static ingress", async () => {
+  for (const path of [
+    "../docker/server/nginx.conf",
+    "../docker/staging/owner.routes.conf",
+    "../docker/staging/bot-onboarding.routes.conf",
+  ]) {
+    const config = await readFile(new URL(path, import.meta.url), "utf8");
+    const location = config.match(
+      /location \/ \{\s*limit_except GET \{[^}]*\}[^}]*proxy_pass http:\/\/10\.89\.18\.13:8080;[^}]*\}/,
+    )?.[0];
+    expect(location).toContain("proxy_pass_request_headers off;");
+    expect(location).toContain("proxy_set_header Accept-Encoding $http_accept_encoding;");
+    expect(location).toContain("proxy_set_header If-None-Match $http_if_none_match;");
+    expect(location).not.toMatch(/proxy_set_header (Authorization|Cookie)/);
+  }
+});
+it("keeps lobby delivery artwork within transfer budgets and binds filenames to the delivered bytes", async () => {
+  const manifest = async (name) =>
+    JSON.parse(await readFile(new URL(`../../docs/design/${name}`, import.meta.url), "utf8"));
+  const home = (await manifest("lobby-delivery-assets.json")).assets;
+  const kahroba = (await manifest("kahroba-palace-lobby-assets.json")).assets.map(
+    (asset) => asset.delivery,
+  );
+  for (const [assets, budget] of [
+    [home, 300_000],
+    [kahroba, 800_000],
+  ]) {
+    let total = 0;
+    for (const asset of assets) {
+      const data = await readFile(new URL(`../../${asset.target}`, import.meta.url));
+      const digest = createHash("sha256").update(data).digest("hex");
+      expect(digest).toBe(asset.sha256);
+      expect(asset.target).toContain(`-${digest.slice(0, 12)}.webp`);
+      expect(data.length).toBe(asset.bytes);
+      total += data.length;
+    }
+    expect(total).toBeLessThanOrEqual(budget);
+  }
 });
 it("refuses changed browser policy, test profile and invalid bind/ports before listening", async () => {
   const { directory, policy, environment } = await fixture();

@@ -104,6 +104,7 @@ export async function startApi(
     ...profileConfig,
   });
   let http: Awaited<ReturnType<typeof createHttpApplication>> | undefined;
+  let kahrobaQueue: ReturnType<typeof createKahrobaRuntimePorts>["queue"];
   let kahrobaRedis: Awaited<ReturnType<typeof createRealtimeRedisAdapter>> | undefined;
   let kahrobaConsumer: ReturnType<typeof createRealtimeConsumer> | undefined;
   let kahrobaDeliveryReady = false;
@@ -217,8 +218,7 @@ export async function startApi(
       if (!ownerAdmission || !roomsConfig || !roomsRate || !admission || !admissionPolicy)
         throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
       const ids = await ownerAdmission.admittedTelegramIds();
-      if (ids.length < 2 || (!kahrobaConfig.local && ids.length !== 2))
-        throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
+      if (ids.length < 2) throw new Error("KAHROBA_RUNTIME_CONFIGURATION_INVALID");
       kahroba = createKahrobaRuntimePorts(database, {
         config: kahrobaConfig,
         clock,
@@ -230,7 +230,10 @@ export async function startApi(
         policy: admissionPolicy,
         origins: runtime.allowedOrigins,
         coexists: !!personalConfig,
+        matchmaking: { redisUrl: runtime.redisUrl, signing: auth.signing },
       });
+      kahrobaQueue = kahroba.queue;
+      await kahrobaQueue?.connect();
       if (!(await kahroba.catalog.find("kahroba")).ok)
         throw new Error("KAHROBA_REGISTRATION_REQUIRED");
       kahrobaRedis = await createRealtimeRedisAdapter({
@@ -259,6 +262,7 @@ export async function startApi(
                 config: kahrobaConfig,
                 canCreate: kahroba.canCreate,
                 privateRooms: kahroba.privateRooms,
+                publicLobby: kahroba.publicLobby,
                 resync: kahroba.resync,
                 names: kahroba.names,
                 rooms: kahroba.rooms,
@@ -357,6 +361,11 @@ export async function startApi(
               !!admission &&
               !!admissionPolicy &&
               (await ownerAdmission.allowsUserId(userId)),
+            !!kahroba &&
+              !!kahrobaConfig?.enabled &&
+              !!kahrobaConfig.admission &&
+              !!ownerAdmission &&
+              (await ownerAdmission.allowsUserId(userId)),
           ),
         authenticate: async (token) => {
           const result = await sessions.authenticate(token);
@@ -433,6 +442,7 @@ export async function startApi(
             roomsRate?.close();
             statisticsRate?.close();
             admission?.close();
+            kahrobaQueue?.close();
             await database.disconnect();
             await kahrobaRedis?.close();
             health.stopped();
@@ -465,6 +475,7 @@ export async function startApi(
     roomsRate?.close();
     statisticsRate?.close();
     admission?.close();
+    kahrobaQueue?.close();
     await database.disconnect().catch(() => {});
     health.stopped();
     await healthServer?.close().catch(() => {});

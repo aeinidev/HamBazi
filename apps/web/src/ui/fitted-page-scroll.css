@@ -1,0 +1,6 @@
+/* The marker is present only while the whole page fits the visible viewport. */
+html[data-fitted-page="true"],
+html[data-fitted-page="true"] body {
+  overflow-y: hidden;
+  overscroll-behavior-y: none;
+}

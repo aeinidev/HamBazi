@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-23",
+  "transformation": "Lanczos thumbnail, WebP quality 85 method 6; original artwork retained for large displays",
+  "assets": [
+    {
+      "source": "apps/web/public/assets/home/banner-95092dfe7663.webp",
+      "target": "apps/web/public/assets/home/banner-compact-decff74c918a.webp",
+      "sha256": "decff74c918a2bcd62c8a07ebcccc7060bd17d61256664b1d117c11fbcb996df",
+      "bytes": 43866,
+      "width": 800,
+      "height": 368
+    },
+    {
+      "source": "apps/web/public/assets/home/chess-5f0c34b275df.webp",
+      "target": "apps/web/public/assets/home/chess-compact-935a18136c27.webp",
+      "sha256": "935a18136c277736cd6191a2e83dc3b7be70683b666ba7736c3086ca7cb5aa49",
+      "bytes": 28074,
+      "width": 600,
+      "height": 331
+    },
+    {
+      "source": "apps/web/public/assets/home/coup-2811ce0e87a8.webp",
+      "target": "apps/web/public/assets/home/coup-compact-c91a98d5936d.webp",
+      "sha256": "c91a98d5936df822586ae04af329f002fc4a34a5fa0814d2ed7af842595d3580",
+      "bytes": 48572,
+      "width": 600,
+      "height": 338
+    },
+    {
+      "source": "apps/web/public/assets/home/domino-068f68864add.webp",
+      "target": "apps/web/public/assets/home/domino-compact-4eea02a3aa59.webp",
+      "sha256": "4eea02a3aa59d5016af49b85ba24eda56afac9eb2d73030ec6aa51fbb56b0bac",
+      "bytes": 27118,
+      "width": 600,
+      "height": 329
+    },
+    {
+      "source": "apps/web/public/assets/home/hokm-4a8999bf3214.webp",
+      "target": "apps/web/public/assets/home/hokm-compact-509c72d4b92e.webp",
+      "sha256": "509c72d4b92eb92b714801711ee49896e7c0dbaeb368e9beeef3530c7f0fbc45",
+      "bytes": 17258,
+      "width": 600,
+      "height": 330
+    },
+    {
+      "source": "apps/web/public/assets/home/kahroba-94b0289f428c.webp",
+      "target": "apps/web/public/assets/home/kahroba-compact-f0ffd1725a4f.webp",
+      "sha256": "f0ffd1725a4fe734e8007448a63ff8ddaf67f900575e2e7e640ee1708db67bf1",
+      "bytes": 54144,
+      "width": 600,
+      "height": 330
+    },
+    {
+      "source": "apps/web/public/assets/home/ludo-c8e10a82c8d8.webp",
+      "target": "apps/web/public/assets/home/ludo-compact-8239849c1461.webp",
+      "sha256": "8239849c14617e5c74f86def1965d8f11612f180d32e30098481605f3e36cdf4",
+      "bytes": 39448,
+      "width": 600,
+      "height": 337
+    }
+  ]
+}

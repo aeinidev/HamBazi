@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-22",
+  "sourceSite": "https://kahroba-palace-lobby.rareeagle6.chatgpt.site/",
+  "prototypeRevision": "76e156e92540b0d53167e03f297c7a062f942f90",
+  "provenance": "Generated artwork from the owner-approved palace prototype. Account portraits are obtained from authenticated sessions; the fictional demo portrait is not imported.",
+  "assets": [
+    {
+      "source": "/home/mehdi/Documents/ChatGPT/Hambazi/kahroba/dist/assets/palace.png",
+      "target": "apps/web/public/assets/kahroba/lobby-palace.png",
+      "bytes": 2870518,
+      "sha256": "aaa47257b75b06898779bb4ada2532c03bb1a86002227cb4db42fcc96e236e60",
+      "transformation": "byte-for-byte copy from the approved prototype",
+      "delivery": {
+        "target": "apps/web/public/assets/kahroba/lobby-palace-2397f45ce834.webp",
+        "bytes": 348856,
+        "sha256": "2397f45ce8347404a3abf768ad9d754f6736872ec549d2641d9e7fa5656d5051",
+        "width": 960,
+        "height": 1440,
+        "transformation": "Lanczos thumbnail, WebP quality 85 method 6; preserve alpha; original artwork retained"
+      }
+    },
+    {
+      "source": "/home/mehdi/Documents/ChatGPT/Hambazi/kahroba/dist/assets/kahroba-hero.png",
+      "target": "apps/web/public/assets/kahroba/lobby-hero.png",
+      "bytes": 2654247,
+      "sha256": "46832a97a073271888b820d62094fca635a6c683021c0d5c1c955c16ba17eeba",
+      "transformation": "byte-for-byte copy from the approved prototype",
+      "delivery": {
+        "target": "apps/web/public/assets/kahroba/lobby-hero-259e68ef0cb1.webp",
+        "bytes": 353228,
+        "sha256": "259e68ef0cb19ef3d78090ab5c151190202312f26eddabfe44a8f2cc48e74ba3",
+        "width": 960,
+        "height": 960,
+        "transformation": "Lanczos thumbnail, WebP quality 85 method 6; preserve alpha; original artwork retained"
+      }
+    }
+  ]
+}

@@ -35,24 +35,46 @@ for (const viewerIndex of [0, 1])
     expect(state.http.slice(1).sort()).toEqual(["GET /v1/games/availability", "GET /v1/me"]);
   });
 
-test("home shows six live cards and keeps future actions inert across direct routes", async ({
+test("home shows eight catalog cards and keeps future actions inert across direct routes", async ({
   page,
   request,
 }) => {
   const state = await setup(page, request);
   await launch(page);
-  await expect(page.locator(".home-game-card")).toHaveCount(6);
+  await expect(page.locator(".home-game-card")).toHaveCount(8);
   await expect(page.getByRole("button", { name: "کودتا، فعال" })).toBeEnabled();
-  for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
+  for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ", "اونو", "نبرد کشتی‌ها"])
     await expect(page.getByRole("button", { name: `${name}، به‌زودی` })).toBeDisabled();
   for (const name of [
-    "بازی پیدا کن، به‌زودی",
     "همه را ببینید، به‌زودی",
     "دوستان، به‌زودی",
-    "جدول، به‌زودی",
+    "برترین‌ها، به‌زودی",
+    "چت، به‌زودی",
     "اعلان‌ها، به‌زودی",
   ])
     await expect(page.getByRole("button", { name })).toBeDisabled();
+  const fixedTop = await page
+    .locator(".home-section-heading")
+    .evaluate((el) => el.getBoundingClientRect().top);
+  for (const id of ["uno", "battleship"]) {
+    const card = page.locator(`.home-game-${id}`);
+    await card.scrollIntoViewIfNeeded();
+    await expect(card).toBeInViewport();
+    await expect
+      .poll(() =>
+        card
+          .locator("img")
+          .evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0),
+      )
+      .toBe(true);
+    await card.evaluate((el: HTMLButtonElement) => el.click());
+    await expect(page).toHaveURL(/#\/games$/);
+  }
+  expect(await page.locator(".home-game-grid").evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  expect(
+    await page.locator(".home-section-heading").evaluate((el) => el.getBoundingClientRect().top),
+  ).toBe(fixedTop);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
   const calls = [...state.http];
   for (const path of [
     "/games/hokm",
@@ -76,7 +98,7 @@ test("home shows six live cards and keeps future actions inert across direct rou
   await page.getByRole("link", { name: "پروفایل" }).click();
   await expect(page).toHaveURL(/#\/profile$/);
   await expect(page.getByRole("heading", { name: "پروفایل" })).toBeVisible();
-  await page.getByRole("link", { name: "خانه" }).click();
+  await page.getByRole("link", { name: "بازی‌ها", exact: true }).click();
   await expect(page).toHaveURL(/#\/games$/);
 });
 
@@ -306,7 +328,9 @@ for (const size of [
     await nativeEvent(page, "safe_area_changed", { top: 20, bottom: 25, left: 0, right: 0 });
     expect(
       await page.evaluate(() =>
-        parseFloat(getComputedStyle(document.querySelector(".midnight-shell")!).paddingBottom),
+        parseFloat(
+          getComputedStyle(document.querySelector(".midnight-shell > main")!).paddingBottom,
+        ),
       ),
     ).toBeGreaterThanOrEqual(25);
     for (const screen of ["lobby", "entry", "tutorial"]) {

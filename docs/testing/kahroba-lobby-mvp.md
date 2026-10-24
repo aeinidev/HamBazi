@@ -1,5 +1,7 @@
 # Kahroba lobby: sharing-only MVP
 
+Historical acceptance report. Current implementation: [palace lobby](kahroba-palace-lobby.md) and [ADR 075](../adr/075-kahroba-palace-lobby-public-matchmaking.md).
+
 ## Scope
 
 The private Kahroba lobby follows the owner-supplied Midnight Neon reference with Persian RTL, the existing Kahroba palace/logo assets, safe-area spacing, room membership, settings, and disabled navigation. Only Share can be enabled. All other buttons have native `disabled` and no action handlers, including room creation, joining, readiness, starting, copy-code, player options and navigation. The only added backend surface is a private member-only public-name projection through the existing Rooms and Users application ports. It is additive in the private v2 runtime contract; frozen v1 and result contracts remain unchanged. No migration, dependency, SDK, admission policy or game-engine behavior changes.
