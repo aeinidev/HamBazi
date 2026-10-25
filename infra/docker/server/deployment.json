@@ -26,7 +26,7 @@
     },
     {
       "role": "web",
-      "image": "hambazi-desktop-window/web:20261025-4a2155e1de61e253@sha256:a2035ab3341cdaa6bd6953fc4ba305d8b167705a15d429ac11ffea6db1f94dc6"
+      "image": "hambazi-header-icons/web:20261025-3e1da9c675c0f176@sha256:98f2488faf1b369604529d514b51d53617f59330e407ccc32313f2f213c33998"
     }
   ],
   "dataRecovery": {
@@ -87,7 +87,8 @@
     "tabletopLoading": "passed-chromium-webkit-responsive-tabletop-artwork-three-second-minimum-departure-transition-fixed-dock-and-lobby-regression",
     "telegramWelcome": "passed-chromium-webkit-responsive-browser-entry-bot-link-no-guest-auth-and-authenticated-lobby-regression",
     "extendedLoading": "passed-chromium-webkit-extended-top-art-no-eyebrow-responsive-loading-minimum-duration-and-lobby-regression",
-    "desktopWindow": "passed-chromium-webkit-desktop-windowed-portrait-frame-mobile-native-presentation-and-lobby-regression"
+    "desktopWindow": "passed-chromium-webkit-desktop-windowed-portrait-frame-mobile-native-presentation-and-lobby-regression",
+    "headerIcons": "passed-chromium-webkit-header-icons-borderless-transparent-no-shadow-and-lobby-regression"
   },
   "securityRenewal": {
     "policy": "normal-24-hour-exact-image",
@@ -115,7 +116,8 @@
     "tabletopLoadingBindingVerifiedAtUTC": "2026-10-24T22:38:49.950707+00:00",
     "telegramWelcomeBindingVerifiedAtUTC": "2026-10-25T07:47:33.922716+00:00",
     "extendedLoadingBindingVerifiedAtUTC": "2026-10-25T08:02:37.724542+00:00",
-    "desktopWindowBindingVerifiedAtUTC": "2026-10-25T08:21:09.205245+00:00"
+    "desktopWindowBindingVerifiedAtUTC": "2026-10-25T08:21:09.205245+00:00",
+    "headerIconsBindingVerifiedAtUTC": "2026-10-25T08:36:03.901485+00:00"
   },
   "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
   "currentApplicationSources": {
@@ -135,9 +137,9 @@
       "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
     },
     "web": {
-      "sourceCommit": "836a231559c596ee5c58c568200688692248132f",
-      "sourceSnapshotSha256": "03e9f2d91eb85f65b5c121634c3e7919d5eda3b6e228d950363dbb344fc30474",
-      "buildInputSha256": "4a2155e1de61e2533fa5e1609c29daec44825368e96318898b4033e7c1d2bca4"
+      "sourceCommit": "c5229ead1631333015dc6e9e96aa8c0d30adbd6b",
+      "sourceSnapshotSha256": "b0de5dd016dc215b4ddfbcfe7e2aefb865ed15854fb45724ef3e43806eac48a8",
+      "buildInputSha256": "3e1da9c675c0f176f3be6f6c7b58270d3474698291c6660fabf9cae76b36f4c5"
     }
   },
   "cloudflareGateway": {
@@ -416,5 +418,13 @@
     "migrationRequired": false,
     "privateEvidenceDirectory": "/opt/hambazi/releases/desktop-window-20261025",
     "record": "docs/operations/telegram-welcome-deployment-20261025.md"
+  },
+  "headerIcons": {
+    "deployedAtUTC": "2026-10-25T08:36:03.901485+00:00",
+    "framelessButtons": true,
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/header-icons-20261025",
+    "record": "docs/operations/header-icons-deployment-20261025.md"
   }
 }

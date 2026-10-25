@@ -84,6 +84,8 @@ The [extended loading release](../../../docs/operations/extended-loading-deploym
 
 The [desktop window release](../../../docs/operations/desktop-window-deployment-20261025.md) limits automatic fullscreen to mobile Telegram clients and adds a 430px portrait content frame in wide desktop browser windows. Only Web was recreated.
 
+The [header icon release](../../../docs/operations/header-icons-deployment-20261025.md) removes the main lobby settings/notification button borders, background and shadow. Only Web was recreated.
+
 ## Inspect without exposing secrets
 
 Run these commands on the destination. Do not print rendered Compose or full
