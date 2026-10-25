@@ -299,7 +299,7 @@ services:
         bind:
           create_host_path: false
   web:
-    image: hambazi-home-list/web:20261024-c3e6cabe6c75b356@sha256:86a2e87cfcf309ea14cd0049c66b0007642007c00ffad84998540811ebd04b3f
+    image: hambazi-desktop-window/web:20261025-4a2155e1de61e253@sha256:a2035ab3341cdaa6bd6953fc4ba305d8b167705a15d429ac11ffea6db1f94dc6
     platform: linux/amd64
     pull_policy: never
     user: 1000:1000

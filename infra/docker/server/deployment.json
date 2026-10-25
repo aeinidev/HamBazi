@@ -26,7 +26,7 @@
     },
     {
       "role": "web",
-      "image": "hambazi-home-list/web:20261024-c3e6cabe6c75b356@sha256:86a2e87cfcf309ea14cd0049c66b0007642007c00ffad84998540811ebd04b3f"
+      "image": "hambazi-desktop-window/web:20261025-4a2155e1de61e253@sha256:a2035ab3341cdaa6bd6953fc4ba305d8b167705a15d429ac11ffea6db1f94dc6"
     }
   ],
   "dataRecovery": {
@@ -79,7 +79,15 @@
     "contentAwarePageLayout": "passed-chromium-and-webkit-30-production-page-size-checks-no-overflow-six-unchanged-table-geometries",
     "fittedPageScroll": "passed-chromium-webkit-fitted-vertical-touch-cancellation-overflow-release-long-sheet-edges-and-game-cleanup",
     "mainLobbyGameList": "passed-chromium-webkit-fixed-chrome-internal-catalog-scroll-and-touch-edge-containment",
-    "zodSecurityPatch": "passed-signed-registry-package-integrity-unchanged-application-runtime-contracts-integration-and-six-fresh-image-scans"
+    "zodSecurityPatch": "passed-signed-registry-package-integrity-unchanged-application-runtime-contracts-integration-and-six-fresh-image-scans",
+    "futureGames": "passed-chromium-webkit-uno-battleship-coming-soon-covers-fixed-chrome-internal-list-scroll",
+    "fantasyLoading": "passed-chromium-webkit-loading-transition-responsive-layout-reduced-motion-and-lobby-regression",
+    "launchGuard": "passed-chromium-webkit-minimum-three-second-loader-no-auth-header-and-lobby-regression",
+    "crystalLoading": "passed-chromium-webkit-matched-static-react-artwork-three-second-minimum-departure-transition-fixed-dock-and-lobby-regression",
+    "tabletopLoading": "passed-chromium-webkit-responsive-tabletop-artwork-three-second-minimum-departure-transition-fixed-dock-and-lobby-regression",
+    "telegramWelcome": "passed-chromium-webkit-responsive-browser-entry-bot-link-no-guest-auth-and-authenticated-lobby-regression",
+    "extendedLoading": "passed-chromium-webkit-extended-top-art-no-eyebrow-responsive-loading-minimum-duration-and-lobby-regression",
+    "desktopWindow": "passed-chromium-webkit-desktop-windowed-portrait-frame-mobile-native-presentation-and-lobby-regression"
   },
   "securityRenewal": {
     "policy": "normal-24-hour-exact-image",
@@ -87,7 +95,7 @@
     "hourlyTimer": "hambazi-server-security-renew.timer",
     "independentExpiryTimer": "hambazi-server-security-expiry.timer",
     "scheduledRunVerifiedAtUTC": "2026-10-20T15:01:09Z",
-    "observedDeadlineUTC": "2026-10-25T07:11:13Z",
+    "observedDeadlineUTC": "2026-10-26T07:10:41Z",
     "automaticApplicationStart": false,
     "automaticIngressReopen": false,
     "botReplacementRenewalVerifiedAtUTC": "2026-10-21T08:01:52.650939+00:00",
@@ -99,7 +107,15 @@
     "layoutRestoreBindingVerifiedAtUTC": "2026-10-23T23:54:03.513359+00:00",
     "contentAwareWebReleaseBindingVerifiedAtUTC": "2026-10-24T00:22:33.869484+00:00",
     "fittedScrollWebReleaseBindingVerifiedAtUTC": "2026-10-24T00:37:24.055806+00:00",
-    "homeGameListReleaseBindingVerifiedAtUTC": "2026-10-24T09:04:39.839977+00:00"
+    "homeGameListReleaseBindingVerifiedAtUTC": "2026-10-24T09:04:39.839977+00:00",
+    "futureGamesReleaseBindingVerifiedAtUTC": "2026-10-24T09:45:48.140001+00:00",
+    "fantasyLoadingReleaseBindingVerifiedAtUTC": "2026-10-24T11:34:51.671727+00:00",
+    "launchGuardReleaseBindingVerifiedAtUTC": "2026-10-24T21:50:31.247698+00:00",
+    "crystalLoadingBindingVerifiedAtUTC": "2026-10-24T22:21:50.641742+00:00",
+    "tabletopLoadingBindingVerifiedAtUTC": "2026-10-24T22:38:49.950707+00:00",
+    "telegramWelcomeBindingVerifiedAtUTC": "2026-10-25T07:47:33.922716+00:00",
+    "extendedLoadingBindingVerifiedAtUTC": "2026-10-25T08:02:37.724542+00:00",
+    "desktopWindowBindingVerifiedAtUTC": "2026-10-25T08:21:09.205245+00:00"
   },
   "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
   "currentApplicationSources": {
@@ -119,9 +135,9 @@
       "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
     },
     "web": {
-      "sourceCommit": "72a942e7bde1979c0b0f04dfc5915c2861325b35",
-      "sourceSnapshotSha256": "90ab2d70069e53ba4777222190f7ef1a023c7ca655d412c6adca34be71c1682c",
-      "buildInputSha256": "c3e6cabe6c75b35618ce18a4a83de93f5eda565e4e47a37992d57fc7a513cb11"
+      "sourceCommit": "836a231559c596ee5c58c568200688692248132f",
+      "sourceSnapshotSha256": "03e9f2d91eb85f65b5c121634c3e7919d5eda3b6e228d950363dbb344fc30474",
+      "buildInputSha256": "4a2155e1de61e2533fa5e1609c29daec44825368e96318898b4033e7c1d2bca4"
     }
   },
   "cloudflareGateway": {
@@ -327,5 +343,78 @@
       }
     ],
     "rollback": "patched-backend-images-and-previous-qualified-web"
+  },
+  "futureGames": {
+    "deployedAtUTC": "2026-10-24T09:45:48.140001+00:00",
+    "onlyWebRecreated": true,
+    "games": ["uno", "battleship"],
+    "status": "COMING_SOON",
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/future-games-20261024",
+    "record": "docs/operations/future-games-deployment-20261024.md"
+  },
+  "fantasyLoading": {
+    "deployedAtUTC": "2026-10-24T11:34:51.671727+00:00",
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/fantasy-loading-20261024",
+    "record": "docs/operations/fantasy-loading-deployment-20261024.md"
+  },
+  "launchGuard": {
+    "deployedAtUTC": "2026-10-24T21:50:31.247698+00:00",
+    "minimumLoadingMs": 3000,
+    "headerDuringAuthentication": false,
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/launch-guard-20261025",
+    "record": "docs/operations/launch-guard-deployment-20261025.md"
+  },
+  "crystalLoading": {
+    "deployedAtUTC": "2026-10-24T22:21:50.641742+00:00",
+    "minimumLoadingMs": 3000,
+    "departureMs": 360,
+    "arrivalMs": 480,
+    "arrival": "opacity-only-preserves-fixed-positioning",
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/crystal-loading-20261025",
+    "record": "docs/operations/crystal-loading-deployment-20261025.md"
+  },
+  "tabletopLoading": {
+    "deployedAtUTC": "2026-10-24T22:38:49.950707+00:00",
+    "minimumLoadingMs": 3000,
+    "departureMs": 360,
+    "arrivalMs": 480,
+    "arrival": "opacity-only-preserves-fixed-positioning",
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/tabletop-loading-20261025",
+    "record": "docs/operations/tabletop-loading-deployment-20261025.md"
+  },
+  "telegramWelcome": {
+    "deployedAtUTC": "2026-10-25T07:47:33.922716+00:00",
+    "botURL": "https://t.me/Hambazidev_bot",
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/telegram-welcome-20261025",
+    "record": "docs/operations/telegram-welcome-deployment-20261025.md"
+  },
+  "extendedLoading": {
+    "deployedAtUTC": "2026-10-25T08:02:37.724542+00:00",
+    "upwardExtendedArtwork": true,
+    "eyebrowRemoved": true,
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/extended-loading-20261025",
+    "record": "docs/operations/telegram-welcome-deployment-20261025.md"
+  },
+  "desktopWindow": {
+    "deployedAtUTC": "2026-10-25T08:21:09.205245+00:00",
+    "desktopPortraitWidth": 430,
+    "mobileOnlyFullscreen": true,
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "privateEvidenceDirectory": "/opt/hambazi/releases/desktop-window-20261025",
+    "record": "docs/operations/telegram-welcome-deployment-20261025.md"
   }
 }

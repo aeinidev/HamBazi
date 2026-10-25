@@ -1,11 +1,13 @@
 export interface TelegramApp {
   initData: string;
+  platform?: string;
   initDataUnsafe?: { start_param?: unknown };
   colorScheme?: string;
   viewportStableHeight?: number;
   isFullscreen?: boolean;
   isVersionAtLeast?(version: string): boolean;
   requestFullscreen?(): void;
+  exitFullscreen?(): void;
   disableVerticalSwipes?(): void;
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
@@ -51,12 +53,22 @@ export function readTelegramLaunch(app: TelegramApp | undefined) {
   };
 }
 const presentationRequested = new WeakSet<TelegramApp>();
+const isMobile = (app: TelegramApp | undefined) =>
+  app?.platform === "ios" || app?.platform === "android" || app?.platform === "android_x";
 
 function requestLaunchPresentation(app: TelegramApp | undefined) {
   if (!app || presentationRequested.has(app)) return;
   // One attempt per bridge/document, including failures and an already-fullscreen launch.
   // Native exit, activation, viewport changes and route changes never retry it.
   presentationRequested.add(app);
+  if (!isMobile(app)) {
+    try {
+      if (app.isFullscreen && app.isVersionAtLeast?.("8.0")) app.exitFullscreen?.();
+    } catch {
+      // Keep the normal window usable when the native client cannot restore it.
+    }
+    return;
+  }
   try {
     if (app.isVersionAtLeast?.("7.7")) app.disableVerticalSwipes?.();
   } catch {
@@ -83,6 +95,7 @@ export function bootstrapTelegram(app: TelegramApp | undefined) {
   window.history.replaceState(null, "", url.pathname + url.search + url.hash);
   const update = () => {
     const root = document.documentElement;
+    root.dataset.telegramMobile = String(isMobile(app));
     root.dataset.telegramTheme = app?.colorScheme === "dark" ? "dark" : "light";
     if (app?.viewportStableHeight)
       root.style.setProperty("--telegram-height", `${app.viewportStableHeight}px`);
@@ -103,7 +116,7 @@ export function bootstrapTelegram(app: TelegramApp | undefined) {
   ];
   for (const event of events) app?.onEvent(event, update);
   app?.ready();
-  app?.expand();
+  if (isMobile(app)) app?.expand();
   requestLaunchPresentation(app);
   return {
     app,

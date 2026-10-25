@@ -29,6 +29,11 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || "/games");
   const [startIntent, setStartIntent] = useState<string | undefined>();
   const [opening, setOpening] = useState(false);
+  const [launchDelayElapsed, setLaunchDelayElapsed] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLaunchDelayElapsed(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, []);
   const entering = useRef(false);
   const playing = route === "/games/coup/play" || /^\/match\/[0-9a-f-]{36}$/i.test(route);
   const tutorial = route === "/games/coup/tutorial";
@@ -37,6 +42,14 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   const profile = route === "/profile";
   const home = route === "/games";
   const homeFrame = home || profile;
+  const [launchComplete, setLaunchComplete] = useState(false);
+  const launchReady = !!session && launchDelayElapsed && (!homeFrame || !!identity.data);
+  useEffect(() => {
+    if (!launchReady || launchComplete) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => setLaunchComplete(true), reducedMotion ? 0 : 360);
+    return () => window.clearTimeout(timer);
+  }, [launchReady, launchComplete]);
   const pageRef = useFittedPageScroll<HTMLDivElement>(
     !session || home || profile || settings || entry,
   );
@@ -92,10 +105,11 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
       );
     return <HamBaziLoading />;
   }
+  if (session && !launchComplete) return <HamBaziLoading leaving={launchReady} />;
   return (
     <div
       ref={pageRef}
-      className={`app-shell midnight-shell ${homeFrame && session ? "home-shell" : ""}`}
+      className={`app-shell midnight-shell ${session && launchComplete ? "hambazi-launch-arrival" : ""} ${homeFrame && session ? "home-shell" : ""}`}
       data-screen={
         !session
           ? "auth"
@@ -122,11 +136,13 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
       >
         رفتن به محتوا
       </a>
-      <MidnightHeader
-        back={hasBack && !homeFrame ? back : undefined}
-        home={homeFrame}
-        onSettings={() => go("/settings")}
-      />
+      {session && (
+        <MidnightHeader
+          back={hasBack && !homeFrame ? back : undefined}
+          home={homeFrame}
+          onSettings={() => go("/settings")}
+        />
+      )}
       <main id="main" tabIndex={-1} key={session?.sessionId ?? "guest"}>
         {!session ? (
           <AuthScreen />

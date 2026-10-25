@@ -1,0 +1,34 @@
+/* Native desktop clients retain their normal window. Wide browser windows use
+   the same portrait content width; fixed controls keep the viewport as owner. */
+@media (min-width: 700px) and (min-height: 480px) and (hover: hover) and (pointer: fine) {
+  html:not([data-telegram-mobile="true"]) {
+    background: #020716;
+  }
+  html:not([data-telegram-mobile="true"]) #root {
+    width: 430px;
+    max-width: 100%;
+    min-height: 100dvh;
+    margin-inline: auto;
+    box-shadow: 0 0 70px #0006;
+  }
+  html:not([data-telegram-mobile="true"]) .hambazi-loading,
+  html:not([data-telegram-mobile="true"]) #root .kh-backdrop {
+    max-width: 430px;
+    margin-inline: auto;
+  }
+  html:not([data-telegram-mobile="true"]) #root .home-bottom-nav {
+    width: 406px;
+    max-width: calc(100% - 24px);
+  }
+  html:not([data-telegram-mobile="true"]) #root .home-bottom-nav :is(a, button) {
+    font-size: 13px;
+  }
+  html:not([data-telegram-mobile="true"]) #root .telegram-welcome {
+    display: flex;
+  }
+  html:not([data-telegram-mobile="true"]) #root .telegram-welcome-art {
+    width: calc(100% + 48px);
+    height: clamp(160px, 32svh, 300px);
+    margin: 0 -24px -5px;
+  }
+}

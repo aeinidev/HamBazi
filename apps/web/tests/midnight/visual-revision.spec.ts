@@ -18,6 +18,7 @@ for (const size of [
     await page.goto("https://staging.hambazi.top/");
     await expect(page.getByRole("status", { name: "در حال بارگذاری هم‌بازی" })).toBeVisible();
     await page.evaluate(() => document.fonts.load('900 52px "Vazirmatn"'));
+    await page.locator(".hambazi-loading-art").evaluate((el) => (el as HTMLImageElement).decode());
     expect(
       await page.evaluate(
         () => getComputedStyle(document.querySelector(".hambazi-loading")!).position,
@@ -82,11 +83,11 @@ for (const size of [
     for (const ratio of [layout.bannerRatio, layout.cardRatio, layout.chessRatio, layout.coupRatio])
       expect(ratio).toBeGreaterThan(1);
     await expect(page.locator(".home-card-arrow svg")).toHaveCount(1);
-    await expect(page.locator(".home-card-badge")).toHaveCount(5);
+    await expect(page.locator(".home-card-badge")).toHaveCount(7);
     const art = await page
       .locator(".home-screen img")
       .evaluateAll((imgs) => imgs.map((img) => img.getAttribute("src")));
-    expect(art).toHaveLength(7);
+    expect(art).toHaveLength(9);
     expect(art.every((src) => /^\/assets\/home\/[a-z]+-[a-f0-9]{12}\.webp$/.test(src!))).toBe(true);
     const delivered = await page.locator(".home-screen img").evaluateAll((imgs) =>
       imgs.map((img) => ({
@@ -146,7 +147,10 @@ test("fantasy header stays below native controls and the dock respects bottom in
   expect(geometry.iconLoaded).toBe(true);
 });
 
-test("auth and profile loading never reveal a guessed home identity", async ({ page, request }) => {
+test("auth and profile loading never reveal a guessed home identity", async ({
+  page,
+  request,
+}, info) => {
   await setup(page, request);
   let releaseAuth!: () => void;
   let releaseProfile!: () => void;
@@ -180,13 +184,41 @@ test("auth and profile loading never reveal a guessed home identity", async ({ p
   });
   await page.goto(`https://staging.hambazi.top/?${query}#${query}`);
   await expect(page.locator(".hambazi-loading")).toBeVisible();
+  await expect(page.locator(".midnight-header,.home-header")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "تنظیمات", exact: true })).toHaveCount(0);
   await expect(page.locator(".home-identity,.home-game-grid")).toHaveCount(0);
+  for (const size of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 844, height: 320 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.locator(".hambazi-loading-art").evaluate((el) => (el as HTMLImageElement).decode());
+    const content = await page.locator(".hambazi-loading-content").boundingBox();
+    const footer = await page.locator(".hambazi-loading-footer").boundingBox();
+    expect(content!.y).toBeGreaterThanOrEqual(0);
+    expect(content!.y + content!.height).toBeLessThanOrEqual(footer!.y);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      size.width,
+    );
+    await page.screenshot({ path: info.outputPath(`fantasy-loading-${size.width}.png`) });
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(
+    await page
+      .locator(".hambazi-loading-orbit")
+      .evaluate((el) => getComputedStyle(el).animationName),
+  ).toBe("none");
+  await page.setViewportSize({ width: 390, height: 844 });
   releaseAuth();
   await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/games");
   await expect(page.locator(".hambazi-loading")).toBeVisible();
+  await expect(page.locator(".midnight-header,.home-header")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "تنظیمات", exact: true })).toHaveCount(0);
   await expect(page.locator(".home-identity,.home-game-grid")).toHaveCount(0);
   releaseProfile();
   await expect(page.locator(".home-game-grid")).toBeVisible();
+  await expect(page.locator(".home-header")).toBeVisible();
   await expect(page.locator(".hambazi-loading")).toHaveCount(0);
 });
 
@@ -208,3 +240,59 @@ for (const endpoint of ["registered-session-photo", "me"]) {
     await expect(page.locator(".hambazi-loading")).toHaveCount(0);
   });
 }
+
+test("launch loading lasts at least three seconds with fast server responses", async ({
+  page,
+  request,
+}) => {
+  await setup(page, request);
+  await page.addInitScript(() => {
+    const timings = { loading: 0, home: 0, leaving: 0, leakedHeader: false };
+    Object.assign(window, { launchTimings: timings });
+    new MutationObserver(() => {
+      if (!timings.loading && document.querySelector(".hambazi-loading"))
+        timings.loading = performance.now();
+      if (document.querySelector(".hambazi-loading.is-leaving")) {
+        timings.leaving ||= performance.now();
+        timings.leakedHeader ||= !!document.querySelector(".home-header");
+      }
+      if (!timings.home && document.querySelector(".home-game-grid"))
+        timings.home = performance.now();
+    }).observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  });
+  await launch(page);
+  await expect(page.locator(".home-game-grid")).toBeVisible();
+  const duration = await page.evaluate(() => {
+    const timings = (window as unknown as { launchTimings: { loading: number; home: number } })
+      .launchTimings;
+    return timings.home - timings.loading;
+  });
+  expect(duration).toBeGreaterThanOrEqual(2900);
+  const transition = await page.evaluate(
+    () =>
+      (
+        window as unknown as {
+          launchTimings: { leaving: number; home: number; leakedHeader: boolean };
+        }
+      ).launchTimings,
+  );
+  expect(transition.leaving).toBeGreaterThan(0);
+  expect(transition.home - transition.leaving).toBeGreaterThanOrEqual(300);
+  expect(transition.leakedHeader).toBe(false);
+  // The arrival must not create a containing block for the fixed lobby dock.
+  expect(
+    await page.locator(".hambazi-launch-arrival").evaluate((el) => getComputedStyle(el).transform),
+  ).toBe("none");
+  await expect(page.locator("html")).toHaveAttribute("data-fitted-page", "true");
+  const dock = await page.locator(".home-bottom-nav").boundingBox();
+  const width = await page.evaluate(() => innerWidth);
+  expect(dock!.x).toBeGreaterThanOrEqual(0);
+  expect(dock!.x + dock!.width).toBeLessThanOrEqual(width);
+  await expect(page.locator(".hambazi-loading")).toHaveCount(0);
+  await expect(page.locator(".home-header")).toBeVisible();
+});

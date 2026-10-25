@@ -13,11 +13,13 @@ function fixture(version = 8) {
   });
   const app: TelegramApp = {
     initData: "synthetic-memory-only",
+    platform: "ios",
     isFullscreen: false,
     isVersionAtLeast: (minimum) => version >= Number(minimum),
     ready: vi.fn(),
     expand: vi.fn(),
     requestFullscreen: vi.fn(),
+    exitFullscreen: vi.fn(),
     disableVerticalSwipes: vi.fn(),
     onEvent: (event, callback) => callbacks.set(event, callback),
     offEvent: (event) => callbacks.delete(event),
@@ -28,6 +30,63 @@ function fixture(version = 8) {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Telegram launch presentation", () => {
+  it.each(["tdesktop", "macos", "unigram", "web", "weba", "webk", "unknown", undefined])(
+    "keeps %s in its normal window without expansion or fullscreen",
+    (platform) => {
+      const { app, callbacks } = fixture();
+      if (platform === undefined) delete app.platform;
+      else app.platform = platform;
+      const result = bootstrapTelegram(app);
+      callbacks.get("viewportChanged")!();
+      result.dispose();
+      bootstrapTelegram(app).dispose();
+      expect(app.expand).not.toHaveBeenCalled();
+      expect(app.requestFullscreen).not.toHaveBeenCalled();
+      expect(app.exitFullscreen).not.toHaveBeenCalled();
+      expect(app.disableVerticalSwipes).not.toHaveBeenCalled();
+      expect(result.initData).toBe("synthetic-memory-only");
+    },
+  );
+
+  it("restores an already-fullscreen desktop window once and respects later user changes", () => {
+    const { app, callbacks } = fixture();
+    app.platform = "tdesktop";
+    app.isFullscreen = true;
+    const result = bootstrapTelegram(app);
+    callbacks.get("fullscreenChanged")!();
+    result.dispose();
+    bootstrapTelegram(app).dispose();
+    expect(app.exitFullscreen).toHaveBeenCalledOnce();
+    expect(app.requestFullscreen).not.toHaveBeenCalled();
+  });
+
+  it.each(["android", "android_x", "ios"])("preserves fullscreen on %s", (platform) => {
+    const { app } = fixture();
+    app.platform = platform;
+    bootstrapTelegram(app).dispose();
+    expect(app.expand).toHaveBeenCalledOnce();
+    expect(app.requestFullscreen).toHaveBeenCalledOnce();
+    expect(app.exitFullscreen).not.toHaveBeenCalled();
+  });
+
+  it("keeps desktop authentication usable when restoring the window is unsupported", () => {
+    const { app } = fixture();
+    app.platform = "tdesktop";
+    app.isFullscreen = true;
+    app.exitFullscreen = vi.fn(() => {
+      throw new Error("unsupported native bridge");
+    });
+    expect(bootstrapTelegram(app).initData).toBe("synthetic-memory-only");
+    expect(app.exitFullscreen).toHaveBeenCalledOnce();
+    bootstrapTelegram(app).dispose();
+    expect(app.exitFullscreen).toHaveBeenCalledOnce();
+    const missing = fixture(7.7).app;
+    missing.platform = "macos";
+    missing.isFullscreen = true;
+    delete missing.exitFullscreen;
+    expect(bootstrapTelegram(missing).initData).toBe("synthetic-memory-only");
+    expect(missing.requestFullscreen).not.toHaveBeenCalled();
+  });
   it("requests native fullscreen once, preserves auth/route and respects intentional exit", () => {
     const { app, callbacks } = fixture();
     const first = bootstrapTelegram(app);

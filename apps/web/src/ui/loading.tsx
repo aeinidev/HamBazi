@@ -1,18 +1,43 @@
-/** No timer or minimum duration: callers remove this as soon as their data is ready. */
-export function HamBaziLoading() {
+/** Presentation only; the launch shell owns the minimum duration and readiness gates. */
+export function HamBaziLoading({ leaving = false }: { leaving?: boolean }) {
   return (
-    <div className="hambazi-loading" role="status" lang="fa" aria-label="در حال بارگذاری هم‌بازی">
-      <div className="hambazi-loading-mark" aria-hidden="true">
-        <svg viewBox="0 0 40 40">
-          <rect x="13" y="7" width="21" height="27" rx="4" />
-          <path d="m10 9-5 2 3 23 5-1M24 16c-4-5-10 2 0 8 10-6 4-13 0-8Z" />
-        </svg>
+    <div
+      className={`hambazi-loading${leaving ? " is-leaving" : ""}`}
+      role="status"
+      lang="fa"
+      aria-label="در حال بارگذاری هم‌بازی"
+    >
+      <div className="hambazi-loading-stars" aria-hidden="true" />
+      <div className="hambazi-loading-scene">
+        <img
+          className="hambazi-loading-art"
+          src="/assets/loading/tabletop-extended-640-f0d102a98360.webp"
+          srcSet="/assets/loading/tabletop-extended-640-f0d102a98360.webp 640w, /assets/loading/tabletop-extended-1024-3fab4717a03b.webp 1024w"
+          sizes="(max-height: 380px) 52vw, (max-width: 640px) 100vw, 640px"
+          width="1024"
+          height="1792"
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+        />
       </div>
-      <div className="hambazi-loading-name" aria-hidden="true">
-        <span>هم</span>‌بازی
+      <div className="hambazi-loading-content" aria-hidden="true">
+        <div className="hambazi-loading-mark" />
+        <div className="hambazi-loading-name">
+          <span>هم</span>‌بازی
+        </div>
+        <p className="hambazi-loading-tagline">دور هم بازی کنیم، خاطره بسازیم</p>
+        <div className="hambazi-loading-progress">
+          <div className="hambazi-loading-track" />
+          <p className="hambazi-loading-caption">
+            <span className="hambazi-loading-orbit" />
+            در حال آماده‌سازی میز بازی<span className="hambazi-loading-dots">…</span>
+          </p>
+        </div>
       </div>
-      <p aria-hidden="true">در حال بارگذاری…</p>
-      <div className="hambazi-loading-track" aria-hidden="true" />
+      <div className="hambazi-loading-footer" aria-hidden="true">
+        <span>✦</span> کنار هم، بیشتر خوش می‌گذره <span>✦</span>
+      </div>
     </div>
   );
 }

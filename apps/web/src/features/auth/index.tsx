@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Panel, go, useRuntime, useSession, useTask } from "../../ui/shared.js";
 import { HamBaziLoading } from "../../ui/loading.js";
+import { TelegramWelcome } from "./telegram-welcome.js";
 export function AuthScreen({ localPreview = false }: { localPreview?: boolean }) {
   const runtime = useRuntime();
   const preview = import.meta.env.DEV && localPreview;
@@ -75,24 +76,16 @@ export function AuthScreen({ localPreview = false }: { localPreview?: boolean })
         </Panel>
       </div>
     );
+  if (runtime.scope === "owner-auth" && !available)
+    return <TelegramWelcome expired={expired}>{task.notice}</TelegramWelcome>;
   if (runtime.scope === "owner-auth")
     return (
       <div className="welcome" lang="fa" dir="rtl">
         <Panel title="ورود به هم‌بازی">
-          {!available ? (
-            <p>
-              {expired
-                ? "نشستت پایان یافته است. مینی‌اپ را دوباره از ربات باز کن."
-                : "برای ورود، مینی‌اپ هم‌بازی را از ربات تلگرام باز کن."}
-            </p>
-          ) : (
-            <>
-              <p role="status">{task.pending ? "در حال ورود…" : "با حساب تلگرام خودت وارد شو."}</p>
-              <button disabled={task.blocked} onClick={submit}>
-                {task.pending ? "در حال ورود…" : "ورود با تلگرام"}
-              </button>
-            </>
-          )}
+          <p role="status">{task.pending ? "در حال ورود…" : "با حساب تلگرام خودت وارد شو."}</p>
+          <button disabled={task.blocked} onClick={submit}>
+            {task.pending ? "در حال ورود…" : "ورود با تلگرام"}
+          </button>
           {task.notice}
         </Panel>
       </div>

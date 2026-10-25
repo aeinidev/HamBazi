@@ -7,8 +7,9 @@
 }
 
 html:has(.hambazi-loading) {
-  background: #001226;
+  background: #050d1b;
   color-scheme: dark;
+  overscroll-behavior: none;
 }
 body {
   margin: 0;
@@ -18,88 +19,269 @@ body {
   position: fixed;
   inset: 0;
   z-index: 30;
-  min-height: 100dvh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: max(24px, var(--telegram-top, 0px)) 24px max(24px, var(--telegram-bottom, 0px));
+  padding: max(24px, var(--telegram-top, 0px)) 24px
+    max(60px, calc(var(--telegram-bottom, 0px) + 42px));
   overflow: hidden;
+  isolation: isolate;
+  touch-action: none;
   direction: rtl;
   color: #f7f6ff;
   background:
-    radial-gradient(ellipse at 18% 25%, #6828ac40, transparent 48%),
-    radial-gradient(ellipse at 84% 74%, #0089df35, transparent 45%), #001226;
+    radial-gradient(ellipse at 22% 15%, #56387c30, transparent 52%),
+    radial-gradient(ellipse at 80% 80%, #087b8e20, transparent 55%),
+    radial-gradient(ellipse at 50% 42%, #132d40 0%, #081627 32%, #050d1b 72%);
   font-family: "Vazirmatn", Tahoma, sans-serif;
 }
-.hambazi-loading-mark {
-  display: grid;
-  place-items: center;
-  width: 96px;
-  height: 96px;
-  margin-bottom: 24px;
-  border: 1px solid #58dfff;
-  border-radius: 29px;
-  color: #1ee8ff;
-  background: linear-gradient(140deg, #092d59, #201449);
+.hambazi-loading::before,
+.hambazi-loading::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 80vmin;
+  height: 80vmin;
+  border: 1px solid #b8a0ff0d;
+  border-radius: 50%;
   box-shadow:
-    0 0 24px #08ceff45,
-    inset 0 0 24px #9070f230;
-  transform: rotate(-8deg);
+    0 0 0 45px #b8a0ff04,
+    0 0 0 90px #b8a0ff03;
+  pointer-events: none;
 }
-.hambazi-loading-mark svg {
-  width: 60px;
-  height: 60px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.hambazi-loading::after {
+  width: 100%;
+  height: 40%;
+  bottom: -28%;
+  border: 0;
+  background: #05d9f3;
+  filter: blur(90px);
+  opacity: 0.1;
+}
+.hambazi-loading-stars {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.32;
+  background-image:
+    radial-gradient(circle, #adbdff 1px, transparent 1.8px),
+    radial-gradient(circle, #e8c68c 1px, transparent 1.8px);
+  background-size:
+    127px 151px,
+    193px 217px;
+  background-position:
+    25px 39px,
+    81px 102px;
+  mask-image: linear-gradient(transparent, #000 20%, #000 75%, transparent);
+}
+.hambazi-loading-content {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: min(100%, 420px);
+}
+.hambazi-loading-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #eee0c6;
+  text-shadow:
+    0 1px 8px #02091c,
+    0 1px 3px #02091c;
+  font-size: 11px;
+}
+.hambazi-loading-eyebrow span {
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c2b18f);
+}
+.hambazi-loading-eyebrow span:last-child {
+  transform: rotate(180deg);
+}
+.hambazi-loading-mark {
+  position: relative;
+  width: calc(100% + 48px);
+  height: clamp(230px, 47vh, 420px);
+  margin: 4px -24px -8px;
+  flex-shrink: 0;
+}
+.hambazi-loading-scene {
+  position: absolute;
+  inset: 0 0 auto;
+  width: min(100%, 640px);
+  height: 74%;
+  margin-inline: auto;
+  pointer-events: none;
+  mask-image: linear-gradient(#000 0%, #000 65%, transparent 100%);
+}
+.hambazi-loading-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+.hambazi-loading-orbit {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  vertical-align: -2px;
+  border: 1px solid #d7b98035;
+  border-top-color: #efd7a6;
+  border-right-color: #6fe3e7;
+  border-radius: 50%;
+  animation: hambazi-orbit 1.8s linear infinite;
 }
 .hambazi-loading-name {
-  font-size: 52px;
+  font-size: clamp(42px, 8vw, 56px);
   font-weight: 900;
-  line-height: 1.4;
-  text-shadow: 0 0 24px #6355da66;
+  line-height: 1.5;
+  text-shadow:
+    0 3px 0 #20304b,
+    0 0 32px #80adff35;
 }
 .hambazi-loading-name span {
-  color: #22e2ff;
+  color: #9be3e8;
 }
-.hambazi-loading p {
-  margin: 8px 0 22px;
-  font:
-    15px/1.8 Tahoma,
-    sans-serif;
-  color: #c6baff;
+.hambazi-loading-tagline {
+  margin: 0;
+  font-size: 14px;
+  color: #c1c8e1;
+}
+.hambazi-loading-progress {
+  width: min(240px, 82%);
+  margin-top: 25px;
 }
 .hambazi-loading-track {
-  width: 144px;
-  height: 3px;
+  box-sizing: content-box;
+  height: 2px;
   overflow: hidden;
-  border-radius: 4px;
-  background: #4c408d66;
+  border: 1px solid #7f93c529;
+  border-radius: 20px;
+  background: #02091c;
+  padding: 0;
+  direction: ltr;
 }
 .hambazi-loading-track::after {
   content: "";
   display: block;
-  width: 50%;
+  width: 38%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #9871fa, #22e2ff);
-  animation: hambazi-loading 1.25s ease-in-out infinite alternate;
+  background: linear-gradient(90deg, transparent, #9be3e8, #eed6ae);
+  box-shadow: 0 0 12px #63dfff80;
+  animation: hambazi-loading 2.4s ease-in-out infinite alternate;
+}
+.hambazi-loading-caption {
+  margin: 14px -16px 0;
+  font-size: 11px;
+  color: #97a6c8;
+  line-height: 1.8;
+}
+.hambazi-loading-dots {
+  display: inline-block;
+  width: 1em;
+}
+.hambazi-loading-footer {
+  position: absolute;
+  bottom: max(22px, calc(var(--telegram-bottom, 0px) + 16px));
+  font-size: 10px;
+  color: #7c8aa7;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.hambazi-loading-footer span {
+  color: #bfa378;
+  font-size: 8px;
 }
 @keyframes hambazi-loading {
   from {
-    transform: translateX(-100%);
+    transform: translateX(0);
   }
   to {
-    transform: translateX(0);
+    transform: translateX(163%);
+  }
+}
+@keyframes hambazi-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes hambazi-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@media (max-height: 560px) {
+  .hambazi-loading-mark {
+    width: min(calc(100% + 32px), 300px);
+    height: 40vh;
+    margin-top: 0;
+  }
+  .hambazi-loading-name {
+    font-size: 40px;
+  }
+  .hambazi-loading-progress {
+    margin-top: 20px;
+  }
+  .hambazi-loading-eyebrow {
+    font-size: 10px;
+  }
+}
+@media (max-height: 380px) {
+  .hambazi-loading-scene {
+    inset: 0 0 0 auto;
+    width: 52%;
+    height: 100%;
+    mask-image: linear-gradient(to left, #000 65%, transparent);
+  }
+  .hambazi-loading-content {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    column-gap: 18px;
+    width: min(100%, 480px);
+  }
+  .hambazi-loading-mark {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    width: 190px;
+    height: 200px;
+    margin: 0;
+  }
+  .hambazi-loading-eyebrow {
+    display: none;
+  }
+  .hambazi-loading-name,
+  .hambazi-loading-tagline,
+  .hambazi-loading-progress {
+    grid-column: 2;
+  }
+  .hambazi-loading-progress {
+    width: 100%;
+    margin-top: 18px;
+  }
+  .hambazi-loading-tagline {
+    font-size: 11px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hambazi-loading-track::after {
+  .hambazi-loading *,
+  .hambazi-loading *::after {
     animation: none;
-    width: 100%;
+  }
+  .hambazi-loading-track::after {
+    width: 38%;
+    margin-inline: auto;
+    opacity: 0.8;
   }
 }
 
@@ -109,4 +291,52 @@ body {
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+}
+
+/* Finish the launch before mounting the lobby: no header or interaction leaks. */
+.hambazi-loading.is-leaving .hambazi-loading-content,
+.hambazi-loading.is-leaving .hambazi-loading-footer {
+  animation: hambazi-launch-depart 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.hambazi-loading.is-leaving .hambazi-loading-stars {
+  transition: opacity 360ms ease;
+  opacity: 0;
+}
+/* Opacity preserves viewport positioning for the fixed lobby dock and sheets. */
+.hambazi-launch-arrival {
+  animation: hambazi-launch-arrive 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes hambazi-launch-depart {
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(1.025);
+  }
+}
+@keyframes hambazi-launch-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hambazi-loading.is-leaving .hambazi-loading-content,
+  .hambazi-loading.is-leaving .hambazi-loading-footer,
+  .hambazi-launch-arrival {
+    animation: none;
+  }
+  .hambazi-loading.is-leaving .hambazi-loading-stars {
+    transition: none;
+  }
+}
+
+.hambazi-loading.is-leaving .hambazi-loading-scene {
+  transition: opacity 360ms ease;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hambazi-loading.is-leaving .hambazi-loading-scene {
+    transition: none;
+  }
 }

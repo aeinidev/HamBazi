@@ -14,20 +14,44 @@
       crossorigin
     />
     <link rel="stylesheet" href="/src/ui/launch.css" />
+    <link rel="stylesheet" href="/src/ui/desktop-frame.css" />
     <title>HamBazi · هم‌بازی</title>
   </head>
   <body>
     <div id="root">
       <div class="hambazi-loading" role="status" lang="fa" aria-label="در حال بارگذاری هم‌بازی">
-        <div class="hambazi-loading-mark" aria-hidden="true">
-          <svg viewBox="0 0 40 40">
-            <rect x="13" y="7" width="21" height="27" rx="4" />
-            <path d="m10 9-5 2 3 23 5-1M24 16c-4-5-10 2 0 8 10-6 4-13 0-8Z" />
-          </svg>
+        <div class="hambazi-loading-stars" aria-hidden="true"></div>
+        <div class="hambazi-loading-scene">
+          <img
+            class="hambazi-loading-art"
+            src="/assets/loading/tabletop-extended-640-f0d102a98360.webp"
+            srcset="
+              /assets/loading/tabletop-extended-640-f0d102a98360.webp   640w,
+              /assets/loading/tabletop-extended-1024-3fab4717a03b.webp 1024w
+            "
+            sizes="(max-height: 380px) 52vw, (max-width: 640px) 100vw, 640px"
+            width="1024"
+            height="1792"
+            alt=""
+            fetchpriority="high"
+            decoding="async"
+          />
         </div>
-        <div class="hambazi-loading-name" aria-hidden="true"><span>هم</span>‌بازی</div>
-        <p aria-hidden="true">در حال بارگذاری…</p>
-        <div class="hambazi-loading-track" aria-hidden="true"></div>
+        <div class="hambazi-loading-content" aria-hidden="true">
+          <div class="hambazi-loading-mark"></div>
+          <div class="hambazi-loading-name"><span>هم</span>‌بازی</div>
+          <p class="hambazi-loading-tagline">دور هم بازی کنیم، خاطره بسازیم</p>
+          <div class="hambazi-loading-progress">
+            <div class="hambazi-loading-track"></div>
+            <p class="hambazi-loading-caption">
+              <span class="hambazi-loading-orbit"></span>
+              در حال آماده‌سازی میز بازی<span class="hambazi-loading-dots">…</span>
+            </p>
+          </div>
+        </div>
+        <div class="hambazi-loading-footer" aria-hidden="true">
+          <span>✦</span> کنار هم، بیشتر خوش می‌گذره <span>✦</span>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

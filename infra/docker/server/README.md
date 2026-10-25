@@ -54,6 +54,36 @@ keeps the lobby stationary while added games scroll inside the catalog. A requir
 Zod 4.6.6 security derivative also recreates API/Bot/Worker while preserving their
 application runtime bytes; data services, admission and ingress remain unchanged.
 
+The [future-game covers release](../../../docs/operations/future-games-deployment-20261024.md)
+adds UNO and Battleship as disabled coming-soon cards with optimized covers.
+Only Web was recreated; backend and data identities remain unchanged.
+
+The [fantasy loading release](../../../docs/operations/fantasy-loading-deployment-20261024.md)
+redesigns the launch screen with inline SVG, responsive styling and reduced-motion
+support. Only Web was recreated.
+
+The [launch guard release](../../../docs/operations/launch-guard-deployment-20261025.md)
+hides the guest header and keeps the launch loader visible for at least three
+seconds while requests proceed concurrently. Only Web was recreated.
+
+The [crystal loading release](../../../docs/operations/crystal-loading-deployment-20261025.md)
+updates the static and React launch artwork and stages loader departure and lobby
+arrival. The arrival uses opacity to preserve fixed dock positioning. Only Web
+was recreated.
+
+The [fantasy tabletop loading release](../../../docs/operations/tabletop-loading-deployment-20261025.md)
+adds responsive fantasy board-game artwork to the static and React launch screens.
+The existing loader departure and lobby arrival remain. The arrival uses opacity to preserve fixed dock positioning. Only Web
+was recreated.
+
+The [Telegram welcome release](../../../docs/operations/telegram-welcome-deployment-20261025.md)
+adds a responsive fantasy entry page with clearer browser/expired-session guidance
+and a link to the existing Telegram bot. Only Web was recreated.
+
+The [extended loading release](../../../docs/operations/extended-loading-deployment-20261025.md) extends the fantasy artwork to the top of the loading screen and removes its eyebrow copy. Only Web was recreated.
+
+The [desktop window release](../../../docs/operations/desktop-window-deployment-20261025.md) limits automatic fullscreen to mobile Telegram clients and adds a 430px portrait content frame in wide desktop browser windows. Only Web was recreated.
+
 ## Inspect without exposing secrets
 
 Run these commands on the destination. Do not print rendered Compose or full

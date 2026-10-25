@@ -5,6 +5,7 @@ import { bootstrapTelegram, type TelegramApp } from "../../src/platform/telegram
 
 const app: TelegramApp = {
   initData: "SYNTHETIC_PRIVATE",
+  platform: "ios",
   ready: vi.fn(),
   expand: vi.fn(),
   onEvent: vi.fn(),
