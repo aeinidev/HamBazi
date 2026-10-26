@@ -23,7 +23,7 @@
     "@hambazi/config": "workspace:*",
     "@hambazi/contracts": "workspace:*",
     "@hambazi/observability": "workspace:*",
-    "fastify": "5.12.5",
+    "fastify": "5.12.7",
     "grammy": "1.46.0",
     "zod": "4.6.6"
   },
@@ -31,7 +31,7 @@
     "@hambazi/typescript": "workspace:*",
     "@types/node": "24.13.4",
     "@types/node-fetch": "2.6.13",
-    "vitest": "5.0.0",
+    "vitest": "5.0.5",
     "typescript": "6.0.3"
   },
   "files": [

@@ -88,6 +88,12 @@ try {
       "infra/scripts/build-local-postgres.mjs",
     ]),
     gate("redis-image-pull", "docker", ["pull", compose.services.redis.image]),
+    gate("admin-postgres-image-pull", "docker", [
+      "pull",
+      "postgres@sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650",
+    ]),
+    gate("admin-integration", "pnpm", ["--filter", "@hambazi/api", "test:admin:local"]),
+    gate("admin-browser", "pnpm", ["--filter", "@hambazi/admin", "test:browser"]),
     gate("images", "node", ["infra/scripts/security-scan.mjs", "images"]),
     gate(
       "application-image-build",

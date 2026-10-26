@@ -61,3 +61,5 @@ export function createRegistrationPort(
     clock,
   });
 }
+
+export { createUsersAdminReadRepository as createUsersAdminRead } from "./infrastructure/repositories/admin-read.js";

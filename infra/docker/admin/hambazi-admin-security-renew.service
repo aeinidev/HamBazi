@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew exact-image private Admin security evidence
+After=network-online.target hambazi-admin.service
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/hambazi/admin/ops/admin-security.py --renew
+TimeoutStartSec=20min

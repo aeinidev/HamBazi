@@ -118,3 +118,5 @@ export function createPublicLobbyPort(
 ) {
   return publicLobbyService(createPublicLobbyRepository(database), processing, options);
 }
+
+export { createMatchesAdminReadRepository as createMatchesAdminRead } from "./infrastructure/repositories/admin-read.js";

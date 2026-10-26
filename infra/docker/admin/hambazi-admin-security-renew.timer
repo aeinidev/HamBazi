@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly private Admin advisory renewal
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=1h
+Persistent=true
+Unit=hambazi-admin-security-renew.service
+
+[Install]
+WantedBy=timers.target

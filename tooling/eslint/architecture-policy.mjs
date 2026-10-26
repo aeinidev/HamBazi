@@ -21,7 +21,16 @@ export const apiDependencies = {
   admin: ["users", "games", "rooms", "matches"],
   health: [],
 };
-export const databaseOwners = ["auth", "users", "games", "rooms", "matches", "chat", "leaderboard"];
+export const databaseOwners = [
+  "admin",
+  "auth",
+  "users",
+  "games",
+  "rooms",
+  "matches",
+  "chat",
+  "leaderboard",
+];
 const common = ["shared", "contracts", "validation"];
 const workspaceDependencies = {
   shared: [],
@@ -33,6 +42,7 @@ const workspaceDependencies = {
   "game-core": common,
   api: [...common, "config", "database", "game-core", "observability"],
   web: common,
+  admin: common,
   bot: [...common, "config", "api", "observability"],
   worker: [...common, "config", "database", "api", "observability"],
 };
@@ -237,7 +247,7 @@ export function createPolicy(root, workspaces = readWorkspaces(root)) {
       !workerComposition
     )
       return "Bot/Worker must use an explicitly exported application module port, not API startup.";
-    if (from.workspace.id === "web" && to.workspace.id === "web") {
+    if (["web", "admin"].includes(from.workspace.id) && from.workspace.id === to.workspace.id) {
       const owner = (file) => file.match(/^src\/(features\/[^/]+|games\/[^/]+)\//)?.[1];
       if (
         owner(from.file) !== owner(to.file) &&

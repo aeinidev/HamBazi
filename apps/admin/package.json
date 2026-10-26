@@ -1,0 +1,42 @@
+{
+  "name": "@hambazi/admin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --project tsconfig.build.json && vite build",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run tests/unit",
+    "test:browser": "playwright test",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@hambazi/contracts": "workspace:*",
+    "@hambazi/validation": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "@tanstack/react-query": "5.104.0",
+    "zod": "4.6.6"
+  },
+  "devDependencies": {
+    "@hambazi/typescript": "workspace:*",
+    "typescript": "6.0.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/node": "24.13.4",
+    "vite": "8.3.5",
+    "@vitejs/plugin-react": "6.1.1",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3",
+    "vitest": "5.0.5",
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

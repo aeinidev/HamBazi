@@ -14,3 +14,5 @@ export function createPrivateRegistrationCatalog(
 export function createCatalogPort(database: Parameters<typeof createCatalogRepository>[0]) {
   return catalogService(createCatalogRepository(database));
 }
+
+export { createGamesAdminReadRepository as createGamesAdminRead } from "./infrastructure/repositories/admin-read.js";

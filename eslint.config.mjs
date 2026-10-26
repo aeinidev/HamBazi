@@ -26,7 +26,7 @@ export default defineConfig([
     extends: [node],
   },
   {
-    files: ["apps/web/src/**/*.{ts,tsx}"],
+    files: ["apps/{web,admin}/src/**/*.{ts,tsx}"],
     extends: [browser],
   },
 ]);

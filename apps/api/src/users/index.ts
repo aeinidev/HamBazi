@@ -14,3 +14,5 @@ export type { PublicNamesPort } from "./application/public-names.js";
 
 export { createRegistrationPort } from "./module.js";
 export type { RegistrationPort, RegistrationProfile } from "./application/registration.js";
+
+export { createUsersAdminRead } from "./module.js";

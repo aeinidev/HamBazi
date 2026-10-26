@@ -9,3 +9,5 @@ export { createCatalogRate } from "./infrastructure/catalog-rate.js";
 export { catalogOpenApiDocument } from "./infrastructure/catalog-contract.js";
 
 export { lobbyAvailability } from "./application/availability.js";
+
+export { createGamesAdminRead } from "./module.js";

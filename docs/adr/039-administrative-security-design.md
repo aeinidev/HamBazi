@@ -1,10 +1,20 @@
 # ADR-039: Separate administrative authority and audited owner-port mutations
 
+> **بازنگری معتبر فاز یک — ۲۰۲۶-۱۰-۲۵:** [ADR-081](081-admin-local-password-and-owner-pin.md) تصمیم جدید و مرجع احراز هویت Admin است: ورود محلی Username/Password، مرحلهٔ PIN ثابت شش‌رقمی فقط برای OWNER، قفل دائمی پس از سه PIN اشتباه و بازیابی خصوصی با دو proof مستقل. Password + PIN ثابت **MFA مستقل یا مقاوم به فیشینگ نیست**. بندهای قبلی OIDC/IdP، MFA خارجی، ورود/دعوت بر اساس subject خارجی و بازیابی provider در این سند در محدودهٔ Admin منسوخ‌اند؛ اصل OWNER/RBAC/private ingress/audit و یکپارچگی بازی حفظ است. فاز یک با تأیید صریح مالک آغاز شده؛ [گزارش اجرایی فاز یک](../implementation/admin-dashboard-phase-1.md) دامنه و شواهد جاری را مشخص می‌کند. فاز دو، حساب واقعی و deployment مجوز ندارند. مطالب «فقط Markdown/فاز صفر» در بخش‌های قدیمی، سابقهٔ زمان تدوین‌اند.
+
 - Status: Accepted security requirements/design for Phase 17A3; implementation
   and provider/role assignments require the separately authorized Phase 7C gate
 - Owner: HamBazi engineering; product/operations owns provider, operators and approvals
 - Date: 2026-10-03
 - Related: ADR-018, ADR-023, ADR-030, ADR-031, ADR-033, ADR-036; architecture section 16
+
+**2026-10-25 design amendment:** [ADR-079](079-owner-and-admin-access-control.md)
+partially supersedes the uniform explicit-grant assumption below for the protected
+human `OWNER`, and specifies administrator lifecycle, custom permissions and the
+owner-final approval path. It does not supersede authentication, MFA, private
+ingress, durable audit or owning-module integrity requirements. No account or
+implementation is activated. In this ADR, an "owner port/transaction" means the
+owning application module, not the human OWNER principal.
 
 ## Context
 
@@ -23,11 +33,17 @@ audience and keys. Deny player/Bot credentials, unsolicited issuer/key URLs and
 spoofed proxy identity. Require both verified operator identity with MFA and
 approved private peer/network access; neither substitutes for the other.
 
-Authorize explicit capabilities per action, deny unknown roles and recheck
-current authorization, revocation and MFA freshness even on retries. The
-[design](../security/admin-security-design.md) proposes a capability matrix and
-phishing-resistant step-up requirements for owner review; it assigns nobody and
-selects no provider, numeric session lifetime or product-session refresh policy.
+Authorize registered capabilities per action and recheck current authorization,
+revocation and MFA freshness even on retries. Under ADR-079 the protected OWNER
+receives all registered current/future capabilities, while non-owner roles need
+explicit grants and scoped overrides; unknown capabilities still deny for all.
+The [design](../security/admin-security-design.md) and
+[access specification](../architecture/admin-access-control.md) retain
+phishing-resistant step-up and assign nobody. OWNER_FINAL replaces the second
+human requirement only for a verified owner decision; security/domain guards
+remain. Provider and ordinary session lifetime remain environment decisions;
+ADR-079 defines the proposed revocation/decision/emergency timing profile without
+altering product-session policy.
 
 Call only owning application ports. Games checks revisions/readiness/admission;
 Matches preserves its atomic writer and pinned active behavior; statistics
@@ -59,9 +75,11 @@ reconciliation must be operationally visible.
 ## Consequences
 
 This delivers a reviewable design, not executable RBAC/MFA or admin endpoints.
-Phase 7C remains mandatory before game activation. Owner choices for provider,
-verified MFA claim mapping/recovery, network inventory, role assignments,
-approval separation, time bounds and audit retention/access remain open. General
+Phase 7C remains mandatory before game activation. Provider, verified MFA claim
+mapping/recovery, network inventory, real role assignments and audit
+retention/access remain environment gates. ADR-079 now defines protected root
+authority, permission precedence, owner-final decisions and a timing profile
+requiring implementation qualification. General
 retention/erasure stays OD-005; identity/session design does not change ADR-014.
 7C must prove the listed authorization, race, failure, audit and grant tests,
 including effect/outcome recovery, before its own gate. Existing operational

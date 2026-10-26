@@ -43,3 +43,5 @@ export { parseKahrobaRuntimeConfig } from "./kahroba-runtime.js";
 export type { KahrobaRuntimeConfig } from "./kahroba-runtime.js";
 
 export { parseGameAvailabilityConfig } from "./game-availability.js";
+export { parseAdminConfig } from "./admin.js";
+export type { AdminConfig } from "./admin.js";

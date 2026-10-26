@@ -9,6 +9,14 @@ import {
 } from "./architecture-policy.mjs";
 
 const delegates = {
+  admin: [
+    "adminRealm",
+    "adminOperator",
+    "adminSession",
+    "adminAuthReceipt",
+    "adminGrant",
+    "adminAuditEvent",
+  ],
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow", "botSupportSubmission"],
   users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],

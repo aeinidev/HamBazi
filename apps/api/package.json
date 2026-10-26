@@ -35,12 +35,15 @@
   },
   "scripts": {
     "start": "node dist/composition/main.js",
-    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write && node scripts/realtime-contract.mjs --write && node scripts/statistics-contract.mjs --write && node scripts/personal-contract.mjs --write && node scripts/kahroba-contract.mjs --write && node scripts/kahroba-runtime-contract.mjs --write",
-    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs && node scripts/statistics-contract.mjs && node scripts/personal-contract.mjs && node scripts/kahroba-contract.mjs && node scripts/kahroba-runtime-contract.mjs",
+    "contract:generate": "node scripts/auth-contract.mjs --write && node scripts/bot-contract.mjs --write && node scripts/profile-contract.mjs --write && node scripts/catalog-contract.mjs --write && node scripts/rooms-contract.mjs --write && node scripts/realtime-contract.mjs --write && node scripts/statistics-contract.mjs --write && node scripts/personal-contract.mjs --write && node scripts/kahroba-contract.mjs --write && node scripts/kahroba-runtime-contract.mjs --write && node scripts/admin-contract.mjs --write",
+    "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs && node scripts/statistics-contract.mjs && node scripts/personal-contract.mjs && node scripts/kahroba-contract.mjs && node scripts/kahroba-runtime-contract.mjs && node scripts/admin-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
-    "test": "vitest run tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime tests/chat tests/leaderboard",
-    "test:integration": "vitest run tests/integration"
+    "test": "vitest run tests/admin tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime tests/chat tests/leaderboard",
+    "test:integration": "vitest run tests/integration",
+    "start:admin": "node dist/composition/admin-main.js",
+    "admin:provision": "node dist/composition/admin-provision.js",
+    "test:admin:local": "node tests/admin/local.mjs"
   },
   "dependencies": {
     "@hambazi/config": "workspace:*",
@@ -48,28 +51,29 @@
     "@hambazi/coup-engine": "workspace:*",
     "@hambazi/database": "workspace:*",
     "@hambazi/game-core": "workspace:*",
+    "@hambazi/kahroba-engine": "workspace:*",
     "@hambazi/observability": "workspace:*",
+    "@hambazi/validation": "workspace:*",
     "@nestjs/common": "12.0.3",
     "@nestjs/core": "12.0.3",
     "@nestjs/platform-fastify": "12.0.3",
     "@socket.io/redis-adapter": "8.3.0",
+    "argon2": "0.45.1",
     "bullmq": "6.3.8",
-    "fastify": "5.12.5",
+    "fastify": "5.12.7",
     "jose": "6.2.12",
     "redis": "6.2.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
     "socket.io": "4.8.3",
-    "zod": "4.6.6",
-    "@hambazi/kahroba-engine": "workspace:*",
-    "@hambazi/validation": "workspace:*"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@hambazi/typescript": "workspace:*",
     "@types/node": "24.13.4",
     "socket.io-client": "4.8.3",
     "typescript": "6.0.3",
-    "vitest": "5.0.0"
+    "vitest": "5.0.5"
   },
   "files": [
     "dist"

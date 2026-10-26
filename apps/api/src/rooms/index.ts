@@ -10,3 +10,5 @@ export { roomStartSnapshotSchema, roomStartPageSchema } from "./application/star
 export type { RoomStartSnapshot } from "./application/start.js";
 
 export { roomResponseSchema } from "./infrastructure/rooms-contract.js";
+
+export { createRoomsAdminRead } from "./module.js";

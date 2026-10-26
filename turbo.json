@@ -49,7 +49,8 @@
         "$TURBO_ROOT$/docs/contracts/realtime.delivery.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/realtime.chat.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/statistics.v1.baseline.json",
-        "$TURBO_ROOT$/docs/contracts/kahroba.result.v2.baseline.json"
+        "$TURBO_ROOT$/docs/contracts/kahroba.result.v2.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/admin.v1.baseline.json"
       ],
       "outputs": []
     },

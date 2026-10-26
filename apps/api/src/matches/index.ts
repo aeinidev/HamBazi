@@ -98,3 +98,5 @@ export {
   publicSearchSchema,
   type PublicLobbyPort,
 } from "./application/public-lobby.js";
+
+export { createMatchesAdminRead } from "./module.js";

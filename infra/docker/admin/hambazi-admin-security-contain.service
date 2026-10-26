@@ -1,0 +1,8 @@
+[Unit]
+Description=Close expired private Admin without changing player services
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/hambazi/admin/ops/admin-security.py --contain
+TimeoutStartSec=60

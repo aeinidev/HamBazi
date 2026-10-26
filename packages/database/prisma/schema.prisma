@@ -523,3 +523,73 @@ model BotSupportSubmission {
   @@index([botId, telegramUserId, status])
   @@map("bot_support_submissions")
 }
+
+
+// Admin identity is independent of Telegram/player accounts. Runtime tables have separate grants.
+model AdminRealm {
+  id String @id
+  ownerId String? @unique @map("owner_id") @db.Uuid
+  ownershipEpoch Int @default(0) @map("ownership_epoch")
+  policyRevision Int @default(1) @map("policy_revision")
+  @@map("admin_realms")
+}
+model AdminOperator {
+  id String @id @db.Uuid
+  realmId String @map("realm_id")
+  username String
+  passwordVerifier String @map("password_verifier")
+  pinVerifier String? @map("pin_verifier")
+  credentialVersion Int @map("credential_version")
+  sessionEpoch Int @map("session_epoch")
+  authorizationVersion Int @map("authorization_version")
+  status String
+  pinFailures Int @default(0) @map("pin_failures")
+  lockedAt DateTime? @map("locked_at") @db.Timestamptz(3)
+  @@unique([realmId, username])
+  @@map("admin_operators")
+}
+model AdminSession {
+  id String @id @db.Uuid
+  realmId String @map("realm_id")
+  operatorId String @map("operator_id") @db.Uuid
+  kind String
+  credentialVersion Int @map("credential_version")
+  sessionEpoch Int @map("session_epoch")
+  issuedAt DateTime @map("issued_at") @db.Timestamptz(3)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @map("last_seen_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  @@index([operatorId, expiresAt])
+  @@map("admin_sessions")
+}
+model AdminAuthReceipt {
+  operatorId String @map("operator_id") @db.Uuid
+  commandId String @map("command_id") @db.Uuid
+  digest String @db.Char(64)
+  outcome String
+  sessionId String? @map("session_id") @db.Uuid
+  @@id([operatorId, commandId])
+  @@map("admin_auth_receipts")
+}
+model AdminGrant {
+  id String @id @db.Uuid
+  realmId String @map("realm_id")
+  operatorId String @map("operator_id") @db.Uuid
+  permission String
+  environment String
+  allGames Boolean @default(false) @map("all_games")
+  gameIds String[] @map("game_ids")
+  deny Boolean @default(false)
+  @@index([operatorId, realmId])
+  @@map("admin_grants")
+}
+model AdminAuditEvent {
+  id String @id @db.Uuid
+  realmId String @map("realm_id")
+  operatorId String? @map("operator_id") @db.Uuid
+  commandId String @map("command_id") @db.Uuid
+  event String
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+  @@index([realmId, occurredAt, id])
+  @@map("admin_audit_events")
+}

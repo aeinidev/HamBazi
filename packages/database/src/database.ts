@@ -4,6 +4,14 @@ import type { Prisma } from "./generated/prisma/client.js";
 import { Pool } from "pg";
 
 const ownership = {
+  admin: [
+    "adminRealm",
+    "adminOperator",
+    "adminSession",
+    "adminAuthReceipt",
+    "adminGrant",
+    "adminAuditEvent",
+  ],
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow", "botSupportSubmission"],
   users: ["user", "userSettings", "profileMutationReceipt"],
   games: ["game"],
@@ -55,6 +63,7 @@ type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
       }
     : object) &
+  (O extends "admin" ? { lockAdminRealm(realmId: string): Promise<void> } : object) &
   (O extends "rooms" ? { lockRooms(): Promise<void> } : object) &
   (O extends "leaderboard" ? { lockStatistics(): Promise<void> } : object) &
   (O extends "outbox"
@@ -151,6 +160,15 @@ function scope<O extends DatabaseOwner>(
           : client[key],
       ]),
     ),
+    ...(owner === "admin"
+      ? {
+          async lockAdminRealm(realmId: string): Promise<void> {
+            if (!inTransaction || !/^[a-z][a-z0-9-]{0,63}$/.test(realmId))
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            await client.$queryRaw`SELECT 1 AS locked FROM (SELECT pg_advisory_xact_lock(182081, hashtext(${realmId}))) AS guard`;
+          },
+        }
+      : {}),
     ...(owner === "leaderboard"
       ? {
           async lockStatistics(): Promise<void> {

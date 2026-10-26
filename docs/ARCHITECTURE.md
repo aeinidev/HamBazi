@@ -1086,7 +1086,7 @@ Client logic باید بر error code پایدار تکیه کند، نه متن
 
 - Redis adapter channelها trusted internal traffic هستند؛ credential و ACL آن از cache/job access در صورت امکان جدا می‌شود.
 
-- Admin route از public API جدا، با MFA/RBAC، allowlist یا private access و audit append-only محافظت می‌شود.
+- Admin route از public API جدا، با احراز هویت مستقل، RBAC، allowlist یا private access و audit append-only محافظت می‌شود. طبق [ADR-081](adr/081-admin-local-password-and-owner-pin.md)، ورود Admin محلی با Username/Password و برای OWNER مرحلهٔ PIN ثابت شش‌رقمی است؛ Password + PIN ثابت MFA مستقل یا مقاوم به فیشینگ نیست. این تصمیم فقط الزام MFA/IdP ورود Admin را بازنگری می‌کند و حفاظت شبکه، OWNER، Audit و یکپارچگی بازی را تغییر نمی‌دهد.
 
 - Dependency scanning، secret scanning، lockfile integrity و container image scanning بخشی از CI release gate هستند.
 

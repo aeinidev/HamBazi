@@ -1,48 +1,43 @@
 # Administrative security design — Phase 17A3
 
+> **بازنگری معتبر فاز یک — ۲۰۲۶-۱۰-۲۵:** [ADR-081](../adr/081-admin-local-password-and-owner-pin.md) تصمیم جدید و مرجع احراز هویت Admin است: ورود محلی Username/Password، مرحلهٔ PIN ثابت شش‌رقمی فقط برای OWNER، قفل دائمی پس از سه PIN اشتباه و بازیابی خصوصی با دو proof مستقل. Password + PIN ثابت **MFA مستقل یا مقاوم به فیشینگ نیست**. بندهای قبلی OIDC/IdP، MFA خارجی، ورود/دعوت بر اساس subject خارجی و بازیابی provider در این سند در محدودهٔ Admin منسوخ‌اند؛ اصل OWNER/RBAC/private ingress/audit و یکپارچگی بازی حفظ است. فاز یک با تأیید صریح مالک آغاز شده؛ [گزارش اجرایی فاز یک](../implementation/admin-dashboard-phase-1.md) دامنه و شواهد جاری را مشخص می‌کند. فاز دو، حساب واقعی و deployment مجوز ندارند. مطالب «فقط Markdown/فاز صفر» در بخش‌های قدیمی، سابقهٔ زمان تدوین‌اند.
+
 [ADR-039](../adr/039-administrative-security-design.md) records the architecture
 requirements and ownership. This document is a design for review and future
 7C implementation. No admin identity provider, credential, role assignment,
 listener, route, database grant or privileged mutation is implemented here.
 
-## Identity, private ingress and sessions
+**2026-10-25 amendment:** [ADR-079](../adr/079-owner-and-admin-access-control.md)
+and the [Persian access specification](../architecture/admin-access-control.md)
+govern protected OWNER authority, custom RBAC, individual ALLOW/DENY scopes,
+administrator management and OWNER_FINAL decisions. The original Phase 17A3
+security boundaries remain in force. "Owning module" and human `OWNER` are
+different concepts; neither human role grants raw persistence access.
 
-Use a separate private TLS listener/origin and Admin authentication port with
-an explicit issuer/audience/key trust configuration. Product Telegram sessions,
-payload user IDs and Bot service credentials never satisfy Admin authentication.
-Pin allowed algorithms and local/provider-reviewed keys; never follow a
-client-provided issuer/JWKS/key URL. Validate signature, audience, issuer,
-expiry/not-before and required MFA evidence. Network access additionally requires
-an approved private path and explicit peer/allowlist policy; if an ingress uses
-mTLS, authenticate its certificates. Trust forwarded identity/address headers
-only from inventoried ingress peers that remove client-supplied equivalents.
-Fail closed on missing configuration or unverifiable identity/network evidence.
+## Local identity, private ingress and sessions — ADR-081
 
-Require provider-verified phishing-resistant MFA and recent step-up for mutations,
-not an `mfa: true` request field. Validate the provider's reviewed assurance/AMR
-mapping and authenticate the operator independently of the private host. Recheck
-current roles, revoked/disabled status, expiry and step-up freshness for each
-action and each retry. Unknown capabilities/roles deny. New actions fail closed
-on provider/authorization outages; a committed effect stays committed.
+یک صفحهٔ Username/Password و هیچ signup عمومی وجود دارد. فقط backend اعتبارسنجی می‌کند؛ root binding، نه input/role/provider claim، OWNER را تعیین می‌کند. مدیر عادی مستقیم FULL و مالک ابتدا PENDING بدون مجوز، سپس با PIN ثابت شش رقم وارد می‌شود. هیچ Telegram/Google/OIDC/TOTP/Authenticator/SMS/email در این ورود وجود ندارد. **Password و PIN ثابت MFA مستقل یا phishing-resistant نیستند.**
 
-Owner review must select identity provider/enrollment/recovery, MFA assertion
-mapping, operator roster, key rotation/revocation propagation and explicit
-absolute/idle/step-up durations. No guessed numeric defaults or local bypass
-account. Key rotation may overlap reviewed verification keys; it cannot extend
-expired assertions or broaden issuer trust. Recovery/break-glass needs a separate
-approved audited policy, not disabling MFA during an incident.
+Argon2id با saltهای مستقل و HMAC PIN pepper خارج DB، verifierها را محافظت می‌کند. کلید امضای session، pepper و command/CSRF key مستقل‌اند. raw credential/verifier/token/cookie در log/audit/response ممنوع است؛ فقط verifier در جدول Admin استثنای محدود مصوب بر ممنوعیت تاریخی credential hash است. روی verifier ذخیره‌شده پیش از KDF محدودیت پارامتر اعمال می‌شود. هزینه و همزمانی KDF، pool و درخواست‌ها bounded هستند.
 
-If 7C adds an operator browser console, use a distinct origin with framing denied,
-strict CSP and no public telemetry payloads. Choose its session transport explicitly;
-any cookie-based session needs Secure/HttpOnly, reviewed SameSite, CSRF and exact
-Origin checks. Do not repurpose Mini App bearer sessions or resolve its separate
-refresh-token question. No operator UI is included in this phase.
+پس از password معتبر، wrong PIN در transaction قفل‌شدهٔ PostgreSQL شمرده می‌شود؛ failure سوم lockedAt دائمی و epoch جدید ایجاد می‌کند. retry همان intent دوباره شمرده نمی‌شود. password غلط اصلاً PIN را بررسی یا شمارنده را زیاد نمی‌کند. موفقیت کامل شمارنده را فقط پیش از lock صفر می‌کند. قفل زمان‌دار یا Redis-based نیست. verify/hash خارج transaction و مصرف نتیجه با credentialVersion/sessionEpoch fencing انجام می‌شود. counter، receipt و Audit یک commit دارند؛ Audit failure صفر اثر دارد.
 
-## Proposed capabilities (unassigned)
+cookieهای pending/full جدا، Secure/HttpOnly/SameSite=Strict/Path=/ و بدون Domain هستند. هر login cookie نوع دیگر را پاک می‌کند؛ pending هرگز برای Admin API معتبر نیست. Origin/Host/peer/TLS دقیق، JSON، CSRF متصل به همان session و عدم پذیرش Authorization/forwarded identity لازم است. هیچ credential در storage مرورگر نیست. نشست و grants در primary در هر gate خوانده، disable/revoke/credential epoch فوراً برای gate جدید اعمال می‌شوند؛ foreground UI حداکثر پنج ثانیه و در visibility change دسترسی را بازبینی می‌کند. request از قبل admitted محدود و قابل undo فرض نمی‌شود.
 
-These least-privilege roles are a proposal for the 7C owner review. Grants must
-be explicit; roles do not inherit other roles implicitly. Every read is still
-privately authenticated and scoped.
+Bootstrap/recovery فقط port/ابزار خصوصی، با OS operator معتبر، explicit confirmation و دو امضای مستقل action-bound خارج DB است. recovery PIN را تعویض، lock را رفع و تمام نشست‌های قبلی را invalid می‌کند؛ root/password را تغییر نمی‌دهد. runtime credential اجازهٔ unlock root قفل‌شده، rebind، ساخت role/مدیر یا نوشتن دادهٔ بازی ندارد. credential ویژهٔ recovery و امضاکنندگان در runtime نگه‌داری نمی‌شوند. هیچ unlock/forgot/bootstrap route عمومی یا حساب پیش‌فرض وجود ندارد. custody واقعی، proof drill، retention و شبکه قبل از حساب واقعی همچنان gate هستند.
+
+در فاز دو OWNER_FINAL حفظ می‌شود، با password+PIN تازه به همان action/target/digest/version/realm و reason، نه MFA خارجی یا flag bypass. درخواست حساسِ قبل از تغییر revision دوباره بررسی می‌شود. هیچ break-glass بدون احراز هویت/Audit/domain guard ساخته نشده است.
+
+## Capabilities and protected ownership (unassigned)
+
+ADR-079 replaces the earlier uniform grant model. A singleton protected root
+binding grants OWNER every registered administrative capability, including future
+ones. Role edits, individual denials or scopes cannot constrain root authority.
+Authentication, network, revocation, audit, data policy and domain checks still
+apply. All other roles use explicit versioned templates/custom grants and scoped
+individual overrides, with matching DENY taking precedence. The full default
+Super Admin/Moderator/Support/Operator/custom matrix is in the access specification.
+The narrower capability examples below remain useful, not an exhaustive role registry.
 
 | Proposed role       | Permitted capability                                               | Required owner checks                                                                                   |
 | ------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
@@ -51,9 +46,21 @@ privately authenticated and scoped.
 | Incident operator   | Request termination of one identified Match                        | Current version/state, bounded reason code, explicit approval; no bulk termination shortcut             |
 | Statistics operator | Request a reviewed generation rebuild                              | Stable generation/command, approved game/scope, existing trusted rebuild and idempotent worker workflow |
 
-Assignment management, activation approval separation and any two-person approval
-require an owner-recorded policy. Reject arbitrary free-form reasons, SQL,
-handler names, URLs or rule configuration in generic admin payloads. Maintenance
+Operator create/invite/activate/disable/tombstone, role editing/assignment,
+individual overrides and other operators' session management are OWNER_ONLY,
+not delegable to Super Admin. No other administrator may mutate the protected
+owner, its identity/recovery binding or its sessions. Root bootstrap/recovery
+are private identity-bound ceremonies, not ordinary role assignment.
+
+High-risk non-owner requests use two distinct authorized humans. OWNER_FINAL
+permits the actual OWNER to decide their own or another operator's request with
+fresh operation-bound password/PIN proof, a fixed reason, immutable admission/outcome audit and
+single-use execution authorization. It records one root decision, never pretends
+two people approved. Break-glass is a separate constrained recovery/incident path;
+having only one administrator does not require emergency mode.
+
+Reject arbitrary free-form reasons, SQL, handler names, URLs or rule configuration
+in generic admin payloads. Maintenance
 should stop new admission while preserving pinned active Matches; explicit Match
 termination is a different capability. This active-Match proposal must be approved
 with 7C's Games/admission semantics before implementation.
@@ -69,9 +76,11 @@ hidden-state inspection. Existing safe logging remains ADR-031/033 allowlisted.
 
 The following sequence is the proposed implementation protocol:
 
-1. Bound/validate the DTO, authenticate private access and operator/MFA, authorize
-   the exact capability, and validate the stable command ID. Bind idempotency to
-   actor and a digest of normalized allowlisted inputs; mismatched retry denies.
+1. Bound/validate the DTO, authenticate private access and operator authentication, authorize
+   the exact capability through the OWNER or explicit-grant path, enforce protected
+   targets and the current approval mode, and validate the stable command ID.
+   Bind idempotency to actor and a digest of normalized allowlisted inputs;
+   mismatched retry denies.
 2. Durably append an admission record before calling the owner. If admission
    audit is unavailable, deny the mutation. A bounded authenticated denial may
    also append a separate outcome; pre-auth floods get only safe aggregate
@@ -94,7 +103,9 @@ The following sequence is the proposed implementation protocol:
 Audit fields are version/event/action IDs, opaque operator subject, capability,
 target kind/ID, expected/result revision, fixed reason/error/outcome codes,
 server time, approved authorization policy/assurance identifiers and safe
-correlation IDs. These private audit fields need their own explicit schema/access
+correlation IDs. ADR-079 additionally requires authority mode, ownership/authz
+revision references and operation-bound decision proof references, never raw
+proofs. These private audit fields need their own explicit schema/access
 policy; they do not expand the public telemetry allowlist. Never store initData,
 token/signature/hash, raw MFA assertion, chat/private game state, RNG material,
 unbounded user text or raw HTTP/Socket/error data. A normalized non-secret command
@@ -121,6 +132,14 @@ within the approved retention policy.
 | Commit/crash before outcome, duplicate/reordered outbox or retry          | One durable effect, eventual deduplicated outcome, original action retained             |
 | Compromised normal API/Worker/Admin credential                            | Real-role grant tests deny foreign writes and audit UPDATE/DELETE/TRUNCATE              |
 | Payload/log/report inspection                                             | No credentials, private state, chat or raw errors in audit or telemetry                 |
+
+ADR-079 adds AC-01…AC-22: protected singleton bootstrap and restore replay;
+OWNER-only administrator lifecycle; non-owner escalation/target denials;
+new-capability OWNER allow versus explicit grants; scoped DENY precedence;
+primary-current authorization and five-second connection invalidation with Redis
+unavailable; valid OWNER_FINAL without a second administrator; expired/replayed
+decision denial; and bounded pre-enrolled emergency authentication. No test is
+claimed executed by this documentation update.
 
 Current 17A3 HTTP tests prove operator mutation paths are absent even with a valid
 player session or a service-shaped bearer. They do not claim implemented RBAC,

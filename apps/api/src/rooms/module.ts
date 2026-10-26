@@ -14,3 +14,5 @@ export function createRoomDiagnostics(
 ) {
   return createRoomDiagnosticsRepository(database);
 }
+
+export { createRoomsAdminReadRepository as createRoomsAdminRead } from "./infrastructure/repositories/admin-read.js";

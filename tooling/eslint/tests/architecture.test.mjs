@@ -171,6 +171,8 @@ describe("source ownership boundaries", () => {
     ["packages/shared/src/index.ts", "const first = items[0];"],
     ["apps/web/src/features/room/index.ts", 'import { Profile } from "../profile/index.js";'],
     ["apps/web/src/index.ts", 'import { Coup } from "./games/coup/index.js";'],
+    [api("admin"), 'import { read } from "../../matches/index.js";'],
+    ["apps/admin/src/index.ts", 'import { schema } from "@hambazi/validation";'],
   ])("accepts a public/owned import from %s", async (file, source) => {
     expect(await messages(source, file)).toEqual([]);
   });
@@ -195,6 +197,12 @@ describe("source ownership boundaries", () => {
     ["apps/worker/src/jobs/timeout.ts", 'import { createCoupMatchGame } from "@hambazi/api";'],
     ["apps/bot/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
     ["apps/web/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
+    ["apps/admin/src/index.ts", 'import { createDatabase } from "@hambazi/database";'],
+    ["apps/admin/src/index.ts", 'import { secret } from "@hambazi/config";'],
+    [
+      api("admin"),
+      'import { hidden } from "../../matches/infrastructure/repositories/postgres.js";',
+    ],
     ["packages/contracts/src/index.ts", 'export type { Prisma } from "@prisma/client";'],
     [api("users"), 'import { Pool } from "pg";'],
     [api("users"), 'import { raw } from "@hambazi/database/src/database.js";'],
@@ -345,12 +353,23 @@ describe("database ownership", () => {
       (await messages("db.profileMutationReceipt.findMany();", repository("auth"))).length,
     ).toBeGreaterThan(0);
   });
-  it.each(["users", "games", "rooms", "matches", "chat", "leaderboard"])(
+  it.each(["admin", "users", "games", "rooms", "matches", "chat", "leaderboard"])(
     "accepts the literal database owner in its repository: %s",
     async (owner) => {
       expect(await messages(`database.forModule("${owner}");`, repository(owner))).toEqual([]);
     },
   );
+  it("keeps administrative persistence isolated from player Auth and game repositories", async () => {
+    expect(
+      await messages("db.adminOperator.findMany({select:{id:true}});", repository("admin")),
+    ).toEqual([]);
+    for (const [source, owner] of [
+      ["db.adminOperator.findMany({});", "auth"],
+      ["db.match.findMany({});", "admin"],
+      ['database.forModule("matches");', "admin"],
+    ])
+      expect((await messages(source, repository(owner))).length).toBeGreaterThan(0);
+  });
   it("allows the narrower outbox scope only inside the Matches repository owner", async () => {
     expect(await messages('database.forModule("outbox");', repository("matches"))).toEqual([]);
     expect(

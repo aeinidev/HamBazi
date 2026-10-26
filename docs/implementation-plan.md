@@ -1,5 +1,17 @@
 # HamBazi MVP Implementation Plan
 
+## Admin Dashboard phase control — 2026-10-25
+
+Phase one was explicitly authorized by the owner. [ADR-081](adr/081-admin-local-password-and-owner-pin.md) supersedes only the Admin OIDC/external-MFA decisions with local password and OWNER static PIN. Static PIN is not independent MFA. See the [phase-one report](implementation/admin-dashboard-phase-1.md). Stop after phase one; no phase-two implementation, real account or staging/production activation is authorized. Historical MVP gates below are unchanged.
+
+The new Admin delivery cycle follows [ADR-080](adr/080-admin-phase-gates-and-phase-zero-baseline.md)
+and the [Phase 0 report](implementation/admin-dashboard-phase-0.md). The current
+baseline instruction authorized **Admin Phase 0 only**; the later explicit approval
+authorizes Phase 1 local implementation, and requires a report and stop
+after every phase; each next phase needs explicit approval. Historical continuous
+MVP execution authorizations below do not authorize Admin progression or any
+staging/production change. This note does not rewrite historical MVP evidence.
+
 ## Plan controls
 
 - **Authoritative architecture:** `docs/ARCHITECTURE.md` (HamBazi Software Architecture Specification, Reviewed Edition, version 1.1).
