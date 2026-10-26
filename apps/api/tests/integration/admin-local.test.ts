@@ -508,6 +508,142 @@ describe("durable local Admin identity", () => {
       await app.close();
     }
   });
+  it("rotates OWNER passwords atomically, fences concurrent changes and rolls back on audit failure", async () => {
+    const pending = await login(),
+      extraPending = await login(),
+      full = await pin(pending.token);
+    const base = { schemaVersion: 1, password: ownerPassword, currentPin: ownerPin };
+    const nextPassword = "IntegrationReplacementPassword456";
+    await service.changePassword(full.token, {
+      ...base,
+      commandId: randomUUID(),
+      newPassword: nextPassword,
+    });
+    await expect(service.access(full.token)).rejects.toBeDefined();
+    await expect(pin(extraPending.token)).rejects.toBeDefined();
+    await expect(login()).rejects.toBeDefined();
+    const signIn = (value: string) =>
+      service.login({
+        schemaVersion: 1,
+        commandId: randomUUID(),
+        username: "owner_integration",
+        password: value,
+      });
+    const nextFull = await pin((await signIn(nextPassword)).token);
+    const before = (
+      await root.query(
+        "SELECT password_verifier,credential_version,session_epoch FROM admin_operators WHERE id=$1",
+        [ownerId],
+      )
+    ).rows[0]!;
+    expect(String(before.password_verifier)).toMatch(/^\$argon2id\$/);
+    expect(await crypto.verify(String(before.password_verifier), nextPassword, "password")).toBe(
+      true,
+    );
+    await root.query(
+      "CREATE FUNCTION admin_test_password_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.event='PASSWORD_CHANGED' THEN RAISE EXCEPTION 'Synthetic audit outage'; END IF; RETURN NEW; END; $$; CREATE TRIGGER admin_test_password_audit BEFORE INSERT ON admin_audit_events FOR EACH ROW EXECUTE FUNCTION admin_test_password_audit();",
+    );
+    try {
+      await expect(
+        service.changePassword(nextFull.token, {
+          ...base,
+          password: nextPassword,
+          commandId: randomUUID(),
+          newPassword: "IntegrationAuditRejected789",
+        }),
+      ).rejects.toBeDefined();
+      expect(
+        (
+          await root.query(
+            "SELECT password_verifier,credential_version,session_epoch FROM admin_operators WHERE id=$1",
+            [ownerId],
+          )
+        ).rows[0],
+      ).toEqual(before);
+    } finally {
+      await root.query(
+        "DROP TRIGGER admin_test_password_audit ON admin_audit_events; DROP FUNCTION admin_test_password_audit();",
+      );
+    }
+    const candidates = ["IntegrationRacePasswordOne789", "IntegrationRacePasswordTwo789"];
+    const outcomes = await Promise.allSettled(
+      candidates.map((newPassword) =>
+        service.changePassword(nextFull.token, {
+          ...base,
+          password: nextPassword,
+          commandId: randomUUID(),
+          newPassword,
+        }),
+      ),
+    );
+    expect(outcomes.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const winner = candidates[outcomes.findIndex((r) => r.status === "fulfilled")]!;
+    const newestFull = await pin((await signIn(winner)).token);
+    const after = (
+      await root.query("SELECT credential_version,session_epoch FROM admin_operators WHERE id=$1", [
+        ownerId,
+      ])
+    ).rows[0]!;
+    expect(after.credential_version).toBe(Number(before.credential_version) + 1);
+    expect(after.session_epoch).toBe(Number(before.session_epoch) + 1);
+    await service.changePassword(newestFull.token, {
+      ...base,
+      password: winner,
+      commandId: randomUUID(),
+      newPassword: ownerPassword,
+    });
+  });
+  it("changes the disposable OWNER PIN, preserves its password and invalidates full and pending sessions", async () => {
+    const full = await pin((await login()).token);
+    const second = await pin((await login()).token);
+    const pending = await login();
+    const before = (
+      await root.query(
+        "SELECT password_verifier,credential_version,session_epoch FROM admin_operators WHERE id=$1",
+        [ownerId],
+      )
+    ).rows[0]!;
+    const newPin = "654321";
+    await service.changePin(full.token, {
+      schemaVersion: 1,
+      commandId: randomUUID(),
+      password: ownerPassword,
+      currentPin: ownerPin,
+      newPin,
+    });
+    for (const old of [full, second]) await expect(service.access(old.token)).rejects.toBeDefined();
+    await expect(pin(pending.token, newPin)).rejects.toBeDefined();
+    const fresh = await login();
+    await expect(pin(fresh.token, ownerPin)).rejects.toBeDefined();
+    const signedIn = await pin(fresh.token, newPin);
+    expect(signedIn.next).toBe("SIGNED_IN");
+    const after = (
+      await root.query(
+        "SELECT password_verifier,pin_verifier,credential_version,session_epoch,pin_failures,locked_at FROM admin_operators WHERE id=$1",
+        [ownerId],
+      )
+    ).rows[0]!;
+    expect(after.password_verifier).toBe(before.password_verifier);
+    expect(after.credential_version).toBe(Number(before.credential_version) + 1);
+    expect(after.session_epoch).toBe(Number(before.session_epoch) + 1);
+    expect(await crypto.verify(String(after.pin_verifier), newPin, "pin")).toBe(true);
+    expect(after.pin_failures).toBe(0);
+    expect(after.locked_at).toBeNull();
+    expect(
+      (
+        await root.query(
+          "SELECT count(*)::int AS count FROM admin_audit_events WHERE event='PIN_CHANGED'",
+        )
+      ).rows[0]!.count,
+    ).toBe(1);
+    await service.changePin(signedIn.token, {
+      schemaVersion: 1,
+      commandId: randomUUID(),
+      password: ownerPassword,
+      currentPin: newPin,
+      newPin: ownerPin,
+    });
+  });
   it("retains the lock after a real PostgreSQL restart and repository recreation", async () => {
     for (let n = 0; n < 3; n++) {
       const pending = await login();

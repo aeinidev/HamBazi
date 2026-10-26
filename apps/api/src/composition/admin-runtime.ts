@@ -109,6 +109,8 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
         cert: await readFile(config.tlsCertFile),
         origin: config.origin,
         peers: config.privatePeers,
+        ingressMode: config.ingressMode,
+        proxyPeers: config.proxyPeers,
         maxInFlight: config.maxInFlight,
         admitIp: async (ip) => (await limiter.limiter.consumeIp(ip)).allowed,
         admitIdentity: async (id) => (await limiter.limiter.consumeIdentity(id)).allowed,

@@ -43,7 +43,12 @@
     "test:integration": "vitest run tests/integration",
     "start:admin": "node dist/composition/admin-main.js",
     "admin:provision": "node dist/composition/admin-provision.js",
-    "test:admin:local": "node tests/admin/local.mjs"
+    "admin:owner:staging": "node dist/composition/admin-owner-staging.js",
+    "admin:owner:backup": "node dist/composition/admin-owner-backup-cli.js",
+    "admin:owner:restore-test": "node dist/composition/admin-owner-restore-cli.js",
+    "test:admin:local": "node tests/admin/local.mjs",
+    "test:admin:private": "node tests/admin/private.mjs",
+    "test:admin:ingress": "node tests/admin/ingress.mjs"
   },
   "dependencies": {
     "@hambazi/config": "workspace:*",

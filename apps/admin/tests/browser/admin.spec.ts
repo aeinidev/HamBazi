@@ -76,7 +76,7 @@ async function mock(page: Page, owner = true) {
         permissions: state.permissions,
         csrfToken: csrf,
       });
-    if (path === "auth/logout" || path === "auth/pin/change") {
+    if (path === "auth/logout" || path === "auth/pin/change" || path === "auth/password/change") {
       state.signed = false;
       return reply({ schemaVersion: 1, ok: true });
     }
@@ -189,3 +189,40 @@ test("three owner PIN failures remain locked and password retry does not reopen 
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.getByLabel("PIN شش‌رقمی", { exact: true })).toHaveCount(0);
 });
+for (const kind of ["password", "pin"] as const) {
+  test(`OWNER ${kind} change confirms input, clears credentials and returns to login`, async ({
+    page,
+  }) => {
+    const state = await mock(page);
+    await page.goto("/");
+    await login(page);
+    await page.getByLabel("PIN شش‌رقمی", { exact: true }).fill("012345");
+    await page.getByRole("button", { name: "تأیید و ورود", exact: true }).click();
+    await page.getByRole("button", { name: "امنیت حساب مالک", exact: true }).click();
+    if (kind === "pin") await page.getByRole("button", { name: "تغییر PIN", exact: true }).click();
+    await page.getByLabel("رمز عبور فعلی", { exact: true }).fill(password);
+    await page.getByLabel("PIN فعلی", { exact: true }).fill("012345");
+    const label = kind === "pin" ? "PIN جدید" : "رمز عبور جدید",
+      next = kind === "pin" ? "654321" : "SyntheticBrowserReplacement456";
+    await page.getByLabel(label, { exact: true }).fill(next);
+    await page
+      .getByLabel("تکرار " + label, { exact: true })
+      .fill(kind === "pin" ? "123456" : "MismatchedSyntheticPassword");
+    await page.getByRole("button", { name: "تأیید تغییر و بستن نشست‌ها" }).click();
+    await expect(page.getByRole("alert")).toHaveText("مقدار جدید و تکرار آن یکسان نیستند.");
+    expect(state.signed).toBe(true);
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.getByLabel("تکرار " + label, { exact: true }).fill(next);
+    const submitted = page.waitForRequest((r) => r.url().endsWith(`/auth/${kind}/change`));
+    await page.getByRole("button", { name: "تأیید تغییر و بستن نشست‌ها" }).click();
+    expect((await submitted).postDataJSON()[kind === "pin" ? "newPin" : "newPassword"]).toBe(next);
+    await expect(page.getByRole("heading", { name: "به هم‌بازی خوش آمدید" })).toBeVisible();
+    expect(state.signed).toBe(false);
+    await expect(page.getByLabel("رمز عبور", { exact: true })).toHaveValue("");
+    expect(
+      await page.evaluate(
+        () => Object.keys(localStorage).length + Object.keys(sessionStorage).length,
+      ),
+    ).toBe(0);
+  });
+}

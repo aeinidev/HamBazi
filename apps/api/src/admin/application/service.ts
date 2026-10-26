@@ -40,6 +40,13 @@ export const adminPinChangeSchema = z.strictObject({
   currentPin: adminPin,
   newPin: adminPin,
 });
+export const adminPasswordChangeSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  commandId: uuid,
+  password: adminPassword,
+  currentPin: adminPin,
+  newPassword: adminPassword,
+});
 
 export function createAdminService(deps: {
   repository: AdminRepository;
@@ -153,6 +160,81 @@ export function createAdminService(deps: {
         csrfToken: crypto.csrf(s!.id),
       };
     });
+  }
+  async function changeCredential(token: unknown, input: unknown, kind: "password" | "pin") {
+    const a = await authenticate(token);
+    if (!a.principal.isOwner) throw new AdminFault("FORBIDDEN");
+    const p =
+      kind === "pin" ? parse(adminPinChangeSchema, input) : parse(adminPasswordChangeSchema, input);
+    const next = "newPin" in p ? p.newPin : p.newPassword;
+    if (kind === "password" && next === p.password) throw new AdminFault("INVALID_INPUT");
+    const observed = await repository.atomic((tx) => tx.operator(a.principal.operatorId));
+    if (!observed?.pinVerifier) throw new AdminFault("UNAUTHENTICATED");
+    const passwordOk = await verify(observed.passwordVerifier, p.password, "password");
+    const pinOk = passwordOk && (await verify(observed.pinVerifier, p.currentPin, "pin"));
+    const verifier = pinOk ? await bounded(() => crypto.hash(next, kind)) : null;
+    const ok = await repository.atomic(async (tx) => {
+      const o = await tx.operator(observed.id);
+      const s = await tx.session(a.sessionId);
+      const realm = await tx.realm();
+      if (
+        !valid(s, o) ||
+        o!.credentialVersion !== observed.credentialVersion ||
+        realm?.ownerId !== observed.id
+      )
+        return false;
+      // Preserve the existing PIN intent digest for retries across the additive release.
+      const digest = crypto.digest(
+        kind === "pin"
+          ? `change-pin:${a.sessionId}:${p.password}:${p.currentPin}:${next}`
+          : JSON.stringify(["change-password", a.sessionId, p.password, p.currentPin, next]),
+      );
+      const previous = await tx.receipt(o!.id, p.commandId);
+      if (previous) {
+        if (previous.digest !== digest) throw new AdminFault("ADMIN_CONFLICT");
+        return false;
+      }
+      const denied = () =>
+        tx.saveReceipt({
+          operatorId: o!.id,
+          commandId: p.commandId,
+          digest,
+          outcome: "DENIED",
+          sessionId: null,
+        });
+      if (!passwordOk) {
+        await audit(tx, "REAUTH_DENIED", p.commandId, o!.id);
+        await denied();
+        return false;
+      }
+      if (!pinOk) {
+        const failures = o!.pinFailures + 1;
+        await tx.updateOperator(o!.id, {
+          pinFailures: failures,
+          ...(failures >= 3 ? { lockedAt: at(), sessionEpoch: o!.sessionEpoch + 1 } : {}),
+        });
+        await audit(tx, failures >= 3 ? "OWNER_LOCKED" : "PIN_DENIED", p.commandId, o!.id);
+        await denied();
+        return false;
+      }
+      const event = kind === "pin" ? "PIN_CHANGED" : "PASSWORD_CHANGED";
+      await audit(tx, event, p.commandId, o!.id);
+      await tx.updateOperator(o!.id, {
+        ...(kind === "pin" ? { pinVerifier: verifier! } : { passwordVerifier: verifier! }),
+        pinFailures: 0,
+        credentialVersion: o!.credentialVersion + 1,
+        sessionEpoch: o!.sessionEpoch + 1,
+      });
+      await tx.saveReceipt({
+        operatorId: o!.id,
+        commandId: p.commandId,
+        digest,
+        outcome: event,
+        sessionId: null,
+      });
+      return true;
+    });
+    if (!ok) throw new AdminFault("UNAUTHENTICATED");
   }
   return Object.freeze({
     authenticate,
@@ -274,66 +356,10 @@ export function createAdminService(deps: {
       });
     },
     async changePin(token: unknown, input: unknown) {
-      const a = await authenticate(token);
-      if (!a.principal.isOwner) throw new AdminFault("FORBIDDEN");
-      const p = parse(adminPinChangeSchema, input);
-      const observed = await repository.atomic((tx) => tx.operator(a.principal.operatorId));
-      if (!observed?.pinVerifier) throw new AdminFault("UNAUTHENTICATED");
-      const passwordOk = await verify(observed.passwordVerifier, p.password, "password");
-      const pinOk = passwordOk && (await verify(observed.pinVerifier, p.currentPin, "pin"));
-      const verifier = pinOk ? await bounded(() => crypto.hash(p.newPin, "pin")) : null;
-      const ok = await repository.atomic(async (tx) => {
-        const o = await tx.operator(observed.id);
-        const s = await tx.session(a.sessionId);
-        if (!valid(s, o) || o!.credentialVersion !== observed.credentialVersion) return false;
-        const digest = crypto.digest(
-          `change-pin:${a.sessionId}:${p.password}:${p.currentPin}:${p.newPin}`,
-        );
-        const previous = await tx.receipt(o!.id, p.commandId);
-        if (previous) {
-          if (previous.digest !== digest) throw new AdminFault("ADMIN_CONFLICT");
-          return false;
-        }
-        const denied = async () =>
-          tx.saveReceipt({
-            operatorId: o!.id,
-            commandId: p.commandId,
-            digest,
-            outcome: "DENIED",
-            sessionId: null,
-          });
-        if (!passwordOk) {
-          await audit(tx, "REAUTH_DENIED", p.commandId, o!.id);
-          await denied();
-          return false;
-        }
-        if (!pinOk) {
-          const failures = o!.pinFailures + 1;
-          await tx.updateOperator(o!.id, {
-            pinFailures: failures,
-            ...(failures >= 3 ? { lockedAt: at(), sessionEpoch: o!.sessionEpoch + 1 } : {}),
-          });
-          await audit(tx, failures >= 3 ? "OWNER_LOCKED" : "PIN_DENIED", p.commandId, o!.id);
-          await denied();
-          return false;
-        }
-        await audit(tx, "PIN_CHANGED", p.commandId, o!.id);
-        await tx.updateOperator(o!.id, {
-          pinVerifier: verifier!,
-          pinFailures: 0,
-          credentialVersion: o!.credentialVersion + 1,
-          sessionEpoch: o!.sessionEpoch + 1,
-        });
-        await tx.saveReceipt({
-          operatorId: o!.id,
-          commandId: p.commandId,
-          digest,
-          outcome: "PIN_CHANGED",
-          sessionId: null,
-        });
-        return true;
-      });
-      if (!ok) throw new AdminFault("UNAUTHENTICATED");
+      return changeCredential(token, input, "pin");
+    },
+    async changePassword(token: unknown, input: unknown) {
+      return changeCredential(token, input, "password");
     },
     async access(token: unknown) {
       const a = await authenticate(token, false);

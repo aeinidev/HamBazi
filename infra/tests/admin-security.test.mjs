@@ -23,6 +23,26 @@ const assess = (v) =>
     { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
   ).trim();
 describe("private Admin release evidence", () => {
+  it("requires the public certificate receipt to match the currently validated live leaf", () => {
+    const run = (patch) =>
+      execFileSync(
+        "python3",
+        [
+          "-c",
+          `import runpy,json,sys;m=runpy.run_path('infra/scripts/admin-security.py');r={'hostname':'admin.hambazi.top','lineage':'hambazi-admin','validation':'system-ca+hostname+key-match+live-leaf','servedCertificateSHA256':'a'*64,'checkedAtUTC':'2026-10-25T10:00:00Z'};r.update(json.loads(sys.argv[1]));m['verify_certificate_receipt'](r,'a'*64,${now})`,
+          JSON.stringify(patch),
+        ],
+        { stdio: ["ignore", "pipe", "pipe"] },
+      );
+    expect(() => run({})).not.toThrow();
+    for (const patch of [
+      { hostname: "player.hambazi.top" },
+      { servedCertificateSHA256: "b".repeat(64) },
+      { validation: "skipped" },
+      { checkedAtUTC: "2026-10-25T12:05:01Z" },
+    ])
+      expect(() => run(patch)).toThrow();
+  });
   it("expires at the earlier genuine timestamp and never later than core infrastructure", () => {
     const f = fixture();
     expect(assess(f)).toBe("2026-10-26T10:00:00Z");

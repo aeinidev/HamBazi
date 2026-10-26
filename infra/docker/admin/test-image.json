@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "purpose": "owned-loopback-ingress-tests-only-not-a-deployment-image",
+  "platform": "linux/amd64",
+  "image": "nginx@sha256:8f84ed99befc3891b8f329c5c202785278a2cfb7c25107d57fb2a134a3117433"
+}

@@ -54,6 +54,9 @@ try {
     throw new Error();
   await access(actionlint, constants.X_OK);
   const compose = parse(await readFile(join(root, "infra/docker/compose.yaml"), "utf8"));
+  const adminIngressFixture = JSON.parse(
+    await readFile(join(root, "infra/docker/admin/test-image.json"), "utf8"),
+  );
   const gate = (name, command, args, env = {}, timeout = 600000) => ({
     stage: name,
     command,
@@ -93,6 +96,13 @@ try {
       "postgres@sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650",
     ]),
     gate("admin-integration", "pnpm", ["--filter", "@hambazi/api", "test:admin:local"]),
+    gate("admin-private-node-image-pull", "docker", [
+      "pull",
+      JSON.parse(await readFile(join(root, "infra/docker/apps/base-lock.json"), "utf8")).image,
+    ]),
+    gate("admin-private-files-and-tty", "pnpm", ["--filter", "@hambazi/api", "test:admin:private"]),
+    gate("admin-ingress-image-pull", "docker", ["pull", adminIngressFixture.image]),
+    gate("admin-ingress", "pnpm", ["--filter", "@hambazi/api", "test:admin:ingress"]),
     gate("admin-browser", "pnpm", ["--filter", "@hambazi/admin", "test:browser"]),
     gate("images", "node", ["infra/scripts/security-scan.mjs", "images"]),
     gate(

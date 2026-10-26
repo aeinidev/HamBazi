@@ -45,7 +45,7 @@
   "dataImages": [
     {
       "role": "postgres-staging",
-      "image": "hambazi-security/postgres-staging:20261024-brotli@sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa"
+      "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b"
     },
     {
       "role": "redis-staging",
@@ -88,7 +88,8 @@
     "telegramWelcome": "passed-chromium-webkit-responsive-browser-entry-bot-link-no-guest-auth-and-authenticated-lobby-regression",
     "extendedLoading": "passed-chromium-webkit-extended-top-art-no-eyebrow-responsive-loading-minimum-duration-and-lobby-regression",
     "desktopWindow": "passed-chromium-webkit-desktop-windowed-portrait-frame-mobile-native-presentation-and-lobby-regression",
-    "headerIcons": "passed-chromium-webkit-header-icons-borderless-transparent-no-shadow-and-lobby-regression"
+    "headerIcons": "passed-chromium-webkit-header-icons-borderless-transparent-no-shadow-and-lobby-regression",
+    "postgresLibcurlSecurityPatch": "passed-seven-exact-image-scans-real-encrypted-backup-restore-unchanged-18.6-volume-data-and-grants-core-and-admin-renewal-private-admin-and-player-https"
   },
   "securityRenewal": {
     "policy": "normal-24-hour-exact-image",
@@ -96,7 +97,7 @@
     "hourlyTimer": "hambazi-server-security-renew.timer",
     "independentExpiryTimer": "hambazi-server-security-expiry.timer",
     "scheduledRunVerifiedAtUTC": "2026-10-20T15:01:09Z",
-    "observedDeadlineUTC": "2026-10-26T07:10:41Z",
+    "observedDeadlineUTC": "2026-10-27T07:15:18Z",
     "automaticApplicationStart": false,
     "automaticIngressReopen": false,
     "botReplacementRenewalVerifiedAtUTC": "2026-10-21T08:01:52.650939+00:00",
@@ -117,7 +118,8 @@
     "telegramWelcomeBindingVerifiedAtUTC": "2026-10-25T07:47:33.922716+00:00",
     "extendedLoadingBindingVerifiedAtUTC": "2026-10-25T08:02:37.724542+00:00",
     "desktopWindowBindingVerifiedAtUTC": "2026-10-25T08:21:09.205245+00:00",
-    "headerIconsBindingVerifiedAtUTC": "2026-10-25T08:36:03.901485+00:00"
+    "headerIconsBindingVerifiedAtUTC": "2026-10-25T08:36:03.901485+00:00",
+    "postgresLibcurlRenewalVerifiedAtUTC": "2026-10-26T14:01:57.650641+00:00"
   },
   "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
   "currentApplicationSources": {
@@ -426,5 +428,25 @@
     "migrationRequired": false,
     "privateEvidenceDirectory": "/opt/hambazi/releases/header-icons-20261025",
     "record": "docs/operations/header-icons-deployment-20261025.md"
+  },
+  "postgresLibcurlSecurityPatch": {
+    "deployedAtUTC": "2026-10-26T14:07:45.070678+00:00",
+    "cve": "CVE-2026-92392",
+    "package": "libcurl",
+    "from": "8.22.0-r0",
+    "to": "8.23.0-r0",
+    "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "postgresVersion": "18.6",
+    "postgresContainerId": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2",
+    "volumePreserved": true,
+    "migrationRequired": false,
+    "otherImagesAndContainerIdsPreserved": true,
+    "encryptedBackupRestoredOffServer": true,
+    "backupArchiveSha256": "47a024fd17ff3493588895e4ded876ef633b93888d26b3f162a2ba752b5e28dc",
+    "securityPolicyChanged": false,
+    "coreDeadlineUTC": "2026-10-27T07:15:18Z",
+    "adminDeadlineUTC": "2026-10-27T07:15:18Z",
+    "privateEvidenceDirectory": "/opt/hambazi/releases/libcurl-20261026",
+    "record": "docs/operations/postgres-libcurl-deployment-20261026.md"
   }
 }

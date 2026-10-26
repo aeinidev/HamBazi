@@ -1,5 +1,9 @@
 #!/usr/bin/python3
-"""Fail-closed security lifecycle for the isolated SSH-only Admin instance."""
+"""Fail-closed security lifecycle for the isolated Admin backend.
+
+The reverse proxy may be private or separately approved public HTTPS. Backend
+ports and all owner provisioning/recovery remain private in either profile.
+"""
 import datetime as dt
 import fcntl
 import hashlib
@@ -13,6 +17,7 @@ import sys
 import tempfile
 import time
 import os
+import importlib.util
 
 ROOT = Path('/opt/hambazi/admin/security')
 MARKER = Path('/var/www/hambazi-admin/maintenance')
@@ -76,6 +81,35 @@ def run(args, timeout=30):
     return result.stdout.strip()
 
 
+def verify_certificate_receipt(receipt, fingerprint, now):
+    require(receipt.get('hostname') == 'admin.hambazi.top' and receipt.get('lineage') == 'hambazi-admin')
+    require(receipt.get('validation') == 'system-ca+hostname+key-match+live-leaf')
+    require(re.fullmatch(r'[a-f0-9]{64}', fingerprint) is not None)
+    require(receipt.get('servedCertificateSHA256') == fingerprint)
+    require(timestamp(receipt['checkedAtUTC']) <= now + 300)
+
+
+def verify_ingress(control, now):
+    env_path = '/opt/hambazi/admin/private/runtime.env'
+    require(env_path in control['files'])
+    values = dict(line.split('=', 1) for line in Path(env_path).read_text().splitlines() if '=' in line)
+    mode = values.get('ADMIN_INGRESS_MODE', 'private')
+    require(mode in ['private', 'public-proxy'] and control.get('ingressMode', 'private') == mode)
+    if mode == 'public-proxy':
+        hook = '/opt/hambazi/admin/ops/admin-certbot-hook.py'
+        require(hook in control['files'])
+        for path in [Path(hook), *Path(hook).parents]:
+            info = path.lstat()
+            require(info.st_uid == 0 and not stat.S_ISLNK(info.st_mode) and info.st_mode & 0o022 == 0)
+        spec = importlib.util.spec_from_file_location('admin_certificate', hook)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.check_files()
+        fingerprint = module.validate_certificate()
+        require(module.served_certificate() == fingerprint)
+        verify_certificate_receipt(private_json(ROOT / 'certificate-renewal.json'), fingerprint, now)
+
+
 def verify(control, require_running=True):
     now = time.time()
     require(control['active'] is True)
@@ -93,6 +127,7 @@ def verify(control, require_running=True):
         require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and digest(path) == expected)
         if path.endswith(('.env', '-key.pem')):
             require(info.st_mode & 0o077 == 0)
+    verify_ingress(control, now)
     container = json.loads(run(['docker', 'inspect', 'hambazi-admin-api']))[0]
     require(container['Id'] == control['containerId'] and container['Image'] == control['image'])
     require(container['Config']['Image'] == control['image'] and container['Config']['User'] == '1000:1000')

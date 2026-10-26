@@ -36,6 +36,9 @@ try {
     throw new Error();
   const config = parseAdminConfig(process.env);
   if (!config) throw new Error();
+  // Staging has one explicit, interactive SSH profile (ADR-084), never a
+  // fallback from missing signatures to file-based credentials.
+  if (config.realmId === "staging") throw new Error();
   const request = JSON.parse(await privateFile(process.env.ADMIN_CEREMONY_REQUEST_FILE));
   if (
     !request ||

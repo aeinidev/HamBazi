@@ -110,6 +110,15 @@ describe("local administrative authentication", () => {
         newPin: "234567",
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(
+      f.service.changePassword(full.token, {
+        schemaVersion: 1,
+        commandId: randomUUID(),
+        password,
+        currentPin: ownerPin,
+        newPassword: "SyntheticForbiddenReplacement456",
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
   it("denies token replay after logout, epoch changes or account disable", async () => {
     const f = await adminFixture();

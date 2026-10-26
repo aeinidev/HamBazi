@@ -74,7 +74,12 @@ export interface AdminTransaction {
     patch: Partial<
       Pick<
         AdminOperatorRecord,
-        "pinFailures" | "lockedAt" | "sessionEpoch" | "pinVerifier" | "credentialVersion"
+        | "pinFailures"
+        | "lockedAt"
+        | "sessionEpoch"
+        | "pinVerifier"
+        | "passwordVerifier"
+        | "credentialVersion"
       >
     >,
   ): Promise<void>;

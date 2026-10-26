@@ -2,7 +2,7 @@ import { z } from "zod";
 import { AdminFault, type AdminCrypto, type AdminRepository } from "./ports.js";
 import { adminPassword, adminPin, adminUsername } from "./service.js";
 
-const ceremonySchema = z.discriminatedUnion("reasonCode", [
+export const adminCeremonySchema = z.discriminatedUnion("reasonCode", [
   z.strictObject({
     schemaVersion: z.literal(1),
     commandId: z.uuid(),
@@ -16,6 +16,7 @@ const ceremonySchema = z.discriminatedUnion("reasonCode", [
     schemaVersion: z.literal(1),
     commandId: z.uuid(),
     username: adminUsername,
+    password: adminPassword.optional(),
     pin: adminPin,
     confirmed: z.literal(true),
     reasonCode: z.literal("OWNER_PIN_RECOVERY"),
@@ -29,6 +30,8 @@ export function createAdminProvisioning(deps: {
   realmId: string;
   clock: { nowMs(): number };
   newId(): string;
+  /** Only the explicitly selected Staging SSH ceremony uses owner-password recovery. */
+  recoveryPasswordRequired?: boolean;
   verifyAuthority(
     input: unknown,
     binding: {
@@ -40,9 +43,20 @@ export function createAdminProvisioning(deps: {
     },
   ): Promise<boolean>;
 }) {
+  if (deps.recoveryPasswordRequired && deps.realmId !== "staging")
+    throw new Error("ADMIN_STAGING_PROFILE_REQUIRED");
   return Object.freeze({
+    async inspectOwner() {
+      return deps.repository.atomic(async (tx) => {
+        const realm = await tx.realm();
+        return {
+          ownerId: realm?.ownerId ?? null,
+          ownershipEpoch: realm?.ownershipEpoch ?? 0,
+        };
+      });
+    },
     async run(input: unknown, authority: unknown) {
-      const parsed = ceremonySchema.safeParse(input);
+      const parsed = adminCeremonySchema.safeParse(input);
       if (!parsed.success) throw new AdminFault("INVALID_INPUT");
       const p = parsed.data;
       if (
@@ -55,6 +69,19 @@ export function createAdminProvisioning(deps: {
         }))
       )
         throw new AdminFault("FORBIDDEN");
+      // Authentication happens outside the short locked transaction. Fence its
+      // result below so concurrent password rotation cannot authorize recovery.
+      let recoveryVersion: number | undefined;
+      if (p.reasonCode === "OWNER_PIN_RECOVERY" && deps.recoveryPasswordRequired) {
+        const owner = await deps.repository.findUsername(p.username);
+        if (
+          !owner ||
+          !p.password ||
+          !(await deps.crypto.verify(owner.passwordVerifier, p.password, "password"))
+        )
+          throw new AdminFault("FORBIDDEN");
+        recoveryVersion = owner.credentialVersion;
+      }
       const passwordVerifier =
         p.reasonCode === "INITIAL_OWNER_ENROLLMENT"
           ? await deps.crypto.hash(p.password, "password")
@@ -109,7 +136,10 @@ export function createAdminProvisioning(deps: {
         if (!realm?.ownerId) throw new AdminFault("FORBIDDEN");
         const owner = await tx.operator(realm.ownerId);
         if (!owner || owner.username !== p.username) throw new AdminFault("FORBIDDEN");
-        // Recovery authority is the two independently signed, action-bound private proofs; the password is not replaced.
+        if (recoveryVersion !== undefined && owner.credentialVersion !== recoveryVersion)
+          throw new AdminFault("ADMIN_CONFLICT");
+        // Authority is supplied by the private composer: dual signatures, or the
+        // documented Staging root/SSH ceremony plus the fenced owner password.
         await tx.audit({
           id: deps.newId(),
           realmId: deps.realmId,

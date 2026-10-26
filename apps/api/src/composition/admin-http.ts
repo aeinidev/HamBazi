@@ -4,6 +4,7 @@ import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import type { FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { isIP } from "node:net";
 import { AdminFault, createAdminHttpModule } from "../admin/index.js";
 
 const body = (code: string) => ({
@@ -50,11 +51,20 @@ export async function createAdminHttpApplication(
     cert: Buffer;
     origin: string;
     peers: readonly string[];
+    ingressMode?: "private" | "public-proxy";
+    proxyPeers?: readonly string[];
     maxInFlight: number;
     admitIp(ip: string): Promise<boolean>;
     admitIdentity(username: string): Promise<boolean>;
   },
 ): Promise<NestFastifyApplication> {
+  const proxies = transport.proxyPeers ?? [];
+  if (
+    (transport.ingressMode === "public-proxy" && proxies.length === 0) ||
+    (transport.ingressMode !== "public-proxy" && proxies.length !== 0) ||
+    proxies.some((ip) => isIP(ip) === 0 || !transport.peers.includes(ip))
+  )
+    throw new Error("ADMIN_TRANSPORT_INVALID");
   const adapter = new FastifyAdapter({
     logger: false,
     https: { key: transport.key, cert: transport.cert },
@@ -91,6 +101,15 @@ export async function createAdminHttpApplication(
       !/^\/v1\/admin\/[a-z0-9/-]+(?:\?[^#]*)?$/.test(request.raw.url ?? "")
     )
       return reply.code(403).send(body("FORBIDDEN"));
+    let clientIp = peer;
+    const forwardedIp = request.headers["x-hambazi-client-ip"];
+    if (transport.ingressMode === "public-proxy" && transport.proxyPeers?.includes(peer)) {
+      if (typeof forwardedIp !== "string" || isIP(forwardedIp) === 0)
+        return reply.code(403).send(body("FORBIDDEN"));
+      clientIp = forwardedIp;
+    } else if (forwardedIp !== undefined) {
+      return reply.code(403).send(body("FORBIDDEN"));
+    }
     if (request.headers.origin !== undefined && request.headers.origin !== transport.origin)
       return reply.code(403).send(body("FORBIDDEN"));
     if (
@@ -103,7 +122,7 @@ export async function createAdminHttpApplication(
     inFlight++;
     admitted.add(request);
     // Durable logout must remain possible during an ephemeral limiter outage.
-    if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(peer)))
+    if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(clientIp)))
       return reply.code(429).send(body("RATE_LIMITED"));
   });
   fastify.addHook("preHandler", async (request, reply) => {

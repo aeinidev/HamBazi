@@ -29,6 +29,32 @@ const fixture = () => ({
   ADMIN_REDIS_URL: "redis://:synthetic@127.0.0.1:6379/0",
 });
 describe("explicit local Admin configuration", () => {
+  it("requires an explicit, private, distinct trusted reverse proxy for public ingress", () => {
+    const base = {
+      ...fixture(),
+      ADMIN_PRIVATE_PEERS: "127.0.0.1,127.0.0.2",
+      ADMIN_INGRESS_MODE: "public-proxy",
+    };
+    for (const ADMIN_PROXY_PEERS of [
+      undefined,
+      "",
+      "8.8.8.8",
+      "127.0.0.1",
+      "127.0.0.3",
+      "127.0.0.2,127.0.0.2",
+    ])
+      expect(() =>
+        parseAdminConfig({
+          ...base,
+          ...(ADMIN_PROXY_PEERS === undefined ? {} : { ADMIN_PROXY_PEERS }),
+        }),
+      ).toThrow();
+    expect(parseAdminConfig({ ...base, ADMIN_PROXY_PEERS: "127.0.0.2" })!.proxyPeers).toEqual([
+      "127.0.0.2",
+    ]);
+    expect(() => parseAdminConfig({ ...fixture(), ADMIN_PROXY_PEERS: "127.0.0.2" })).toThrow();
+    expect(parseAdminConfig(fixture())!.ingressMode).toBe("private");
+  });
   it("is disabled unless explicitly enabled and has no production defaults", () => {
     expect(parseAdminConfig({})).toBeNull();
     expect(parseAdminConfig({ ADMIN_ENABLED: "false" })).toBeNull();

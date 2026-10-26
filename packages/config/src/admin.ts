@@ -18,6 +18,8 @@ const key = z
 const privateIp = (v: string) =>
   isIP(v) === 4 && /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(v);
 const schema = z.object({
+  ADMIN_INGRESS_MODE: z.enum(["private", "public-proxy"]).default("private"),
+  ADMIN_PROXY_PEERS: z.string().optional(),
   ADMIN_REALM: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
   ADMIN_ENVIRONMENT: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
   ADMIN_ORIGIN: z
@@ -59,6 +61,17 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
   const p = schema.safeParse(environment);
   if (!p.success) throw new Error("ADMIN_CONFIGURATION_INVALID");
   const v = p.data;
+  const proxyPeers = v.ADMIN_PROXY_PEERS?.split(",") ?? [];
+  if (
+    (v.ADMIN_INGRESS_MODE === "public-proxy" && proxyPeers.length === 0) ||
+    (v.ADMIN_INGRESS_MODE === "private" && proxyPeers.length !== 0) ||
+    proxyPeers.some(
+      (ip) => !privateIp(ip) || !v.ADMIN_PRIVATE_PEERS.includes(ip) || ip === v.ADMIN_BIND_ADDRESS,
+    ) ||
+    new Set(proxyPeers).size !== proxyPeers.length ||
+    proxyPeers.length > 16
+  )
+    throw new Error("ADMIN_CONFIGURATION_INVALID");
   const keys = [v.ADMIN_SIGNING_KEY, v.ADMIN_PIN_PEPPER, v.ADMIN_COMMAND_KEY];
   if (
     new Set(keys).size !== keys.length ||
@@ -85,6 +98,8 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
   )
     throw new Error("ADMIN_CONFIGURATION_INVALID");
   return Object.freeze({
+    ingressMode: v.ADMIN_INGRESS_MODE,
+    proxyPeers,
     realmId: v.ADMIN_REALM,
     environment: v.ADMIN_ENVIRONMENT,
     origin: v.ADMIN_ORIGIN,

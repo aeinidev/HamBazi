@@ -7,9 +7,14 @@ import {
   adminOverviewSchema,
   adminPageSchema,
 } from "@hambazi/validation";
-import { adminLoginSchema, adminPinSchema, adminPinChangeSchema } from "../application/service.js";
+import {
+  adminLoginSchema,
+  adminPinSchema,
+  adminPinChangeSchema,
+  adminPasswordChangeSchema,
+} from "../application/service.js";
 
-/** Private API contract, generated separately from the player API. */
+/** Authenticated Admin contract, generated separately from the player API. */
 export function adminOpenApiDocument() {
   const json = (schema: z.ZodType) => z.toJSONSchema(schema, { io: "input" });
   const response = (schema: z.ZodType) => ({
@@ -36,6 +41,7 @@ export function adminOpenApiDocument() {
     "/v1/admin/auth/pin": { post: post(adminPinSchema, adminLoginResultSchema, pending, true) },
     "/v1/admin/auth/logout": { post: post(command, ok, full, true) },
     "/v1/admin/auth/pin/change": { post: post(adminPinChangeSchema, ok, full, true) },
+    "/v1/admin/auth/password/change": { post: post(adminPasswordChangeSchema, ok, full, true) },
     "/v1/admin/me/access": {
       get: { security: full, responses: { "200": response(adminAccessSchema), ...errors } },
     },
@@ -96,7 +102,7 @@ export function adminOpenApiDocument() {
     };
   return {
     openapi: "3.1.0",
-    info: { title: "HamBazi Private Admin API", version: "1.0.0" },
+    info: { title: "HamBazi Admin API", version: "1.1.0" },
     paths,
     components: {
       securitySchemes: {

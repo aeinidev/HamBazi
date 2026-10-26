@@ -1,11 +1,23 @@
 import "reflect-metadata";
-import { Controller, Get, Post, Param, Req, Res, Module } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Req,
+  Res,
+  Module,
+  SetMetadata,
+  type ExecutionContext,
+} from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { AdminService } from "../application/service.js";
 import { AdminFault } from "../application/ports.js";
 import {
   adminAccess,
+  adminCapabilities,
   adminGameScope,
   type AdminCapability,
   type AdminPrincipal,
@@ -14,6 +26,9 @@ import { constantAdminEqual } from "./crypto.js";
 
 export const adminCookie = "__Host-hambazi-admin";
 export const adminPendingCookie = "__Host-hambazi-admin-pending";
+const policyKey = "hambazi:admin:route-policy";
+type RoutePolicy = "LOGIN" | "PENDING" | "SESSION" | AdminCapability;
+const policy = (value: RoutePolicy) => SetMetadata(policyKey, value);
 function cookie(request: FastifyRequest, name: string) {
   const raw = request.headers.cookie;
   if (!raw || raw.length > 8192) return undefined;
@@ -49,6 +64,10 @@ export function createAdminHttpModule(deps: {
   cookieSeconds: number;
   pendingSeconds: number;
 }) {
+  const authenticatedRequests = new WeakMap<
+    FastifyRequest,
+    ReturnType<AdminService["authenticate"]>
+  >();
   function setCookie(reply: FastifyReply, name: string, token: string, maxAge: number) {
     const other = name === adminCookie ? adminPendingCookie : adminCookie;
     reply.header("Set-Cookie", [
@@ -57,7 +76,16 @@ export function createAdminHttpModule(deps: {
     ]);
   }
   async function authenticated(request: FastifyRequest, permission?: AdminCapability) {
-    const a = await deps.service.authenticate(cookie(request, adminCookie));
+    let promise = authenticatedRequests.get(request);
+    if (!promise) {
+      // Polling effective permissions must not extend the idle timeout.
+      promise = deps.service.authenticate(
+        cookie(request, adminCookie),
+        request.raw.url !== "/v1/admin/me/access",
+      );
+      authenticatedRequests.set(request, promise);
+    }
+    const a = await promise;
     if (
       permission &&
       !adminAccess(a.principal, permission) &&
@@ -83,6 +111,7 @@ export function createAdminHttpModule(deps: {
   }
   @Controller("v1/admin")
   class AdminController {
+    @policy("LOGIN")
     @Post("auth/login")
     async login(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       const result = await deps.service.login(request.body);
@@ -94,6 +123,7 @@ export function createAdminHttpModule(deps: {
       );
       return reply.send({ schemaVersion: 1, next: result.next, csrfToken: result.csrfToken });
     }
+    @policy("PENDING")
     @Post("auth/pin")
     async pin(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       const token = await csrf(request, true);
@@ -102,15 +132,18 @@ export function createAdminHttpModule(deps: {
       setCookie(reply, adminCookie, result.token, deps.cookieSeconds);
       return reply.send({ schemaVersion: 1, next: result.next, csrfToken: result.csrfToken });
     }
+    @policy("SESSION")
     @Get("me/access")
     async access(@Req() request: FastifyRequest) {
       return deps.service.access(cookie(request, adminCookie));
     }
+    @policy("SESSION")
     @Get("session")
     async session(@Req() request: FastifyRequest) {
       const a = await authenticated(request);
       return { schemaVersion: 1, expiresAt: a.expiresAt, csrfToken: a.csrfToken };
     }
+    @policy("SESSION")
     @Post("auth/logout")
     async logout(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       const p = z
@@ -121,6 +154,7 @@ export function createAdminHttpModule(deps: {
       setCookie(reply, adminCookie, "", 0);
       return reply.send({ schemaVersion: 1, ok: true });
     }
+    @policy("SESSION")
     @Post("auth/pin/change")
     async change(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
       const token = await csrf(request);
@@ -128,6 +162,15 @@ export function createAdminHttpModule(deps: {
       setCookie(reply, adminCookie, "", 0);
       return reply.send({ schemaVersion: 1, ok: true });
     }
+    @policy("SESSION")
+    @Post("auth/password/change")
+    async changePassword(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
+      const token = await csrf(request);
+      await deps.service.changePassword(token, request.body);
+      setCookie(reply, adminCookie, "", 0);
+      return reply.send({ schemaVersion: 1, ok: true });
+    }
+    @policy("overview.view")
     @Get("overview")
     async overview(@Req() request: FastifyRequest) {
       const a = await authenticated(request, "overview.view");
@@ -138,6 +181,7 @@ export function createAdminHttpModule(deps: {
         throw new AdminFault("FORBIDDEN");
       return deps.reads.overview(a.principal);
     }
+    @policy("monitoring.view")
     @Get("monitoring/summary")
     async monitoring(@Req() request: FastifyRequest) {
       const a = await authenticated(request, "monitoring.view");
@@ -148,6 +192,7 @@ export function createAdminHttpModule(deps: {
         throw new AdminFault("FORBIDDEN");
       return deps.reads.overview(a.principal);
     }
+    @policy("audit.view")
     @Get("audit-events")
     async audit(@Req() request: FastifyRequest) {
       const a = await authenticated(request, "audit.view");
@@ -182,32 +227,75 @@ export function createAdminHttpModule(deps: {
         games,
       );
     }
-    @Get("users") users(@Req() r: FastifyRequest) {
+    @policy("users.view")
+    @Get("users")
+    users(@Req() r: FastifyRequest) {
       return this.page("users", r);
     }
-    @Get("games") games(@Req() r: FastifyRequest) {
+    @policy("games.view")
+    @Get("games")
+    games(@Req() r: FastifyRequest) {
       return this.page("games", r);
     }
-    @Get("rooms") rooms(@Req() r: FastifyRequest) {
+    @policy("rooms.view")
+    @Get("rooms")
+    rooms(@Req() r: FastifyRequest) {
       return this.page("rooms", r);
     }
-    @Get("matches") matches(@Req() r: FastifyRequest) {
+    @policy("matches.view")
+    @Get("matches")
+    matches(@Req() r: FastifyRequest) {
       return this.page("matches", r);
     }
-    @Get("users/:id") user(@Req() r: FastifyRequest, @Param("id") id: string) {
+    @policy("users.view")
+    @Get("users/:id")
+    user(@Req() r: FastifyRequest, @Param("id") id: string) {
       return this.page("users", r, id);
     }
-    @Get("games/:id") game(@Req() r: FastifyRequest, @Param("id") id: string) {
+    @policy("games.view")
+    @Get("games/:id")
+    game(@Req() r: FastifyRequest, @Param("id") id: string) {
       return this.page("games", r, id);
     }
-    @Get("rooms/:id") room(@Req() r: FastifyRequest, @Param("id") id: string) {
+    @policy("rooms.view")
+    @Get("rooms/:id")
+    room(@Req() r: FastifyRequest, @Param("id") id: string) {
       return this.page("rooms", r, id);
     }
-    @Get("matches/:id") match(@Req() r: FastifyRequest, @Param("id") id: string) {
+    @policy("matches.view")
+    @Get("matches/:id")
+    match(@Req() r: FastifyRequest, @Param("id") id: string) {
       return this.page("matches", r, id);
     }
   }
-  @Module({ controllers: [AdminController] })
+  @Module({
+    controllers: [AdminController],
+    providers: [
+      {
+        provide: APP_GUARD,
+        useValue: {
+          async canActivate(context: ExecutionContext) {
+            const value: unknown = Reflect.getMetadata(policyKey, context.getHandler());
+            const request = context.switchToHttp().getRequest<FastifyRequest>();
+            // New controllers/handlers are closed until a registered policy is explicitly declared.
+            if (value === "LOGIN") return true;
+            if (value === "PENDING") {
+              await csrf(request, true);
+              return true;
+            }
+            if (value !== "SESSION" && !adminCapabilities.includes(value as AdminCapability))
+              throw new AdminFault("FORBIDDEN");
+            await authenticated(
+              request,
+              value === "SESSION" ? undefined : (value as AdminCapability),
+            );
+            if (request.method !== "GET") await csrf(request);
+            return true;
+          },
+        },
+      },
+    ],
+  })
   class AdminHttpModule {}
   return AdminHttpModule;
 }

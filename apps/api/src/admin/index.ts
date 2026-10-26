@@ -11,3 +11,4 @@ export {
   adminProvisioningStatement,
 } from "./infrastructure/provisioning-authority.js";
 export { adminOpenApiDocument } from "./infrastructure/contract.js";
+export { adminCeremonySchema } from "./application/provisioning.js";

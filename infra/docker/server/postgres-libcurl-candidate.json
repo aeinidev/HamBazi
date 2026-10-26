@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "status": "deployed-qualified-staging",
+  "purpose": "staging-postgres-libcurl-remediation",
+  "platform": "linux/amd64",
+  "cve": "CVE-2026-92392",
+  "parentInstalledReference": "hambazi-security/postgres-staging:20261024-brotli@sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa",
+  "parentImageId": "sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa",
+  "candidateImage": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+  "candidateImageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+  "postgresVersion": "18.6",
+  "package": {
+    "name": "libcurl",
+    "installedVersion": "8.22.0-r0",
+    "candidateVersion": "8.23.0-r0",
+    "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libcurl-8.23.0-r0.apk",
+    "archiveSha256": "1f70ca404818805a6465b615bbfe84ef861488a963d7e630108ebd7fbaa51665",
+    "signatureVerification": "apk default trusted keys; no allow-untrusted",
+    "soname": "libcurl.so.4=4.8.0"
+  },
+  "recipe": {
+    "path": "infra/docker/server/PostgresLibcurl.Dockerfile",
+    "sha256": "c848002d578b46ee4fc69662fd5b7837286f1b3da37c772a5d091cbba5c09493",
+    "buildNetwork": "none",
+    "builder": "classic local image-ID parent; no registry fallback"
+  },
+  "imageArchive": {
+    "file": "postgres-libcurl-image.tar.gz",
+    "sha256": "3d5ce18f809fc0cf664af905794aa9579740438d367e8d96e813cc810bb92c02",
+    "bytes": 121023206,
+    "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "containsLiveData": false,
+    "uploadedToServer": true
+  },
+  "verification": {
+    "packageDeltaOnlyLibcurl": true,
+    "postgresLibpqOauthIcuHashesUnchanged": true,
+    "actualImageScan": {
+      "high": 0,
+      "critical": 0,
+      "unknown": 0,
+      "medium": 1,
+      "databaseUpdatedAtUTC": "2026-10-26T07:15:18.945937093Z"
+    },
+    "databaseFoundationTests": 17,
+    "adminIntegrationTests": 16,
+    "infraTests": 192,
+    "existingInfraSkips": 2,
+    "fixturePhysicalReplacementAndRollback": true,
+    "fixtureEncryptedLogicalRestore": true,
+    "fixtureTableCount": 37,
+    "amcheckPatchedAndRestored": true,
+    "serverHealthVerifiedReadOnly": true,
+    "securityPolicyChanged": false,
+    "serverDeadlineChanged": true,
+    "serverCandidateScan": {
+      "checkedAtUTC": "2026-10-26T13:41:31.778453Z",
+      "high": 0,
+      "critical": 0,
+      "unknown": 0,
+      "medium": 1,
+      "reportSha256": "c8cc5708e484e29754a711a1440879b3003089034607d32420a9c66c30f0f8b9"
+    },
+    "realEncryptedBackupRestoredOffServer": true,
+    "deadlineChangeMechanism": "normal installed Core and Admin renewal controllers with fresh official feed and exact-image scans",
+    "qualificationCompleted": true,
+    "finalPostgresScan": {
+      "artifact": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "sha256": "8ccf1c55eb84018235635509f594d09409c0e94af32cd118ca5009f56829a957",
+      "counts": {
+        "MEDIUM": 1
+      },
+      "targetCvePresent": false
+    }
+  },
+  "approval": {
+    "stagingDeployment": true,
+    "productionDeployment": false,
+    "realDatabaseBackup": true,
+    "ownerCreation": false,
+    "publicAdmin": false,
+    "adminPhase2": false
+  },
+  "localEvidenceDirectory": "/home/mehdi/.cache/hambazi-libcurl-20261026",
+  "evidenceSha256": {
+    "candidate-reference.scan.json": "5e4f18eccebf132d2b228872332f82e8762ecfc0a92d6e400ad06b8245d2bd21",
+    "database-rehearsal.json": "2af7094f7122cec8fb4a52ee5cf9368fa04dff30e249c5ba6df9f1deae7e9666",
+    "compatibility-inventory.json": "7549ccd71a10a9193d625a4ebfc1fe4eae550ba2ebcab9abb76f714f72ff3675",
+    "runtime-compatibility.json": "a7670860a60a6fffb0884511982201cb13c7d6876517cec501a0cb06887fad11",
+    "normal-renewal-local-assessment.json": "9e0ad9c01828b91757f0d71cfaa551214199c08d398b5170032bd6aeb6ed9d27"
+  },
+  "deploymentAttempt": {
+    "maintenanceStartedAtUTC": "2026-10-26T13:45:36.862362Z",
+    "rollbackCompletedAtUTC": "2026-10-26T13:50:27.055809Z",
+    "failure": "runtime comparison treated environment-variable order as significant; values unchanged",
+    "localComparisonFixedAndTested": true,
+    "postgresVersion": "18.6",
+    "volumePreserved": true,
+    "dataReconciledBeforeAndAfterRollback": true,
+    "activeImageId": "sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa",
+    "activePostgresContainerId": "8dfb23f7d947a79daa62dcba9640c5772e15619cbe19fa8d223685266e915d12",
+    "coreAndAdminDeadlineUTC": "2026-10-26T19:10:35Z",
+    "qualificationCompleted": false,
+    "applicationsInMaintenance": true,
+    "report": "docs/operations/postgres-libcurl-deployment-20261026.md"
+  },
+  "deployment": {
+    "completedAtUTC": "2026-10-26T14:07:45.070678+00:00",
+    "postgresVersion": "18.6",
+    "libcurl": "8.23.0-r0",
+    "image": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "containerId": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2",
+    "sameVolume": true,
+    "dataAndRuntimeReconciledBeforeApplicationStart": true,
+    "backupArchiveSha256": "47a024fd17ff3493588895e4ded876ef633b93888d26b3f162a2ba752b5e28dc",
+    "coreDeadlineUTC": "2026-10-27T07:15:18Z",
+    "adminDeadlineUTC": "2026-10-27T07:15:18Z",
+    "qualification": "actual-core-and-admin-systemd-renew-services-passed",
+    "securityPolicyUnchanged": true,
+    "playerIngressOpen": true,
+    "publicAdmin": false,
+    "ownerCreated": false,
+    "phase2": false
+  },
+  "finalHealthObservedAtUTC": "2026-10-26T14:08:20.599392+00:00",
+  "remainingSeverityCounts": {
+    "core:bot.scan.private.json": {
+      "MEDIUM": 5,
+      "LOW": 5
+    },
+    "core:redis-staging.scan.private.json": {
+      "MEDIUM": 1
+    },
+    "core:api.scan.private.json": {
+      "MEDIUM": 5,
+      "LOW": 5
+    },
+    "core:postgres-staging.scan.private.json": {
+      "MEDIUM": 1
+    },
+    "core:web.scan.private.json": {
+      "MEDIUM": 1
+    },
+    "core:worker.scan.private.json": {
+      "MEDIUM": 5,
+      "LOW": 5
+    },
+    "admin:image.scan.private.json": {
+      "MEDIUM": 1
+    }
+  }
+}

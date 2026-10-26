@@ -99,6 +99,13 @@ export function createAdminRepository(
                 credentialVersion: patch.credentialVersion ?? old.credentialVersion,
               },
             });
+            // Both statements use this same transaction/realm lock. Keep the
+            // optional column grant and query shape explicit for boundary checks.
+            if (patch.passwordVerifier !== undefined)
+              await db.adminOperator.update({
+                where: { id },
+                data: { passwordVerifier: patch.passwordVerifier },
+              });
           },
           async createOperator(record) {
             await db.adminOperator.create({

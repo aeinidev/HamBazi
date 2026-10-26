@@ -14,7 +14,10 @@ import type {
 
 export const password = "SyntheticPassword123";
 export const ownerPin = "012345";
-export async function adminFixture() {
+export async function adminFixture(
+  options: { realmId?: string; recoveryPasswordRequired?: boolean } = {},
+) {
+  const realmId = options.realmId ?? "synthetic";
   const clock = {
     value: Date.UTC(2026, 9, 25),
     nowMs() {
@@ -27,7 +30,7 @@ export async function adminFixture() {
     commandKey: { reveal: () => Buffer.alloc(32, 33).toString("base64url") },
     issuer: "urn:hambazi:synthetic:admin",
     audience: "urn:hambazi:synthetic:console",
-    realmId: "synthetic",
+    realmId,
     clock,
     memoryCost: 19456,
     timeCost: 2,
@@ -103,7 +106,7 @@ export async function adminFixture() {
           state.realm!.ownershipEpoch++;
         },
         async createRealm() {
-          state.realm = { id: "synthetic", ownerId: null, ownershipEpoch: 0, policyRevision: 1 };
+          state.realm = { id: realmId, ownerId: null, ownershipEpoch: 0, policyRevision: 1 };
         },
         async saveReceipt(row) {
           state.receipts.set(row.operatorId + row.commandId, structuredClone(row));
@@ -129,7 +132,7 @@ export async function adminFixture() {
     clock,
     newId: randomUUID,
     policy: {
-      realmId: "synthetic",
+      realmId,
       environment: "test",
       sessionSeconds: 900,
       idleSeconds: 300,
@@ -143,7 +146,10 @@ export async function adminFixture() {
     crypto,
     clock,
     newId: randomUUID,
-    realmId: "synthetic",
+    realmId,
+    ...(options.recoveryPasswordRequired === undefined
+      ? {}
+      : { recoveryPasswordRequired: options.recoveryPasswordRequired }),
     verifyAuthority: async (input) => input === "synthetic-verified-authority",
   });
   const enroll = () =>

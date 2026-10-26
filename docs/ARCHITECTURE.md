@@ -1086,7 +1086,7 @@ Client logic باید بر error code پایدار تکیه کند، نه متن
 
 - Redis adapter channelها trusted internal traffic هستند؛ credential و ACL آن از cache/job access در صورت امکان جدا می‌شود.
 
-- Admin route از public API جدا، با احراز هویت مستقل، RBAC، allowlist یا private access و audit append-only محافظت می‌شود. طبق [ADR-081](adr/081-admin-local-password-and-owner-pin.md)، ورود Admin محلی با Username/Password و برای OWNER مرحلهٔ PIN ثابت شش‌رقمی است؛ Password + PIN ثابت MFA مستقل یا مقاوم به فیشینگ نیست. این تصمیم فقط الزام MFA/IdP ورود Admin را بازنگری می‌کند و حفاظت شبکه، OWNER، Audit و یکپارچگی بازی را تغییر نمی‌دهد.
+- Admin route از public API بازیکنان جدا، با احراز هویت مستقل، RBAC و audit append-only محافظت می‌شود. طبق [ADR-081](adr/081-admin-local-password-and-owner-pin.md)، ورود محلی Username/Password و برای OWNER مرحلهٔ PIN ثابت شش‌رقمی دارد؛ این ترکیب MFA مستقل یا مقاوم به فیشینگ نیست. [ADR-083](adr/083-admin-public-https-and-self-credential-rotation.md) ورود عادی از HTTPS عمومی و Reverse Proxy محدود را جایگزین الزام تونل می‌کند؛ process/port Backend، DB/Redis و Bootstrap/Recovery همچنان خصوصی‌اند. [ADR-084](adr/084-staging-owner-private-ssh-ceremony.md) فقط مراسم Staging را با SSH/root/TTY، policy و تأیید صریح، backup rehearsal و checkpoint خصوصی ساده می‌کند؛ Recovery رمز فعلی مالک را می‌خواهد. این تصمیم‌ها مجوز فعال‌سازی عمومی، حساب واقعی یا فاز دو نیستند؛ CSRF/cookie/rate/permission/OWNER/Audit و یکپارچگی بازی حفظ‌اند.
 
 - Dependency scanning، secret scanning، lockfile integrity و container image scanning بخشی از CI release gate هستند.
 

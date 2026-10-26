@@ -4,7 +4,7 @@ BEGIN;
 GRANT USAGE ON SCHEMA public TO hambazi_admin_runtime, hambazi_admin_bootstrap, hambazi_admin_recovery;
 GRANT SELECT ON admin_realms, admin_operators, admin_sessions, admin_auth_receipts, admin_grants, admin_audit_events TO hambazi_admin_runtime;
 GRANT INSERT ON admin_sessions, admin_auth_receipts, admin_audit_events TO hambazi_admin_runtime;
-GRANT UPDATE (pin_failures, locked_at, session_epoch, pin_verifier, credential_version) ON admin_operators TO hambazi_admin_runtime;
+GRANT UPDATE (pin_failures, locked_at, session_epoch, pin_verifier, password_verifier, credential_version) ON admin_operators TO hambazi_admin_runtime;
 GRANT UPDATE (last_seen_at, revoked_at) ON admin_sessions TO hambazi_admin_runtime;
 GRANT SELECT ON admin_realms, admin_operators, admin_auth_receipts, admin_audit_events TO hambazi_admin_bootstrap;
 GRANT INSERT ON admin_realms, admin_operators, admin_audit_events, admin_auth_receipts TO hambazi_admin_bootstrap;

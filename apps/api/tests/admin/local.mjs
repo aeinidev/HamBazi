@@ -8,7 +8,24 @@ import { promisify } from "node:util";
 import process from "node:process";
 import { URL } from "node:url";
 import { setTimeout } from "node:timers";
-const run = promisify(execFile);
+const execute = promisify(execFile);
+// Test allocation must never follow a developer's remote Docker context.
+const run = (command, args, options = {}) =>
+  execute(
+    command,
+    command === "docker" ? ["--host", "unix:///var/run/docker.sock", ...args] : args,
+    {
+      ...options,
+      env: {
+        ...process.env,
+        ...options.env,
+        DOCKER_HOST: "unix:///var/run/docker.sock",
+        DOCKER_CONTEXT: "",
+        DOCKER_TLS_VERIFY: "",
+        DOCKER_CERT_PATH: "",
+      },
+    },
+  );
 const require = createRequire(
   new URL("../../../../packages/database/package.json", import.meta.url),
 );
@@ -58,7 +75,7 @@ try {
     { timeout: 30000 },
   );
   started = true;
-  const port = (
+  let port = (
     await run("docker", [
       "inspect",
       "--format",
@@ -105,6 +122,11 @@ try {
     ])
   ).stdout.trim();
   const url = (role) => `postgresql://${role}:${password}@127.0.0.1:${port}/hambazi`;
+  const databaseUrl = (role, databaseName) => {
+    const value = new URL(url(role));
+    value.pathname = "/" + databaseName;
+    return value.toString();
+  };
   let root;
   for (let i = 0; i < 60; i++) {
     const c = new Client({ connectionString: url("postgres"), connectionTimeoutMillis: 1000 });
@@ -199,6 +221,116 @@ try {
   );
   const summary = tests.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [];
   for (const line of summary) process.stdout.write(line + "\n");
+  stage = "owner backup restore rehearsal";
+  // The restart persistence test may get a new randomly allocated host port.
+  port = (
+    await run("docker", [
+      "inspect",
+      "--format",
+      '{{(index (index .NetworkSettings.Ports "5432/tcp") 0).HostPort}}',
+      name,
+    ])
+  ).stdout.trim();
+  const otherRealm = new Client({ connectionString: url("postgres") });
+  await otherRealm.connect();
+  try {
+    let denied = false;
+    try {
+      await otherRealm.query(
+        await readFile(
+          new URL(
+            "../../../../packages/database/prisma/admin-staging-owner-permissions.sql",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+    } catch {
+      denied = true;
+    }
+    await otherRealm.query("ROLLBACK");
+    if (!denied) throw new Error("ADMIN_TEST_STAGING_GRANT_ESCAPED");
+    const permissions = await otherRealm.query(
+      "SELECT has_table_privilege('hambazi_admin_recovery','admin_sessions','SELECT') AS sessions, has_table_privilege('hambazi_admin_recovery','admin_grants','SELECT') AS grants",
+    );
+    if (permissions.rows[0].sessions || permissions.rows[0].grants)
+      throw new Error("ADMIN_TEST_STAGING_GRANT_ESCAPED");
+  } finally {
+    await otherRealm.end();
+  }
+  const ownerSource = "hambazi_owner_source",
+    ownerRestore = "hambazi_owner_restore";
+  for (const databaseName of [ownerSource, ownerRestore]) {
+    const allocator = new Client({ connectionString: url("postgres") });
+    await allocator.connect();
+    try {
+      await allocator.query(`CREATE DATABASE ${databaseName}`);
+    } finally {
+      await allocator.end();
+    }
+    const connectionString = databaseUrl("postgres", databaseName);
+    const schema = new Client({ connectionString });
+    await schema.connect();
+    try {
+      await schema.query(
+        "REVOKE ALL ON SCHEMA public FROM PUBLIC; GRANT USAGE,CREATE ON SCHEMA public TO hambazi_migrator",
+      );
+    } finally {
+      await schema.end();
+    }
+    await run("pnpm", ["--filter", "@hambazi/database", "db:migrate"], {
+      env: {
+        ...env,
+        MIGRATION_DATABASE_URL: databaseUrl("hambazi_migrator", databaseName),
+      },
+      timeout: 120000,
+      maxBuffer: 2 * 1024 * 1024,
+    });
+    const access = new Client({ connectionString });
+    await access.connect();
+    try {
+      await access.query(
+        await readFile(
+          new URL("../../../../packages/database/prisma/admin-permissions.sql", import.meta.url),
+          "utf8",
+        ),
+      );
+      await access.query(
+        await readFile(
+          new URL(
+            "../../../../packages/database/prisma/admin-staging-owner-permissions.sql",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+    } finally {
+      await access.end();
+    }
+  }
+  const rehearsal = await run(
+    "pnpm",
+    [
+      "--filter",
+      "@hambazi/api",
+      "exec",
+      "vitest",
+      "run",
+      "tests/integration/admin-owner-drill.test.ts",
+    ],
+    {
+      env: {
+        ...env,
+        TEST_ADMIN_OWNER_SOURCE_URL: databaseUrl("postgres", ownerSource),
+        TEST_ADMIN_OWNER_RESTORE_URL: databaseUrl("postgres", ownerRestore),
+      },
+      timeout: 120000,
+      maxBuffer: 4 * 1024 * 1024,
+    },
+  );
+  for (const line of rehearsal.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
+    process.stdout.write(line + "\n");
+  process.stdout.write("ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED\n");
   process.stdout.write("ADMIN_DISPOSABLE_INTEGRATION_PASSED\n");
 } catch (error) {
   const stderr =
@@ -214,11 +346,14 @@ try {
     process.stderr.write(`ADMIN_TEST_ERROR_CODE:${error.code}\n`);
   // Source locations/test names only, not SQL, assertion data, credential files or commands.
   for (const line of stderr.split("\n")) {
-    if (/^ FAIL\s+tests\/integration\/admin-local/.test(line)) process.stderr.write(line + "\n");
-    const location = line.match(/tests\/integration\/admin-local.test.ts:\d+:\d+/);
+    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill)/.test(line))
+      process.stderr.write(line + "\n");
+    const location = line.match(/tests\/integration\/admin-(local|owner-drill).test.ts:\d+:\d+/);
     if (location) process.stderr.write(location[0] + "\n");
     const fixed = line.match(/ADMIN_TEST_[A-Z_]+/);
     if (fixed) process.stderr.write(fixed[0] + "\n");
+    const timeout = line.match(/Test timed out in [0-9]+ms/);
+    if (timeout) process.stderr.write(timeout[0] + "\n");
   }
   process.stderr.write(`ADMIN_DISPOSABLE_TEST_FAILED:${stage}\n`);
   process.exitCode = 1;

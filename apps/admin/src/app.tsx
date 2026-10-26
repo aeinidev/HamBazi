@@ -369,7 +369,7 @@ export function AdminApp() {
         </nav>
         <div className="identity">
           <span>{access?.isOwner ? "مالک اصلی · OWNER" : "مدیر پلتفرم"}</span>
-          {access?.isOwner && <button onClick={() => setSecurity(true)}>تغییر PIN مالک</button>}
+          {access?.isOwner && <button onClick={() => setSecurity(true)}>امنیت حساب مالک</button>}
           <button
             disabled={busy}
             onClick={() => {
@@ -394,7 +394,7 @@ export function AdminApp() {
           </p>
         )}
         {security && access?.isOwner ? (
-          <PinSettings csrf={csrf} completed={reset} />
+          <OwnerSecuritySettings csrf={csrf} completed={reset} />
         ) : loading ? (
           <p role="status">در حال دریافت اطلاعات…</p>
         ) : !permitted ? (
@@ -518,21 +518,33 @@ function ReadPanel({
     );
   return <p className="empty">دادهٔ قابل نمایش موجود نیست.</p>;
 }
-function PinSettings({ csrf, completed }: { csrf: string; completed(): void }) {
+function OwnerSecuritySettings({ csrf, completed }: { csrf: string; completed(): void }) {
+  const [kind, setKind] = useState<"password" | "pin">("password");
   const [password, setPassword] = useState(""),
     [currentPin, setCurrentPin] = useState(""),
-    [newPin, setNewPin] = useState("");
+    [next, setNext] = useState(""),
+    [confirmation, setConfirmation] = useState("");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function change(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
+    if (next !== confirmation) {
+      setError("مقدار جدید و تکرار آن یکسان نیستند.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
       await adminRequest(
-        "auth/pin/change",
-        { schemaVersion: 1, commandId: crypto.randomUUID(), password, currentPin, newPin },
+        `auth/${kind}/change`,
+        {
+          schemaVersion: 1,
+          commandId: crypto.randomUUID(),
+          password,
+          currentPin,
+          ...(kind === "pin" ? { newPin: next } : { newPassword: next }),
+        },
         csrf,
       );
       completed();
@@ -541,13 +553,34 @@ function PinSettings({ csrf, completed }: { csrf: string; completed(): void }) {
     } finally {
       setPassword("");
       setCurrentPin("");
-      setNewPin("");
+      setNext("");
+      setConfirmation("");
       setBusy(false);
     }
   }
   return (
     <section className="login-card">
-      <h2>تغییر رمز امنیتی مالک</h2>
+      <h2>امنیت حساب مالک</h2>
+      <div role="group" aria-label="نوع تغییر اطلاعات امنیتی">
+        {(["password", "pin"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            disabled={busy}
+            aria-pressed={kind === value}
+            onClick={() => {
+              setKind(value);
+              setPassword("");
+              setCurrentPin("");
+              setNext("");
+              setConfirmation("");
+              setError("");
+            }}
+          >
+            {value === "password" ? "تغییر رمز عبور" : "تغییر PIN"}
+          </button>
+        ))}
+      </div>
       <p className="muted">
         پس از تغییر، تمام نشست‌ها بسته می‌شوند. سه PIN فعلی اشتباه، ورود مالک را تا بازیابی خصوصی
         قفل می‌کند.
@@ -581,17 +614,33 @@ function PinSettings({ csrf, completed }: { csrf: string; completed(): void }) {
           />
         </label>
         <label>
-          PIN جدید
+          {kind === "pin" ? "PIN جدید" : "رمز عبور جدید"}
           <input
             type="password"
             dir="ltr"
-            inputMode="numeric"
-            autoComplete="off"
+            inputMode={kind === "pin" ? "numeric" : "text"}
+            autoComplete={kind === "pin" ? "off" : "new-password"}
             required
-            pattern="[0-9]{6}"
-            maxLength={6}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value)}
+            pattern={kind === "pin" ? "[0-9]{6}" : undefined}
+            minLength={kind === "pin" ? 6 : 12}
+            maxLength={kind === "pin" ? 6 : 256}
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+          />
+        </label>
+        <label>
+          {kind === "pin" ? "تکرار PIN جدید" : "تکرار رمز عبور جدید"}
+          <input
+            type="password"
+            dir="ltr"
+            required
+            inputMode={kind === "pin" ? "numeric" : "text"}
+            autoComplete={kind === "pin" ? "off" : "new-password"}
+            pattern={kind === "pin" ? "[0-9]{6}" : undefined}
+            minLength={kind === "pin" ? 6 : 12}
+            maxLength={kind === "pin" ? 6 : 256}
+            value={confirmation}
+            onChange={(e) => setConfirmation(e.target.value)}
           />
         </label>
         {error && (
