@@ -107,7 +107,8 @@ export async function buildCandidates(directory, environment = process.env) {
     environment.HAMBAZI_WEB_POLICY_PROFILE !== "production"
   )
     invalid();
-  if (process.versions.node !== "24.20.0") invalid();
+  const toolchain = JSON.parse(await readFile(join(root, "infra/ci/toolchain.json"), "utf8"));
+  if (process.versions.node !== toolchain.nodeVersion) invalid();
   if ((await runGate("packaging-pnpm", "pnpm", ["--version"])).trim() !== "12.4.1") invalid();
   const commit = (
     await runGate("packaging-source", "git", ["rev-parse", "HEAD"], { cwd: root })

@@ -5,11 +5,16 @@ import { createDatabase } from "@hambazi/database";
 import { adminAuditPageSchema, adminOverviewSchema, adminPageSchema } from "@hambazi/validation";
 import { createAdminCrypto, createAdminModule, type AdminReadPort } from "../admin/index.js";
 import { createRedisAuthRateLimiter } from "../auth/index.js";
-import { createUsersAdminRead } from "../users/index.js";
-import { createGamesAdminRead } from "../games/index.js";
-import { createRoomsAdminRead, createRoomDiagnostics } from "../rooms/index.js";
+import { createUsersAdminOperations, createUsersAdminRead } from "../users/index.js";
+import { createGamesAdminOperations, createGamesAdminRead } from "../games/index.js";
+import {
+  createRoomsAdminOperations,
+  createRoomsAdminRead,
+  createRoomDiagnostics,
+} from "../rooms/index.js";
 import {
   createMatchesAdminRead,
+  createMatchesAdminOperations,
   createMatchDiagnostics,
   createOutboxDiagnostics,
 } from "../matches/index.js";
@@ -21,7 +26,9 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
   if (!config) return null;
   if (
     new URL(config.databaseUrl.reveal()).username !== "hambazi_admin_runtime" ||
-    new URL(config.readDatabaseUrl.reveal()).username !== "hambazi_admin_reader"
+    new URL(config.readDatabaseUrl.reveal()).username !== "hambazi_admin_reader" ||
+    (config.operationsDatabaseUrl &&
+      new URL(config.operationsDatabaseUrl.reveal()).username !== "hambazi_admin_operations")
   )
     throw new Error("ADMIN_STARTUP_FAILED");
   const options = {
@@ -33,24 +40,62 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
   };
   const database = createDatabase({ ...options, databaseUrl: config.databaseUrl });
   const readDatabase = createDatabase({ ...options, databaseUrl: config.readDatabaseUrl });
+  const operationsDatabase = config.operationsDatabaseUrl
+    ? createDatabase({ ...options, databaseUrl: config.operationsDatabaseUrl })
+    : null;
   const limiter = createRedisAuthRateLimiter({
     url: config.redisUrl,
     namespace: `admin-v1:${config.realmId}`,
     ipLimit: config.rateLimit,
     identityLimit: Math.min(config.rateLimit, 30),
   });
+  let reconciliation: ReturnType<typeof setInterval> | undefined;
   let app: Awaited<ReturnType<typeof createAdminHttpApplication>> | undefined;
   try {
-    await Promise.all([database.connect(), readDatabase.connect(), limiter.connect()]);
+    await Promise.all([
+      database.connect(),
+      readDatabase.connect(),
+      limiter.connect(),
+      ...(operationsDatabase ? [operationsDatabase.connect()] : []),
+    ]);
     const clock = { nowMs: () => Date.now() };
     const crypto = createAdminCrypto({ ...config, clock });
-    const module = createAdminModule(database, config.realmId, {
-      crypto,
-      policy: config,
-      clock,
-      newId: randomUUID,
-      dummyPasswordVerifier: await crypto.hash(randomBytes(32).toString("base64url"), "password"),
-    });
+    const userOperations = operationsDatabase
+      ? createUsersAdminOperations(operationsDatabase, clock)
+      : undefined;
+    const module = createAdminModule(
+      database,
+      config.realmId,
+      {
+        crypto,
+        policy: config,
+        clock,
+        newId: randomUUID,
+        dummyPasswordVerifier: await crypto.hash(randomBytes(32).toString("base64url"), "password"),
+      },
+      operationsDatabase
+        ? {
+            USER_DISPLAY_NAME: userOperations!,
+            GAME_AVAILABILITY: createGamesAdminOperations(operationsDatabase, clock),
+            ROOM_CLOSE: createRoomsAdminOperations(operationsDatabase, clock),
+            MATCH_TERMINATE: createMatchesAdminOperations(operationsDatabase, clock),
+          }
+        : undefined,
+    );
+    let reconciling = false;
+    if (module.management) {
+      reconciliation = setInterval(() => {
+        if (reconciling) return;
+        reconciling = true;
+        void module
+          .management!.reconcilePending()
+          .catch(() => {})
+          .finally(() => {
+            reconciling = false;
+          });
+      }, 5000);
+      reconciliation.unref();
+    }
     const pages = {
       users: createUsersAdminRead(readDatabase),
       games: createGamesAdminRead(readDatabase),
@@ -66,8 +111,8 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     let snapshot: Promise<ReturnType<typeof adminOverviewSchema.parse>> | undefined;
     let sampledAt = 0;
     const reads: AdminReadPort = {
-      async page(kind, query, games) {
-        return adminPageSchema.parse(await pages[kind](query, games));
+      async page(kind, query, games, excluded) {
+        return adminPageSchema.parse(await pages[kind](query, games, excluded));
       },
       async overview() {
         if (!snapshot || clock.nowMs() - sampledAt >= 5000) {
@@ -99,6 +144,7 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     app = await createAdminHttpApplication(
       {
         service: module.service,
+        management: module.management,
         csrf: crypto.csrf,
         reads,
         cookieSeconds: config.sessionSeconds,
@@ -119,15 +165,25 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     await app.listen(config.port, config.bindAddress);
     return {
       close: async () => {
+        clearInterval(reconciliation);
         await app!.close();
         limiter.close();
-        await Promise.all([database.disconnect(), readDatabase.disconnect()]);
+        await Promise.all([
+          database.disconnect(),
+          readDatabase.disconnect(),
+          ...(operationsDatabase ? [operationsDatabase.disconnect()] : []),
+        ]);
       },
     };
   } catch {
+    clearInterval(reconciliation);
     await app?.close().catch(() => {});
     limiter.close();
-    await Promise.allSettled([database.disconnect(), readDatabase.disconnect()]);
+    await Promise.allSettled([
+      database.disconnect(),
+      readDatabase.disconnect(),
+      ...(operationsDatabase ? [operationsDatabase.disconnect()] : []),
+    ]);
     throw new Error("ADMIN_STARTUP_FAILED");
   }
 }

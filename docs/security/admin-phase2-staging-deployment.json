@@ -1,0 +1,890 @@
+{
+  "schemaVersion": 1,
+  "scope": "staging-only",
+  "status": "deployed-manual-review-ended-at-user-request-audit-discrepancies-open",
+  "checkedAtUTC": "2026-10-27T18:49:17.372508+00:00",
+  "deployedAtUTC": "2026-10-27T18:42:22.975488+00:00",
+  "sourceSnapshotSha256": "c13068a3aba76565d1385491a2d1326f3dd8a253f00a87f8bb6bf3d32a7b9b32",
+  "pins": {
+    "api": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+    "bot": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+    "worker": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+    "web": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+    "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+  },
+  "adminImage": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+  "migration": {
+    "migrations": 19,
+    "legacyLogicalTablesUnchanged": 36,
+    "ownerUnchanged": true,
+    "privilegeChecks": {
+      "connect": true,
+      "banDisabled": true,
+      "hiddenDenied": true,
+      "identityDenied": true,
+      "auditImmutable": true,
+      "noEscalation": true
+    }
+  },
+  "owner": {
+    "owners": 1,
+    "credentialVersion": 2,
+    "sessionEpoch": 2,
+    "authorizationVersion": 1,
+    "status": "ACTIVE",
+    "pinFailures": 0,
+    "locked": false,
+    "passwordChanges": 1,
+    "pinChanges": 0
+  },
+  "sessionInvalidation": {
+    "oldGenerationSessions": 4,
+    "persistentlyMarkedRevoked": 2,
+    "mechanism": "backend credentialVersion and sessionEpoch equality; all four old-generation sessions fail authentication"
+  },
+  "finalRuntimeScanCounts": {
+    "api": {},
+    "bot": {},
+    "worker": {},
+    "web": {},
+    "postgres-staging": {
+      "MEDIUM": 1
+    },
+    "redis-staging": {
+      "MEDIUM": 1
+    },
+    "admin": {}
+  },
+  "normalSecurityRenewal": {
+    "core": {
+      "ok": true,
+      "result": "unchanged",
+      "checkedAtUTC": "2026-10-27T18:41:31.111139+00:00",
+      "deadlineUTC": "2026-10-28T13:12:49Z",
+      "images": 6,
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-28T13:12:49.474279763Z",
+        "UpdatedAt": "2026-10-27T13:12:49.474279883Z",
+        "DownloadedAt": "2026-10-27T18:40:36.958222266Z"
+      }
+    },
+    "admin": {
+      "ok": true,
+      "checkedAtUTC": "2026-10-27T18:42:11.873548+00:00",
+      "deadlineUTC": "2026-10-28T13:12:49Z"
+    }
+  },
+  "securityTimers": {
+    "hambazi-server-security-renew.timer": "active",
+    "hambazi-admin-security-renew.timer": "active",
+    "hambazi-server-security-expiry.timer": "active",
+    "hambazi-admin-security-expiry.timer": "active"
+  },
+  "controllerCodeSha256": {
+    "core": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+    "admin": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e"
+  },
+  "httpAcceptance": {
+    "checkedAtUTC": "2026-10-27T18:43:24.895880+00:00",
+    "httpsChecks": [
+      {
+        "host": "admin.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 200,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/me/access",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/overview",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/management/meta",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/admins",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/operations",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/games",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/rooms",
+        "method": "GET",
+        "status": 401,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/bootstrap",
+        "method": "POST",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/recovery",
+        "method": "POST",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/password/reset",
+        "method": "POST",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/forgot-password",
+        "method": "POST",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/login",
+        "method": "POST",
+        "status": 403,
+        "tlsVerified": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/operations",
+        "method": "POST",
+        "status": 403,
+        "tlsVerified": true
+      },
+      {
+        "host": "staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 200,
+        "tlsVerified": true
+      },
+      {
+        "host": "api-staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "bot-staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 404,
+        "tlsVerified": true
+      },
+      {
+        "host": "api-staging.hambazi.top",
+        "path": "/v1/admin/admins",
+        "method": "GET",
+        "status": 404,
+        "tlsVerified": true
+      }
+    ],
+    "ownerUnchanged": true,
+    "backendDatabaseRedisPublicPorts": false,
+    "nginxValid": true,
+    "coreSecurityBinding": true,
+    "adminSecurityBinding": true
+  },
+  "anonymousBrowserAcceptance": {
+    "checkedAtUTC": "2026-10-27T18:44:28.769Z",
+    "livePublicHttps": true,
+    "isolatedAnonymousBrowser": true,
+    "loginUsernamePasswordOnly": true,
+    "pinHiddenBeforePassword": true,
+    "rtl": true,
+    "mobileNoHorizontalOverflow": true,
+    "desktopNoHorizontalOverflow": true,
+    "credentialsEntered": false
+  },
+  "backups": {
+    "ownerArchiveSha256": "df7dd140e4f37a1e67f33cc25d38cb5e8e245fdedbed8692654f699b63c80223",
+    "ownerPrivateRestoreCheckedAtUTC": "2026-10-27T17:18:24.905Z",
+    "preDeploymentFullArchiveSha256": "f448b674233edd810ba3f3a1fcd88f310734e1caae542003739addeb23a98e86",
+    "quiescentArchiveSha256": "f4e0a9f8de32e922fe5985d40e61942ae1b371de6f6df1a205e1cd204b8451f8",
+    "postDeployment": {
+      "archiveSha256": "423f047648d8158686f5f340b1297fcffbaeadc265471dfce4bb4f7049569edf",
+      "verifiedAtUTC": "2026-10-27T18:45:45.371Z",
+      "tables": 44,
+      "identityTables": 9,
+      "offServerCopyVerified": true,
+      "actualIsolatedRestore": true
+    }
+  },
+  "services": {
+    "api": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+      "containerId": "c4ec4c9b66e18c4a4c759911fc07661f146f926a8ad7b10ef3656231eca50c8a"
+    },
+    "bot": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+      "containerId": "2c8921778a7e537690dc0ba21787f88e9baf17f70bce662f548b956f8affde69"
+    },
+    "worker": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+      "containerId": "a7ecc04238b8655d04100079007a1af70b6d41941dfe15bd122666fcf4a275f7"
+    },
+    "web": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+      "containerId": "3bdc076678c5f5b9d22e74a32c9f8db9037cf767e3aeb101021555809f490245"
+    },
+    "postgres-staging": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "containerId": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2"
+    },
+    "redis-staging": {
+      "running": true,
+      "dockerHealth": null,
+      "restarts": 0,
+      "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "containerId": "d718077f893fcd410da571c3aacabb7e68dd4abff665c20225ee2dab823d4d8a"
+    },
+    "admin": {
+      "running": true,
+      "dockerHealth": "healthy",
+      "restarts": 0,
+      "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+      "containerId": "3cbd8525bbfbeef5487c47574b9aa3d1c5b6fee3d95f9dcf91c73269185dfd29"
+    }
+  },
+  "nginxActive": true,
+  "dataContainersUnchanged": true,
+  "userBanEnabled": false,
+  "productionChanged": false,
+  "phaseThreeStarted": false,
+  "capacityAccepted": false,
+  "privateOperatorPatch": {
+    "files": [
+      "apps/api/src/composition/admin-owner-backup-cli.ts",
+      "apps/api/src/composition/admin-owner-staging.ts"
+    ],
+    "change": "Private identity commands explicitly disable product mutations and clear the product-operations DSN; service images unchanged.",
+    "checks": [
+      {
+        "check": "api-build",
+        "exitCode": 0,
+        "seconds": 18.77
+      },
+      {
+        "check": "api-typecheck",
+        "exitCode": 0,
+        "seconds": 26.85
+      },
+      {
+        "check": "config-tests",
+        "exitCode": 0,
+        "seconds": 3.81
+      },
+      {
+        "check": "private-tty",
+        "exitCode": 0,
+        "seconds": 4.6
+      }
+    ]
+  },
+  "orchestratorWaitRegressionChecks": 3,
+  "liveAuthenticatedChecks": {
+    "ownerPasswordThenPin": "passed-user-confirmed-and-audit-corroborated",
+    "adminManagementOwnerFinal": "passed-user-confirmed-and-nine-successful-owner-final-operations-audit-corroborated",
+    "limitedAdministratorBackendDenialAndLiveRevocation": "user-reported-success-unverified-by-audit-no-further-manual-retest-requested",
+    "ownerPages": {
+      "admins": "passed-user-confirmed",
+      "users": "passed-user-confirmed",
+      "games": "passed-user-confirmed",
+      "rooms": "passed-user-confirmed"
+    },
+    "limitedAdministratorLoginWithoutPin": "passed-user-confirmed-and-full-session-only-corroborated",
+    "limitedAdministratorBackendDenial": "user-reported-403-no-corresponding-authorization-denied-audit-observed",
+    "ordinaryAdministratorDisablement": "user-reported-success-observed-active-discrepancy-open"
+  },
+  "events": [
+    {
+      "stage": "MAINTENANCE_BEGIN",
+      "atUTC": "2026-10-27T18:28:22.936228+00:00",
+      "dataServicesPreserved": true
+    },
+    {
+      "stage": "QUIESCENT_BACKUP_READY_FOR_OFFSERVER_RESTORE",
+      "atUTC": "2026-10-27T18:28:44.954481+00:00",
+      "sha256": "f4e0a9f8de32e922fe5985d40e61942ae1b371de6f6df1a205e1cd204b8451f8"
+    },
+    {
+      "stage": "MIGRATIONS_AND_GRANTS_PASSED",
+      "atUTC": "2026-10-27T18:29:58.664919+00:00",
+      "migrations": 19,
+      "ownerUnchanged": true,
+      "banEnabled": false
+    },
+    {
+      "stage": "DEPLOYMENT_STOPPED",
+      "atUTC": "2026-10-27T18:30:12.273920+00:00",
+      "errorType": "RuntimeError",
+      "safeCode": "COMMAND_FAILED_1"
+    },
+    {
+      "stage": "SAFE_CONTAINMENT_NO_DATABASE_RESTORE",
+      "atUTC": "2026-10-27T18:30:13.169962+00:00",
+      "dataServicesPreserved": true
+    },
+    {
+      "stage": "CORE_DEPENDENCIES_HEALTHY_BEFORE_BOT",
+      "atUTC": "2026-10-27T18:34:47.503725+00:00"
+    },
+    {
+      "stage": "ORDERED_CORE_STARTUP_PASSED",
+      "atUTC": "2026-10-27T18:34:53.428286+00:00"
+    },
+    {
+      "stage": "DEPLOYMENT_STOPPED",
+      "atUTC": "2026-10-27T18:35:07.321728+00:00",
+      "errorType": "RuntimeError",
+      "safeCode": "CANDIDATE_EXITED"
+    },
+    {
+      "stage": "SAFE_CONTAINMENT_NO_DATABASE_RESTORE",
+      "atUTC": "2026-10-27T18:35:23.698812+00:00",
+      "dataServicesPreserved": true
+    },
+    {
+      "stage": "ACTUAL_POSTGRESQL_PRISMA_DRIFT_ZERO",
+      "atUTC": "2026-10-27T18:37:50.939542+00:00"
+    },
+    {
+      "stage": "DEPLOYMENT_STOPPED",
+      "atUTC": "2026-10-27T18:38:18.135204+00:00",
+      "errorType": "RuntimeError",
+      "safeCode": "CANDIDATE_EXITED"
+    },
+    {
+      "stage": "SAFE_CONTAINMENT_NO_DATABASE_RESTORE",
+      "atUTC": "2026-10-27T18:38:34.361708+00:00",
+      "dataServicesPreserved": true
+    },
+    {
+      "stage": "ACTUAL_POSTGRESQL_PRISMA_DRIFT_ZERO",
+      "atUTC": "2026-10-27T18:39:15.488302+00:00"
+    },
+    {
+      "stage": "ADMIN_READONLY_QUALIFICATION_PASSED",
+      "atUTC": "2026-10-27T18:40:00.134265+00:00",
+      "systemdCreatedStateHandled": true,
+      "healthGuardsUnchanged": true
+    },
+    {
+      "stage": "ADMIN_CANDIDATE_HEALTHY",
+      "atUTC": "2026-10-27T18:40:21.078414+00:00",
+      "mutationsEnabled": true,
+      "publicAdmission": false
+    },
+    {
+      "stage": "STAGING_PHASE2_DEPLOYED_HEALTHY",
+      "atUTC": "2026-10-27T18:42:23.095854+00:00",
+      "ownerUnchanged": true,
+      "banEnabled": false,
+      "dataServicesPreserved": true
+    }
+  ],
+  "ownerAcceptanceFollowUp": {
+    "reportedOnClientDate": "2026-10-28",
+    "clientTimezone": "Asia/Tehran",
+    "confirmationSource": "explicit user report in this conversation",
+    "readOnlyVerification": {
+      "checkedAtUTC": "2026-10-27T21:07:02.810142+00:00",
+      "readOnly": true,
+      "services": {
+        "api": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "bot": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "worker": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "web": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "postgres-staging": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "redis-staging": {
+          "running": true,
+          "health": null,
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        },
+        "admin": {
+          "running": true,
+          "health": "healthy",
+          "imageMatches": true,
+          "noPublishedPorts": true,
+          "restartCount": 0
+        }
+      },
+      "nginxActive": true,
+      "nginxValid": true,
+      "nativeHealth": {
+        "api": true,
+        "bot": true,
+        "worker": true,
+        "web": true,
+        "admin": true
+      },
+      "auditMetadata": {
+        "owner": {
+          "count": 1,
+          "status": "ACTIVE",
+          "credentialVersion": 2,
+          "sessionEpoch": 2,
+          "authorizationVersion": 1,
+          "pinFailures": 0,
+          "locked": false
+        },
+        "ownerAuditSinceDeployment": {
+          "LOGIN_SUCCEEDED": 1,
+          "PASSWORD_VERIFIED": 1
+        },
+        "latestOwnerLoginUTC": "2026-10-27T21:03:52.492+00:00",
+        "passwordChangeCount": 1,
+        "pinChangeCount": 0,
+        "managementOperationCounts": {},
+        "ordinaryAdminCount": 0,
+        "banGrantAbsent": true
+      },
+      "security": {
+        "core": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "deadlineValid": true,
+          "lastNormalRun": {
+            "ok": true,
+            "result": "unchanged",
+            "checkedAtUTC": "2026-10-27T21:01:01.742709+00:00",
+            "deadlineUTC": "2026-10-28T19:17:44Z",
+            "images": 6,
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-10-28T19:17:44.708952538Z",
+              "UpdatedAt": "2026-10-27T19:17:44.708952708Z",
+              "DownloadedAt": "2026-10-27T21:00:50.745058858Z"
+            }
+          }
+        },
+        "admin": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "deadlineValid": true,
+          "lastNormalRun": {
+            "ok": true,
+            "checkedAtUTC": "2026-10-27T20:40:15.478077+00:00",
+            "deadlineUTC": "2026-10-28T19:17:44Z"
+          }
+        }
+      },
+      "serverMutationsPerformed": false
+    },
+    "remaining": [
+      "OWNER_FINAL administrator management",
+      "limited-role Backend 403",
+      "ordinary-admin live session revocation and disablement"
+    ],
+    "phaseThreeStarted": false
+  },
+  "managementAcceptanceFollowUp": {
+    "reportedOnClientDate": "2026-10-28",
+    "clientTimezone": "Asia/Tehran",
+    "userReport": "All requested stages successful",
+    "readOnlyVerification": {
+      "checkedAtUTC": "2026-10-27T22:52:08.510660+00:00",
+      "readOnly": true,
+      "serverChangesPerformed": false,
+      "metadata": {
+        "owner": {
+          "status": "ACTIVE",
+          "credentialVersion": 2,
+          "sessionEpoch": 2,
+          "authorizationVersion": 1,
+          "pinFailures": 0,
+          "locked": false
+        },
+        "operationSummary": [
+          {
+            "operation": "ADMIN_ACCESS",
+            "state": "SUCCEEDED",
+            "mode": "OWNER_FINAL",
+            "count": 1
+          },
+          {
+            "operation": "ADMIN_CREATE",
+            "state": "PENDING",
+            "mode": null,
+            "count": 1
+          },
+          {
+            "operation": "ADMIN_CREATE",
+            "state": "SUCCEEDED",
+            "mode": "OWNER_FINAL",
+            "count": 1
+          },
+          {
+            "operation": "ADMIN_RESET_PASSWORD",
+            "state": "SUCCEEDED",
+            "mode": "OWNER_FINAL",
+            "count": 1
+          },
+          {
+            "operation": "ROLE_DELETE",
+            "state": "APPROVED",
+            "mode": "OWNER_FINAL",
+            "count": 2
+          },
+          {
+            "operation": "ROLE_DELETE",
+            "state": "SUCCEEDED",
+            "mode": "OWNER_FINAL",
+            "count": 2
+          },
+          {
+            "operation": "ROLE_SAVE",
+            "state": "PENDING",
+            "mode": null,
+            "count": 1
+          },
+          {
+            "operation": "ROLE_SAVE",
+            "state": "SUCCEEDED",
+            "mode": "OWNER_FINAL",
+            "count": 4
+          }
+        ],
+        "successfulOperationsMissingAuditStages": 0,
+        "successfulOwnerFinalWithOwnerActorAndApprover": 9,
+        "unknownOperations": 0,
+        "testAdministrators": [
+          {
+            "status": "ACTIVE",
+            "credential_version": 2,
+            "session_epoch": 2,
+            "authorization_version": 3,
+            "full_sessions": 2,
+            "pending_sessions": 0,
+            "invalidated_full_sessions": 2,
+            "role_memberships": 1,
+            "granted_permissions": ["users.view"]
+          }
+        ],
+        "testAdministratorAudit": {
+          "LOGOUT": 2,
+          "LOGIN_SUCCEEDED": 2
+        },
+        "passwordChanges": 1,
+        "pinChanges": 0,
+        "auditAppendOnlyTriggerEnabled": true,
+        "banGrantAbsent": true
+      },
+      "services": {
+        "api": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "bot": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "worker": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "web": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "postgres-staging": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "redis-staging": {
+          "running": true,
+          "health": null,
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        },
+        "admin": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restartCount": 0,
+          "noPublishedPorts": true
+        }
+      },
+      "nativeHealth": {
+        "api": true,
+        "bot": true,
+        "worker": true,
+        "web": true,
+        "admin": true
+      },
+      "nginxActive": true,
+      "nginxValid": true,
+      "security": {
+        "core": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "deadlineValid": true,
+          "lastNormalRun": {
+            "ok": true,
+            "result": "unchanged",
+            "checkedAtUTC": "2026-10-27T22:01:27.290340+00:00",
+            "deadlineUTC": "2026-10-28T19:17:44Z",
+            "images": 6,
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-10-28T19:17:44.708952538Z",
+              "UpdatedAt": "2026-10-27T19:17:44.708952708Z",
+              "DownloadedAt": "2026-10-27T22:01:15.400697132Z"
+            }
+          }
+        },
+        "admin": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "deadlineValid": true,
+          "lastNormalRun": {
+            "ok": true,
+            "checkedAtUTC": "2026-10-27T22:40:27.071772+00:00",
+            "deadlineUTC": "2026-10-28T19:17:44Z"
+          }
+        }
+      }
+    },
+    "confirmed": [
+      "Administrator creation",
+      "Custom role and membership limited to users.view in staging",
+      "Ordinary login with FULL sessions and no PENDING PIN sessions",
+      "Nine successful OWNER_FINAL operations with complete correlated Audit stages"
+    ],
+    "notCorroborated": [
+      "Explicit ADMIN_REVOKE_SESSIONS operation absent",
+      "ADMIN_STATUS disablement absent; test administrator ACTIVE",
+      "No AUTHORIZATION_DENIED event for test administrator; direct Backend 403 retest requested"
+    ],
+    "observedInsteadOfExplicitRevocation": "Successful ADMIN_RESET_PASSWORD; older sessions invalidated but not evidence of explicit revoke-session action",
+    "privateRetestInstructionsSent": true,
+    "phaseTwoAcceptanceClosed": false,
+    "productionChangedByAgent": false,
+    "phaseThreeStarted": false
+  },
+  "manualReviewConclusion": {
+    "reportedOnClientDate": "2026-10-28",
+    "clientTimezone": "Asia/Tehran",
+    "userInstruction": "Test succeeded; move past this stage",
+    "interactiveRetestingEnded": true,
+    "additionalQuestionsRequested": false,
+    "finalReadOnlyVerification": {
+      "checkedAtUTC": "2026-10-27T22:55:56.985292+00:00",
+      "readOnly": true,
+      "agentServerChanges": false,
+      "metadata": {
+        "owner": {
+          "status": "ACTIVE",
+          "credentialVersion": 2,
+          "sessionEpoch": 2,
+          "pinFailures": 0,
+          "locked": false
+        },
+        "successfulOperations": {
+          "ADMIN_ACCESS": 1,
+          "ROLE_DELETE": 2,
+          "ROLE_SAVE": 4,
+          "ADMIN_CREATE": 1,
+          "ADMIN_RESET_PASSWORD": 1
+        },
+        "successfulOperationsMissingAuditStages": 0,
+        "unknownOperations": 0,
+        "testAdministrators": [
+          {
+            "status": "ACTIVE",
+            "credential_version": 2,
+            "session_epoch": 2,
+            "authorization_version": 3,
+            "full_sessions": 2,
+            "pending_sessions": 0,
+            "invalidated_full_sessions": 2
+          }
+        ],
+        "ordinaryAudit": {
+          "LOGOUT": 2,
+          "LOGIN_SUCCEEDED": 2
+        },
+        "passwordChanges": 1,
+        "pinChanges": 0,
+        "banGrantAbsent": true
+      },
+      "services": {
+        "api": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "bot": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "worker": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "web": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "postgres-staging": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "redis-staging": {
+          "running": true,
+          "health": null,
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        },
+        "admin": {
+          "running": true,
+          "health": "healthy",
+          "sameApprovedImage": true,
+          "restarts": 0,
+          "noPublishedPorts": true
+        }
+      },
+      "nginxActive": true,
+      "security": {
+        "core": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "valid": true,
+          "normalRenewalOK": true
+        },
+        "admin": {
+          "deadlineUTC": "2026-10-28T19:17:44Z",
+          "valid": true,
+          "normalRenewalOK": true
+        }
+      }
+    },
+    "unresolvedEvidence": [
+      "Test administrator remains ACTIVE",
+      "No successful ADMIN_REVOKE_SESSIONS",
+      "No successful ADMIN_STATUS disablement",
+      "No matching AUTHORIZATION_DENIED Audit observed"
+    ],
+    "finalSecurityAcceptanceIssued": false,
+    "controlsWaivedOrBypassed": false,
+    "phaseThreeAuthorized": false,
+    "agentChangedServerOrOwner": false
+  }
+}

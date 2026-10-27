@@ -1,6 +1,15 @@
 import { z } from "zod";
 import {
   adminAccessSchema,
+  adminManagementMetaSchema,
+  adminActivitySchema,
+  adminDirectorySchema,
+  adminSessionPageSchema,
+  adminCommandPageSchema,
+  adminCommandResultSchema,
+  adminCommandRequestSchema,
+  adminApprovalSchema,
+  adminExecuteSchema,
   adminAuditPageSchema,
   adminErrorSchema,
   adminLoginResultSchema,
@@ -61,6 +70,45 @@ export function adminOpenApiDocument() {
       },
     },
   };
+  const pathId = {
+    in: "path",
+    name: "id",
+    required: true,
+    schema: { type: "string", format: "uuid" },
+  };
+  for (const [path, schema] of [
+    ["management/meta", adminManagementMetaSchema],
+    ["admins", adminDirectorySchema],
+    ["admins/{id}/sessions", adminSessionPageSchema],
+    ["admins/{id}/activity", adminActivitySchema],
+    ["operations", adminCommandPageSchema],
+    ["operations/{id}", adminCommandResultSchema],
+  ] as const)
+    paths[`/v1/admin/${path}`] = {
+      get: {
+        security: full,
+        parameters: path.includes("{id}")
+          ? [pathId]
+          : path === "admins"
+            ? [{ in: "query", name: "cursor", schema: { type: "string", format: "uuid" } }]
+            : [],
+        responses: { "200": response(schema), ...errors },
+      },
+    };
+  paths["/v1/admin/operations"] = {
+    ...(paths["/v1/admin/operations"] as object),
+    post: post(adminCommandRequestSchema, adminCommandResultSchema, full, true),
+  };
+  for (const [path, input, output] of [
+    ["approve", adminApprovalSchema, adminLoginResultSchema],
+    ["execute", adminExecuteSchema, adminCommandResultSchema],
+    ["renew", adminExecuteSchema, adminCommandResultSchema],
+  ] as const) {
+    const operation = post(input, output, full, true);
+    paths[`/v1/admin/operations/{id}/${path}`] = {
+      post: { ...operation, parameters: [...operation.parameters, pathId] },
+    };
+  }
   for (const kind of ["users", "games", "rooms", "matches"]) {
     paths[`/v1/admin/${kind}`] = {
       get: {
@@ -102,7 +150,7 @@ export function adminOpenApiDocument() {
     };
   return {
     openapi: "3.1.0",
-    info: { title: "HamBazi Admin API", version: "1.1.0" },
+    info: { title: "HamBazi Admin API", version: "1.2.0" },
     paths,
     components: {
       securitySchemes: {

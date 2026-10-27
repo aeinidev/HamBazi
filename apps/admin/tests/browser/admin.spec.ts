@@ -161,6 +161,30 @@ test("ordinary admin enters directly and revoked permissions disappear within fi
   await expect(page.getByText("بخشی برای این حساب فعال نشده است.")).toBeVisible({ timeout: 6000 });
   await expect(page.getByText("<img src=x onerror=alert(1)>")).toHaveCount(0);
 });
+test("clears protected content within five seconds when access checks stop responding", async ({
+  page,
+}) => {
+  await mock(page, false);
+  await page.goto("/");
+  await login(page);
+  await expect(page.getByText("مدیر پلتفرم", { exact: true })).toBeVisible();
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/v1/admin/me/access", async (route) => {
+    await blocked;
+    await route.abort().catch(() => {});
+  });
+  try {
+    await expect(
+      page.getByRole("heading", { name: "به هم‌بازی خوش آمدید", exact: true }),
+    ).toBeVisible({ timeout: 6000 });
+    await expect(page.getByText("<img src=x onerror=alert(1)>")).toHaveCount(0);
+  } finally {
+    release();
+  }
+});
 test("mobile login is accessible, has no public recovery/signup, and never overflows", async ({
   page,
 }) => {

@@ -16,3 +16,11 @@ export function createCatalogPort(database: Parameters<typeof createCatalogRepos
 }
 
 export { createGamesAdminReadRepository as createGamesAdminRead } from "./infrastructure/repositories/admin-read.js";
+
+import { createGamesAdminOperationsRepository } from "./infrastructure/repositories/admin-operations.js";
+export function createGamesAdminOperations(
+  database: Parameters<typeof createGamesAdminOperationsRepository>[0],
+  clock: { nowMs(): number },
+) {
+  return createGamesAdminOperationsRepository(database, clock);
+}

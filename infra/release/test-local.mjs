@@ -34,6 +34,7 @@ try {
       manifest.images?.length === 4,
   );
   const images = Object.fromEntries(manifest.images.map(({ role, image }) => [role, image]));
+  const toolchain = JSON.parse(await readFile(join(root, "infra/ci/toolchain.json"), "utf8"));
   if (releaseRehearsal) {
     validateInventory(
       manifest,
@@ -58,8 +59,7 @@ try {
       ),
     );
     stage = `${role}-filesystem`;
-    const probe =
-      "import fs from 'node:fs'; if(process.getuid()!==1000)process.exit(1); for(const p of ['/app/tests','/app/.env','/app/node_modules/typescript','/app/node_modules/vitest','/usr/local/bin/npm'])if(fs.existsSync(p))process.exit(1);";
+    const probe = `import fs from 'node:fs'; import zlib from 'node:zlib'; if(process.getuid()!==1000||process.versions.node!==${JSON.stringify(toolchain.nodeVersion)}||typeof zlib.constants.BROTLI_DECODER_ERROR_FORMAT_BLOCK_SWITCH!=='number')process.exit(1); for(const p of ['/app/tests','/app/.env','/app/node_modules/typescript','/app/node_modules/vitest','/usr/local/bin/npm'])if(fs.existsSync(p))process.exit(1); const data=Buffer.from('owned compression fixture'); if(!zlib.brotliDecompressSync(zlib.brotliCompressSync(data)).equals(data))process.exit(1);`;
     await run("docker", [
       "run",
       "--rm",

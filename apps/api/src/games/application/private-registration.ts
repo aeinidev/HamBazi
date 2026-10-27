@@ -13,6 +13,7 @@ const stored = z.object({
   minPlayers: z.number().int(),
   maxPlayers: z.number().int(),
   status: z.literal("DISABLED"),
+  adminAvailability: z.enum(["ACTIVE", "MAINTENANCE", "DISABLED"]).optional(),
   configSchemaVersion: z.literal(1),
   configJsonb: z.strictObject({}),
 });
@@ -34,7 +35,13 @@ export function privateRegistrationService(
         row.maxPlayers < game.maxPlayers
       )
         return createErrorEnvelope("INTERNAL_ERROR");
-      return { ok: true as const, game };
+      return {
+        ok: true as const,
+        game:
+          row.adminAvailability && row.adminAvailability !== "ACTIVE"
+            ? { ...game, playable: false, status: row.adminAvailability }
+            : game,
+      };
     } catch {
       return createErrorEnvelope("INTERNAL_ERROR");
     }

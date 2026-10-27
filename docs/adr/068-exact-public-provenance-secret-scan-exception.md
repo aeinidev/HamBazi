@@ -1,5 +1,7 @@
 # ADR-068 — Exact public build revision false-positive exception
 
+> 2026-10-27: [ADR-088](088-admin-exact-secret-false-positives.md) records the separately authorized three Admin findings. This original exception and all remaining controls are unchanged; no general test, file or commit allowance was added.
+
 - **Status:** Accepted by the owner's explicit narrowly scoped remediation approval; no deployment approval.
 - **Owner:** HamBazi repository owner.
 - **Date:** 2026-10-13.

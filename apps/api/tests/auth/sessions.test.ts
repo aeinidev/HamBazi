@@ -23,6 +23,31 @@ async function issued(f = fixture()) {
   return { f, result, raw: result.accessToken.reveal() };
 }
 describe("durable session application semantics", () => {
+  it("never revalidates a pre-ban session after unban; only a fresh issuance uses the new eligibility generation", async () => {
+    const f = fixture();
+    let active = true,
+      authVersion = 0;
+    const users = {
+      findActiveByTelegramId: async () =>
+        active ? { userId, registrationCompleted: true, authVersion } : undefined,
+      findActiveById: async () =>
+        active ? { userId, registrationCompleted: true, authVersion } : undefined,
+    };
+    const service = sessionService({ ...f.deps, users });
+    const result = await service.issue(initData(), commandId);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    active = false;
+    authVersion++;
+    expect((await service.authenticate(result.accessToken.reveal())).ok).toBe(false);
+    active = true;
+    authVersion++;
+    expect((await service.authenticate(result.accessToken.reveal())).ok).toBe(false);
+    expect((await service.issue(initData(), commandId)).ok).toBe(false);
+    const fresh = await service.issue(initData(), randomUUID());
+    expect(fresh.ok).toBe(true);
+    if (fresh.ok) expect((await service.authenticate(fresh.accessToken.reveal())).ok).toBe(true);
+  });
   it("returns a validated photo only with issuance and never embeds it in the JWT or durable row", async () => {
     const f = fixture();
     const photo = "https://t.me/i/userpic/320/synthetic.jpg";

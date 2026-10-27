@@ -45,7 +45,7 @@ describe("temporary staging account scope", () => {
     ]);
     runtime.dispose();
   });
-  it("opens the private lobby without public gameplay navigation or realtime", () => {
+  it("keeps the initial private lobby behind the approved launch gate", () => {
     vi.stubGlobal("window", { location: { hash: "" } });
     const runtime = createRuntime(
       "https://api-staging.hambazi.top",
@@ -73,29 +73,16 @@ describe("temporary staging account scope", () => {
     });
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
-    expect(html).toContain("بازی‌ها");
-    expect(html).toContain("Synthetic owner");
-    expect(html).toContain("fallback-avatar");
-    expect(html).toContain("کودتا، موقتاً غیرفعال");
-    for (const name of ["حکم", "کهربا", "شطرنج", "دومینو", "منچ"])
-      expect(html).toContain(`${name}، به‌زودی`);
-    expect(html).not.toContain("بازی پیدا کن");
-    expect(html).not.toContain("ادامهٔ بازی موجود");
-    expect(html).toContain("نفر آنلاین");
-    expect(html).toContain("آمار هنوز در دسترس نیست");
-    expect(html).toContain("همه را ببینید، به‌زودی");
-    expect(html).toContain("برترین‌ها، به‌زودی");
-    expect(html).toContain("چت، به‌زودی");
-    expect(html).toContain("دوستان، به‌زودی");
-    expect(html.match(/disabled=""/g)).toHaveLength(11);
-    expect(html).toContain('href="#/profile"');
-    expect(html).toContain('href="#/games"');
-    expect(html).not.toContain('aria-label="Main navigation"');
-    expect(html).not.toContain("Reconnect");
-    expect(html).not.toContain("Match session");
+    // Effects and the approved 3s launch gate do not advance during server rendering.
+    // Post-launch lobby, identity and card behavior is covered by the Midnight browser suite.
+    expect(html).toContain('aria-label="در حال بارگذاری هم‌بازی"');
+    expect(html).not.toContain("Synthetic owner");
+    expect(html).not.toContain("home-header");
+    expect(html).not.toContain("home-game-grid");
+    expect(html).not.toContain("Main navigation");
     runtime.dispose();
   });
-  it("opens Kahroba from its available main card without the separate private entry", () => {
+  it("does not expose an available Kahroba card before launch completes", () => {
     vi.stubGlobal("window", { location: { hash: "#/games" } });
     vi.stubGlobal("location", { hash: "#/games" });
     const runtime = createRuntime(
@@ -122,12 +109,13 @@ describe("temporary staging account scope", () => {
     runtime.query.setQueryData(["kahroba-private-entry"], { enabled: true });
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} kahrobaEnabled />);
-    expect(html).toContain('aria-label="کهربا، فعال"');
+    expect(html).toContain('aria-label="در حال بارگذاری هم‌بازی"');
+    expect(html).not.toContain('aria-label="کهربا، فعال"');
     expect(html).not.toContain("میز خصوصی کهربا");
     expect(html).not.toContain("kh-private-entry");
     runtime.dispose();
   });
-  it("renders the session photo beside the authenticated saved name", () => {
+  it("keeps the authenticated name and photo hidden until launch completes", () => {
     vi.stubGlobal("window", { location: { hash: "" } });
     const runtime = createRuntime(
       "https://api-staging.hambazi.top",
@@ -146,8 +134,9 @@ describe("temporary staging account scope", () => {
     });
     vi.spyOn(runtime.store, "getInitialState").mockImplementation(runtime.store.getState);
     const html = renderToStaticMarkup(<App runtime={runtime} />);
-    expect(html).toContain("Chosen");
-    expect(html).toContain("https://t.me/i/userpic/320/synthetic.jpg");
+    expect(html).toContain('aria-label="در حال بارگذاری هم‌بازی"');
+    expect(html).not.toContain("Chosen");
+    expect(html).not.toContain("https://t.me/i/userpic/320/synthetic.jpg");
     expect(html).not.toContain("fallback-avatar");
     runtime.dispose();
   });

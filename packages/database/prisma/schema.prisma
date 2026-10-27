@@ -20,6 +20,7 @@ model User {
   createdAt               DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt               DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
   registrationCompletedAt DateTime?                @map("registration_completed_at") @db.Timestamptz(3)
+  authVersion             Int                      @default(0) @map("auth_version")
   profileVersion          Int                      @default(0) @map("profile_version")
   profileReceipts         ProfileMutationReceipt[]
   settings                UserSettings?
@@ -40,6 +41,7 @@ model User {
 model Session {
   id            String    @id @db.Uuid
   userId        String    @map("user_id") @db.Uuid
+  authVersion   Int       @default(0) @map("auth_version")
   commandId     String    @map("command_id") @db.Uuid
   schemaVersion Int       @map("schema_version")
   keyId         String    @map("key_id")
@@ -142,7 +144,9 @@ model Game {
   results             GameResult[]
   stats               UserGameStats[]
 
-  admissions MatchAdmission[]
+  admissions        MatchAdmission[]
+  adminVersion      Int              @default(0) @map("admin_version")
+  adminAvailability String           @default("ACTIVE") @map("admin_availability")
 
   @@map("games")
 }
@@ -524,72 +528,216 @@ model BotSupportSubmission {
   @@map("bot_support_submissions")
 }
 
-
 // Admin identity is independent of Telegram/player accounts. Runtime tables have separate grants.
 model AdminRealm {
-  id String @id
-  ownerId String? @unique @map("owner_id") @db.Uuid
-  ownershipEpoch Int @default(0) @map("ownership_epoch")
-  policyRevision Int @default(1) @map("policy_revision")
+  id             String            @id
+  ownerId        String?           @unique @map("owner_id") @db.Uuid
+  ownershipEpoch Int               @default(0) @map("ownership_epoch")
+  policyRevision Int               @default(1) @map("policy_revision")
+  owner          AdminOperator?    @relation("AdminRealmOwner", fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "admin_root_fk")
+  operators      AdminOperator[]   @relation("AdminRealmOperators")
+  sessions       AdminSession[]
+  grants         AdminGrant[]
+  auditEvents    AdminAuditEvent[]
+  roles          AdminRole[]
+
   @@map("admin_realms")
 }
+
 model AdminOperator {
-  id String @id @db.Uuid
-  realmId String @map("realm_id")
-  username String
-  passwordVerifier String @map("password_verifier")
-  pinVerifier String? @map("pin_verifier")
-  credentialVersion Int @map("credential_version")
-  sessionEpoch Int @map("session_epoch")
-  authorizationVersion Int @map("authorization_version")
-  status String
-  pinFailures Int @default(0) @map("pin_failures")
-  lockedAt DateTime? @map("locked_at") @db.Timestamptz(3)
+  id                   String              @id @db.Uuid
+  realmId              String              @map("realm_id")
+  username             String
+  passwordVerifier     String              @map("password_verifier")
+  pinVerifier          String?             @map("pin_verifier")
+  credentialVersion    Int                 @map("credential_version")
+  sessionEpoch         Int                 @map("session_epoch")
+  authorizationVersion Int                 @map("authorization_version")
+  status               String
+  pinFailures          Int                 @default(0) @map("pin_failures")
+  lockedAt             DateTime?           @map("locked_at") @db.Timestamptz(3)
+  realm                AdminRealm          @relation("AdminRealmOperators", fields: [realmId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  ownedRealm           AdminRealm?         @relation("AdminRealmOwner")
+  sessions             AdminSession[]
+  authReceipts         AdminAuthReceipt[]
+  grants               AdminGrant[]
+  roleMemberships      AdminOperatorRole[]
+  operations           AdminOperation[]
+
   @@unique([realmId, username])
+  @@unique([id, realmId], map: "admin_operators_id_realm_key")
   @@map("admin_operators")
 }
+
 model AdminSession {
-  id String @id @db.Uuid
-  realmId String @map("realm_id")
-  operatorId String @map("operator_id") @db.Uuid
-  kind String
-  credentialVersion Int @map("credential_version")
-  sessionEpoch Int @map("session_epoch")
-  issuedAt DateTime @map("issued_at") @db.Timestamptz(3)
-  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
-  lastSeenAt DateTime @map("last_seen_at") @db.Timestamptz(3)
-  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  id                String             @id @db.Uuid
+  realmId           String             @map("realm_id")
+  operatorId        String             @map("operator_id") @db.Uuid
+  kind              String
+  credentialVersion Int                @map("credential_version")
+  sessionEpoch      Int                @map("session_epoch")
+  issuedAt          DateTime           @map("issued_at") @db.Timestamptz(3)
+  expiresAt         DateTime           @map("expires_at") @db.Timestamptz(3)
+  lastSeenAt        DateTime           @map("last_seen_at") @db.Timestamptz(3)
+  revokedAt         DateTime?          @map("revoked_at") @db.Timestamptz(3)
+  realm             AdminRealm         @relation(fields: [realmId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  operator          AdminOperator      @relation(fields: [operatorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  authReceipts      AdminAuthReceipt[]
+
   @@index([operatorId, expiresAt])
   @@map("admin_sessions")
 }
+
 model AdminAuthReceipt {
-  operatorId String @map("operator_id") @db.Uuid
-  commandId String @map("command_id") @db.Uuid
-  digest String @db.Char(64)
-  outcome String
-  sessionId String? @map("session_id") @db.Uuid
+  operatorId String        @map("operator_id") @db.Uuid
+  commandId  String        @map("command_id") @db.Uuid
+  digest     String        @db.Char(64)
+  outcome    String
+  sessionId  String?       @map("session_id") @db.Uuid
+  operator   AdminOperator @relation(fields: [operatorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  session    AdminSession? @relation(fields: [sessionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
   @@id([operatorId, commandId])
   @@map("admin_auth_receipts")
 }
+
 model AdminGrant {
-  id String @id @db.Uuid
-  realmId String @map("realm_id")
-  operatorId String @map("operator_id") @db.Uuid
-  permission String
+  id          String        @id @db.Uuid
+  realmId     String        @map("realm_id")
+  operatorId  String        @map("operator_id") @db.Uuid
+  permission  String
   environment String
-  allGames Boolean @default(false) @map("all_games")
-  gameIds String[] @map("game_ids")
-  deny Boolean @default(false)
+  allGames    Boolean       @default(false) @map("all_games")
+  gameIds     String[]      @map("game_ids")
+  deny        Boolean       @default(false)
+  realm       AdminRealm    @relation(fields: [realmId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  operator    AdminOperator @relation(fields: [operatorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
   @@index([operatorId, realmId])
   @@map("admin_grants")
 }
+
 model AdminAuditEvent {
-  id String @id @db.Uuid
-  realmId String @map("realm_id")
-  operatorId String? @map("operator_id") @db.Uuid
-  commandId String @map("command_id") @db.Uuid
-  event String
-  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+  id         String     @id @db.Uuid
+  realmId    String     @map("realm_id")
+  operatorId String?    @map("operator_id") @db.Uuid
+  commandId  String     @map("command_id") @db.Uuid
+  event      String
+  occurredAt DateTime   @map("occurred_at") @db.Timestamptz(3)
+  operation  String?
+  targetId   String?    @map("target_id")
+  reasonCode String?    @map("reason_code")
+  mode       String?
+  realm      AdminRealm @relation(fields: [realmId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
   @@index([realmId, occurredAt, id])
+  @@index([realmId, operatorId, occurredAt, id], map: "admin_audit_actor_idx")
+  @@index([realmId, targetId, occurredAt, id], map: "admin_audit_target_idx")
   @@map("admin_audit_events")
+}
+
+model AdminRole {
+  id          String              @id @db.Uuid
+  realmId     String              @map("realm_id")
+  name        String
+  version     Int
+  grantsJsonb Json                @map("grants_jsonb")
+  realm       AdminRealm          @relation(fields: [realmId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "admin_roles_realm_fk")
+  memberships AdminOperatorRole[]
+
+  @@unique([realmId, name])
+  @@unique([id, realmId], map: "admin_roles_id_realm_key")
+  @@map("admin_roles")
+}
+
+model AdminOperatorRole {
+  operatorId String        @map("operator_id") @db.Uuid
+  roleId     String        @map("role_id") @db.Uuid
+  realmId    String        @map("realm_id")
+  operator   AdminOperator @relation(fields: [operatorId, realmId], references: [id, realmId], onDelete: Restrict, onUpdate: NoAction, map: "admin_membership_operator_fk")
+  role       AdminRole     @relation(fields: [roleId, realmId], references: [id, realmId], onDelete: Restrict, onUpdate: NoAction, map: "admin_membership_role_fk")
+
+  @@id([operatorId, roleId])
+  @@map("admin_operator_roles")
+}
+
+model AdminOperation {
+  id                           String        @id @db.Uuid
+  realmId                      String        @map("realm_id")
+  actorId                      String        @map("actor_id") @db.Uuid
+  sessionId                    String        @map("session_id") @db.Uuid
+  authorizationVersion         Int           @map("authorization_version")
+  credentialVersion            Int           @map("credential_version")
+  sessionEpoch                 Int           @map("session_epoch")
+  policyRevision               Int           @map("policy_revision")
+  ownershipEpoch               Int           @map("ownership_epoch")
+  environment                  String
+  digest                       String        @db.Char(64)
+  action                       Json
+  gameId                       String?       @map("game_id")
+  reasonCode                   String        @map("reason_code")
+  state                        String
+  mode                         String?
+  approverId                   String?       @map("approver_id") @db.Uuid
+  approverSessionId            String?       @map("approver_session_id") @db.Uuid
+  approverAuthorizationVersion Int?          @map("approver_authorization_version")
+  approverSessionEpoch         Int?          @map("approver_session_epoch")
+  approverCredentialVersion    Int?          @map("approver_credential_version")
+  createdAt                    DateTime      @map("created_at") @db.Timestamptz(3)
+  expiresAt                    DateTime      @map("expires_at") @db.Timestamptz(3)
+  approvedUntil                DateTime?     @map("approved_until") @db.Timestamptz(3)
+  resultCode                   String?       @map("result_code")
+  actor                        AdminOperator @relation(fields: [actorId, realmId], references: [id, realmId], onDelete: Restrict, onUpdate: NoAction, map: "admin_operations_actor_fk")
+
+  @@index([realmId, state, createdAt])
+  @@index([realmId, actorId, createdAt])
+  @@map("admin_operations")
+}
+
+model UserAdminEffect {
+  id         String   @id @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  realmId    String   @map("realm_id")
+  digest     String   @db.Char(64)
+  targetId   String   @map("target_id")
+  resultCode String   @map("result_code")
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+
+  @@map("user_admin_effects")
+}
+
+model GameAdminEffect {
+  id         String   @id @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  realmId    String   @map("realm_id")
+  digest     String   @db.Char(64)
+  targetId   String   @map("target_id")
+  resultCode String   @map("result_code")
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+
+  @@map("game_admin_effects")
+}
+
+model RoomAdminEffect {
+  id         String   @id @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  realmId    String   @map("realm_id")
+  digest     String   @db.Char(64)
+  targetId   String   @map("target_id")
+  resultCode String   @map("result_code")
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+
+  @@map("room_admin_effects")
+}
+
+model MatchAdminEffect {
+  id         String   @id @db.Uuid
+  actorId    String   @map("actor_id") @db.Uuid
+  realmId    String   @map("realm_id")
+  digest     String   @db.Char(64)
+  targetId   String   @map("target_id")
+  resultCode String   @map("result_code")
+  occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
+
+  @@map("match_admin_effects")
 }

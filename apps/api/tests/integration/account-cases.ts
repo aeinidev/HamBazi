@@ -54,6 +54,7 @@ export function accountIntegrationCases(admin: ReturnType<typeof createDatabase>
       expect(await createUserIdentityPort(b).findActiveByTelegramId("6001")).toEqual({
         userId: result.account.userId,
         registrationCompleted: false,
+        authVersion: 0,
       });
       const row = await admin
         .forModule("users")

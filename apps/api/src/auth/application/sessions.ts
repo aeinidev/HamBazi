@@ -86,6 +86,7 @@ export function sessionService(deps: {
         const record = await repository.createOrGet({
           id,
           userId: user.userId,
+          authVersion: user.authVersion ?? 0,
           commandId: command.data.toLowerCase(),
           schemaVersion: 1,
           keyId: codec.activeKeyId,
@@ -97,6 +98,7 @@ export function sessionService(deps: {
         });
         if (
           record.userId !== user.userId ||
+          (record.authVersion ?? 0) !== (user.authVersion ?? 0) ||
           record.commandId !== command.data.toLowerCase() ||
           !isLiveSession(record, time().seconds)
         )
@@ -111,6 +113,7 @@ export function sessionService(deps: {
           !eligible ||
           eligible.registrationCompleted !== true ||
           eligible.userId !== record.userId ||
+          (eligible.authVersion ?? 0) !== (record.authVersion ?? 0) ||
           !current ||
           !matches(current, record) ||
           !isLiveSession(current, end.seconds) ||
@@ -142,7 +145,13 @@ export function sessionService(deps: {
           return createErrorEnvelope("REGISTRATION_REQUIRED");
         const row = await repository.find(claims.id);
         const now = time().seconds;
-        if (now < start || !row || !matches(row, claims) || !isLiveSession(row, now))
+        if (
+          now < start ||
+          !row ||
+          !matches(row, claims) ||
+          (row.authVersion ?? 0) !== (user.authVersion ?? 0) ||
+          !isLiveSession(row, now)
+        )
           return denied();
         if (deps.ownerAdmission && !(await deps.ownerAdmission.allowsUserId(claims.userId)))
           return denied();

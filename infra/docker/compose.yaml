@@ -2,7 +2,7 @@ name: hambazi-local
 
 services:
   postgres:
-    image: hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a
+    image: hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b
     pull_policy: never
     entrypoint: [/bin/sh, /usr/local/bin/hambazi-postgres.sh]
     environment:
@@ -31,7 +31,7 @@ services:
     networks: [private]
 
   redis:
-    image: redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+    image: redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403
     user: redis
     entrypoint: [/bin/sh, /usr/local/bin/hambazi-redis.sh]
     environment:

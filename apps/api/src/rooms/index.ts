@@ -12,3 +12,5 @@ export type { RoomStartSnapshot } from "./application/start.js";
 export { roomResponseSchema } from "./infrastructure/rooms-contract.js";
 
 export { createRoomsAdminRead } from "./module.js";
+
+export { createRoomsAdminOperations } from "./module.js";

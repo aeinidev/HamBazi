@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -26,36 +26,34 @@ const cleanImage = {
   Results: [{ Class: "os-pkgs" }],
 };
 
-it("admits only pinned clean-source staging artifact names and preserves Unknown/High blocks", () => {
-  const ref =
-    "hambazi-staging/ingress:" +
-    "a".repeat(40) +
-    "-" +
-    "b".repeat(16) +
-    "@sha256:" +
-    "c".repeat(64);
-  const report = { ...cleanImage, ArtifactName: ref };
-  expect(assessImage(report, ref).ok).toBe(true);
-  for (const severity of ["HIGH", "CRITICAL", "UNKNOWN"])
-    expect(
-      assessImage(
-        {
-          ...report,
-          Results: [
-            {
-              Class: "os-pkgs",
-              Vulnerabilities: [
-                { VulnerabilityID: "CVE-2026-12345", PkgName: "synthetic", Severity: severity },
-              ],
-            },
-          ],
-        },
-        ref,
-      ).ok,
-    ).toBe(false);
-  for (const bad of ["nginx:latest", "hambazi-staging/ingress:latest@sha256:" + "c".repeat(64)])
-    expect(() => assessImage({ ...report, ArtifactName: bad }, bad)).toThrow();
-});
+it.each(["hambazi-staging/ingress", "hambazi-candidate/admin"])(
+  "admits only pinned %s artifacts and preserves Unknown/High blocks",
+  (component) => {
+    const ref =
+      component + ":" + "a".repeat(40) + "-" + "b".repeat(16) + "@sha256:" + "c".repeat(64);
+    const report = { ...cleanImage, ArtifactName: ref };
+    expect(assessImage(report, ref).ok).toBe(true);
+    for (const severity of ["HIGH", "CRITICAL", "UNKNOWN"])
+      expect(
+        assessImage(
+          {
+            ...report,
+            Results: [
+              {
+                Class: "os-pkgs",
+                Vulnerabilities: [
+                  { VulnerabilityID: "CVE-2026-12345", PkgName: "synthetic", Severity: severity },
+                ],
+              },
+            ],
+          },
+          ref,
+        ).ok,
+      ).toBe(false);
+    for (const bad of ["nginx:latest", component + ":latest@sha256:" + "c".repeat(64)])
+      expect(() => assessImage({ ...report, ArtifactName: bad }, bad)).toThrow();
+  },
+);
 
 it("blocks known High dependencies and rejects unavailable/inconsistent audit evidence", () => {
   expect(assessAudit(cleanAudit, 0)).toMatchObject({ ok: true, findings: [] });
@@ -355,7 +353,26 @@ it.skipIf(!process.env.SECURITY_SCANNER_DIR)(
       const exception = JSON.parse(
         await readFile(resolve("infra/security/gitleaks-provenance-exception.json"), "utf8"),
       );
-      const original = await readFile(resolve(exception.path), "utf8");
+      // Current operational metadata may have moved beyond the exact approved binding.
+      // Exercise that approval using a verified historical source, never weaken it for the test.
+      let original;
+      const commits = (
+        await run("git", ["log", "--format=%H", "--all", "--", exception.path])
+      ).stdout
+        .trim()
+        .split("\n");
+      for (const commit of commits) {
+        const candidate = (await run("git", ["show", `${commit}:${exception.path}`])).stdout;
+        if (
+          exception.reviewedSourceSha256.includes(
+            createHash("sha256").update(candidate).digest("hex"),
+          )
+        ) {
+          original = candidate;
+          break;
+        }
+      }
+      if (!original) throw new Error("APPROVED_PROVENANCE_FIXTURE_UNAVAILABLE");
       const fixture = join(directory, "repo");
       const path = join(fixture, exception.path);
       await mkdir(join(fixture, "infra/docker/staging"), { recursive: true });
@@ -508,6 +525,210 @@ it.skipIf(!process.env.SECURITY_SCANNER_DIR)(
         reviewedFalsePositives: 1,
       });
       expect(historicalOnly.rows.some((row) => row.RuleID === "github-pat")).toBe(true);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+  30000,
+);
+
+it("accepts only the three owner-approved Admin findings with their exact history and source context", async () => {
+  const approval = JSON.parse(
+    await readFile(resolve("infra/security/gitleaks-admin-phase2-exceptions.json"), "utf8"),
+  );
+  const receipt = JSON.parse(
+    await readFile(resolve("docs/security/admin-phase2-secret-review.json"), "utf8"),
+  );
+  expect(approval.status).toBe("APPROVED");
+  expect(approval.findings).toEqual(receipt.findings);
+  expect(approval.findings).toHaveLength(3);
+  const directory = await mkdtemp(join(tmpdir(), "hambazi-admin-exact-findings-"));
+  try {
+    for (const reviewed of approval.findings) {
+      const source = (await run("git", ["show", `${reviewed.commit}:${reviewed.path}`])).stdout;
+      expect(createHash("sha256").update(source).digest("hex")).toBe(reviewed.sourceSha256);
+      expect(
+        createHash("sha256")
+          .update(source.split("\n")[reviewed.startLine - 1])
+          .digest("hex"),
+      ).toBe(reviewed.lineSha256);
+      const row = {
+        RuleID: reviewed.rule,
+        File: reviewed.path,
+        Commit: reviewed.commit,
+        StartLine: reviewed.startLine,
+        EndLine: reviewed.endLine,
+        StartColumn: reviewed.startColumn,
+        EndColumn: reviewed.endColumn,
+        Secret: "REDACTED",
+        Match: reviewed.redactedMatch,
+      };
+      expect(await assessProvenanceSecrets([row], 1, "history", resolve("."))).toMatchObject({
+        ok: true,
+        detectedFindings: 1,
+        findings: 0,
+        reviewedFalsePositives: 1,
+      });
+      for (const change of [
+        { RuleID: "github-pat" },
+        { File: "unapproved/" + row.File },
+        { Commit: "f".repeat(40) },
+        { Commit: "" },
+        { StartLine: row.StartLine + 1 },
+        { EndLine: row.EndLine + 1 },
+        { StartColumn: row.StartColumn - 1 },
+        { EndColumn: row.EndColumn + 1 },
+        { Secret: "unexpected" },
+        { Match: "unexpected" },
+        { SymlinkFile: row.File },
+      ])
+        expect(
+          await assessProvenanceSecrets([{ ...row, ...change }], 1, "history", resolve(".")),
+        ).toMatchObject({
+          ok: false,
+          findings: 1,
+          reviewedFalsePositives: 0,
+        });
+      const path = join(directory, reviewed.path);
+      await mkdir(join(path, ".."), { recursive: true });
+      await writeFile(path, source, { mode: 0o600 });
+      const current = { ...row, File: path, Commit: "" };
+      expect(await assessProvenanceSecrets([current], 1, "current", directory)).toMatchObject({
+        ok: !!reviewed.currentSourceSha256,
+        findings: reviewed.currentSourceSha256 ? 0 : 1,
+      });
+      if (!reviewed.currentSourceSha256) continue;
+      for (const change of [
+        { RuleID: "github-pat" },
+        { File: path + ".copy" },
+        { Commit: row.Commit },
+        { StartLine: row.StartLine + 1 },
+        { EndLine: row.EndLine + 1 },
+        { StartColumn: row.StartColumn - 1 },
+        { EndColumn: row.EndColumn + 1 },
+        { Secret: "unexpected" },
+        { Match: "unexpected" },
+        { SymlinkFile: path },
+      ])
+        expect(
+          await assessProvenanceSecrets([{ ...current, ...change }], 1, "current", directory),
+        ).toMatchObject({
+          ok: false,
+          findings: 1,
+          reviewedFalsePositives: 0,
+        });
+      for (const changed of [
+        source + "\n",
+        source.replace('"previousContinuousApplication"', '"unapprovedAncestor"'),
+      ]) {
+        await writeFile(path, changed);
+        expect(await assessProvenanceSecrets([current], 1, "current", directory)).toMatchObject({
+          ok: false,
+          findings: 1,
+          reviewedFalsePositives: 0,
+        });
+      }
+      await rm(path);
+      await symlink(resolve(reviewed.path), path);
+      await expect(assessProvenanceSecrets([current], 1, "current", directory)).rejects.toThrow(
+        "SECURITY_SCAN_INVALID_EVIDENCE",
+      );
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+it.skipIf(!process.env.SECURITY_SCANNER_DIR)(
+  "native Gitleaks detects all approved Admin findings and still blocks a fresh credential in the same approved file",
+  async () => {
+    const directory = await mkdtemp(join(tmpdir(), "hambazi-admin-scan-canary-"));
+    try {
+      const executable = resolve(process.env.SECURITY_SCANNER_DIR, "gitleaks");
+      await verifyTool(executable, "gitleaks");
+      const approval = JSON.parse(
+        await readFile(resolve("infra/security/gitleaks-admin-phase2-exceptions.json"), "utf8"),
+      );
+      const fixture = join(directory, "candidate");
+      const report = join(directory, "report.json"),
+        ignore = join(directory, "empty-ignore");
+      await writeFile(ignore, "", { mode: 0o600 });
+      const args = [
+        "--config",
+        resolve("infra/security/gitleaks.toml"),
+        "--gitleaks-ignore-path",
+        ignore,
+        "--ignore-gitleaks-allow",
+        "--redact=100",
+        "--no-banner",
+        "--no-color",
+        "--timeout=120",
+        "--max-archive-depth=2",
+        "--report-format=json",
+        "--report-path",
+        report,
+      ];
+      const inspect = async (scope, target) => {
+        let code = 0;
+        try {
+          await run(
+            executable,
+            [
+              scope === "history" ? "git" : "dir",
+              ...(scope === "history" ? ["--log-opts=--all"] : []),
+              ...args,
+              target,
+            ],
+            { cwd: directory },
+          );
+        } catch (error) {
+          code = error.code === 1 ? 1 : -1;
+        }
+        if (code === -1) throw new Error("ADMIN_CANARY_SCANNER_FAILED");
+        const rows = JSON.parse(await readFile(report, "utf8"));
+        return { rows, code, result: await assessProvenanceSecrets(rows, code, scope, target) };
+      };
+      const history = await inspect("history", resolve("."));
+      expect(history.code).toBe(1);
+      expect(history.result).toEqual({
+        ok: true,
+        findings: 0,
+        detectedFindings: 4,
+        reviewedFalsePositives: 4,
+      });
+      const reviewed = approval.findings.find((row) => row.currentSourceSha256);
+      const path = join(fixture, reviewed.path);
+      const source = (await run("git", ["show", `${reviewed.commit}:${reviewed.path}`])).stdout;
+      await mkdir(join(path, ".."), { recursive: true });
+      await writeFile(path, source, { mode: 0o600 });
+      const current = await inspect("current", fixture);
+      expect(current.code).toBe(1);
+      expect(current.result).toEqual({
+        ok: true,
+        findings: 0,
+        detectedFindings: 1,
+        reviewedFalsePositives: 1,
+      });
+      const changedValue = JSON.parse(source);
+      // A different detector-shaped value at the exact approved JSON field stays blocked.
+      const symbols = [...("0123456789abcdef".repeat(2) + "01234567")];
+      changedValue.previousContinuousApplication.roleSourceCommits.api = [
+        ...randomBytes(symbols.length),
+      ]
+        .map((byte) => symbols.splice(byte % symbols.length, 1)[0])
+        .join("");
+      await writeFile(path, JSON.stringify(changedValue, null, 2) + "\n");
+      const generic = await inspect("current", fixture);
+      expect(generic.rows.some((row) => row.RuleID === "generic-api-key")).toBe(true);
+      expect(generic.result).toMatchObject({ ok: false, reviewedFalsePositives: 0 });
+      const generated = ["ghp", "_", randomBytes(18).toString("hex")].join("");
+      const changed = JSON.parse(source);
+      changed.authentication = { api: generated };
+      await writeFile(path, JSON.stringify(changed, null, 2) + "\n");
+      const positive = await inspect("current", fixture);
+      expect(positive.rows.some((row) => row.RuleID === "github-pat")).toBe(true);
+      expect(positive.result).toMatchObject({ ok: false, reviewedFalsePositives: 0 });
+      expect(await readFile(report, "utf8")).not.toContain(generated);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }

@@ -14,6 +14,21 @@ export {
   createPageSchema,
 } from "./schemas.js";
 export { parseContract } from "./parse.js";
+export {
+  adminPermissionSchema,
+  adminGrantSchema,
+  adminGrantsSchema,
+  adminActionSchema,
+  adminCommandRequestSchema,
+  adminApprovalSchema,
+  adminExecuteSchema,
+  adminCommandResultSchema,
+  adminDirectorySchema,
+  adminSessionPageSchema,
+  adminCommandPageSchema,
+} from "./admin-management.js";
+export type { AdminAction } from "./admin-management.js";
+export { adminManagementMetaSchema, adminActivitySchema } from "./admin-management.js";
 export type { ContractParseResult } from "./parse.js";
 export { gameResultV2Schema, matchFinishedV2Schema } from "./game-result-v2.js";
 export type { GameResultV2 } from "./game-result-v2.js";

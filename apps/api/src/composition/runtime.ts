@@ -18,7 +18,12 @@ import {
   parseOwnerAdmissionConfig,
 } from "@hambazi/config";
 import { createRoomsPort, createRoomsRate } from "../rooms/index.js";
-import { createCatalogPort, createCatalogRate, lobbyAvailability } from "../games/index.js";
+import {
+  createGamesAdminOperations,
+  createCatalogPort,
+  createCatalogRate,
+  lobbyAvailability,
+} from "../games/index.js";
 import { createDatabase } from "@hambazi/database";
 import {
   createAuthSessions,
@@ -281,6 +286,8 @@ export async function startApi(
                   retainedGames: [createPersonalCoupGame()],
                   owner: ownerAdmission,
                   newMatchesAllowed: !availability.coupTemporarilyDisabled,
+                  admissionAllowed: () =>
+                    createGamesAdminOperations(database, clock).allowsNewMatches("coup"),
                 }),
                 createPublicNamesPort(database),
               ),
@@ -355,7 +362,12 @@ export async function startApi(
         catalog: createCatalogPort(database),
         lobbyAvailability: async (userId) =>
           lobbyAvailability(
-            availability,
+            {
+              ...availability,
+              coupTemporarilyDisabled:
+                availability.coupTemporarilyDisabled ||
+                !(await createGamesAdminOperations(database, clock).allowsNewMatches("coup")),
+            },
             !!personalConfig &&
               !!ownerAdmission &&
               !!admission &&
@@ -364,6 +376,7 @@ export async function startApi(
             !!kahroba &&
               !!kahrobaConfig?.enabled &&
               !!kahrobaConfig.admission &&
+              (await createGamesAdminOperations(database, clock).allowsNewMatches("kahroba")) &&
               !!ownerAdmission &&
               (await ownerAdmission.allowsUserId(userId)),
           ),

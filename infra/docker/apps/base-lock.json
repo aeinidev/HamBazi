@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "platform": "linux/amd64",
-  "image": "node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f",
+  "image": "node:24.22.1-alpine3.24@sha256:1200d815de24f8dcca745fbf7651d166034a35adbcad8860a8538ffff44f1420",
   "packages": [
     {
       "package": "libcrypto3",

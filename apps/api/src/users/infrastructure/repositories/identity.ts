@@ -10,13 +10,14 @@ export function createIdentityRepository(
       const user = await scope.execute((db) =>
         db.user.findUnique({
           where: { telegramUserId: id },
-          select: { id: true, status: true, registrationCompletedAt: true },
+          select: { id: true, status: true, authVersion: true, registrationCompletedAt: true },
         }),
       );
       return user
         ? {
             userId: user.id,
             status: user.status,
+            authVersion: user.authVersion,
             registrationCompleted: user.registrationCompletedAt !== null,
           }
         : undefined;
@@ -25,13 +26,14 @@ export function createIdentityRepository(
       const user = await scope.execute((db) =>
         db.user.findUnique({
           where: { id: userId },
-          select: { id: true, status: true, registrationCompletedAt: true },
+          select: { id: true, status: true, authVersion: true, registrationCompletedAt: true },
         }),
       );
       return user
         ? {
             userId: user.id,
             status: user.status,
+            authVersion: user.authVersion,
             registrationCompleted: user.registrationCompletedAt !== null,
           }
         : undefined;

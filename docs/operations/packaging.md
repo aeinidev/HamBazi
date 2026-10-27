@@ -10,7 +10,7 @@ acceptance remains deferred and unproven.
 
 ## Build inputs and inventory
 
-Use Node 24.20.0, root-declared pnpm 12.4.1 and compatible Docker buildx with the
+Use Node 24.22.1, root-declared pnpm 12.4.1 and compatible Docker buildx with the
 containerd image store. Read the manifests/workspace/task graph, then install
 with the declared `pnpm install --frozen-lockfile`. The standalone entry points
 below are implemented files, not new guessed package scripts.

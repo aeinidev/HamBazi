@@ -120,3 +120,11 @@ export function createPublicLobbyPort(
 }
 
 export { createMatchesAdminReadRepository as createMatchesAdminRead } from "./infrastructure/repositories/admin-read.js";
+
+import { createMatchesAdminOperationsRepository } from "./infrastructure/repositories/admin-operations.js";
+export function createMatchesAdminOperations(
+  database: Parameters<typeof createMatchesAdminOperationsRepository>[0],
+  clock: { nowMs(): number },
+) {
+  return createMatchesAdminOperationsRepository(database, clock);
+}

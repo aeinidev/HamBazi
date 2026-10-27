@@ -129,6 +129,14 @@ export async function rehearseOwnerRestore(capsule: OwnerBackupCapsule) {
       ),
       "utf8",
     );
+    // Restore both archive generations into the current additive identity schema.
+    const managementSchema = await readFile(
+      new URL(
+        "../../../../packages/database/prisma/migrations/202610270001_admin_management/migration.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
     const grants = await readFile(
       new URL("../../../../packages/database/prisma/admin-permissions.sql", import.meta.url),
       "utf8",
@@ -145,6 +153,8 @@ export async function rehearseOwnerRestore(capsule: OwnerBackupCapsule) {
         schema +
         "\n" +
         rotation +
+        "\n" +
+        managementSchema +
         "\n" +
         grants.split("-- Metadata only:")[0] +
         "\nCOMMIT;\n" +
@@ -164,6 +174,12 @@ export async function rehearseOwnerRestore(capsule: OwnerBackupCapsule) {
       ],
       Buffer.from(capsule.dumpBase64, "base64"),
     );
+    if (managementSchema) {
+      const invalid = await sql(
+        "SELECT (SELECT count(*) FROM admin_roles WHERE realm_id<>'staging') + (SELECT count(*) FROM admin_operator_roles m LEFT JOIN admin_roles r ON r.id=m.role_id AND r.realm_id=m.realm_id LEFT JOIN admin_operators o ON o.id=m.operator_id AND o.realm_id=m.realm_id WHERE o.id IS NULL OR r.id IS NULL OR m.realm_id<>'staging') + (SELECT count(*) FROM admin_operations c LEFT JOIN admin_operators o ON o.id=c.actor_id AND o.realm_id=c.realm_id WHERE o.id IS NULL OR c.realm_id<>'staging');",
+      );
+      if (Number(invalid.trim()) !== 0) throw new Error();
+    }
     const result = JSON.parse(
       (
         await sql(`
@@ -204,6 +220,16 @@ SELECT json_build_object(
       capsule.checkpoint?.pending
     )
       throw new Error();
+    if (capsule.scope === "staging-admin-nine-tables") {
+      const counts: number[] = JSON.parse(
+        (
+          await sql(
+            "SELECT json_build_array((SELECT count(*) FROM admin_roles),(SELECT count(*) FROM admin_operator_roles),(SELECT count(*) FROM admin_operations));",
+          )
+        ).trim(),
+      );
+      result.rows.push(...counts);
+    }
     outcome = { ownerPresent: result.owners === 1, tableRows: result.rows };
   } catch {
     failed = true;

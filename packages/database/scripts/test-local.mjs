@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
+import { deepStrictEqual } from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
-import { mkdtemp, writeFile, rm, readFile } from "node:fs/promises";
+import { mkdtemp, writeFile, rm, readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -334,9 +335,18 @@ if (!bin) {
     await restored.connect();
     try {
       const result = await restored.query(
-        "SELECT count(*)::int AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL",
+        "SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL ORDER BY migration_name",
       );
-      if (result.rows[0].count !== 15) throw new Error();
+      const migrations = await readdir(new URL("../prisma/migrations/", import.meta.url), {
+        withFileTypes: true,
+      });
+      deepStrictEqual(
+        result.rows.map((row) => row.migration_name),
+        migrations
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+          .sort(),
+      );
       const persisted = await restored.query(
         "SELECT (SELECT count(*)::int FROM users) AS users, (SELECT state_version FROM matches LIMIT 1) AS version, (SELECT count(*)::int FROM game_events) AS events, (SELECT count(*)::int FROM outbox_events) AS outbox",
       );
@@ -682,6 +692,8 @@ if (!bin) {
         if (/^ FAIL {2}tests\/integration\/[A-Za-z0-9_.-]+/.test(line)) console.error(line);
         const frame = line.match(/tests\/integration\/[A-Za-z0-9_.-]+:\d+:\d+/);
         if (frame) console.error(`Integration failure location: ${frame[0]}`);
+        const timeout = line.match(/Test timed out in [0-9]+ms/);
+        if (timeout) console.error(timeout[0]);
       }
     }
     if (stage === "migration deploy" && error && typeof error === "object" && "stderr" in error) {

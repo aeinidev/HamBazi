@@ -238,6 +238,93 @@ export function createAdminService(deps: {
   }
   return Object.freeze({
     authenticate,
+    async noteDenied(token: unknown) {
+      const a = await authenticate(token, false);
+      await repository.atomic((tx) =>
+        audit(tx, "AUTHORIZATION_DENIED", newId(), a.principal.operatorId),
+      );
+    },
+    hashAdminPassword(value: string) {
+      return bounded(() => crypto.hash(parse(adminPassword, value), "password"));
+    },
+    /** Internal operation-bound reauthentication; the callback validates the challenge under the realm lock. */
+    async reauthenticateOperation(
+      token: unknown,
+      input: { commandId: string; password: string; pin?: string; operationId: string },
+      validate: (tx: AdminTransaction, sessionId: string) => Promise<void>,
+      approved: (tx: AdminTransaction, sessionId: string) => Promise<void>,
+    ) {
+      const a = await authenticate(token);
+      const observed = await repository.atomic((tx) => tx.operator(a.principal.operatorId));
+      if (!observed) throw new AdminFault("UNAUTHENTICATED");
+      const passwordOk = await verify(observed.passwordVerifier, input.password, "password");
+      const pinOk =
+        !a.principal.isOwner ||
+        (!!observed.pinVerifier &&
+          passwordOk &&
+          typeof input.pin === "string" &&
+          (await verify(observed.pinVerifier, input.pin, "pin")));
+      const result = await repository.atomic(async (tx) => {
+        const o = await tx.operator(observed.id),
+          s = await tx.session(a.sessionId),
+          realm = await tx.realm();
+        if (
+          !valid(s, o) ||
+          o!.credentialVersion !== observed.credentialVersion ||
+          (realm?.ownerId === o!.id) !== a.principal.isOwner
+        )
+          return null;
+        await validate(tx, a.sessionId);
+        const digest = crypto.digest(
+          JSON.stringify([
+            "operation-reauth",
+            input.operationId,
+            a.sessionId,
+            input.password,
+            input.pin ?? null,
+          ]),
+        );
+        const previous = await tx.receipt(o!.id, input.commandId);
+        if (previous) {
+          if (previous.digest !== digest) throw new AdminFault("ADMIN_CONFLICT");
+          return null;
+        }
+        if (!passwordOk || !pinOk) {
+          if (passwordOk && a.principal.isOwner) {
+            const failures = o!.pinFailures + 1;
+            await tx.updateOperator(o!.id, {
+              pinFailures: failures,
+              ...(failures >= 3 ? { lockedAt: at(), sessionEpoch: o!.sessionEpoch + 1 } : {}),
+            });
+            await audit(tx, failures >= 3 ? "OWNER_LOCKED" : "PIN_DENIED", input.commandId, o!.id);
+          } else await audit(tx, "REAUTH_DENIED", input.commandId, o!.id);
+          await tx.saveReceipt({
+            operatorId: o!.id,
+            commandId: input.commandId,
+            digest,
+            outcome: "DENIED",
+            sessionId: null,
+          });
+          return null;
+        }
+        const rotated = { ...session(o!, "FULL"), expiresAt: s!.expiresAt };
+        await tx.updateSession(s!.id, { revokedAt: at() });
+        await tx.createSession(rotated);
+        if (a.principal.isOwner) await tx.updateOperator(o!.id, { pinFailures: 0 });
+        await approved(tx, rotated.id);
+        await audit(tx, "REAUTH_SUCCEEDED", input.commandId, o!.id);
+        await tx.saveReceipt({
+          operatorId: o!.id,
+          commandId: input.commandId,
+          digest,
+          outcome: "REAUTH_SUCCEEDED",
+          sessionId: rotated.id,
+        });
+        return rotated;
+      });
+      if (!result) throw new AdminFault("UNAUTHENTICATED");
+      return reply(result);
+    },
     async pendingSessionId(token: unknown) {
       const claim = await crypto.verifyToken(token);
       if (!claim || claim.kind !== "PENDING") throw new AdminFault("UNAUTHENTICATED");

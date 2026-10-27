@@ -29,6 +29,12 @@ const provenanceException = JSON.parse(
     "utf8",
   ),
 );
+const adminExceptions = JSON.parse(
+  await readFile(
+    new URL("../security/gitleaks-admin-phase2-exceptions.json", import.meta.url),
+    "utf8",
+  ),
+);
 const exec = promisify(execFile);
 const severities = ["info", "low", "moderate", "high", "critical"];
 const invalid = () => {
@@ -37,7 +43,7 @@ const invalid = () => {
 const count = (n) => Number.isSafeInteger(n) && n >= 0;
 const blocked = (severity) => policy.blockingSeverities.includes(severity);
 const pinnedImage = (image) =>
-  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+|hambazi-candidate\/(api|bot|worker|web):[a-f0-9]{40}-[a-f0-9]{16}|hambazi-staging\/(ingress|acme):[a-f0-9]{40}-[a-f0-9]{16})@sha256:[a-f0-9]{64}$/.test(
+  /^((postgres|redis):[^@\s]+|hambazi-local\/postgres:[^@\s]+|hambazi-candidate\/(api|bot|worker|web|admin):[a-f0-9]{40}-[a-f0-9]{16}|hambazi-staging\/(ingress|acme):[a-f0-9]{40}-[a-f0-9]{16})@sha256:[a-f0-9]{64}$/.test(
     image,
   );
 
@@ -77,13 +83,67 @@ export function assessSecrets(report, exitCode) {
   return { ok: report.length === 0, findings: report.length };
 }
 
-/** A single approved public revision; detectors still report it. Fail closed on drift. */
+async function approvedAdminFinding(finding, scope, sourceRoot) {
+  if (adminExceptions.status !== "APPROVED" || adminExceptions.findings?.length !== 3) invalid();
+  for (const reviewed of adminExceptions.findings) {
+    if (
+      finding.RuleID !== reviewed.rule ||
+      finding.File !== (scope === "history" ? reviewed.path : join(sourceRoot, reviewed.path)) ||
+      finding.StartLine !== reviewed.startLine ||
+      finding.EndLine !== reviewed.endLine ||
+      finding.StartColumn !== reviewed.startColumn ||
+      finding.EndColumn !== reviewed.endColumn ||
+      finding.Secret !== "REDACTED" ||
+      finding.Match !== reviewed.redactedMatch ||
+      finding.SymlinkFile ||
+      (scope === "history"
+        ? finding.Commit !== reviewed.commit
+        : finding.Commit !== "" || !reviewed.currentSourceSha256)
+    )
+      continue;
+    let source;
+    if (scope === "history") {
+      const blob = await run("git", ["show", `${reviewed.commit}:${reviewed.path}`], sourceRoot);
+      if (blob.code !== 0) invalid();
+      source = blob.stdout;
+    } else {
+      const path = join(sourceRoot, reviewed.path);
+      const info = await lstat(path);
+      if (!info.isFile() || info.isSymbolicLink()) invalid();
+      source = await readFile(path, "utf8");
+    }
+    const line = source.split("\n")[reviewed.startLine - 1];
+    if (
+      createHash("sha256").update(source).digest("hex") !==
+        (scope === "history" ? reviewed.sourceSha256 : reviewed.currentSourceSha256) ||
+      !line ||
+      createHash("sha256").update(line).digest("hex") !== reviewed.lineSha256
+    )
+      continue;
+    if (reviewed.field) {
+      const revision = reviewed.field
+        .split(".")
+        .reduce((value, key) => value?.[key], JSON.parse(source));
+      if (!/^[a-f0-9]{40}$/.test(revision ?? "")) continue;
+      const object = await run("git", ["cat-file", "-t", revision], root);
+      if (object.code !== 0 || object.stdout.trim() !== "commit") invalid();
+    }
+    return true;
+  }
+  return false;
+}
+
+/** Exact owner-reviewed non-credentials; detectors still report every match. */
 export async function assessProvenanceSecrets(report, exitCode, scope, sourceRoot) {
   assessSecrets(report, exitCode); // Validate raw scanner exit/report consistency first.
   if (!["history", "current"].includes(scope) || !isAbsolute(sourceRoot)) invalid();
   const exception = provenanceException;
   let reviewedFalsePositives = 0;
   for (const finding of report) {
+    if (await approvedAdminFinding(finding, scope, sourceRoot)) {
+      reviewedFalsePositives++;
+      continue;
+    }
     const exactColumns =
       finding.StartColumn === exception.startColumn && finding.EndColumn === exception.endColumn;
     // Gitleaks 8.30.1 reports columns one lower on the first diff line.

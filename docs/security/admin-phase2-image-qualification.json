@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-phase2-final-artifact-qualification",
+  "checkedAt": "2026-10-27T14:01:26.781189+00:00",
+  "localStagingCandidateReady": true,
+  "stagingDeploymentAuthorized": false,
+  "stagingAccepted": false,
+  "productionReady": false,
+  "realOwnerTouched": false,
+  "phase3Started": false,
+  "userStatusEnabled": false,
+  "capacityAcceptance": "explicitly-deferred-to-future-server",
+  "source": {
+    "sourceCommit": "a24ce45335db039dc94c654dedd916470893fdac",
+    "sourceDirty": true,
+    "sourceSnapshotSha256": "c13068a3aba76565d1385491a2d1326f3dd8a253f00a87f8bb6bf3d32a7b9b32",
+    "buildInputSha256": "e21df33d353e0e1344dec7e5f9ecf5f924e9f531acaaaac6597e0ec4ad86b982",
+    "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+    "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
+    "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217"
+  },
+  "artifactInventorySha256": "34e42f6f0aaf94dcb36ed33d431cda5fbca8aee2de25a538ca00934f0c16c5bd",
+  "admin": {
+    "schemaVersion": 1,
+    "purpose": "local-admin-phase2-candidate",
+    "productionReleaseApproved": false,
+    "image": "hambazi-candidate/admin:a24ce45335db039dc94c654dedd916470893fdac-76c186b2897cc68a@sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+    "adminSourceSha256": "76c186b2897cc68a8f4ce04dcaef400616a700f9446c0c3c8fea21942825f11a",
+    "apiImage": "hambazi-candidate/api:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+    "runtimeImage": "hambazi-candidate/web:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+    "sourceSnapshotSha256": "c13068a3aba76565d1385491a2d1326f3dd8a253f00a87f8bb6bf3d32a7b9b32",
+    "coreInventorySha256": "34e42f6f0aaf94dcb36ed33d431cda5fbca8aee2de25a538ca00934f0c16c5bd",
+    "clientFiles": 5,
+    "sourceFiles": 22376,
+    "clientSha256": "ee40f220f704b179466a0e0c04f10b95871127dd45c3f94daec5c66b23b466d3"
+  },
+  "images": [
+    {
+      "ok": true,
+      "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "ok": true,
+      "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "role": "api",
+      "ok": true,
+      "image": "hambazi-candidate/api:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "role": "bot",
+      "ok": true,
+      "image": "hambazi-candidate/bot:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "role": "worker",
+      "ok": true,
+      "image": "hambazi-candidate/worker:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "role": "web",
+      "ok": true,
+      "image": "hambazi-candidate/web:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    },
+    {
+      "role": "admin",
+      "ok": true,
+      "image": "hambazi-candidate/admin:a24ce45335db039dc94c654dedd916470893fdac-76c186b2897cc68a@sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": []
+    }
+  ],
+  "toolchain": {
+    "node": "24.22.1",
+    "pnpm": "12.4.1",
+    "postgresql": "18.6",
+    "redis": "8.10.2"
+  },
+  "checks": {
+    "root": {
+      "exitCode": 0,
+      "seconds": 412.25,
+      "tests": 2421,
+      "tasks": ["25 successful, 25 total", "39 successful, 39 total", "14 successful, 14 total"],
+      "failedSuites": []
+    },
+    "finalApiTestTypecheck": {
+      "exitCode": 0,
+      "seconds": 17.05
+    },
+    "schemaDrift": 0,
+    "fullFunctional": {
+      "exitCode": 0,
+      "seconds": 166.01,
+      "databaseMode": "native PostgreSQL 18.6; Docker Redis at final pin",
+      "integrationTestsPassed": 286,
+      "releaseBrowserCases": 6,
+      "schemaDrift": 0,
+      "restoredTables": 44,
+      "successMarkers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "API session/account/onboarding integration and account/session/receipt/flow/result/statistics restart persistence passed.",
+        "Disposable logical backup/restore reconciled 44 tables, constraints, triggers and grants; source preserved.",
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    },
+    "adminIntegration": {
+      "passed": true,
+      "phase1SecurityCases": 13,
+      "phase2IntegrationCases": 9,
+      "encryptedBackupRestoreCases": 4,
+      "databaseAndRedis": "final-immutable-image-pins",
+      "seconds": 110.65
+    },
+    "adminExactImage": {
+      "passed": true,
+      "checks": 32,
+      "image": "hambazi-candidate/admin:a24ce45335db039dc94c654dedd916470893fdac-76c186b2897cc68a@sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+      "postgresImage": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+      "redisImage": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+      "inboundTLSVerified": true,
+      "nativeArgon2AsUid1000": true,
+      "productionRejectsPlaintextDependencies": true,
+      "fixtureRuntimeMode": "production",
+      "productionDependencyTLSRehearsed": true,
+      "realOwnerTouched": false,
+      "ownerCreated": false
+    },
+    "coreExactImages": {
+      "schemaVersion": 1,
+      "purpose": "disposable-release-rehearsal",
+      "checks": 123,
+      "browserCases": 2,
+      "passed": true,
+      "productionReady": false,
+      "transitions": 3,
+      "acceptedRequestDrainDrills": 3,
+      "stagingAccepted": false,
+      "candidateBuildInputSha256": "e21df33d353e0e1344dec7e5f9ecf5f924e9f531acaaaac6597e0ec4ad86b982",
+      "rollbackBuildInputSha256": "75735adec0baa348c39c9f67657f0f4a6a8641efcc19cee9b8b5520adc53331e"
+    },
+    "definition": {
+      "schemaVersion": 1,
+      "purpose": "disposable-definition-rehearsal",
+      "checks": 24,
+      "passed": true,
+      "productionReady": false,
+      "backendProductionTested": false,
+      "operatorMonitoringVerifiedLocally": true,
+      "stagingMonitoringAccepted": false
+    },
+    "postgresMatchAdmission": {
+      "passed": true,
+      "cases": 34,
+      "twoClientRaces": 20,
+      "timeoutPerCaseMs": 5000,
+      "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b"
+    },
+    "postgresTransfer": {
+      "passed": true,
+      "foundationTests": 17,
+      "comparedTables": 44,
+      "unicodeJsonbConstraintsTriggersGrants": true,
+      "legacyVolumeGuard": true,
+      "restartPersistence": true,
+      "sourcePreserved": true
+    },
+    "privateAndIngress": [
+      {
+        "name": "admin-private",
+        "exitCode": 0,
+        "seconds": 3.12,
+        "testCounts": [],
+        "safeMarkers": ["ADMIN_PRIVATE_ROOT_FILES_PASSED", "ADMIN_PRIVATE_REAL_PTY_PASSED"]
+      },
+      {
+        "name": "admin-ingress",
+        "exitCode": 0,
+        "seconds": 23.83,
+        "testCounts": ["1", "3"],
+        "safeMarkers": []
+      }
+    ],
+    "browser": {
+      "adminFixture": 7,
+      "adminStandaloneSkipped": 1,
+      "adminSkippedCaseExecutedWithRealBackend": true,
+      "web": 30,
+      "csp": 8,
+      "preview": 2,
+      "midnightBroadPassed": 130,
+      "midnightFlagOnTargetedPassed": 6,
+      "midnightFlagOffTargetedPassed": 6,
+      "kahroba": 104
+    },
+    "finalStaticChecks": [
+      {
+        "check": "format",
+        "exitCode": 0,
+        "seconds": 13.37
+      },
+      {
+        "check": "lint",
+        "exitCode": 0,
+        "seconds": 6.28
+      },
+      {
+        "check": "architecture",
+        "exitCode": 0,
+        "seconds": 2.63
+      }
+    ],
+    "sourceSecurityScans": {
+      "passed": true,
+      "checkedAt": "2026-10-27T14:02:04.612575+00:00",
+      "dependencies": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "history": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 4,
+        "reviewedFalsePositives": 4
+      },
+      "current": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 1,
+        "reviewedFalsePositives": 1
+      }
+    }
+  },
+  "provenanceNotes": [
+    "All image qualification is bound to the captured immutable artifact identities, not merely HEAD.",
+    "After the artifact snapshot, only test-harness expectations, parametrization and documentation were corrected; runtime/config/SQL source identities remained unchanged.",
+    "The broad functional harness used its declared native PostgreSQL 18.6 mode; final Alpine PostgreSQL separately passed Admin, transfer, exact-image and 34 Match admission compatibility cases.",
+    "The historical 15-migration count was replaced by exact successful migration-name comparison.",
+    "The former single 20-race test exceeded the default 5000ms aggregate budget on Docker storage. All 20 races now run as independent cases with the unchanged 5000ms limit and unchanged invariants. No case or production control was removed.",
+    "Core rollback evidence proves candidate-to-candidate transitions, not compatibility with the installed Staging release.",
+    "Definition rehearsal does not prove real Staging backend or monitoring acceptance.",
+    "No Staging security deadline, timer, firewall, certificate, database or account was inspected or changed."
+  ],
+  "runtimeSourceProof": {
+    "files": 504,
+    "manifestSha256": "0479f5b1459e9bea647d533015866098adc3899c85d219fc297497145aca65cf",
+    "unchangedAfterQualification": true
+  },
+  "postSnapshotTestFiles": {
+    "packages/database/scripts/test-local.mjs": "36373bb638783cc4793cf1e5a8c9460338632f699325490d5077131f5042d242",
+    "apps/api/tests/integration/sessions.test.ts": "fcc99f512370ea7ed48a763c5197ba8e68c9d2fbe0883312a8b1e2752af5ad1c",
+    "apps/api/tests/integration/account-cases.ts": "afda0dffcd46f1601ac22151d41b41d5fff34772b714d300c8b3a8d62e7d6e77",
+    "apps/api/tests/integration/match-admission.test.ts": "9d0730f4ebe433541a9a17f2abd70d3754b70b7c58129915bfff456faee692a1"
+  },
+  "deploymentPrerequisites": [
+    "Separate explicit Staging approval.",
+    "Fresh encrypted product and nine-table identity backup, verified off-server copy and actual isolated restore with owner-entered passphrase.",
+    "Exact target previous image/rollback compatibility, schema/grants/CONNECT, TLS DNS/SAN/CA and private interpreter preflight.",
+    "Fresh scans, valid qualification/deadline and all real target service health checks before and after deployment."
+  ],
+  "artifactRetention": "Local immutable images remain in Docker; inventory, scan and qualification metadata are retained privately under the build-input identity. Re-scan and validate exact target backup/rollback before separately authorized installation."
+}

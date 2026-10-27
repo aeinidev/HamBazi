@@ -132,9 +132,8 @@ async function fixture(wrongUpstreamName = false) {
       "pid /tmp/nginx.pid; error_log /tmp/nginx-error.log crit; events { worker_connections 128; } http { client_body_temp_path /tmp/body; proxy_temp_path /tmp/proxy; fastcgi_temp_path /tmp/fcgi; uwsgi_temp_path /tmp/uwsgi; scgi_temp_path /tmp/scgi; include /test/ingress.conf; }",
     );
     await docker(["image", "inspect", image]);
-    await docker([
+    const containerArgs = [
       "run",
-      "--detach",
       "--rm",
       "--pull=never",
       "--name",
@@ -161,6 +160,12 @@ async function fixture(wrongUpstreamName = false) {
       "--entrypoint",
       "nginx",
       image,
+    ];
+    await docker([...containerArgs, "-t", "-c", "/test/nginx.conf"]);
+    await docker([
+      containerArgs[0]!,
+      "--detach",
+      ...containerArgs.slice(1),
       "-c",
       "/test/nginx.conf",
       "-g",
@@ -320,7 +325,7 @@ describe("owned local Nginx → private TLS Admin", () => {
         expect((await t.send("/v1/admin/" + path, {}, { cookie: fCookie })).status).toBe(404);
       expect((await t.send("/.env")).status).toBe(404);
       expect((await t.send("/v1/health/ready")).status).toBe(404);
-      const nextPassword = "SyntheticIngressReplacement456";
+      const nextPassword = randomUUID();
       const payload = { ...command(), password, currentPin: ownerPin, newPassword: nextPassword };
       expect(
         (await t.send("/v1/admin/auth/password/change", payload, { cookie: fCookie })).status,

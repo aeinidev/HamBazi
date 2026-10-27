@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "platform": "linux/amd64",
-  "baseImage": "postgres:18.6-alpine3.24@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873",
-  "tag": "hambazi-local/postgres:18.6-alpine3.24-v1",
-  "image": "hambazi-local/postgres:18.6-alpine3.24-v1@sha256:18f4eaef9fda255d3b10a16c62c72a92864b69a6b4eb4ded1145b349f06d514a",
+  "baseImage": "postgres:18.6-alpine3.24@sha256:3b0ef735388b2cb097fc29b8bb421d86d57d0ddbe7aa1fbd6493e06d65028503",
+  "tag": "hambazi-local/postgres:18.6-alpine3.24-v2",
+  "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
   "sourceDateEpoch": 1790899200,
-  "dockerfileSha256": "8388243c921f93b5cbfaa9db978201cb13f136b27765eb835c72f0580e48db7f",
+  "dockerfileSha256": "d2958089eef4c76a7c7ac5e190360c15d171885661c15708685dd3a3b8de804d",
   "helper": {
     "package": "su-exec",
     "version": "0.3-r0",
@@ -17,5 +17,17 @@
     "version": "1.70.0-r0",
     "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/nghttp2-libs-1.70.0-r0.apk",
     "archiveSha256": "f0c4014eb2f10308dcdfd84cd49c121673c7b78cb8182b6e7a1388d8ae112a3b"
+  },
+  "brotli": {
+    "package": "brotli-libs",
+    "version": "1.2.1-r0",
+    "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/brotli-libs-1.2.1-r0.apk",
+    "archiveSha256": "62a7e37e43bbfc1f8525a00ad2125fd5897135dc93b849733884cb78ffd8e26c"
+  },
+  "curl": {
+    "package": "libcurl",
+    "version": "8.23.0-r0",
+    "archiveUrl": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libcurl-8.23.0-r0.apk",
+    "archiveSha256": "1f70ca404818805a6465b615bbfe84ef861488a963d7e630108ebd7fbaa51665"
   }
 }

@@ -11,6 +11,7 @@ const storedSchema = z.strictObject({
   privateRoomsEnabled: z.boolean(),
   chatEnabled: z.boolean(),
   voiceEnabled: z.literal(false),
+  adminAvailability: z.enum(["ACTIVE", "MAINTENANCE", "DISABLED"]).optional(),
   status: z.enum(["ACTIVE", "MAINTENANCE", "DISABLED"]),
   configSchemaVersion: z.literal(1),
   configJsonb: z.strictObject({}),

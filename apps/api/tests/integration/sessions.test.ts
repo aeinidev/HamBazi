@@ -974,8 +974,13 @@ describe("Auth and Users ports against PostgreSQL", () => {
     expect(await users.findActiveByTelegramId("42")).toEqual({
       userId,
       registrationCompleted: true,
+      authVersion: 0,
     });
-    expect(await users.findActiveById(userId)).toEqual({ userId, registrationCompleted: true });
+    expect(await users.findActiveById(userId)).toEqual({
+      userId,
+      registrationCompleted: true,
+      authVersion: 0,
+    });
     expect(await users.findActiveByTelegramId("99")).toBeUndefined();
     expect((await auth.issue(initData(99), randomUUID())).ok).toBe(false);
   });
@@ -1077,6 +1082,7 @@ describe("Auth and Users ports against PostgreSQL", () => {
       );
     expect(Object.keys(row).sort()).toEqual([
       "audience",
+      "authVersion",
       "commandId",
       "expiresAt",
       "id",

@@ -4,6 +4,7 @@ export function createGamesAdminReadRepository(database: ReturnType<typeof creat
   return async (
     query: { cursor?: string; limit: number; id?: string },
     games: readonly string[] | null,
+    excluded: readonly string[] = [],
   ) => {
     if (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 50)
       throw new Error("ADMIN_READ_INVALID");
@@ -11,20 +12,40 @@ export function createGamesAdminReadRepository(database: ReturnType<typeof creat
       games === null
         ? await scope.execute((db) =>
             db.game.findMany({
-              where: { id: query.id ?? { gt: query.cursor ?? "" } },
+              where: {
+                AND: [
+                  { id: query.id ?? { gt: query.cursor ?? "" } },
+                  { id: { notIn: [...excluded] } },
+                ],
+              },
               orderBy: { id: "asc" },
               take: query.limit + 1,
-              select: { id: true, status: true, title: true },
+              select: {
+                id: true,
+                status: true,
+                title: true,
+                adminVersion: true,
+                adminAvailability: true,
+              },
             }),
           )
         : await scope.execute((db) =>
             db.game.findMany({
               where: {
-                AND: [{ id: query.id ?? { gt: query.cursor ?? "" } }, { id: { in: [...games] } }],
+                AND: [
+                  { id: query.id ?? { gt: query.cursor ?? "" } },
+                  { id: { in: [...games], notIn: [...excluded] } },
+                ],
               },
               orderBy: { id: "asc" },
               take: query.limit + 1,
-              select: { id: true, status: true, title: true },
+              select: {
+                id: true,
+                status: true,
+                title: true,
+                adminVersion: true,
+                adminAvailability: true,
+              },
             }),
           );
     return {
@@ -33,9 +54,9 @@ export function createGamesAdminReadRepository(database: ReturnType<typeof creat
       items: rows.slice(0, query.limit).map((row) => ({
         id: row.id,
         label: row.title,
-        status: row.status,
+        status: row.adminAvailability,
         gameId: row.id,
-        version: null,
+        version: row.adminVersion,
       })),
       nextCursor: rows.length > query.limit ? rows[query.limit - 1]!.id : null,
     };

@@ -170,7 +170,7 @@ describe("owned PostgreSQL Staging owner restore rehearsal", () => {
         "--host=127.0.0.1",
         "--username=hambazi_admin_recovery",
         "--dbname=hambazi_owner_source",
-        ...ownerDumpArguments,
+        ...ownerDumpArguments.slice(0, -3),
       ],
       { env: childEnv, encoding: "buffer", maxBuffer: 32 * 1024 * 1024, timeout: 20000 },
     );
@@ -263,7 +263,16 @@ describe("owned PostgreSQL Staging owner restore rehearsal", () => {
     expect(row.locked_at).not.toBeNull();
     await expect(login()).rejects.toThrow();
   });
-  it("encrypts an actual six-table pg_dump and restores only into the separate owned database", async () => {
+  it("encrypts an actual nine-table pg_dump and restores only into the separate owned database", async () => {
+    const roleId = randomUUID();
+    await source.query(
+      "INSERT INTO admin_roles(id,realm_id,name,version,grants_jsonb) VALUES($1,'staging','Synthetic backup role',1,'[]')",
+      [roleId],
+    );
+    await source.query(
+      "INSERT INTO admin_operator_roles(operator_id,role_id,realm_id) VALUES($1,$2,'staging')",
+      [ownerId, roleId],
+    );
     const dumped = await promisify(execFile)(
       "docker",
       [
@@ -280,11 +289,11 @@ describe("owned PostgreSQL Staging owner restore rehearsal", () => {
     const sealed = sealOwnerBackup(
       {
         schemaVersion: 1,
-        scope: "staging-admin-six-tables",
+        scope: "staging-admin-nine-tables",
         realm: "staging",
         createdAtUTC: new Date().toISOString(),
         sourceRevision: "a".repeat(64),
-        schemaTag: "admin-local-identity+password-rotation-v1",
+        schemaTag: "admin-local-identity+access-management-v2",
         runtimeEnvironment: "SYNTHETIC_KEYS=fixture-only",
         operatorEnvironment: "SYNTHETIC_URLS=fixture-only",
         checkpoint: {
@@ -301,7 +310,8 @@ describe("owned PostgreSQL Staging owner restore rehearsal", () => {
     const opened = openOwnerBackup(sealed, "SyntheticIndependentBackupSecret123");
     const offline = await rehearseOwnerRestore(opened);
     expect(offline.ownerPresent).toBe(true);
-    expect(offline.tableRows).toHaveLength(6);
+    expect(offline.tableRows).toHaveLength(9);
+    expect(offline.tableRows.slice(6)).toEqual([1, 1, 0]);
     const before = await source.query(
       "SELECT id,pin_failures,locked_at,session_epoch,password_verifier,pin_verifier FROM admin_operators",
     );

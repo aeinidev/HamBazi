@@ -33,7 +33,6 @@ import {
 } from "../../dist/auth/index.js";
 import {
   createUserIdentityPort,
-  createAccountCreationPort,
   createRegistrationPort,
   createProfilePort,
   createProfileRate,
@@ -618,7 +617,7 @@ async function main() {
       ),
     };
   const onboarding = createMiniAppOnboarding({
-    accounts: createAccountCreationPort(database),
+    registration: createRegistrationPort(database, clock),
     users,
     telegram,
     clock,

@@ -7,4 +7,5 @@ DO $$ BEGIN
 END; $$;
 -- Reuse the existing host-gateway-only private recovery role for identity backup.
 GRANT SELECT ON admin_sessions, admin_grants TO hambazi_admin_recovery;
+GRANT SELECT ON admin_roles, admin_operator_roles, admin_operations TO hambazi_admin_recovery;
 COMMIT;

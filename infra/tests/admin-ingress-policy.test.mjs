@@ -12,7 +12,8 @@ const allowed = (method, path) =>
   entries.some((line) => {
     const key = line.slice(0, -3).trim(),
       input = method + ":" + path;
-    return key.startsWith("~") ? new RegExp(key.slice(1)).test(input) : JSON.parse(key) === input;
+    const decoded = key.startsWith('"') ? JSON.parse(key) : key;
+    return decoded.startsWith("~") ? new RegExp(decoded.slice(1)).test(input) : decoded === input;
   });
 describe("Admin ingress vs independent API contract", () => {
   it("admits every method/path actually published in the Admin OpenAPI contract", () => {

@@ -20,6 +20,21 @@ import { runSequence } from "../ci/gates.mjs";
 
 const directories = [],
   servers = [];
+it("keeps the security-patched Node version consistent across CI, build and runtime images", async () => {
+  const pin = JSON.parse(await readFile(new URL("../ci/toolchain.json", import.meta.url), "utf8"));
+  const base = JSON.parse(
+    await readFile(new URL("../docker/apps/base-lock.json", import.meta.url), "utf8"),
+  );
+  const dockerfile = await readFile(new URL("../docker/apps/Dockerfile", import.meta.url), "utf8");
+  expect(pin.nodeVersion).toBe("24.22.1");
+  expect(base.image).toMatch(
+    new RegExp(`^node:${pin.nodeVersion.replaceAll(".", "\\.")}-alpine3\\.24@sha256:[a-f0-9]{64}$`),
+  );
+  expect(dockerfile.split("\n").filter((line) => line.startsWith("FROM node:"))).toEqual([
+    `FROM ${base.image} AS build`,
+    `FROM ${base.image} AS runtime`,
+  ]);
+});
 it("refuses substituted runtime package archives before Docker builds", () => {
   expect(() => verifyArchive(Buffer.from("synthetic substitution"), "0".repeat(64))).toThrow(
     "PACKAGING_INPUT_INVALID",

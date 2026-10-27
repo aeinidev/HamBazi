@@ -1,4 +1,4 @@
-FROM node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f AS build
+FROM node:24.22.1-alpine3.24@sha256:1200d815de24f8dcca745fbf7651d166034a35adbcad8860a8538ffff44f1420 AS build
 WORKDIR /source
 ARG NPM_CONFIG_REGISTRY
 ENV PNPM_CONFIG_REGISTRY=${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org/}
@@ -62,7 +62,7 @@ for (const role of ['api', 'bot', 'worker']) {
 }
 NODE
 
-FROM node:24.20.0-alpine3.24@sha256:4caaaf42195bcd6f6f3559a413b20cb8f8ad089e231ee874cf7701643966689f AS runtime
+FROM node:24.22.1-alpine3.24@sha256:1200d815de24f8dcca745fbf7651d166034a35adbcad8860a8538ffff44f1420 AS runtime
 COPY .build-inputs/*.apk /tmp/hambazi-apk/
 # Keep the base log unchanged; the retained build output records this installation.
 RUN --network=none apk add --no-logfile --no-network /tmp/hambazi-apk/*.apk && rm -rf /tmp/hambazi-apk

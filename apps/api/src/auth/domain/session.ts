@@ -2,6 +2,7 @@
 export interface SessionRecord {
   readonly id: string;
   readonly userId: string;
+  readonly authVersion?: number;
   readonly commandId: string;
   readonly schemaVersion: number;
   readonly keyId: string;

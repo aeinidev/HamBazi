@@ -1,12 +1,5 @@
-export const adminCapabilities = [
-  "overview.view",
-  "users.view",
-  "games.view",
-  "rooms.view",
-  "matches.view",
-  "monitoring.view",
-  "audit.view",
-] as const;
+import { adminPermissionSchema } from "@hambazi/validation";
+export const adminCapabilities = adminPermissionSchema.options;
 export type AdminCapability = (typeof adminCapabilities)[number];
 export interface AdminGrant {
   permission: string;
@@ -26,6 +19,7 @@ export interface AdminPrincipal {
 export function adminAccess(principal: AdminPrincipal, permission: string, gameId?: string) {
   if (!(adminCapabilities as readonly string[]).includes(permission)) return false;
   if (principal.isOwner) return true;
+  if (/^(admins|roles)\./.test(permission)) return false;
   const matching = principal.grants.filter(
     (g) =>
       g.permission === permission &&
@@ -38,17 +32,28 @@ export function adminGameScope(
   principal: AdminPrincipal,
   permission: string,
 ): readonly string[] | null {
-  if (!(adminCapabilities as readonly string[]).includes(permission)) return [];
-  if (principal.isOwner) return null;
+  const scope = adminReadScope(principal, permission);
+  // Aggregate ports cannot subtract a game; deny them rather than disclose excluded counts.
+  return scope.excluded.length ? [] : scope.games;
+}
+export function adminReadScope(
+  principal: AdminPrincipal,
+  permission: string,
+): { games: readonly string[] | null; excluded: readonly string[] } {
+  if (!(adminCapabilities as readonly string[]).includes(permission))
+    return { games: [], excluded: [] };
+  if (principal.isOwner) return { games: null, excluded: [] };
+  if (/^(admins|roles)\./.test(permission)) return { games: [], excluded: [] };
   const grants = principal.grants.filter(
     (g) => g.permission === permission && g.environment === principal.environment,
   );
   const allowed = grants.filter((g) => !g.deny);
   const denied = grants.filter((g) => g.deny);
-  if (denied.some((g) => g.gameIds === null)) return [];
-  // A global allow with game-specific denials needs a NOT IN query, which this read port does not expose.
-  // Deny safely rather than silently widening the scope.
-  if (allowed.some((g) => g.gameIds === null)) return denied.length ? [] : null;
+  if (denied.some((g) => g.gameIds === null)) return { games: [], excluded: [] };
   const denyIds = new Set(denied.flatMap((g) => g.gameIds ?? []));
-  return [...new Set(allowed.flatMap((g) => g.gameIds ?? []))].filter((id) => !denyIds.has(id));
+  if (allowed.some((g) => g.gameIds === null)) return { games: null, excluded: [...denyIds] };
+  return {
+    games: [...new Set(allowed.flatMap((g) => g.gameIds ?? []))].filter((id) => !denyIds.has(id)),
+    excluded: [],
+  };
 }

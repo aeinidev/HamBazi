@@ -13,10 +13,13 @@ async function fits(page: Page) {
   const bounds = await page
     .locator("main button, main input, main select, .home-bottom-nav")
     .evaluateAll((es) =>
-      es.map((e) => {
-        const r = e.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-      }),
+      // Cards deliberately scroll inside their own grid; reachability is tested below.
+      es
+        .filter((e) => !e.closest(".home-game-grid"))
+        .map((e) => {
+          const r = e.getBoundingClientRect();
+          return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
+        }),
     );
   for (const b of bounds) {
     expect(b.top).toBeGreaterThanOrEqual(0);
@@ -54,6 +57,13 @@ for (const size of [
       await page.evaluate(() => document.fonts.ready);
       await fits(page);
       if (path === "/games") {
+        const last = page.locator(".home-game-card").last();
+        await last.scrollIntoViewIfNeeded();
+        await expect(last).toBeInViewport();
+        const card = (await last.boundingBox())!;
+        expect(card.y + card.height).toBeLessThanOrEqual(
+          (await page.locator(".home-bottom-nav").boundingBox())!.y,
+        );
         const art = await page.locator(".home-banner").evaluate((e) => {
           const r = e.getBoundingClientRect();
           return {

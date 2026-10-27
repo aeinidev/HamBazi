@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "nodeVersion": "24.20.0",
+  "nodeVersion": "24.22.1",
   "corepackVersion": "0.35.0",
   "dockerVersion": "29.8.1",
   "telegramSdk": {

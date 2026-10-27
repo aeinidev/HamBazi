@@ -116,7 +116,7 @@ describe("local administrative authentication", () => {
         commandId: randomUUID(),
         password,
         currentPin: ownerPin,
-        newPassword: "SyntheticForbiddenReplacement456",
+        newPassword: randomUUID(),
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });

@@ -15,10 +15,10 @@ and BuildKit 0.33.0 on Linux amd64. Build inputs and output are locked in
 ```sh
 pnpm install --frozen-lockfile
 node infra/scripts/build-local-postgres.mjs
-docker pull redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+docker pull redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403
 ```
 
-The builder downloads only the two exact pinned Alpine APKs over verified HTTPS,
+The builder downloads only the four exact pinned Alpine APKs over verified HTTPS,
 checks hashes/size, and installs them with signature verification inside the
 network-disabled build. For separately provisioned verified archives, set
 `HAMBAZI_POSTGRES_HELPER_ARCHIVE` and `HAMBAZI_POSTGRES_HTTP2_ARCHIVE` to their
@@ -26,6 +26,14 @@ private absolute paths; the same hashes remain mandatory. It never prints build
 diagnostics, modifies `.env`, starts a service, pushes an image or silently accepts
 a different digest. A failed integrity/build gate must be investigated; do not
 retag a different result to bypass it. Do not pull the local PostgreSQL alias.
+
+The 2026-10-27 [ADR-089](../adr/089-admin-phase-two-image-security-refresh.md)
+refresh preserves PostgreSQL 18.6 and Redis 8.10.2. The updated base fixes musl;
+the PostgreSQL derivative retains su-exec/nghttp2 and adds signed Brotli 1.2.1-r0
+and libcurl 8.23.0-r0. The locked builder writes APK inputs with mode 0600;
+ad-hoc builds with different COPY permissions have different layer identities
+and must not be substituted. Independent builds with the same reviewed inputs
+reproduced the locked manifest digest.
 
 Direct Node HTTPS fetching timed out in the reviewed environment. Both
 pre-provisioned archive mode and `node --use-env-proxy infra/scripts/build-local-postgres.mjs` using the environment's approved HTTPS
@@ -81,7 +89,7 @@ logical backup/restore; it does not download/install host PostgreSQL.
 
 The transfer script generates its own synthetic credentials and disposable
 source/target services. It runs existing migrations and 17 foundation cases on
-the exact legacy 18.6 Debian image, transfers the populated 29-table schema to
+the exact legacy 18.6 Debian image, transfers the populated current schema to
 the selected image, checks logical equality/Unicode/JSONB/role guards and restart,
 and destroys only its own containers, networks, volumes and private archives.
 No existing service, environment, volume or external database target is accepted.

@@ -13,12 +13,16 @@ import {
 import { APP_GUARD } from "@nestjs/core";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
+import { adminExecuteSchema } from "@hambazi/validation";
+import { adminRoleTemplates } from "../application/management.js";
+import type { AdminManagement } from "../application/management.js";
 import type { AdminService } from "../application/service.js";
 import { AdminFault } from "../application/ports.js";
 import {
   adminAccess,
   adminCapabilities,
   adminGameScope,
+  adminReadScope,
   type AdminCapability,
   type AdminPrincipal,
 } from "../domain/access.js";
@@ -29,7 +33,7 @@ export const adminPendingCookie = "__Host-hambazi-admin-pending";
 const policyKey = "hambazi:admin:route-policy";
 type RoutePolicy = "LOGIN" | "PENDING" | "SESSION" | AdminCapability;
 const policy = (value: RoutePolicy) => SetMetadata(policyKey, value);
-function cookie(request: FastifyRequest, name: string) {
+export function adminRequestCookie(request: FastifyRequest, name: string) {
   const raw = request.headers.cookie;
   if (!raw || raw.length > 8192) return undefined;
   const matches = raw
@@ -38,6 +42,7 @@ function cookie(request: FastifyRequest, name: string) {
     .filter((v) => v.startsWith(name + "="));
   return matches.length === 1 ? matches[0]!.slice(name.length + 1) : undefined;
 }
+const cookie = adminRequestCookie;
 const querySchema = z.strictObject({
   cursor: z.string().max(128).optional(),
   limit: z
@@ -52,6 +57,7 @@ export interface AdminReadPort {
     kind: "users" | "games" | "rooms" | "matches",
     query: { cursor?: string; id?: string; limit: number },
     games: readonly string[] | null,
+    excluded?: readonly string[],
   ): Promise<unknown>;
   overview(principal: AdminPrincipal): Promise<unknown>;
   audit(): Promise<unknown>;
@@ -63,7 +69,12 @@ export function createAdminHttpModule(deps: {
   reads: AdminReadPort;
   cookieSeconds: number;
   pendingSeconds: number;
+  management?: AdminManagement | undefined;
 }) {
+  function management() {
+    if (!deps.management) throw new AdminFault("ADMIN_UNAVAILABLE");
+    return deps.management;
+  }
   const authenticatedRequests = new WeakMap<
     FastifyRequest,
     ReturnType<AdminService["authenticate"]>
@@ -111,6 +122,72 @@ export function createAdminHttpModule(deps: {
   }
   @Controller("v1/admin")
   class AdminController {
+    @policy("SESSION")
+    @Get("management/meta")
+    metadata() {
+      return {
+        schemaVersion: 1,
+        permissions: adminCapabilities,
+        templates: adminRoleTemplates,
+        enabled: !!deps.management,
+      };
+    }
+    @policy("admins.view")
+    @Get("admins")
+    directory(@Req() request: FastifyRequest) {
+      const p = z.strictObject({ cursor: z.uuid().optional() }).parse(request.query);
+      return management().directory(cookie(request, adminCookie), p.cursor);
+    }
+    @policy("admins.view")
+    @Get("admins/:id/activity")
+    activity(@Req() request: FastifyRequest, @Param("id") id: string) {
+      return management().activity(cookie(request, adminCookie), id);
+    }
+    @policy("admins.view")
+    @Get("admins/:id/sessions")
+    sessions(@Req() request: FastifyRequest, @Param("id") id: string) {
+      return management().sessions(cookie(request, adminCookie), id);
+    }
+    @policy("SESSION")
+    @Get("operations")
+    operations(@Req() request: FastifyRequest) {
+      return management().list(cookie(request, adminCookie));
+    }
+    @policy("SESSION")
+    @Get("operations/:id")
+    operation(@Req() request: FastifyRequest, @Param("id") id: string) {
+      return management().status(cookie(request, adminCookie), id);
+    }
+    @policy("SESSION")
+    @Post("operations")
+    requestOperation(@Req() request: FastifyRequest) {
+      return management().request(cookie(request, adminCookie), request.body);
+    }
+    @policy("SESSION")
+    @Post("operations/:id/approve")
+    async approveOperation(
+      @Req() request: FastifyRequest,
+      @Param("id") id: string,
+      @Res() reply: FastifyReply,
+    ) {
+      const result = await management().approve(cookie(request, adminCookie), id, request.body);
+      setCookie(reply, adminCookie, result.token, deps.cookieSeconds);
+      return reply.send({ schemaVersion: 1, next: result.next, csrfToken: result.csrfToken });
+    }
+    @policy("SESSION")
+    @Post("operations/:id/renew")
+    renewOperation(@Req() request: FastifyRequest, @Param("id") id: string) {
+      const p = adminExecuteSchema.parse(request.body);
+      if (p.commandId !== id) throw new AdminFault("INVALID_INPUT");
+      return management().renew(cookie(request, adminCookie), id);
+    }
+    @policy("SESSION")
+    @Post("operations/:id/execute")
+    executeOperation(@Req() request: FastifyRequest, @Param("id") id: string) {
+      const p = adminExecuteSchema.parse(request.body);
+      if (p.commandId !== id) throw new AdminFault("INVALID_INPUT");
+      return management().execute(cookie(request, adminCookie), id);
+    }
     @policy("LOGIN")
     @Post("auth/login")
     async login(@Req() request: FastifyRequest, @Res() reply: FastifyReply) {
@@ -214,7 +291,7 @@ export function createAdminHttpModule(deps: {
       if (p.cursor !== undefined)
         (kind === "games" ? z.string().regex(/^[a-z][a-z0-9-]{0,63}$/) : z.uuid()).parse(p.cursor);
       const a = await authenticated(request, `${kind}.view`);
-      const games = adminGameScope(a.principal, `${kind}.view`);
+      const { games, excluded } = adminReadScope(a.principal, `${kind}.view`);
       if (games?.length === 0 || (kind === "users" && games !== null))
         throw new AdminFault("FORBIDDEN");
       return deps.reads.page(
@@ -225,6 +302,7 @@ export function createAdminHttpModule(deps: {
           limit: id === undefined ? (p.limit ?? 25) : 1,
         },
         games,
+        excluded,
       );
     }
     @policy("users.view")

@@ -29,10 +29,12 @@ try {
   for (const [name, artifact, override, label] of [
     ["su-exec.apk", lock.helper, process.env.HAMBAZI_POSTGRES_HELPER_ARCHIVE, "helper"],
     ["nghttp2-libs.apk", lock.http2, process.env.HAMBAZI_POSTGRES_HTTP2_ARCHIVE, "http2"],
+    ["brotli-libs.apk", lock.brotli, undefined, "brotli"],
+    ["libcurl.apk", lock.curl, undefined, "libcurl"],
   ]) {
     stage = label + "-integrity";
     if (
-      !/^https:\/\/dl-cdn\.alpinelinux\.org\/alpine\/v3\.24\/main\/x86_64\/(su-exec|nghttp2-libs)-[\w.-]+\.apk$/.test(
+      !/^https:\/\/dl-cdn\.alpinelinux\.org\/alpine\/v3\.24\/main\/x86_64\/(su-exec|nghttp2-libs|brotli-libs|libcurl)-[\w.-]+\.apk$/.test(
         artifact.archiveUrl,
       )
     )

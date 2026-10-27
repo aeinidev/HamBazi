@@ -11,12 +11,16 @@ const ownership = {
     "adminAuthReceipt",
     "adminGrant",
     "adminAuditEvent",
+    "adminRole",
+    "adminOperatorRole",
+    "adminOperation",
   ],
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow", "botSupportSubmission"],
-  users: ["user", "userSettings", "profileMutationReceipt"],
-  games: ["game"],
-  rooms: ["room", "roomMember", "roomCommandReceipt"],
+  users: ["user", "userSettings", "profileMutationReceipt", "userAdminEffect"],
+  games: ["game", "gameAdminEffect"],
+  rooms: ["room", "roomMember", "roomCommandReceipt", "roomAdminEffect"],
   matches: [
+    "matchAdminEffect",
     "matchAdmission",
     "matchReservation",
     "match",
@@ -50,7 +54,7 @@ type MatchPresenceRow = Pick<
   "id" | "status" | "stateVersion" | "lastEventSeq" | "reconnectPolicyJsonb" | "startedAt"
 >;
 const matchIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
+export type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   ? Omit<OwnedClient<O>, "outboxEvent"> & {
       outboxEvent: Pick<Prisma.TransactionClient["outboxEvent"], "create">;
     }
@@ -62,6 +66,9 @@ type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
         lockMatch(id: string): Promise<void>;
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
       }
+    : object) &
+  (O extends "users" | "games" | "rooms" | "matches"
+    ? { lockAdminEffect(id: string): Promise<void> }
     : object) &
   (O extends "admin" ? { lockAdminRealm(realmId: string): Promise<void> } : object) &
   (O extends "rooms" ? { lockRooms(): Promise<void> } : object) &
@@ -160,6 +167,16 @@ function scope<O extends DatabaseOwner>(
           : client[key],
       ]),
     ),
+    ...(["users", "games", "rooms", "matches"].includes(owner)
+      ? {
+          async lockAdminEffect(id: string): Promise<void> {
+            if (!inTransaction || !matchIdPattern.test(id))
+              throw new DatabaseError("DATABASE_LOCK_INVALID");
+            const lane = `admin-effect:${owner}:${id}`;
+            await client.$queryRaw`SELECT 1 AS locked FROM (SELECT pg_advisory_xact_lock(182085, hashtext(${lane}))) AS guard`;
+          },
+        }
+      : {}),
     ...(owner === "admin"
       ? {
           async lockAdminRealm(realmId: string): Promise<void> {

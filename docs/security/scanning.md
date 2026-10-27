@@ -1,5 +1,7 @@
 # Security scanning
 
+> 2026-10-27 security refresh: the old local PostgreSQL/Redis pins were blocked. The reviewed replacements under [ADR-089](../adr/089-admin-phase-two-image-security-refresh.md) now pass with zero findings at every severity; see [fresh Phase 2 scan evidence](admin-phase2-release-scans.json). Application/Admin artifact qualification is recorded separately in the release-readiness report. These are local results, not an observation or change of Staging. Scanner policy and security deadlines remain unchanged.
+
 [ADR-034](../adr/034-security-scan-boundaries.md) defines scope and failure policy.
 `infra/security/policy.json` records reviewed tool versions, official archive
 URLs/SHA-256 and extracted Linux x64 binary SHA-256. Provision the two executables
@@ -31,11 +33,19 @@ Secrets cover all reachable local Git refs (`--all`) and the current tracked plu
 non-ignored untracked candidate files, including new files before a commit.
 Shallow history or candidate symlinks fail. Deleted tracked files are absent from
 the candidate but remain covered by history. No blanket test/docs exceptions,
-inline allows or `.gitleaksignore` fingerprints apply. The sole exact normative
-prose exception is documented and tested; every actual finding blocks. Raw match
+inline allows or `.gitleaksignore` fingerprints apply. The existing exact normative-prose allowance and individually approved contextual
+findings under ADR-068/088 are documented and tested; every other finding blocks. Raw match
 content, author metadata, paths, fingerprints and error diagnostics are never
 printed. Reports exist only in a private task-owned temporary directory and are
 removed on success or failure; cleanup failure blocks too.
+
+The owner's separate [ADR-088](../adr/088-admin-exact-secret-false-positives.md)
+approval adds exactly three contextual Admin false positives, recorded in
+`infra/security/gitleaks-admin-phase2-exceptions.json`. Detectors still report
+them; classification requires the reviewed path/rule/commit/coordinates,
+redacted match, complete source hash and line hash, plus the parsed JSON ancestry
+and real public Git object for provenance. The two historical test literals do
+not qualify in the current tree. Any drift or other credential remains blocking.
 
 Build the locked local PostgreSQL derivative and pre-pull the exact Redis
 reference through [the image setup runbook](local-image-transition.md), without

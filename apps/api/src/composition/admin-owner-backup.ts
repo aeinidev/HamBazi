@@ -6,11 +6,14 @@ const magic = Buffer.from("HBADMIN1");
 const maxBytes = 64 * 1024 * 1024;
 const capsule = z.strictObject({
   schemaVersion: z.literal(1),
-  scope: z.literal("staging-admin-six-tables"),
+  scope: z.enum(["staging-admin-six-tables", "staging-admin-nine-tables"]),
   realm: z.literal("staging"),
   createdAtUTC: z.iso.datetime(),
   sourceRevision: z.string().regex(/^[0-9a-f]{64}$/),
-  schemaTag: z.literal("admin-local-identity+password-rotation-v1"),
+  schemaTag: z.enum([
+    "admin-local-identity+password-rotation-v1",
+    "admin-local-identity+access-management-v2",
+  ]),
   runtimeEnvironment: z.string().max(65536),
   operatorEnvironment: z.string().max(65536),
   checkpoint: ownerStateSchema.nullable(),
@@ -79,4 +82,7 @@ export const ownerDumpArguments = [
   "--table=public.admin_auth_receipts",
   "--table=public.admin_grants",
   "--table=public.admin_audit_events",
+  "--table=public.admin_roles",
+  "--table=public.admin_operator_roles",
+  "--table=public.admin_operations",
 ];

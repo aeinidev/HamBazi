@@ -18,3 +18,4 @@ export {
 } from "./telegram-room-invite.js";
 export type { RoomLaunchTarget } from "./telegram-room-invite.js";
 export { createMatchSequence } from "./match-sequence.js";
+export type { AdminEffectCommand } from "./admin-effect.js";

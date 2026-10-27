@@ -1,7 +1,12 @@
 /* Native desktop clients retain their normal window. Wide browser windows use
    the same portrait content width; fixed controls keep the viewport as owner. */
 @media (min-width: 700px) and (min-height: 480px) and (hover: hover) and (pointer: fine) {
-  html:not([data-telegram-mobile="true"]) {
+  html:not([data-telegram-mobile="true"]):has(
+      .midnight-shell,
+      .kh-app,
+      .telegram-welcome,
+      .hambazi-loading
+    ) {
     background: #020716;
   }
   html:not([data-telegram-mobile="true"]) #root {

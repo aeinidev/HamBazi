@@ -22,4 +22,7 @@ GRANT SELECT (id, game_id, status, state_version, started_at, engine_version, st
 GRANT SELECT (match_id, connection_status) ON match_players TO hambazi_admin_reader;
 GRANT SELECT (id, type) ON game_events TO hambazi_admin_reader;
 GRANT SELECT (id, status, created_at) ON outbox_events TO hambazi_admin_reader;
+GRANT SELECT ON admin_roles, admin_operator_roles TO hambazi_admin_runtime;
+GRANT SELECT (profile_version) ON users TO hambazi_admin_reader;
+GRANT SELECT (admin_version, admin_availability) ON games TO hambazi_admin_reader;
 COMMIT;

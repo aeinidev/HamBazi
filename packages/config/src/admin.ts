@@ -37,6 +37,8 @@ const schema = z.object({
     .pipe(z.array(z.string().refine(privateIp)).min(1).max(16)),
   ADMIN_DATABASE_URL: z.string().url(),
   ADMIN_READ_DATABASE_URL: z.string().url(),
+  ADMIN_MUTATIONS_ENABLED: z.enum(["true", "false"]).default("false"),
+  ADMIN_OPERATIONS_DATABASE_URL: z.string().url().optional(),
   ADMIN_DB_POOL_MAX: integer(1, 10),
   ADMIN_SESSION_SECONDS: integer(60, 28800),
   ADMIN_IDLE_SECONDS: integer(30, 3600),
@@ -61,6 +63,18 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
   const p = schema.safeParse(environment);
   if (!p.success) throw new Error("ADMIN_CONFIGURATION_INVALID");
   const v = p.data;
+  if ((v.ADMIN_MUTATIONS_ENABLED === "true") !== (v.ADMIN_OPERATIONS_DATABASE_URL !== undefined))
+    throw new Error("ADMIN_CONFIGURATION_INVALID");
+  if (v.ADMIN_OPERATIONS_DATABASE_URL) {
+    const operations = new URL(v.ADMIN_OPERATIONS_DATABASE_URL),
+      primary = new URL(v.ADMIN_DATABASE_URL);
+    if (
+      operations.username !== "hambazi_admin_operations" ||
+      operations.host !== primary.host ||
+      operations.pathname !== primary.pathname
+    )
+      throw new Error("ADMIN_CONFIGURATION_INVALID");
+  }
   const proxyPeers = v.ADMIN_PROXY_PEERS?.split(",") ?? [];
   if (
     (v.ADMIN_INGRESS_MODE === "public-proxy" && proxyPeers.length === 0) ||
@@ -79,7 +93,11 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
     v.ADMIN_IDLE_SECONDS > v.ADMIN_SESSION_SECONDS
   )
     throw new Error("ADMIN_CONFIGURATION_INVALID");
-  for (const url of [v.ADMIN_DATABASE_URL, v.ADMIN_READ_DATABASE_URL]) {
+  for (const url of [
+    v.ADMIN_DATABASE_URL,
+    v.ADMIN_READ_DATABASE_URL,
+    ...(v.ADMIN_OPERATIONS_DATABASE_URL ? [v.ADMIN_OPERATIONS_DATABASE_URL] : []),
+  ]) {
     const u = new URL(url);
     if (
       !["postgres:", "postgresql:"].includes(u.protocol) ||
@@ -108,6 +126,9 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
     privatePeers: v.ADMIN_PRIVATE_PEERS,
     databaseUrl: new SecretValue(v.ADMIN_DATABASE_URL),
     readDatabaseUrl: new SecretValue(v.ADMIN_READ_DATABASE_URL),
+    operationsDatabaseUrl: v.ADMIN_OPERATIONS_DATABASE_URL
+      ? new SecretValue(v.ADMIN_OPERATIONS_DATABASE_URL)
+      : undefined,
     poolMax: v.ADMIN_DB_POOL_MAX,
     sessionSeconds: v.ADMIN_SESSION_SECONDS,
     idleSeconds: v.ADMIN_IDLE_SECONDS,

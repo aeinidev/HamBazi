@@ -3,6 +3,7 @@ import { z } from "zod";
 /** Eligibility only; no Prisma record/profile is shared with Auth. */
 export interface UserIdentity {
   readonly userId: string;
+  readonly authVersion?: number;
   readonly registrationCompleted?: boolean;
 }
 export interface UserIdentityPort {
@@ -13,18 +14,27 @@ export interface UserIdentityPort {
 export interface IdentityRepository {
   findByTelegramId(
     id: bigint,
-  ): Promise<{ userId: string; status: string; registrationCompleted?: boolean } | undefined>;
+  ): Promise<
+    | { userId: string; status: string; authVersion?: number; registrationCompleted?: boolean }
+    | undefined
+  >;
   findById(
     id: string,
-  ): Promise<{ userId: string; status: string; registrationCompleted?: boolean } | undefined>;
+  ): Promise<
+    | { userId: string; status: string; authVersion?: number; registrationCompleted?: boolean }
+    | undefined
+  >;
 }
 export function identityService(repository: IdentityRepository): UserIdentityPort {
   function eligible(
-    row: { userId: string; status: string; registrationCompleted?: boolean } | undefined,
+    row:
+      | { userId: string; status: string; authVersion?: number; registrationCompleted?: boolean }
+      | undefined,
   ): UserIdentity | undefined {
     return row?.status === "ACTIVE"
       ? Object.freeze({
           userId: row.userId,
+          ...(row.authVersion === undefined ? {} : { authVersion: row.authVersion }),
           registrationCompleted: row.registrationCompleted === true,
         })
       : undefined;

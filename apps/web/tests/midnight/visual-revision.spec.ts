@@ -50,9 +50,11 @@ for (const size of [
     await page.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all(
-        [...document.querySelectorAll<HTMLImageElement>(".home-screen img")].map((img) =>
-          img.decode(),
-        ),
+        [...document.querySelectorAll<HTMLImageElement>(".home-screen img")].map((img) => {
+          // WebKit defers lazy offscreen images, including their decode promise.
+          img.loading = "eager";
+          return img.decode();
+        }),
       );
     });
     const layout = await page.evaluate(() => {

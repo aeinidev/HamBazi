@@ -2,10 +2,16 @@ import "reflect-metadata";
 import { Catch, HttpException, type ArgumentsHost, type ExceptionFilter } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
 import { isIP } from "node:net";
-import { AdminFault, createAdminHttpModule } from "../admin/index.js";
+import {
+  AdminFault,
+  createAdminHttpModule,
+  adminCookie,
+  adminRequestCookie,
+  type AdminService,
+} from "../admin/index.js";
 
 const body = (code: string) => ({
   ok: false,
@@ -18,7 +24,8 @@ const body = (code: string) => ({
 });
 @Catch()
 class AdminExceptionFilter implements ExceptionFilter {
-  catch(error: unknown, host: ArgumentsHost) {
+  constructor(private readonly service: AdminService) {}
+  async catch(error: unknown, host: ArgumentsHost) {
     const code =
       error instanceof AdminFault
         ? error.code
@@ -41,6 +48,14 @@ class AdminExceptionFilter implements ExceptionFilter {
                 : code === "ADMIN_CONFLICT"
                   ? 409
                   : 503;
+    if (code === "FORBIDDEN") {
+      const request = host.switchToHttp().getRequest<FastifyRequest>();
+      try {
+        await this.service.noteDenied(adminRequestCookie(request, adminCookie));
+      } catch {
+        /* Denial still has no effect when Audit or identity is unavailable. */
+      }
+    }
     host.switchToHttp().getResponse<FastifyReply>().code(status).send(body(code));
   }
 }
@@ -137,7 +152,7 @@ export async function createAdminHttpApplication(
     }
     if (
       request.raw.url?.includes("?") &&
-      !/^\/v1\/admin\/(users|games|rooms|matches)\?/.test(request.raw.url)
+      !/^\/v1\/admin\/(users|games|rooms|matches|admins)\?/.test(request.raw.url)
     )
       return reply.code(400).send(body("INVALID_INPUT"));
   });
@@ -149,7 +164,7 @@ export async function createAdminHttpApplication(
     adapter,
     { logger: false, abortOnError: false },
   );
-  app.useGlobalFilters(new AdminExceptionFilter());
+  app.useGlobalFilters(new AdminExceptionFilter(deps.service));
   await app.init();
   return app;
 }

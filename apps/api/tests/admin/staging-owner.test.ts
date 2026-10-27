@@ -324,7 +324,7 @@ describe("encrypted Staging owner backup", () => {
     expect(first.equals(second)).toBe(false);
     expect(first.includes(Buffer.from("SYNTHETIC_PEPPER"))).toBe(false);
     expect(openOwnerBackup(first, passphrase)).toEqual(value);
-    expect(ownerDumpArguments.filter((a) => a.startsWith("--table="))).toHaveLength(6);
+    expect(ownerDumpArguments.filter((a) => a.startsWith("--table="))).toHaveLength(9);
   });
   it("rejects wrong keys, corruption, truncation and wrong realm before restoration", () => {
     const encrypted = sealOwnerBackup(value, passphrase);

@@ -205,8 +205,9 @@ it("cancellation before creation wins and releases the unaffected group member",
   });
   expect(await f.first.reserve(claim)).toMatchObject({ error: { code: "MATCHMAKING_CONFLICT" } });
 });
-it("repeated two-client cancel-versus-commit races have exactly one durable winner", async () => {
-  for (let i = 0; i < 20; i++) {
+it.each(Array.from({ length: 20 }, (_, index) => index + 1))(
+  "two-client cancel-versus-commit race %i has exactly one durable winner",
+  async () => {
     const f = await fixture();
     const claim = f.reserve();
     value(await f.first.reserve(claim));
@@ -221,8 +222,8 @@ it("repeated two-client cancel-versus-commit races have exactly one durable winn
     const group = value(await f.second.inspect(f.group(claim.reservationId)));
     expect(Boolean(group.matchId)).toBe(final.status === "MATCHED");
     if (commit.ok) expect(commit.value.matchId).toBe(final.matchId);
-  }
-});
+  },
+);
 it("release versus commit cannot return an aborted reservation that later commits", async () => {
   const f = await fixture();
   const claim = f.reserve();

@@ -12,6 +12,11 @@ test.beforeAll(async () => {
   sdk = await readTelegramSdk();
 });
 test.beforeEach(async ({ page }) => {
+  await page.route("**/*", (route) =>
+    new URL(route.request().url()).origin === process.env.TEST_WEB_IMAGE_ORIGIN
+      ? route.continue()
+      : route.abort(),
+  );
   await page.route(telegramSdkUrl, (route) =>
     route.fulfill({
       body: sdk,

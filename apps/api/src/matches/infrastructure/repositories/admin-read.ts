@@ -4,6 +4,7 @@ export function createMatchesAdminReadRepository(database: ReturnType<typeof cre
   return async (
     query: { cursor?: string; limit: number; id?: string },
     games: readonly string[] | null,
+    excluded: readonly string[] = [],
   ) => {
     if (!Number.isInteger(query.limit) || query.limit < 1 || query.limit > 50)
       throw new Error("ADMIN_READ_INVALID");
@@ -13,6 +14,7 @@ export function createMatchesAdminReadRepository(database: ReturnType<typeof cre
             db.match.findMany({
               where: {
                 id: query.id ?? { gt: query.cursor ?? "00000000-0000-0000-0000-000000000000" },
+                gameId: { notIn: [...excluded] },
               },
               orderBy: { id: "asc" },
               take: query.limit + 1,
@@ -31,7 +33,7 @@ export function createMatchesAdminReadRepository(database: ReturnType<typeof cre
             db.match.findMany({
               where: {
                 id: query.id ?? { gt: query.cursor ?? "00000000-0000-0000-0000-000000000000" },
-                gameId: { in: [...games] },
+                gameId: { in: [...games], notIn: [...excluded] },
               },
               orderBy: { id: "asc" },
               take: query.limit + 1,

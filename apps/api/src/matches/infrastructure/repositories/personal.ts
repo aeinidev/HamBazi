@@ -21,6 +21,7 @@ export function createPersonalMatchRepository(
   options: {
     game: MatchGame & MatchViewGame;
     newMatchesAllowed?: boolean;
+    admissionAllowed?: () => Promise<boolean>;
     retainedGames?: readonly (MatchGame & MatchViewGame)[];
     clock: { nowMs(): number };
     owner: { allowsUserId(id: string): Promise<boolean> };
@@ -79,6 +80,7 @@ export function createPersonalMatchRepository(
         const p = startSchema.safeParse(input);
         if (!p.success) throw new MatchFault("INVALID_INPUT");
         const matchId = identity(actor, p.data.commandId);
+        const admitted = options.admissionAllowed ? await options.admissionAllowed() : true;
         let fault: MatchFault | undefined;
         try {
           await scope.transaction(async (db) => {
@@ -96,7 +98,8 @@ export function createPersonalMatchRepository(
                 return;
               }
               // Checked after idempotent recovery, inside the serialized admission transaction.
-              if (options.newMatchesAllowed !== true) throw new MatchFault("GAME_UNAVAILABLE");
+              if (options.newMatchesAllowed !== true || !admitted)
+                throw new MatchFault("GAME_UNAVAILABLE");
               const active = await db.match.findFirst({
                 where: {
                   matchType: personalMatchType,

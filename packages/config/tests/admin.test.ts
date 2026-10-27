@@ -29,6 +29,32 @@ const fixture = () => ({
   ADMIN_REDIS_URL: "redis://:synthetic@127.0.0.1:6379/0",
 });
 describe("explicit local Admin configuration", () => {
+  it("keeps mutations disabled and requires the distinct operations role on the same primary database", () => {
+    expect(parseAdminConfig(fixture())!.operationsDatabaseUrl).toBeUndefined();
+    const url = "postgresql://hambazi_admin_operations:synthetic@127.0.0.1/test";
+    for (const patch of [
+      { ADMIN_MUTATIONS_ENABLED: "true" },
+      { ADMIN_OPERATIONS_DATABASE_URL: url },
+      {
+        ADMIN_MUTATIONS_ENABLED: "true",
+        ADMIN_OPERATIONS_DATABASE_URL: url.replace("hambazi_admin_operations", "hambazi_api"),
+      },
+      {
+        ADMIN_MUTATIONS_ENABLED: "true",
+        ADMIN_OPERATIONS_DATABASE_URL: url.replace("/test", "/another_environment"),
+      },
+    ])
+      expect(() => parseAdminConfig({ ...fixture(), ...patch })).toThrow(
+        "ADMIN_CONFIGURATION_INVALID",
+      );
+    const config = parseAdminConfig({
+      ...fixture(),
+      ADMIN_MUTATIONS_ENABLED: "true",
+      ADMIN_OPERATIONS_DATABASE_URL: url,
+    })!;
+    expect(config.operationsDatabaseUrl!.reveal()).toBe(url);
+    expect(JSON.stringify(config)).not.toContain("synthetic@127");
+  });
   it("requires an explicit, private, distinct trusted reverse proxy for public ingress", () => {
     const base = {
       ...fixture(),

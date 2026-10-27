@@ -1,5 +1,9 @@
 # معماری مالک، مدیریت مدیران و کنترل دسترسی HamBazi
 
+> مرز انتشار 2026-10-27: طبق [ADR-087](../adr/087-admin-phase-two-release-boundary.md)، محروم‌سازی/رفع محرومیت فعلاً برای همه، حتی OWNER، غیرفعال است؛ scope اولیهٔ فاز سوم پابرجاست.
+
+> بازنگری اجرای فاز دوم (2026-10-27): [ADR-085](../adr/085-admin-phase-two-operations.md) و [ADR-086](../adr/086-admin-user-ban-and-session-generation.md) قرارداد عملیات/نقش‌ها و استثنای مصوب محروم‌سازی را تکمیل می‌کنند. توسعه فقط محلی مجاز است؛ این بازنگری مجوز استقرار یا تغییر OWNER نیست.
+
 > **تصمیم جدید مراسم Staging — [ADR-084](../adr/084-staging-owner-private-ssh-ceremony.md):** دو امضای Ed25519 و فایل credential خام برای Staging با پروفایل صریح SSH/root/TTY، تأیید عمل، checkpoint و Audit خصوصی جایگزین می‌شوند؛ Recovery به Password فعلی همان OWNER نیاز دارد. backup رمزگذاری‌شده و تمرین restore خارج سرور پیش‌نیازند. این تغییر محلی است؛ نصب، حساب واقعی، public ingress و فاز دو مجاز نشده‌اند. مطالب قبلیِ دو proof در این محدوده تاریخی‌اند؛ برای محیط‌های دیگر پابرجا هستند.
 
 > **تصمیم جدید ۲۰۲۶-۱۰-۲۶ — [ADR-083](../adr/083-admin-public-https-and-self-credential-rotation.md):** مسیر استفادهٔ عادی، Public HTTPS با احراز هویت و Reverse Proxy محدود است؛ الزام SSH-only برای مرورگر منسوخ می‌شود. Backend/DB/Redis و Bootstrap/Recovery خصوصی می‌مانند. تغییر Password و PIN خود OWNER و ابطال نشست‌ها ادامهٔ محدود فاز یک‌اند. کد/تست محلی مجاز است؛ نصب سرور، Firewall، فعال‌سازی عمومی، حساب واقعی و فاز دو تأیید نشده‌اند. نصب فعلی سرور تا مجوز جدا همان SSH-only است. این یادداشت در موضوع ingress بر بندهای تاریخی پایین مقدم است.

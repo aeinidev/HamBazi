@@ -210,7 +210,13 @@ describe("database infrastructure boundary", () => {
   it("returns only owned top-level delegates, no raw SQL/client", async () => {
     const database = createDatabase(options);
     await database.forModule("users").execute(async (db) => {
-      expect(Object.keys(db).sort()).toEqual(["profileMutationReceipt", "user", "userSettings"]);
+      expect(Object.keys(db).sort()).toEqual([
+        "lockAdminEffect",
+        "profileMutationReceipt",
+        "user",
+        "userAdminEffect",
+        "userSettings",
+      ]);
       expect("match" in db).toBe(false);
       expect("$queryRaw" in db).toBe(false);
     });
@@ -324,7 +330,14 @@ describe("database infrastructure boundary", () => {
 it("exposes room receipts only to the Rooms owner and keeps the migration additive", async () => {
   const database = createDatabase(options);
   await database.forModule("rooms").execute(async (db) => {
-    expect(Object.keys(db)).toEqual(["room", "roomMember", "roomCommandReceipt", "lockRooms"]);
+    expect(Object.keys(db)).toEqual([
+      "room",
+      "roomMember",
+      "roomCommandReceipt",
+      "roomAdminEffect",
+      "lockAdminEffect",
+      "lockRooms",
+    ]);
     expect("user" in db).toBe(false);
     expect("match" in db).toBe(false);
   });
@@ -484,4 +497,40 @@ it("keeps results Matches-owned and generation aggregates Leaderboard-owned with
   expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|ALTER TABLE user_game_stats/);
   expect(sql).toContain("match_results_immutable");
   expect(sql).toContain("game_results_no_truncate");
+});
+
+it("keeps Admin effect receipts and fixed transaction locks exclusive to their data owners", async () => {
+  const database = createDatabase(options);
+  try {
+    const effects = {
+      users: "userAdminEffect",
+      games: "gameAdminEffect",
+      rooms: "roomAdminEffect",
+      matches: "matchAdminEffect",
+    };
+    for (const owner of [
+      "users",
+      "games",
+      "rooms",
+      "matches",
+      "auth",
+      "admin",
+      "chat",
+      "leaderboard",
+      "outbox",
+    ] as const) {
+      await database.forModule(owner).execute(async (db) => {
+        for (const [expectedOwner, effect] of Object.entries(effects))
+          expect(effect in db).toBe(owner === expectedOwner);
+        if ("lockAdminEffect" in db) {
+          await expect(
+            db.lockAdminEffect("11111111-1111-4111-8111-111111111111"),
+          ).rejects.toMatchObject({ code: "DATABASE_LOCK_INVALID" });
+        } else expect(["users", "games", "rooms", "matches"]).not.toContain(owner);
+        expect("$queryRaw" in db).toBe(false);
+      });
+    }
+  } finally {
+    await database.disconnect();
+  }
 });

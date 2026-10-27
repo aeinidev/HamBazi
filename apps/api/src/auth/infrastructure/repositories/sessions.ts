@@ -11,6 +11,7 @@ function map(row: StoredSession): SessionRecord {
   return Object.freeze({
     id: row.id,
     userId: row.userId,
+    authVersion: row.authVersion ?? 0,
     commandId: row.commandId,
     schemaVersion: row.schemaVersion,
     keyId: row.keyId,
@@ -36,6 +37,7 @@ export function createSessionRepository(
             {
               id: candidate.id,
               userId: candidate.userId,
+              authVersion: candidate.authVersion ?? 0,
               commandId: candidate.commandId,
               schemaVersion: candidate.schemaVersion,
               keyId: candidate.keyId,
@@ -50,7 +52,10 @@ export function createSessionRepository(
         });
         const row = await db.session.findUniqueOrThrow({
           where: {
-            userId_commandId: { userId: candidate.userId, commandId: candidate.commandId },
+            userId_commandId: {
+              userId: candidate.userId,
+              commandId: candidate.commandId,
+            },
           },
         });
         return map(row);

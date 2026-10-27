@@ -10,6 +10,11 @@ completes 17C for MVP with performance exceptions. The original context below is
 historical; production capacity/staging validation remains deferred and unproven.
 Packaging decisions, security requirements and staging deferral are unchanged.
 
+**Security pin update (2026-10-27):** [ADR-089](089-admin-phase-two-image-security-refresh.md)
+replaces the historical Node 24.20.0 pin below with the 24.22.1 security release
+and refreshes local infrastructure image pins. The historical version is not a
+permitted new build target; scanner policy and separate deployment approval remain.
+
 ## Context
 
 Architecture sections 19/24 require separate API/Socket, Bot, Worker and static

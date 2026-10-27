@@ -63,3 +63,11 @@ export function createRegistrationPort(
 }
 
 export { createUsersAdminReadRepository as createUsersAdminRead } from "./infrastructure/repositories/admin-read.js";
+
+import { createUsersAdminOperationsRepository } from "./infrastructure/repositories/admin-operations.js";
+export function createUsersAdminOperations(
+  database: Parameters<typeof createUsersAdminOperationsRepository>[0],
+  clock: { nowMs(): number },
+) {
+  return createUsersAdminOperationsRepository(database, clock);
+}

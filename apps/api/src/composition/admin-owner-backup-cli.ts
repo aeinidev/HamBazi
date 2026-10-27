@@ -50,6 +50,8 @@ try {
   const base = parsePrivateEnvironment(environment);
   const config = parseAdminConfig({
     ...base,
+    ADMIN_MUTATIONS_ENABLED: "false",
+    ADMIN_OPERATIONS_DATABASE_URL: undefined,
     ADMIN_DATABASE_URL: operatorDatabaseUrl(
       parsePrivateEnvironment(operatorEnvironment).ADMIN_RECOVERY_DATABASE_URL,
       policy,
@@ -134,11 +136,11 @@ try {
   const encrypted = sealOwnerBackup(
     {
       schemaVersion: 1,
-      scope: "staging-admin-six-tables",
+      scope: "staging-admin-nine-tables",
       realm: "staging",
       createdAtUTC: new Date().toISOString(),
       sourceRevision: policy.sourceRevision,
-      schemaTag: "admin-local-identity+password-rotation-v1",
+      schemaTag: "admin-local-identity+access-management-v2",
       runtimeEnvironment: environment,
       operatorEnvironment,
       checkpoint,

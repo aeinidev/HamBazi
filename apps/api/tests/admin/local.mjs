@@ -32,10 +32,19 @@ const require = createRequire(
 const { Client } = require("pg");
 const directory = await mkdtemp(join(tmpdir(), "hambazi-admin-disposable-"));
 const name = `hambazi-admin-test-${randomBytes(6).toString("hex")}`;
-// Existing local image, pinned digest. No target URL or running application DB is accepted.
-const image = "postgres@sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650";
-const redisImage =
-  "redis:8.10.2-alpine3.23@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0";
+// Exercise the qualified local pins, never a supplied target or running application DB.
+const image = JSON.parse(
+  await readFile(
+    new URL("../../../../infra/docker/postgres/image-lock.json", import.meta.url),
+    "utf8",
+  ),
+).image;
+const { parse } = createRequire(new URL("../../../../package.json", import.meta.url))("yaml");
+const compose = parse(
+  await readFile(new URL("../../../../infra/docker/compose.yaml", import.meta.url), "utf8"),
+);
+if (compose.services.postgres.image !== image) throw new Error("ADMIN_TEST_IMAGE_MISMATCH");
+const redisImage = compose.services.redis.image;
 const redisName = name + "-redis";
 const password = randomBytes(24).toString("hex");
 let started = false,
@@ -44,7 +53,11 @@ let volumeCreated = false;
 let redisStarted = false;
 try {
   const envFile = join(directory, "postgres.env");
-  await writeFile(envFile, `POSTGRES_PASSWORD=${password}\nPOSTGRES_DB=hambazi\n`, { mode: 0o600 });
+  await writeFile(
+    envFile,
+    `POSTGRES_PASSWORD=${password}\nPOSTGRES_DB=hambazi\nPOSTGRES_INITDB_ARGS=${compose.services.postgres.environment.POSTGRES_INITDB_ARGS}\n`,
+    { mode: 0o600 },
+  );
   await run("docker", [
     "volume",
     "create",
@@ -150,6 +163,7 @@ try {
       "hambazi_admin_bootstrap",
       "hambazi_admin_recovery",
       "hambazi_admin_reader",
+      "hambazi_admin_operations",
     ])
       await root.query(
         `CREATE ROLE ${role} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '${password}'`,
@@ -168,6 +182,7 @@ try {
     TEST_ADMIN_BOOTSTRAP_URL: url("hambazi_admin_bootstrap"),
     TEST_ADMIN_RECOVERY_URL: url("hambazi_admin_recovery"),
     TEST_ADMIN_READER_URL: url("hambazi_admin_reader"),
+    TEST_ADMIN_OPERATIONS_URL: url("hambazi_admin_operations"),
     TEST_ADMIN_CONFIRM: "owned-disposable-admin",
     TEST_ADMIN_CONTAINER: name,
     TEST_ADMIN_REDIS_URL: `redis://:${password}@127.0.0.1:${redisPort}/0`,
@@ -221,6 +236,46 @@ try {
   );
   const summary = tests.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [];
   for (const line of summary) process.stdout.write(line + "\n");
+  stage = "phase two administrative operations";
+  port = (
+    await run("docker", [
+      "inspect",
+      "--format",
+      '{{(index (index .NetworkSettings.Ports "5432/tcp") 0).HostPort}}',
+      name,
+    ])
+  ).stdout.trim();
+  for (const [key, role] of [
+    ["TEST_ADMIN_DATABASE_URL", "postgres"],
+    ["TEST_ADMIN_RUNTIME_URL", "hambazi_admin_runtime"],
+    ["TEST_ADMIN_BOOTSTRAP_URL", "hambazi_admin_bootstrap"],
+    ["TEST_ADMIN_READER_URL", "hambazi_admin_reader"],
+    ["TEST_ADMIN_OPERATIONS_URL", "hambazi_admin_operations"],
+  ])
+    env[key] = url(role);
+  const phaseTwoGrant = new Client({ connectionString: url("postgres") });
+  await phaseTwoGrant.connect();
+  try {
+    await phaseTwoGrant.query(
+      await readFile(
+        new URL(
+          "../../../../packages/database/prisma/admin-phase2-permissions.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+  } finally {
+    await phaseTwoGrant.end();
+  }
+  const phaseTwo = await run(
+    "pnpm",
+    ["--filter", "@hambazi/api", "exec", "vitest", "run", "tests/integration/admin-phase2.test.ts"],
+    { env, timeout: 150000, maxBuffer: 4 * 1024 * 1024 },
+  );
+  for (const line of phaseTwo.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
+    process.stdout.write(line + "\n");
+  process.stdout.write("ADMIN_PHASE_TWO_INTEGRATION_PASSED\n");
   stage = "owner backup restore rehearsal";
   // The restart persistence test may get a new randomly allocated host port.
   port = (
@@ -346,9 +401,11 @@ try {
     process.stderr.write(`ADMIN_TEST_ERROR_CODE:${error.code}\n`);
   // Source locations/test names only, not SQL, assertion data, credential files or commands.
   for (const line of stderr.split("\n")) {
-    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill)/.test(line))
+    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill|phase2)/.test(line))
       process.stderr.write(line + "\n");
-    const location = line.match(/tests\/integration\/admin-(local|owner-drill).test.ts:\d+:\d+/);
+    const location = line.match(
+      /tests\/integration\/admin-(local|owner-drill|phase2).test.ts:\d+:\d+/,
+    );
     if (location) process.stderr.write(location[0] + "\n");
     const fixed = line.match(/ADMIN_TEST_[A-Z_]+/);
     if (fixed) process.stderr.write(fixed[0] + "\n");

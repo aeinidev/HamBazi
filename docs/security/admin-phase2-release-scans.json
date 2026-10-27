@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-phase2-release-scans",
+  "checkedAt": "2026-10-27T13:46:49.444921+00:00",
+  "scope": "disposable-local-artifacts-only",
+  "stagingInspected": false,
+  "productionReleaseApproved": false,
+  "sourceCommit": "a24ce45335db039dc94c654dedd916470893fdac",
+  "sourceDirty": true,
+  "sourceSnapshotSha256": "c13068a3aba76565d1385491a2d1326f3dd8a253f00a87f8bb6bf3d32a7b9b32",
+  "buildInputSha256": "e21df33d353e0e1344dec7e5f9ecf5f924e9f531acaaaac6597e0ec4ad86b982",
+  "scans": [
+    {
+      "schemaVersion": 1,
+      "kind": "dependencies",
+      "status": "passed",
+      "ok": true,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "findings": []
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "secrets",
+      "status": "passed",
+      "tool": {
+        "name": "gitleaks",
+        "version": "8.30.1",
+        "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+      },
+      "history": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 4,
+        "reviewedFalsePositives": 4
+      },
+      "files": 1205,
+      "current": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 1,
+        "reviewedFalsePositives": 1
+      },
+      "ok": true
+    },
+    {
+      "schemaVersion": 1,
+      "kind": "images",
+      "status": "passed",
+      "tool": {
+        "name": "trivy",
+        "version": "0.74.0",
+        "sha256": "d89bcc6510a267f11b773398cbf1be5520ce39f9e8b6633178c4487f05b7d791"
+      },
+      "database": {
+        "updatedAt": "2026-10-27T07:13:33.504287223Z",
+        "downloadedAt": "2026-10-27T08:08:10.910225231Z"
+      },
+      "images": [
+        {
+          "ok": true,
+          "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "ok": true,
+          "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "api",
+          "ok": true,
+          "image": "hambazi-candidate/api:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "bot",
+          "ok": true,
+          "image": "hambazi-candidate/bot:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "worker",
+          "ok": true,
+          "image": "hambazi-candidate/worker:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "web",
+          "ok": true,
+          "image": "hambazi-candidate/web:a24ce45335db039dc94c654dedd916470893fdac-e21df33d353e0e13@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "admin",
+          "ok": true,
+          "image": "hambazi-candidate/admin:a24ce45335db039dc94c654dedd916470893fdac-76c186b2897cc68a@sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        }
+      ],
+      "ok": true
+    }
+  ],
+  "notes": [
+    "Every final runtime filesystem was scanned; no severity, freshness, detector or policy bypass.",
+    "The exact source snapshot predates only subsequent test-harness/documentation corrections; final runtime file identities are recorded in the qualification report.",
+    "Load/stress/capacity acceptance is explicitly deferred to the future server."
+  ],
+  "sourceScansCheckedAt": "2026-10-27T14:02:04.612575+00:00"
+}

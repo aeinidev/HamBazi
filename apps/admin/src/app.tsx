@@ -1,3 +1,4 @@
+import { ManagementPanel, ResourceActions } from "./features/management/index.js";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -6,12 +7,15 @@ import {
   adminLoginResultSchema,
   adminOverviewSchema,
   adminPageSchema,
+  adminManagementMetaSchema,
 } from "@hambazi/validation";
 import type { z } from "zod";
 import { AdminClientError, adminRequest } from "./platform/http.js";
 
 type Access = z.infer<typeof adminAccessSchema>;
 const sections = [
+  ["admins", "مدیران و نقش‌ها", "admins.view"],
+  ["operations", "درخواست‌ها و تأییدها", "SESSION"],
   ["overview", "نمای کلی", "overview.view"],
   ["users", "کاربران", "users.view"],
   ["games", "بازی‌ها", "games.view"],
@@ -60,6 +64,7 @@ const sourceTitles: Record<string, string> = {
 };
 const statusTitles: Record<string, string> = {
   ACTIVE: "فعال",
+  BANNED: "محروم",
   DISABLED: "غیرفعال",
   MAINTENANCE: "در دست نگه‌داری",
   WAITING: "منتظر",
@@ -89,12 +94,19 @@ export function AdminApp() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [security, setSecurity] = useState(false);
+  const [managementEnabled, setManagementEnabled] = useState(false);
   const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const generation = useRef(0);
+  const accessRevision = useRef("");
+  const accessRequest = useRef(0);
+  const verifiedAt = useRef(0);
+  const [resourceRevision, setResourceRevision] = useState(0);
   const retry = useRef<{ fingerprint: string; commandId: string } | null>(null);
   const reset = useCallback(() => {
     generation.current++;
+    accessRevision.current = "";
+    accessRequest.current++;
     setAccess(null);
     setData(null);
     setPassword("");
@@ -104,19 +116,39 @@ export function AdminApp() {
     cache.clear();
     retry.current = null;
     setSecurity(false);
+    setManagementEnabled(false);
     setDetail(null);
     setCursor(null);
   }, [cache]);
-  const inspect = useCallback(async (signal?: AbortSignal) => {
-    const epoch = generation.current;
-    const value = adminAccessSchema.parse(
-      await adminRequest("me/access", undefined, undefined, signal),
-    );
-    if (epoch !== generation.current) return;
-    setAccess(value);
-    setCsrf(value.csrfToken);
-    setMode("DASHBOARD");
-  }, []);
+  const inspect = useCallback(
+    async (signal?: AbortSignal) => {
+      const epoch = generation.current,
+        request = ++accessRequest.current;
+      let value: Access;
+      try {
+        value = adminAccessSchema.parse(
+          await adminRequest("me/access", undefined, undefined, signal),
+        );
+      } catch (error) {
+        if (epoch !== generation.current || request !== accessRequest.current || signal?.aborted)
+          return;
+        throw error;
+      }
+      if (epoch !== generation.current || request !== accessRequest.current) return;
+      verifiedAt.current = performance.now();
+      const revision = `${value.authorizationVersion}:${value.policyRevision}`;
+      if (accessRevision.current && revision !== accessRevision.current) {
+        generation.current++;
+        setData(null);
+        cache.clear();
+      }
+      accessRevision.current = revision;
+      setAccess(value);
+      setCsrf(value.csrfToken);
+      setMode("DASHBOARD");
+    },
+    [cache],
+  );
   useEffect(() => {
     const controller = new AbortController();
     void inspect(controller.signal).catch(() => {
@@ -126,10 +158,29 @@ export function AdminApp() {
   }, [inspect, reset]);
   useEffect(() => {
     if (mode !== "DASHBOARD") return;
+    const controller = new AbortController(),
+      epoch = generation.current;
+    void adminRequest("management/meta", undefined, undefined, controller.signal)
+      .then((raw) => {
+        if (!controller.signal.aborted && epoch === generation.current)
+          setManagementEnabled(adminManagementMetaSchema.parse(raw).enabled);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setManagementEnabled(false);
+      });
+    return () => controller.abort();
+  }, [mode]);
+  useEffect(() => {
+    if (mode !== "DASHBOARD") return;
     let outstanding = false;
     const controller = new AbortController();
     const check = async () => {
-      if (document.hidden || outstanding) return;
+      if (document.hidden) return;
+      if (performance.now() - verifiedAt.current >= 5000) {
+        reset();
+        return;
+      }
+      if (outstanding) return;
       outstanding = true;
       try {
         await inspect(controller.signal);
@@ -141,7 +192,7 @@ export function AdminApp() {
     };
     const timer = setInterval(() => {
       void check();
-    }, 5000);
+    }, 2500);
     document.addEventListener("visibilitychange", check);
     return () => {
       clearInterval(timer);
@@ -149,13 +200,34 @@ export function AdminApp() {
       document.removeEventListener("visibilitychange", check);
     };
   }, [mode, inspect, reset]);
-  const allowed = sections.filter((s) => access?.permissions.includes(s[2]));
+  useEffect(() => {
+    if (mode !== "DASHBOARD" || !access) return;
+    const timer = setTimeout(
+      () => {
+        if (!document.hidden) reset();
+      },
+      Math.max(0, 5000 - (performance.now() - verifiedAt.current)),
+    );
+    return () => clearTimeout(timer);
+  }, [access, mode, reset]);
+  const allowed = sections.filter((s) =>
+    (s[0] === "admins" || s[0] === "operations") && !managementEnabled
+      ? false
+      : s[2] === "SESSION"
+        ? access?.permissions.some((p) => /\.(create|edit|manage|approve)$/.test(p))
+        : access?.permissions.includes(s[2]),
+  );
   const permitted = allowed.some((s) => s[0] === section);
   useEffect(() => {
     if (mode !== "DASHBOARD" || !access) return;
     if (!permitted) {
       setData(null);
       setSection(allowed[0]?.[0] ?? "");
+      return;
+    }
+    if (section === "admins" || section === "operations") {
+      setData(null);
+      setLoading(false);
       return;
     }
     const epoch = generation.current,
@@ -198,7 +270,12 @@ export function AdminApp() {
     permitted,
     access?.authorizationVersion,
     access?.policyRevision,
+    resourceRevision,
   ]);
+  async function refreshed() {
+    await inspect();
+    setResourceRevision((v) => v + 1);
+  }
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
@@ -386,7 +463,7 @@ export function AdminApp() {
             <span className="eyebrow">HAMBAZI / ADMIN</span>
             <h1>{allowed.find((s) => s[0] === section)?.[1] ?? "دسترسی مدیریتی"}</h1>
           </div>
-          <span className="status">پنل مشاهده</span>
+          <span className="status">مدیریت امن</span>
         </header>
         {error && (
           <p role="alert" className="error">
@@ -395,6 +472,15 @@ export function AdminApp() {
         )}
         {security && access?.isOwner ? (
           <OwnerSecuritySettings csrf={csrf} completed={reset} />
+        ) : (section === "admins" || section === "operations") && access ? (
+          <ManagementPanel
+            key={`${section}:${access.authorizationVersion}:${access.policyRevision}`}
+            kind={section}
+            csrf={csrf}
+            isOwner={access.isOwner}
+            permissions={access.permissions}
+            refreshed={refreshed}
+          />
         ) : loading ? (
           <p role="status">در حال دریافت اطلاعات…</p>
         ) : !permitted ? (
@@ -403,6 +489,22 @@ export function AdminApp() {
           <>
             {detail && <button onClick={() => setDetail(null)}>بازگشت به فهرست</button>}
             <ReadPanel data={data} next={setCursor} inspect={setDetail} />
+            {managementEnabled &&
+              detail &&
+              access &&
+              adminPageSchema.safeParse(data).success &&
+              adminPageSchema.parse(data).items[0] && (
+                <ResourceActions
+                  key={`${detail}:${access.authorizationVersion}:${access.policyRevision}}`}
+                  kind={section}
+                  row={adminPageSchema.parse(data).items[0]!}
+                  csrf={csrf}
+                  isOwner={access.isOwner}
+                  permissions={access.permissions}
+                  refreshed={inspect}
+                  reload={() => setResourceRevision((v) => v + 1)}
+                />
+              )}
           </>
         )}
       </main>

@@ -32,7 +32,13 @@ for (const viewerIndex of [0, 1])
     expect(state.sockets).toHaveLength(0);
     expect(state.events).toEqual([]);
     expect(state.http[0]).toBe("POST /v1/auth/telegram-mini-app/registered-session-photo");
-    expect(state.http.slice(1).sort()).toEqual(["GET /v1/games/availability", "GET /v1/me"]);
+    expect(state.http.slice(1).sort()).toEqual(
+      [
+        "GET /v1/games/availability",
+        "GET /v1/me",
+        ...(process.env.VITE_KAHROBA_RUNTIME === "true" ? ["GET /v1/kahroba/capabilities"] : []),
+      ].sort(),
+    );
   });
 
 test("home shows eight catalog cards and keeps future actions inert across direct routes", async ({
@@ -125,6 +131,30 @@ test("home renders the authenticated photo and saved name", async ({ page, reque
     )
     .toBe(1);
   await expect(page.locator(".home-identity .fallback-avatar")).toHaveCount(0);
+});
+
+test("available Kahroba appears in the settled shared lobby without a separate private entry", async ({
+  page,
+  request,
+}) => {
+  const state = await setup(page, request);
+  await page.route("https://api-staging.hambazi.top/v1/games/availability", (route) =>
+    route.fulfill({
+      json: {
+        schemaVersion: 1,
+        games: [],
+        lobbyAvailability: [{ id: "kahroba", state: "AVAILABLE" }],
+      },
+      headers: { "access-control-allow-origin": "https://staging.hambazi.top" },
+    }),
+  );
+  await launch(page);
+  await expect(page.getByRole("button", { name: "کهربا، فعال", exact: true })).toBeEnabled();
+  await expect(page.locator(".home-game-card")).toHaveCount(8);
+  await expect(page.locator(".home-identity")).toBeVisible();
+  await expect(page.getByText("ورود خصوصی کهربا", { exact: true })).toHaveCount(0);
+  expect(state.starts).toEqual([]);
+  expect(state.sockets).toHaveLength(0);
 });
 
 test("mobile RTL grid and fixed navigation leave the last card reachable", async ({
@@ -279,7 +309,7 @@ test("failed current lookup cannot fall through to match creation", async ({ pag
   expect(state.starts).toHaveLength(1);
 });
 
-test("settings uses the existing profile patch flow without public product requests", async ({
+test("settings patches the profile and makes only declared read requests", async ({
   page,
   request,
 }) => {
@@ -298,7 +328,13 @@ test("settings uses the existing profile patch flow without public product reque
   await nativeEvent(page, "back_button_pressed");
   await expect(page).toHaveURL(/#\/games$/);
   expect(state.sockets).toHaveLength(0);
-  expect(state.http.every((x) => /\/v1\/(auth|me|games)(\/|$)/.test(x))).toBe(true);
+  expect(
+    state.http.every(
+      (x) =>
+        /\/v1\/(auth|me|games)(\/|$)/.test(x) ||
+        (process.env.VITE_KAHROBA_RUNTIME === "true" && x === "GET /v1/kahroba/capabilities"),
+    ),
+  ).toBe(true);
 });
 
 for (const size of [

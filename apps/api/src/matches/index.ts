@@ -100,3 +100,5 @@ export {
 } from "./application/public-lobby.js";
 
 export { createMatchesAdminRead } from "./module.js";
+
+export { createMatchesAdminOperations } from "./module.js";

@@ -16,3 +16,11 @@ export function createRoomDiagnostics(
 }
 
 export { createRoomsAdminReadRepository as createRoomsAdminRead } from "./infrastructure/repositories/admin-read.js";
+
+import { createRoomsAdminOperationsRepository } from "./infrastructure/repositories/admin-operations.js";
+export function createRoomsAdminOperations(
+  database: Parameters<typeof createRoomsAdminOperationsRepository>[0],
+  clock: { nowMs(): number },
+) {
+  return createRoomsAdminOperationsRepository(database, clock);
+}

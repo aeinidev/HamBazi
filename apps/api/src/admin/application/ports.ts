@@ -1,4 +1,5 @@
 import type { AdminGrant } from "../domain/access.js";
+import type { AdminManagementTransaction } from "./management-ports.js";
 
 export type AdminCode =
   | "INVALID_INPUT"
@@ -57,8 +58,13 @@ export interface AdminAudit {
   event: string;
   commandId: string;
   occurredAt: Date;
+  operation?: string;
+  targetId?: string;
+  reasonCode?: string;
+  mode?: string;
 }
 export interface AdminTransaction {
+  management?: AdminManagementTransaction;
   realm(): Promise<AdminRealmRecord | null>;
   operator(id: string): Promise<AdminOperatorRecord | null>;
   session(id: string): Promise<AdminSessionRecord | null>;
@@ -80,6 +86,8 @@ export interface AdminTransaction {
         | "pinVerifier"
         | "passwordVerifier"
         | "credentialVersion"
+        | "authorizationVersion"
+        | "status"
       >
     >,
   ): Promise<void>;
