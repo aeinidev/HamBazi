@@ -154,3 +154,13 @@ commit or alter the user's worktree merely to satisfy this gate. Treat its
 manifest as local candidate evidence, never a published source/release artifact.
 The local runner does not exercise GitHub's action service, privileged runner
 provisioning, artifact upload or repository protection settings.
+
+## Docker 29.8.2 local recheck
+
+The owner-authorized ADR-041 amendment updates both the exact CI pin and workflow.
+The [Phase 3 recheck](../security/admin-phase3-docker-29.8.2-qualification.json)
+records clean-source local execution of the real verification entrypoint. Runtime
+build/scan checks passed, but a reproducible 5000ms recovery correctness timeout
+blocks the full pipeline. Downstream browser commands passed separately; they do
+not replace a successful complete run or authorize staging deployment. Historical
+29.8.1 measurements are retained unchanged.

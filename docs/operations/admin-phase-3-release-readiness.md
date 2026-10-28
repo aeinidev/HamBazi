@@ -1,8 +1,51 @@
 # آمادگی انتشار فاز سوم Admin روی Staging
 
-تاریخ بررسی: 2026-10-28. مرجع معماری ADR-090 است. این کار فقط آماده‌سازی محلی است؛ نصب، اتصال به Staging/Production، تغییر OWNER و شروع فاز چهارم مجاز نیستند. نتیجهٔ نهایی کنترل‌ها در `docs/security/admin-phase3-release-qualification.json` ثبت می‌شود؛ این سند به‌تنهایی مجوز نصب نیست.
+تاریخ بررسی: 2026-10-28. مرجع معماری ADR-090 است. این کار فقط آماده‌سازی محلی است؛ نصب، اتصال به Staging/Production، تغییر OWNER و شروع فاز چهارم مجاز نیستند. نتیجهٔ جاری در `docs/security/admin-phase3-docker-29.8.2-qualification.json` و نتیجهٔ تاریخی پیش از ارتقای pin در `docs/security/admin-phase3-release-qualification.json` ثبت شده است؛ این سند به‌تنهایی مجوز نصب نیست.
 
-## نتیجهٔ نهایی محلی
+## بازبینی جاری Docker 29.8.2 — 2026-10-28
+
+نسخهٔ مورد انتظار با مجوز مالک در workflow و toolchain به `29.8.2` منتقل شد؛
+ADR-041 و راهنمای CI/بازتولید نیز هماهنگ‌اند. بررسی نسخه همچنان دقیق است و
+snapshotter، هش ابزارها، freshness، شدت‌های مسدودکننده و اسکن تاریخچه تغییر نکرده‌اند.
+آزمون منفی نسخهٔ قبلی و snapshotter خاموش، همراه با ۲۸ آزمون سیاست CI، موفق شد.
+فایل bytecode تولیدی Python از ردیابی Git خارج و خروجی‌های Python به `.gitignore`
+افزوده شدند؛ شرط سورس تمیز حفظ شد. cache اسکن محلی نیز به مجوز لازم `0700` محدود شد.
+
+**انتشار همچنان مسدود است؛ علت جاری دیگر اختلاف pin یا سورس commit‌نشده نیست.**
+کد candidate در commit `beaad2b26a5ddea3ef88234bb9075cba1f2db35d` با سورس تمیز و
+نصب frozen، بدون `.env` محیط کاری، در کپی محلی دارای تاریخچهٔ کامل Git بررسی شد.
+اسکریپت واقعی `infra/ci/verify.mjs` از ۲۳ gate عبور کرد، اما در
+`migration-fault-release` شکست خورد. سناریوی
+`apps/api/tests/integration/match-processing.test.ts:600`
+با عنوان `keeps current-cursor recovery waves fresh across concurrent commands and locked role changes`
+در اجرای جامع و تکرار مستقل شکست خورد؛ اجرای محدود نیز timeout پس از حدود
+`5005.5ms` در برابر مهلت ثابت `5000ms` را تأیید کرد. علت زیرساختی/عملکردیِ کندی
+هنوز قطعی نیست و Regression ناشی از Docker اثبات نشده است. این آزمونِ صحت هم‌زمانی
+با تعویق تست ظرفیت حذف نمی‌شود؛ هیچ assertion، نمونه یا مهلتی کاهش/افزایش نیافت.
+manifest موفق CI ساخته نشد؛ اجرای GitHub Actions میزبانی‌شده نیز انجام نشده است.
+
+نتایج موفق همین بازبینی:
+
+- کیفیت جامع، قراردادها و diff تمیز تولید قرارداد، Bot، Admin Integration،
+  ترمینال خصوصی و Nginx؛ Build چهار ایمیج و اجرای واقعی آن‌ها در خود CI.
+- اسکن تاریخچه/candidate و وابستگی‌ها بدون یافتهٔ بررسی‌نشده؛ هفت ایمیج
+  API/Bot/Worker/Web/Admin/PostgreSQL/Redis بدون HIGH/CRITICAL/UNKNOWN، با DB advisory تازه.
+- چهار gate بعد از مرحلهٔ ناموفق جداگانه اجرا شدند: Web=۳۰، SDK=۳۸، Preview=۲
+  و Build عادی Web؛ این موفقیت‌ها جای CI جامع موفق معرفی نمی‌شوند.
+- Admin نهایی: ۴۰ تست Integration، ۳۸ کنترل production/TLS روی همان digest،
+  ارتقای دارای داده از ۱۹ به ۲۱ Migration، حفظ OWNER/Audit ساختگی و بازیابی
+  رمزگذاری‌شدهٔ واقعی ۴۵ جدول در محیط بدون شبکه، با رد archive دستکاری‌شده.
+- حالت flag=false و انقضای محرومیت موجود با کد همان ایمیج و clock تزریق‌شدهٔ
+  fixture موفق‌اند. هیچ حساب واقعی یا سروری تغییر نکرد.
+
+[شواهد بازبینی جاری](../security/admin-phase3-docker-29.8.2-qualification.json)
+هویت commit، digestها، نتایج و شکست را ثبت می‌کند. ایمیج‌های جدیدِ core پروفایل
+پیش‌فرض CI دارند و payload دارای originهای Staging نیستند. پس از رفع timeout و
+موفقیت کامل CI، candidate تمیز با origin/featureهای مقصد ساخته و همان digestها
+دوباره کنترل شوند. انتشار همچنان به مجوز جداگانه، بکاپ واقعی تازه و بازیابی معتبر
+خارج سرور و کنترل سلامت/freshness مقصد نیاز دارد. ظرفیت عملیاتی تأیید نشده است.
+
+## نتیجهٔ تاریخی محلی پیش از ارتقای pin
 
 نسخهٔ عملکردی محلی آزموده شده، اما **انتشار هنوز مسدود است**: اجرای رسمی CI در preflight نسخهٔ Docker متوقف شد (`29.8.2` محلی در برابر `29.8.1` مصوب). همچنین سورس فاز سوم هنوز commit‌نشده است؛ evidence رسمی CI به source تمیز و بازبینی‌شده نیاز دارد. pin یا شرط clean-source برای عبور تغییر نکرد؛ گزارش محلی به‌عنوان CI موفق معرفی نمی‌شود.
 
@@ -30,7 +73,7 @@ digestها، source snapshot، sourceDirty=true، هویت toolchain، نتیج�
 ## پیش‌شرط‌های انتشار آینده
 
 1. تأیید جداگانهٔ Staging؛ ثبت snapshot کد، digest ایمیج‌های API/Bot/Worker/Web/Admin و هویت PostgreSQL/Redis. اسکن تمام این ایمیج‌ها با دیتابیس advisory تازه، بدون HIGH/CRITICAL/UNKNOWN مسدودکننده، باید به همین digestها متصل باشد. شواهد قدیمی یا ایمیج اولیهٔ قبل از اصلاح Schema معتبرِ نسخهٔ نهایی نیستند.
-2. Qualification مصوب با toolchain دقیق و source review‌شده. نسخهٔ Docker این رایانه `29.8.2` است؛ `infra/ci/toolchain.json` برای CI نسخهٔ `29.8.1` را الزام می‌کند. شرط CI یا فایل toolchain برای عبور تغییر نمی‌کند. گزارش محلی جای evidence رسمی CI با source تمیز را نمی‌گیرد؛ candidate با `sourceDirty=true` صادقانه ثبت می‌شود.
+2. Qualification با toolchain دقیقِ جاری `Docker 29.8.2` و سورس تمیزِ commit‌شده لازم است. اختلاف pin تاریخی با اصلاح مصوب ADR-041 رفع شده؛ timeout آزمون صحت هم‌زمانی در بازبینی جاری هنوز CI جامع را مسدود می‌کند. گزارش موفق جزئی یا تعویق ظرفیت جای رفع این شکست و اجرای کامل CI را نمی‌گیرد.
 3. پیش‌بررسی فقط پس از مجوز نصب: فضای آزاد، سلامت PostgreSQL/Redis/Nginx/API/Bot/Worker/Web/Admin، گواهی و timerها، digest فعلی، grantها و اعتبار deadline امنیتی. این بررسی‌ها در آماده‌سازی محلی انجام نمی‌شوند و هیچ مهلتی تمدید نمی‌شود.
 
 ## بکاپ و بازیابی
@@ -39,7 +82,7 @@ digestها، source snapshot، sourceDirty=true، هویت toolchain، نتیج�
 - از مسیر خصوصی full-backup آزموده‌شدهٔ انتشار قبلی استفاده شود: snapshot سازگار هر دیتابیس، `pg_dump` قالب custom، globals و CMS با AES-256-GCM و گواهی گیرندهٔ تأییدشده. private key و عبارت رمزگذاری فقط در اختیار مالک و خارج سرور بمانند؛ ورود تعاملی فقط در ترمینال خصوصی و بدون ضبط انجام شود. کلید واقعی یا Passphrase در Build، env اجرایی تست، چت یا Git دریافت نمی‌شود.
 - archive رمزگذاری‌شده خارج سرور کپی و SHA-256 دو طرف تطبیق داده شود. صرف تطابق هش، بازیابی معتبر محسوب نمی‌شود. همان archive پس از احراز صحت AEAD، در PostgreSQL disposable با `network=none`، بدون port عمومی و بدون mount دادهٔ میزبان بازیابی شود؛ rows/digests، constraints، triggers، grants، ownership و کنترل یکپارچگی مقایسه شوند. شکست decrypt/restore/reconcile، نصب را متوقف می‌کند.
 - کلید `ADMIN_COMMAND_KEY` برای توضیحات محرمانه، همراه با realm و نسخهٔ کد، در vault یا بکاپ رمزگذاری‌شدهٔ مستقل حفظ شود. DB dump بدون این کلید برای بازیابی متن محرمانه کافی نیست؛ چرخش خام کلید مجاز نیست. کلیدهای امضای نشست، PIN pepper، تنظیمات خصوصی و checkpoint OWNER نیز باید طبق runbook فعلی قابل بازیابی باشند.
-- نسخهٔ ابزار خصوصی Backup/Restore نیز باید با `admin-local-identity+private-notes-v3` سازگار باشد؛ آن را پیش از مراسم بکاپ/بازیابی انتشار آینده و بدون اجرای Bootstrap/Recovery یا تغییر checkpoint/credential مالک تطبیق دهید. تست نه‌جدولی OWNER با schema جدید جدا از تست full backup لازم است.
+- بکاپ پیش از Migration با ابزار سازگار با schema فعلی مقصد تهیه و با همان نسخهٔ سازگار بازیابی شود؛ ابزار نیازمند ستون‌های جدید را پیش از ایجاد آن‌ها روی schema قبلی اجرا نکنید. نسخهٔ ابزار خصوصی Backup/Restore پس از ارتقا نیز باید با `admin-local-identity+private-notes-v3` سازگار باشد؛ آن را پیش از مراسم بکاپ/بازیابی انتشار آینده و بدون اجرای Bootstrap/Recovery یا تغییر checkpoint/credential مالک تطبیق دهید. تست نه‌جدولی OWNER با schema جدید جدا از تست full backup لازم است.
 - تست‌های این آماده‌سازی فقط داده و کلید **ساختگی** دارند. هیچ رسید محلی به‌عنوان اثبات بکاپ تازهٔ واقعی یا کپی خارج سرور گزارش نمی‌شود. انجام بکاپ و بازیابی واقعی همان نسخه، gate انسانی انتشار آینده باقی می‌ماند.
 
 ## نصب آینده و کنترل پذیرش

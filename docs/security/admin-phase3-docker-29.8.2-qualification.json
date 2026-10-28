@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "purpose": "docker-29.8.2-phase3-qualification-recheck",
+  "checkedAtUTC": "2026-10-28T13:26:40.952386+00:00",
+  "status": "blocked-on-recovery-correctness-test-timeout",
+  "dockerPinUpdateCompleted": true,
+  "localCiEntrypointPassed": false,
+  "fullPhase3QualificationPassed": false,
+  "fullCiEvidenceExported": false,
+  "hostedGitHubActionsRun": false,
+  "stagingDeploymentReady": false,
+  "stagingDeploymentAuthorized": false,
+  "stagingInspected": false,
+  "productionReady": false,
+  "realOwnerTouched": false,
+  "phase4Started": false,
+  "capacityAcceptance": "explicitly-deferred-to-future-server-not-an-exemption-for-correctness",
+  "historicalQualification": "docs/security/admin-phase3-release-qualification.json",
+  "candidateSource": {
+    "sourceCommit": "beaad2b26a5ddea3ef88234bb9075cba1f2db35d",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "b386164a0874a3647ab7ba3646934589a1c99cf7422d45fc3b44fc11a6d57dd9",
+    "buildInputSha256": "33d78d91086ae595fa0d766eacea504338abcc89441350fbbb63b76820887d69",
+    "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+    "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
+    "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217"
+  },
+  "toolchain": {
+    "nodeVersion": "24.22.1",
+    "pnpmVersion": "12.4.1",
+    "dockerExpected": "29.8.2",
+    "dockerObserved": "29.8.2",
+    "containerdObserved": "2.3.6",
+    "buildxObserved": "0.37.1",
+    "buildkitObserved": "0.33.1",
+    "runcObserved": "1.5.1",
+    "dockerReleaseNotes": "https://docs.docker.com/engine/release-notes/29/#2982",
+    "hostSecurityCertification": false
+  },
+  "ci": {
+    "command": "node infra/ci/verify.mjs",
+    "result": {
+      "stage": "full-ci-final",
+      "exitCode": 1,
+      "seconds": 1494.51,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "sourceClean": true,
+    "passedGates": [
+      "workflow-lint",
+      "secrets",
+      "dependencies",
+      "compiled-public-surfaces",
+      "root-quality",
+      "contracts-check",
+      "contracts-generate",
+      "contracts-format",
+      "contracts-diff",
+      "bot-integration",
+      "postgres-image-build",
+      "redis-image-pull",
+      "admin-postgres-image-pull",
+      "admin-integration",
+      "admin-private-node-image-pull",
+      "admin-private-files-and-tty",
+      "admin-ingress-image-pull",
+      "admin-ingress",
+      "admin-browser",
+      "images",
+      "application-image-build",
+      "application-images",
+      "application-image-smoke"
+    ],
+    "failedGate": "migration-fault-release",
+    "separateReproduction": {
+      "stage": "diagnose-migration",
+      "exitCode": 1,
+      "seconds": 167.9,
+      "testCounts": ["17", "62", "6", "10", "6", "22", "34", "12"],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "focusedFailure": {
+      "scope": "owned-local-focused-docker-fixture",
+      "passed": false,
+      "test": "apps/api/tests/integration/match-processing.test.ts:600",
+      "testName": "keeps current-cursor recovery waves fresh across concurrent commands and locked role changes",
+      "durationMs": 5005.527768,
+      "limitMs": 5000,
+      "classification": "test-timeout",
+      "assertionsOrTimeoutRelaxed": false,
+      "underlyingPerformanceCause": "unresolved-not-proven-docker-regression"
+    },
+    "allRemainingCommandGatesReexecutedSeparately": true,
+    "scans": [
+      {
+        "stage": "secrets",
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "secrets",
+          "status": "passed",
+          "ok": true,
+          "files": 1221,
+          "history": {
+            "ok": true,
+            "findings": 0
+          },
+          "current": {
+            "ok": true,
+            "findings": 0
+          }
+        }
+      },
+      {
+        "stage": "dependencies",
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "dependencies",
+          "status": "passed",
+          "ok": true,
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0
+          },
+          "findings": []
+        }
+      },
+      {
+        "stage": "images",
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "images",
+          "status": "passed",
+          "ok": true,
+          "database": {
+            "updatedAt": "2026-10-28T07:10:42.861393948Z",
+            "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+          },
+          "images": [
+            {
+              "ok": true,
+              "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "ok": true,
+              "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            }
+          ]
+        }
+      },
+      {
+        "stage": "application-images",
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "application-images",
+          "status": "passed",
+          "ok": true,
+          "sourceCommit": "beaad2b26a5ddea3ef88234bb9075cba1f2db35d",
+          "sourceDirty": false,
+          "sourceSnapshotSha256": "b386164a0874a3647ab7ba3646934589a1c99cf7422d45fc3b44fc11a6d57dd9",
+          "buildInputSha256": "33d78d91086ae595fa0d766eacea504338abcc89441350fbbb63b76820887d69",
+          "database": {
+            "updatedAt": "2026-10-28T07:10:42.861393948Z",
+            "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+          },
+          "images": [
+            {
+              "role": "api",
+              "ok": true,
+              "image": "hambazi-candidate/api:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:ec5b258d2037cd1ef26bf094e314779c3a427f2b641369b8d07daaa618c257ec",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "bot",
+              "ok": true,
+              "image": "hambazi-candidate/bot:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:e6363cc4f44ca3321977a6f7337b8b18fdea0400ce6caddbc3b669dbb9b397b4",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "worker",
+              "ok": true,
+              "image": "hambazi-candidate/worker:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:644de87136231497e7f5c30e7f9e265cbaa89cadadaa0fe6e760d59a3a4c7fef",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "web",
+              "ok": true,
+              "image": "hambazi-candidate/web:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:2b61dc318265750e6618f3719b361b94a9377f06b0a7431f360a1930b8ed952d",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            }
+          ]
+        }
+      }
+    ],
+    "evidenceExportRefused": true
+  },
+  "coreImages": [
+    {
+      "role": "api",
+      "image": "hambazi-candidate/api:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:ec5b258d2037cd1ef26bf094e314779c3a427f2b641369b8d07daaa618c257ec"
+    },
+    {
+      "role": "bot",
+      "image": "hambazi-candidate/bot:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:e6363cc4f44ca3321977a6f7337b8b18fdea0400ce6caddbc3b669dbb9b397b4"
+    },
+    {
+      "role": "worker",
+      "image": "hambazi-candidate/worker:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:644de87136231497e7f5c30e7f9e265cbaa89cadadaa0fe6e760d59a3a4c7fef"
+    },
+    {
+      "role": "web",
+      "image": "hambazi-candidate/web:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:2b61dc318265750e6618f3719b361b94a9377f06b0a7431f360a1930b8ed952d"
+    }
+  ],
+  "coreImageScan": {
+    "schemaVersion": 1,
+    "kind": "application-images",
+    "ok": true,
+    "status": "passed",
+    "database": {
+      "updatedAt": "2026-10-28T07:10:42.861393948Z",
+      "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+    },
+    "sourceCommit": "beaad2b26a5ddea3ef88234bb9075cba1f2db35d",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "b386164a0874a3647ab7ba3646934589a1c99cf7422d45fc3b44fc11a6d57dd9",
+    "buildInputSha256": "33d78d91086ae595fa0d766eacea504338abcc89441350fbbb63b76820887d69",
+    "images": [
+      {
+        "role": "api",
+        "ok": true,
+        "image": "hambazi-candidate/api:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:ec5b258d2037cd1ef26bf094e314779c3a427f2b641369b8d07daaa618c257ec",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        },
+        "findings": []
+      },
+      {
+        "role": "bot",
+        "ok": true,
+        "image": "hambazi-candidate/bot:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:e6363cc4f44ca3321977a6f7337b8b18fdea0400ce6caddbc3b669dbb9b397b4",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        },
+        "findings": []
+      },
+      {
+        "role": "worker",
+        "ok": true,
+        "image": "hambazi-candidate/worker:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:644de87136231497e7f5c30e7f9e265cbaa89cadadaa0fe6e760d59a3a4c7fef",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        },
+        "findings": []
+      },
+      {
+        "role": "web",
+        "ok": true,
+        "image": "hambazi-candidate/web:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:2b61dc318265750e6618f3719b361b94a9377f06b0a7431f360a1930b8ed952d",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        },
+        "findings": []
+      }
+    ]
+  },
+  "coreBrowserPolicy": {
+    "schemaVersion": 1,
+    "profile": "production",
+    "webOrigin": null,
+    "apiOrigin": null,
+    "frameAncestors": [],
+    "headers": {
+      "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "Cache-Control": "no-store",
+      "Strict-Transport-Security": "max-age=31536000"
+    }
+  },
+  "imageProfile": "CI default; not an origin-bound staging deployment payload",
+  "admin": {
+    "schemaVersion": 1,
+    "purpose": "local-admin-phase3-candidate",
+    "productionReleaseApproved": false,
+    "image": "hambazi-candidate/admin:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-36a86dab0038494c@sha256:e64f3e22086be319c876e9add67f0934d263322dd81bd00f10b0beb019e0b820",
+    "adminSourceSha256": "36a86dab0038494c375a53746f3ece6fef559364c3620efea3b1ea21e54b1f12",
+    "apiImage": "hambazi-candidate/api:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:ec5b258d2037cd1ef26bf094e314779c3a427f2b641369b8d07daaa618c257ec",
+    "runtimeImage": "hambazi-candidate/web:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-33d78d91086ae595@sha256:2b61dc318265750e6618f3719b361b94a9377f06b0a7431f360a1930b8ed952d",
+    "sourceSnapshotSha256": "b386164a0874a3647ab7ba3646934589a1c99cf7422d45fc3b44fc11a6d57dd9",
+    "coreInventorySha256": "a3dbaf7d52c9d8ed779656da4fee04b52d482776cd685f241b4eb968d2d68789"
+  },
+  "adminScan": {
+    "ok": true,
+    "image": "hambazi-candidate/admin:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-36a86dab0038494c@sha256:e64f3e22086be319c876e9add67f0934d263322dd81bd00f10b0beb019e0b820",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "unknown": 0
+    },
+    "findings": [],
+    "database": {
+      "updatedAt": "2026-10-28T07:10:42.861393948Z",
+      "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+    }
+  },
+  "exactAdminRuntime": {
+    "passed": true,
+    "checks": 38,
+    "image": "hambazi-candidate/admin:beaad2b26a5ddea3ef88234bb9075cba1f2db35d-36a86dab0038494c@sha256:e64f3e22086be319c876e9add67f0934d263322dd81bd00f10b0beb019e0b820",
+    "fixtureMode": "production",
+    "databaseTLSVerifyFull": true,
+    "redisTLS": true,
+    "inboundTLSVerified": true,
+    "argon2NativeAsUid1000": true,
+    "plaintextProductionRejected": true,
+    "defaultDeny401": true,
+    "csrfOrigin403": true,
+    "realSyntheticOwnerLoginAndPendingIsolation": true,
+    "restrictionAndUnrestrictViaHttps": true,
+    "auditedPrivateNote": true,
+    "flagDisabledFallbackPreservesRestriction": true,
+    "exactImageExpiryWithInjectedFixtureClock": true,
+    "syntheticFixtureOnly": true,
+    "realOwnerTouched": false
+  },
+  "populatedMigrationUpgrade": {
+    "passed": true,
+    "scope": "owned-local-sql-upgrade",
+    "fromMigrations": 19,
+    "toMigrations": 21,
+    "populatedUserAndSyntheticOwnerUnchanged": true,
+    "existingAuditUnchanged": true,
+    "grantsApplied": true,
+    "destructiveMigration": false
+  },
+  "syntheticEncryptedBackupRestore": {
+    "scope": "local-synthetic-full-postgresql",
+    "fixture": true,
+    "cmsAeadVerifiedBeforeRestore": true,
+    "globalsAndAllNonTemplateDatabasesRestored": true,
+    "networkNoneNoHostVolumes": true,
+    "postgresVersion": "18.6",
+    "verificationImage": "sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+    "corruptionRejected": true,
+    "syntheticEncryptionKeyOnly": true,
+    "realOffServerBackupVerified": false,
+    "offServerCopyVerified": false,
+    "restoredDatabaseCount": 2,
+    "restoredTableCount": 45
+  },
+  "checks": {
+    "frozen-install": {
+      "stage": "frozen-install",
+      "exitCode": 0,
+      "seconds": 247.72,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "provision-final": {
+      "stage": "provision-final",
+      "exitCode": 0,
+      "seconds": 0.97,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "fresh-advisory-download": {
+      "stage": "fresh-advisory-download",
+      "exitCode": 0,
+      "seconds": 196.21,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "remaining-ordinary-browser": {
+      "stage": "remaining-ordinary-browser",
+      "exitCode": 0,
+      "seconds": 24.33,
+      "testCounts": [],
+      "browserCases": ["30"],
+      "markers": []
+    },
+    "remaining-sdk-browser": {
+      "stage": "remaining-sdk-browser",
+      "exitCode": 0,
+      "seconds": 24.77,
+      "testCounts": [],
+      "browserCases": ["38"],
+      "markers": []
+    },
+    "remaining-preview": {
+      "stage": "remaining-preview",
+      "exitCode": 0,
+      "seconds": 2.92,
+      "testCounts": [],
+      "browserCases": ["2"],
+      "markers": []
+    },
+    "remaining-normal-build": {
+      "stage": "remaining-normal-build",
+      "exitCode": 0,
+      "seconds": 5.33,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "final-admin-build": {
+      "stage": "final-admin-build",
+      "exitCode": 0,
+      "seconds": 119.33,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "final-admin-scan": {
+      "stage": "final-admin-scan",
+      "exitCode": 0,
+      "seconds": 20.67,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "phase3-exact-artifact-rehearsal": {
+      "stage": "phase3-exact-artifact-rehearsal",
+      "exitCode": 0,
+      "seconds": 222.86,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    }
+  },
+  "securityPolicyChanges": false,
+  "resolvedIssues": [
+    "Owner-authorized exact Docker pin updated to 29.8.2; equality and snapshotter checks retained.",
+    "Scanner cache permissions corrected locally to 0700; no integrity/freshness/severity bypass.",
+    "Generated Python bytecode removed from Git tracking; full history and clean-source checks retained."
+  ],
+  "remainingReleaseBlockers": [
+    "Resolve reproducible 5000ms match recovery correctness test timeout without weakening assertions or limits, then pass the full clean-source CI entrypoint.",
+    "After CI success, bind a clean staging-profile candidate to intended origins/features and revalidate exact immutable artifacts.",
+    "Separate staging deployment approval and fresh actual encrypted full PostgreSQL backup with verified off-server isolated restore.",
+    "Authorized destination health, security evidence freshness/deadline and rollback checks."
+  ],
+  "evidenceDirectory": "/home/mehdi/.cache/hambazi-docker2982-ckt22qp8"
+}
