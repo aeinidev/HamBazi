@@ -71,18 +71,24 @@ export function createRoomsRepository(
       throw new Error("Invalid room clock");
     return value;
   }
-  async function transaction<T>(operation: (db: Client) => Promise<T>): Promise<T> {
+  async function transaction<T>(
+    operation: (db: Client) => Promise<T>,
+    readOnly = false,
+  ): Promise<T> {
     for (let attempt = 0; ; attempt++) {
       try {
-        const result = await scope.transaction(async (db) => {
-          await db.lockRooms();
+        const work = async (db: Client) => {
+          if (!readOnly) await db.lockRooms();
           try {
             return await operation(db);
           } catch (error) {
             if (error instanceof RoomFault) return error;
             throw error;
           }
-        }, "Serializable");
+        };
+        const result = readOnly
+          ? await scope.snapshot(work)
+          : await scope.transaction(work, "Serializable");
         if (result instanceof RoomFault) throw result;
         return result;
       } catch (error) {
@@ -300,6 +306,8 @@ export function createRoomsRepository(
         return record(db, actor, "create", input, room);
       }),
     read: (id) => transaction((db) => current(db, id)),
+    // STARTING/STARTED/CLOSED cannot expire; recovery only needs a consistent roster, not a write lane.
+    startSnapshot: (id) => transaction((db) => load(db, id), true),
     latestForMember: (userId, gameId) =>
       transaction(async (db) => {
         const memberships = await db.roomMember.findMany({

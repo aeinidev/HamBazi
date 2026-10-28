@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, realpath, rmdir, statfs, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 export const legacyPostgresImage =
   "postgres:18.6-bookworm@sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650";
 
-// Test-only: creates its own names, credentials file, bridge network and volume.
+// Test-only: creates its own names, credentials file, bridge network and disk directory.
 // There is no supplied existing volume/container or external database target.
 export async function startIsolatedPostgres({ directory, port, credentials, legacy = false }) {
   if (!Number.isSafeInteger(port) || port < 0 || port > 65535) throw new Error("Invalid test port");
@@ -21,8 +21,9 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
   );
   if (compose.services.postgres.image !== lock.image) throw new Error("Invalid test image");
   const name = `hambazi-image-test-${randomUUID()}`;
+  const dataDirectory = join(directory, `${name}.data`);
   let network = false,
-    volume = false,
+    dataCreated = false,
     container = false;
   let stage = "environment";
   const stop = async () => {
@@ -30,9 +31,34 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
       await run("docker", ["rm", "--force", name], { timeout: 10000 });
       container = false;
     }
-    if (volume) {
-      await run("docker", ["volume", "rm", name], { timeout: 10000 });
-      volume = false;
+    if (dataCreated) {
+      // The image owns these files as postgres; delete only our exclusive fixture after shutdown.
+      await run(
+        "docker",
+        [
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--read-only",
+          "--user",
+          "0",
+          "--label",
+          "hambazi.test=image-compatibility",
+          "--mount",
+          `type=bind,source=${dataDirectory},target=/owned`,
+          "--entrypoint",
+          "find",
+          legacy ? legacyPostgresImage : lock.image,
+          "/owned",
+          "-mindepth",
+          "1",
+          "-delete",
+        ],
+        { timeout: 10000 },
+      );
+      await rmdir(dataDirectory);
+      dataCreated = false;
     }
     if (network) {
       await run("docker", ["network", "rm", name], { timeout: 10000 });
@@ -40,6 +66,19 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
     }
   };
   try {
+    stage = "persistent private directory";
+    const info = await lstat(directory);
+    const filesystem = await statfs(directory);
+    if (
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      (info.mode & 0o077) !== 0 ||
+      info.uid !== process.getuid() ||
+      (await realpath(directory)) !== directory ||
+      /[,\r\n]/.test(directory) ||
+      [0x01021994, 0x858458f6].includes(filesystem.type)
+    )
+      throw new Error("ISOLATED_POSTGRES_DISK_DIRECTORY_REQUIRED");
     const values = {
       POSTGRES_USER: "hambazi_local_admin",
       POSTGRES_DB: "hambazi",
@@ -56,6 +95,31 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
       if (!/^[a-f0-9]{64}$/.test(credentials[key])) throw new Error("Invalid synthetic credential");
       values[key] = credentials[key];
     }
+    // Docker's data root can be a slow external disk; keep durable fixture I/O on the runner disk.
+    stage = "data directory";
+    await mkdir(dataDirectory, { mode: 0o700 });
+    dataCreated = true;
+    stage = "data directory ownership";
+    await run(
+      "docker",
+      [
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "0",
+        "--mount",
+        `type=bind,source=${dataDirectory},target=/owned`,
+        "--entrypoint",
+        "chown",
+        legacy ? legacyPostgresImage : lock.image,
+        "postgres:postgres",
+        "/owned",
+      ],
+      { timeout: 10000 },
+    );
     const environment = join(directory, `${name}.env`);
     await writeFile(
       environment,
@@ -79,11 +143,6 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
       { timeout: 10000 },
     );
     network = true;
-    stage = "volume";
-    await run("docker", ["volume", "create", "--label", "hambazi.test=image-compatibility", name], {
-      timeout: 10000,
-    });
-    volume = true;
     const args = [
       "run",
       "--detach",
@@ -97,8 +156,8 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
       `127.0.0.1:${port}:5432`,
       "--env-file",
       environment,
-      "--volume",
-      `${name}:/var/lib/postgresql`,
+      "--mount",
+      `type=bind,source=${dataDirectory},target=/var/lib/postgresql`,
       "--mount",
       `type=bind,source=${join(root, "infra/docker/postgres/10-roles.sh")},target=/docker-entrypoint-initdb.d/10-roles.sh,readonly`,
     ];
@@ -115,6 +174,12 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
     if (!legacy) args.push("/usr/local/bin/hambazi-postgres.sh");
     args.push(
       "postgres",
+      "-c",
+      "fsync=on",
+      "-c",
+      "synchronous_commit=on",
+      "-c",
+      "full_page_writes=on",
       "-c",
       "log_statement=none",
       "-c",
@@ -161,7 +226,7 @@ export async function startIsolatedPostgres({ directory, port, credentials, lega
     if (!actualPort) throw new Error("Invalid isolated binding");
     return {
       name,
-      volume: name,
+      dataDirectory,
       port: Number(actualPort),
       stop,
       restart: async () => {

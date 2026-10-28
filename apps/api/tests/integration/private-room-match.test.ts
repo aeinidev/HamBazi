@@ -7,7 +7,7 @@ import { createDatabase, DatabaseError } from "@hambazi/database";
 import { createCorrelation, withCorrelation } from "@hambazi/observability";
 import { migrateCoupState } from "@hambazi/coup-engine";
 import { createRoomsPort } from "../../src/rooms/index.js";
-import { createAccountCreationPort, createUserIdentityPort } from "../../src/users/index.js";
+import { createUserIdentityPort } from "../../src/users/index.js";
 import { createCatalogPort, type CatalogPort } from "../../src/games/index.js";
 import {
   createPrivateRoomMatchPort,
@@ -46,7 +46,14 @@ const admin = createDatabase({
   ...options,
   databaseUrl: { reveal: () => process.env.TEST_DATABASE_URL! },
 });
-beforeAll(() => Promise.all([a.connect(), b.connect(), admin.connect()]));
+beforeAll(() =>
+  Promise.all(
+    [a, b, admin].map(async (db) => {
+      await db.connect();
+      await db.probe();
+    }),
+  ),
+);
 afterAll(() => Promise.all([a.disconnect(), b.disconnect(), admin.disconnect()]));
 // An isolated eligibility port registers the real pinned adapter; production Games stay disabled.
 const games: CatalogPort = {
@@ -72,15 +79,19 @@ const games: CatalogPort = {
 };
 let telegramId = 23000000;
 async function fixture() {
-  const users: string[] = [];
-  for (let seat = 0; seat < 2; seat++) {
-    const result = await createAccountCreationPort(a).createForVerifiedTelegramIdentity(
-      String(++telegramId),
-      "Private start test",
-    );
-    if (!result.ok) throw new Error("Account fixture failed");
-    users.push(result.account.userId);
-  }
+  const users = [randomUUID(), randomUUID()];
+  // Match fixtures seed the same ACTIVE user fields; account creation has its own integration suite.
+  await admin.forModule("users").execute((db) =>
+    db.user.createMany({
+      data: users.map((id) => ({
+        id,
+        telegramUserId: BigInt(++telegramId),
+        displayName: "Private start test",
+        publicHandle: `private_fixture_${telegramId}`,
+        status: "ACTIVE",
+      })),
+    }),
+  );
   const clock = { nowMs: () => 2000000 };
   const game = createCoupMatchGame(rules);
   function roomPort(db = a) {
@@ -180,11 +191,19 @@ async function fixture() {
     return { schemaVersion: 1, actionId: randomUUID(), matchId, expectedVersion };
   }
   async function active(port = build()) {
-    expect((await port.start(users[0], start)).ok).toBe(true);
-    const matchId = (await stored()).match!.id;
+    expect(await port.start(users[0], start)).toMatchObject({ ok: true });
+    const { id: matchId } = await a
+      .forModule("matches")
+      .execute((db) => db.match.findUniqueOrThrow({ where: { roomId }, select: { id: true } }));
     expect((await port.ready(users[0], request(matchId, 1))).ok).toBe(true);
     expect((await port.ready(users[1], request(matchId, 2))).ok).toBe(true);
-    expect((await stored()).match!.status).toBe("ACTIVE");
+    expect(
+      await a
+        .forModule("matches")
+        .execute((db) =>
+          db.match.findUniqueOrThrow({ where: { roomId }, select: { status: true } }),
+        ),
+    ).toEqual({ status: "ACTIVE" });
     return matchId;
   }
   return {
@@ -204,15 +223,16 @@ async function fixture() {
 }
 
 it("recovers eight active private Matches concurrently without duplicate Room reads or durable effects", async () => {
-  const tables = [];
-  for (let index = 0; index < 8; index++) {
-    const f = await fixture();
-    const matchId = await f.active();
-    const before = await f.stored();
-    const startSnapshot = vi.fn(f.rooms.startSnapshot);
-    const port = f.build(a, { ...f.rooms, startSnapshot });
-    tables.push({ f, matchId, before, startSnapshot, port });
-  }
+  const tables = await Promise.all(
+    Array.from({ length: 8 }, async () => {
+      const f = await fixture();
+      const matchId = await f.active();
+      const before = await f.stored();
+      const startSnapshot = vi.fn(f.rooms.startSnapshot);
+      const port = f.build(a, { ...f.rooms, startSnapshot });
+      return { f, matchId, before, startSnapshot, port };
+    }),
+  );
   await Promise.all(
     tables.map(async ({ f, matchId, startSnapshot, port }) => {
       for (let wave = 0; wave < 16; wave++)
@@ -220,7 +240,7 @@ it("recovers eight active private Matches concurrently without duplicate Room re
       expect(startSnapshot).toHaveBeenCalledTimes(16);
     }),
   );
-  for (const { f, before } of tables) expect(await f.stored()).toEqual(before);
+  await Promise.all(tables.map(async ({ f, before }) => expect(await f.stored()).toEqual(before)));
 });
 
 it("races private starts across two processes with one durable Match/roster and original acknowledgements", async () => {

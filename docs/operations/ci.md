@@ -144,6 +144,16 @@ Chromium already provisioned without modifying the developer host. Set
 `TELEGRAM_SDK_FIXTURE_PATH` and an owned `RUNNER_TEMP` outside the checkout; set
 `LD_LIBRARY_PATH` only if the local binaries require it. Then:
 
+Set `TMPDIR` to an owned private directory on persistent local disk (for example,
+a private subdirectory of the runner's disk-backed temporary workspace). The
+isolated PostgreSQL container binds a newly created, exclusive data directory
+there, rather than inheriting an unrelated Docker data-root disk. Memory-backed
+tmpfs/ramfs, shared directories and symlinks are rejected. `fsync`,
+`synchronous_commit` and `full_page_writes` remain enabled; restart and restore
+checks use that same disk data. Cleanup runs only after its container stops and
+cannot reuse an existing cluster. This is fixture placement, not capacity
+acceptance or permission to change a developer/server Docker daemon.
+
 ```sh
 node infra/ci/verify.mjs
 ```

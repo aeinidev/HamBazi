@@ -31,6 +31,7 @@ function setup() {
     receipt: vi.fn(async () => null),
     create: vi.fn(async () => ack),
     read: vi.fn(async () => room),
+    startSnapshot: vi.fn(async () => room),
     command: vi.fn(async () => ack),
     confirmStarted: vi.fn(async () => {}),
     closeStarted: vi.fn(async () => {}),

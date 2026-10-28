@@ -112,7 +112,7 @@ try {
     maxBuffer: 4194304,
   });
   stage = "legacy fixture count";
-  if (!/Tests\s+17 passed/.test(tests.stdout)) throw new Error();
+  if (!/Tests\s+18 passed/.test(tests.stdout)) throw new Error();
   stage = "Unicode fixture";
   await connection(oldEnv.TEST_DATABASE_URL, (c) =>
     c.query(
@@ -138,8 +138,8 @@ try {
         "none",
         "--label",
         "hambazi.test=image-guard",
-        "--volume",
-        `${source.volume}:/var/lib/postgresql:ro`,
+        "--mount",
+        `type=bind,source=${source.dataDirectory},target=/var/lib/postgresql,readonly`,
         "--mount",
         `type=bind,source=${fileURLToPath(new URL("../docker/postgres/start.sh", import.meta.url))},target=/usr/local/bin/hambazi-postgres.sh,readonly`,
         "--entrypoint",

@@ -167,22 +167,24 @@ it("renews concurrent Presence heartbeats without views while retaining atomic l
       },
     },
   ]);
-  const tables = [];
-  for (let i = 0; i < 8; i++) {
-    const f = await connected();
-    const presence = createPresencePort({ reconnect: f.firstReconnect, resync });
-    const sessions = Array.from({ length: 3 }, () =>
-      presence.open({ userId: f.ids[0]!, sessionExpiresAt: 20000 }),
-    );
-    await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
-    const before = await f.stored();
-    tables.push({
-      f,
-      sessions,
-      version: before.match.stateVersion,
-      seq: before.match.lastEventSeq,
-    });
-  }
+  // Independent setup must not consume the heartbeat wave's unchanged deadline serially.
+  const tables = await Promise.all(
+    Array.from({ length: 8 }, async () => {
+      const f = await connected();
+      const presence = createPresencePort({ reconnect: f.firstReconnect, resync });
+      const sessions = Array.from({ length: 3 }, () =>
+        presence.open({ userId: f.ids[0]!, sessionExpiresAt: 20000 }),
+      );
+      await Promise.all(sessions.map((session) => session.subscribe(f.matchId)));
+      const before = await f.stored();
+      return {
+        f,
+        sessions,
+        version: before.match.stateVersion,
+        seq: before.match.lastEventSeq,
+      };
+    }),
+  );
   allowProjection = false;
   await expect(
     a.forModule("matches").transaction((db) => db.lockMatchPresence(randomUUID())),
@@ -210,21 +212,23 @@ it("renews concurrent Presence heartbeats without views while retaining atomic l
       tables.flatMap(({ sessions }) => sessions.map((session) => session.heartbeat())),
     );
   }
-  for (const { f, sessions, version, seq } of tables) {
-    const after = await f.stored();
-    expect(after.match.stateVersion).toBe(version);
-    expect(after.match.lastEventSeq).toBe(seq);
-    const leases = await a
-      .forModule("matches")
-      .execute((db) =>
-        db.matchConnectionLease.findMany({ where: { matchId: f.matchId, userId: f.ids[0]! } }),
-      );
-    expect(leases.filter((lease) => lease.leaseUntil.getTime() === 3800)).toHaveLength(3);
-    // A missing/expired lease still fails closed through the same durable renewal.
-    f.at(4000);
-    await expect(sessions[0]!.heartbeat()).rejects.toThrow("Presence lease unavailable");
-    await Promise.all(sessions.map((session) => session.close()));
-  }
+  await Promise.all(
+    tables.map(async ({ f, sessions, version, seq }) => {
+      const after = await f.stored();
+      expect(after.match.stateVersion).toBe(version);
+      expect(after.match.lastEventSeq).toBe(seq);
+      const leases = await a
+        .forModule("matches")
+        .execute((db) =>
+          db.matchConnectionLease.findMany({ where: { matchId: f.matchId, userId: f.ids[0]! } }),
+        );
+      expect(leases.filter((lease) => lease.leaseUntil.getTime() === 3800)).toHaveLength(3);
+      // A missing/expired lease still fails closed through the same durable renewal.
+      f.at(4000);
+      await expect(sessions[0]!.heartbeat()).rejects.toThrow("Presence lease unavailable");
+      await Promise.all(sessions.map((session) => session.close()));
+    }),
+  );
 });
 it("registers 32 pre-activation Presence subscriptions with one guard projection and atomic leases", async () => {
   const game = createCoupMatchGame(rules);
@@ -783,6 +787,7 @@ it("keeps another node live after SIGKILL and recovers the last crashed node's o
     const ready = once(child, "message");
     child.send({
       userId: f.ids[0],
+      matchId: f.matchId,
       sessionId: randomUUID(),
       token: "fixture-token",
       expiresAt: Math.floor(Date.now() / 1000) + 60,
@@ -791,7 +796,10 @@ it("keeps another node live after SIGKILL and recovers the last crashed node's o
     });
     const [message] = (await ready) as [{ port: number }];
     if (!message.port) throw new Error("Presence child failed");
-    const client = io(`http://127.0.0.1:${message.port}/v1`, {
+    return { child, port: message.port };
+  }
+  async function connect({ child, port }: { child: ReturnType<typeof fork>; port: number }) {
+    const client = io(`http://127.0.0.1:${port}/v1`, {
       path: "/v1/socket.io",
       transports: ["websocket"],
       reconnection: false,
@@ -812,8 +820,9 @@ it("keeps another node live after SIGKILL and recovers the last crashed node's o
     return child;
   }
   try {
-    const first = await node();
-    const second = await node();
+    const [firstNode, secondNode] = await Promise.all([node(), node()]);
+    const first = await connect(firstNode);
+    const second = await connect(secondNode);
     const ended = once(first, "exit");
     first.kill("SIGKILL");
     await ended;

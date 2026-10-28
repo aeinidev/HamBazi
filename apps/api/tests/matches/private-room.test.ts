@@ -163,6 +163,13 @@ it("preserves owner denial and never creates a Match for a rejected room start",
   expect(await f.service.start(f.guest, {})).toMatchObject({ error: { code: "FORBIDDEN" } });
   expect(f.repository.create).not.toHaveBeenCalled();
 });
+it("reuses the initial binding and refreshes it after a lifecycle transition", async () => {
+  const f = fixture();
+  expect(await f.service.resume(f.roomId)).toMatchObject({ ok: true, matchId: f.matchId });
+  expect(f.repository.read).toHaveBeenCalledTimes(2);
+  expect(f.processing.lifecycle).toHaveBeenCalledTimes(1);
+  expect(f.match().status).toBe("WAITING_FOR_PLAYERS");
+});
 it("uses stored pins during recovery even after catalog/configuration becomes unavailable", async () => {
   const f = fixture();
   await f.service.resume(f.roomId);

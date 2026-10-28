@@ -22,6 +22,14 @@ process.once("message", async (input) => {
       transactionTimeoutMs: 5000,
     });
     await database.connect();
+    // Advertise readiness after the query adapter is usable, before starting strict heartbeat timers.
+    await database.probe();
+    const membership = createMatchMembershipPort(database);
+    const admitted = await membership.authorize(input.userId, {
+      schemaVersion: 1,
+      matchId: input.matchId,
+    });
+    if (!admitted.ok) throw new Error("Presence fixture membership unavailable");
     const resync = createMatchResyncPort(database, [createCoupMatchGame(input.rules)]);
     const reconnect = createMatchReconnectPort(database, {
       clock: { nowMs: () => Date.now() },
@@ -68,7 +76,7 @@ process.once("message", async (input) => {
               }
             : fail(),
       },
-      membership: createMatchMembershipPort(database),
+      membership,
       matches: { command: fail, ready: fail },
       rooms: { read: fail, join: fail, leave: fail, start: fail },
       matchmaking: { search: fail, read: fail, cancel: fail, found: fail, admit: fail },

@@ -13,6 +13,23 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
+  it("restricts the fixed private Match projection to Matches and validates its Room identity before I/O", async () => {
+    const database = createDatabase(options);
+    try {
+      await database.forModule("matches").execute(async (db) => {
+        expect("$queryRaw" in db).toBe(false);
+        await expect(db.readPrivateRoomMatch("invalid SQL identity")).rejects.toMatchObject({
+          code: "DATABASE_QUERY_INVALID",
+        });
+      });
+      for (const owner of ["rooms", "users", "admin", "auth"] as const)
+        await database.forModule(owner).execute(async (db) => {
+          expect("readPrivateRoomMatch" in db).toBe(false);
+        });
+    } finally {
+      await database.disconnect();
+    }
+  });
   it("restricts the fixed Room transaction lock to its owner and an active transaction", async () => {
     const database = createDatabase(options);
     try {

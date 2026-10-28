@@ -56,6 +56,27 @@ function fixture(failures: number, code = "DATABASE_TRANSACTION_CONFLICT") {
   };
 }
 
+it("uses a read-only snapshot for recovery while retaining the Room lock on ordinary reads", async () => {
+  const db = { lockRooms: vi.fn(async () => {}), room: { findUnique: vi.fn(async () => null) } };
+  const snapshot = vi.fn(async (operation: (client: typeof db) => unknown) => operation(db));
+  const transaction = vi.fn(async (operation: (client: typeof db) => unknown) => operation(db));
+  const database = { forModule: () => ({ snapshot, transaction }) } as unknown as ReturnType<
+    typeof createDatabase
+  >;
+  const repository = createRoomsRepository(database, {
+    clock: { nowMs: () => 1 },
+    ttlSeconds: 900,
+  });
+  const id = randomUUID();
+  await expect(repository.startSnapshot(id)).resolves.toBeNull();
+  expect(snapshot).toHaveBeenCalledTimes(1);
+  expect(transaction).not.toHaveBeenCalled();
+  expect(db.lockRooms).not.toHaveBeenCalled();
+  await expect(repository.read(id)).resolves.toBeNull();
+  expect(transaction).toHaveBeenCalledTimes(1);
+  expect(db.lockRooms).toHaveBeenCalledTimes(1);
+});
+
 it("backs off only after rollback and retains Serializable isolation and the five-attempt bound", async () => {
   vi.useFakeTimers();
   const f = fixture(4);

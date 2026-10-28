@@ -72,6 +72,63 @@ afterAll(async () => {
 });
 
 describe("PostgreSQL foundation", () => {
+  it("keeps a Serializable read-only snapshot consistent and rejects writes without leaking mode to the pool", async () => {
+    const probeId = `snapshot-${randomUUID()}`;
+    const reader = createDatabase({
+      ...options,
+      poolMax: 1,
+      databaseUrl: { reveal: () => process.env.TEST_DATABASE_URL! },
+    });
+    let release!: () => void;
+    let signal!: () => void;
+    const paused = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const ready = new Promise<void>((resolve) => {
+      signal = resolve;
+    });
+    let pending: Promise<string[]> | undefined;
+    try {
+      await reader.connect();
+      await admin.query(
+        "INSERT INTO games (id,slug,title,min_players,max_players,matchmaking_enabled,private_rooms_enabled,chat_enabled,voice_enabled,status,config_schema_version,config_jsonb,updated_at) VALUES ($1,$1,'Before',2,6,true,true,true,false,'ACTIVE',1,'{}',now())",
+        [probeId],
+      );
+      const scope = reader.forModule("games");
+      pending = scope.snapshot(async (db) => {
+        expect("$executeRaw" in db).toBe(false);
+        const first = await db.game.findUniqueOrThrow({ where: { id: probeId } });
+        signal();
+        await paused;
+        const second = await db.game.findUniqueOrThrow({ where: { id: probeId } });
+        return [first.title, second.title];
+      });
+      await Promise.race([ready, pending]);
+      await admin.query("UPDATE games SET title='After' WHERE id=$1", [probeId]);
+      release();
+      expect(await pending).toEqual(["Before", "Before"]);
+      await expect(
+        scope.snapshot((db) =>
+          db.game.update({ where: { id: probeId }, data: { title: "Forbidden" } }),
+        ),
+      ).rejects.toMatchObject({ code: "DATABASE_OPERATION_FAILED" });
+      expect(
+        (await scope.execute((db) => db.game.findUniqueOrThrow({ where: { id: probeId } }))).title,
+      ).toBe("After");
+      expect(
+        (
+          await scope.execute((db) =>
+            db.game.update({ where: { id: probeId }, data: { title: "Writable" } }),
+          )
+        ).title,
+      ).toBe("Writable");
+    } finally {
+      release();
+      await pending?.catch(() => {});
+      await reader.disconnect();
+      await admin.query("DELETE FROM games WHERE id=$1", [probeId]);
+    }
+  });
   it("seeds a disabled catalog once and preserves existing configuration on replay", async () => {
     const { readFile } = await import("node:fs/promises");
     const migration = await readFile(

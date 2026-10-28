@@ -50,6 +50,7 @@ export interface RoomsRepository {
   ): Promise<Ack | null>;
   create(actor: string, input: CreateRoomInput): Promise<Ack>;
   read(roomId: string): Promise<Room | null>;
+  startSnapshot(roomId: string): Promise<Room | null>;
   latestForMember?(userId: string, gameId: string): Promise<Room | null>;
   invitation(
     input: { roomId: string } | { inviteCode: string },
@@ -197,7 +198,7 @@ export function roomsService(deps: {
     // Trusted Matches orchestration only. No REST/Socket route exposes these ports.
     startSnapshot(roomId: unknown) {
       return safe(async () => {
-        const room = await deps.repository.read(parse(uuid, roomId));
+        const room = await deps.repository.startSnapshot(parse(uuid, roomId));
         if (
           !room ||
           !["STARTING", "STARTED", "CLOSED"].includes(room.status) ||

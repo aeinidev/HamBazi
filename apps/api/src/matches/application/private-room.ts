@@ -161,7 +161,8 @@ export function privateRoomMatchService(deps: {
     if (snapshot.status === "STARTED" && match.status === "ACTIVE")
       return { ok: true as const, matchId: match.matchId };
     for (let step = 0; step < 8; step++) {
-      match = await deps.repository.read(roomId);
+      // The initial binding is already validated; refresh after a transition or conflict.
+      if (step > 0) match = await deps.repository.read(roomId);
       if (!match) fault("INTERNAL_ERROR");
       verify(snapshot, match);
       let operation: "WAIT" | "START" | "ACTIVATE" | undefined;

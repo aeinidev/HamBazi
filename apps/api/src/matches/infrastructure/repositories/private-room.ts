@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { DatabaseError, type createDatabase } from "@hambazi/database";
 import {
   privateRoomMatchSchema,
@@ -14,28 +14,11 @@ export function createPrivateRoomMatchRepository(
   const scope = database.forModule("matches");
   type Client = Parameters<Parameters<typeof scope.transaction>[0]>[0];
   async function read(db: Client, roomId: string): Promise<PrivateRoomMatch | null> {
-    const row = await db.match.findUnique({
-      where: { roomId },
-      select: {
-        id: true,
-        roomId: true,
-        gameId: true,
-        roomStartVersion: true,
-        matchType: true,
-        stateVersion: true,
-        status: true,
-        engineVersion: true,
-        stateSchemaVersion: true,
-        rulesetVersion: true,
-      },
-    });
+    const rows = await db.readPrivateRoomMatch(roomId);
+    const row = rows[0];
     if (!row) return null;
     if (row.matchType !== "PRIVATE_ROOM") throw new PrivateRoomMatchFault("ROOM_CONFLICT");
-    const players = await db.matchPlayer.findMany({
-      where: { matchId: row.id },
-      select: { userId: true, seat: true, readyAt: true },
-      orderBy: { seat: "asc" },
-    });
+    const players = rows.filter((player) => player.userId !== null);
     return privateRoomMatchSchema.parse({
       schemaVersion: 1,
       matchId: row.id,
@@ -73,11 +56,16 @@ export function createPrivateRoomMatchRepository(
           attempt >= 4
         )
           throw error;
+        // Independent Room creations can share SSI predicate pages; do not retry the same burst in lockstep.
+        const backoffMs = 10 * 2 ** attempt;
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, backoffMs + randomInt(backoffMs + 1)),
+        );
       }
     }
   }
   return {
-    read: (roomId) => transaction((db) => read(db, roomId)),
+    read: (roomId) => scope.execute((db) => read(db, roomId)),
     roomForMatch: (matchId) =>
       scope.execute(async (db) => {
         const row = await db.match.findUnique({

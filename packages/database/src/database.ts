@@ -53,6 +53,19 @@ type MatchPresenceRow = Pick<
   Match,
   "id" | "status" | "stateVersion" | "lastEventSeq" | "reconnectPolicyJsonb" | "startedAt"
 >;
+type PrivateRoomMatchRow = Pick<
+  Match,
+  | "id"
+  | "roomId"
+  | "gameId"
+  | "roomStartVersion"
+  | "matchType"
+  | "stateVersion"
+  | "status"
+  | "engineVersion"
+  | "stateSchemaVersion"
+  | "rulesetVersion"
+> & { userId: string | null; seat: number | null; readyAt: Date | null };
 const matchIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   ? Omit<OwnedClient<O>, "outboxEvent"> & {
@@ -65,6 +78,7 @@ export type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
         lockMatchAdmissions(ids: readonly string[]): Promise<void>;
         lockMatch(id: string): Promise<void>;
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
+        readPrivateRoomMatch(roomId: string): Promise<PrivateRoomMatchRow[]>;
       }
     : object) &
   (O extends "users" | "games" | "rooms" | "matches"
@@ -225,6 +239,18 @@ function scope<O extends DatabaseOwner>(
       : {}),
     ...(owner === "matches"
       ? {
+          async readPrivateRoomMatch(roomId: string): Promise<PrivateRoomMatchRow[]> {
+            if (!matchIdPattern.test(roomId)) throw new DatabaseError("DATABASE_QUERY_INVALID");
+            // One statement gives metadata and readiness the same MVCC snapshot without a read transaction.
+            return client.$queryRaw<PrivateRoomMatchRow[]>`
+              SELECT m.id, m.room_id AS "roomId", m.game_id AS "gameId",
+                m.room_start_version AS "roomStartVersion", m.match_type AS "matchType",
+                m.state_version AS "stateVersion", m.status::text AS status,
+                m.engine_version AS "engineVersion", m.state_schema_version AS "stateSchemaVersion",
+                m.ruleset_version AS "rulesetVersion", p.user_id AS "userId", p.seat, p.ready_at AS "readyAt"
+              FROM matches m LEFT JOIN match_players p ON p.match_id=m.id
+              WHERE m.room_id=${roomId}::uuid ORDER BY p.seat LIMIT 65`;
+          },
           async lockPersonalAdmission(): Promise<void> {
             if (!inTransaction) throw new DatabaseError("DATABASE_LOCK_INVALID");
             await client.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(181803)`;
@@ -367,6 +393,16 @@ export function createDatabase(options: DatabaseOptions) {
       return Object.freeze({
         execute: <T>(operation: (db: ScopedClient<O>) => Promise<T>) =>
           safe(() => operation(scoped)),
+        snapshot: <T>(operation: (db: ScopedClient<O>) => Promise<T>) =>
+          safe(() =>
+            client.$transaction(
+              async (tx) => {
+                await tx.$executeRaw`SET TRANSACTION READ ONLY`;
+                return operation(scope(tx, owner));
+              },
+              { isolationLevel: "Serializable" },
+            ),
+          ),
         // Consumer-owned DB effects and receipt commit together. No network effects here.
         consumeOnce: (
           consumer: string,
