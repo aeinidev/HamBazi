@@ -3,6 +3,8 @@ node_modules/
 .pnpm-store/
 
 # Build and test output
+__pycache__/
+*.py[cod]
 .turbo/
 dist/
 build/
