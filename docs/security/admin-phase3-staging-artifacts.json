@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-phase3-staging-preparation-not-a-deployment-manifest",
+  "releaseApproved": false,
+  "ciPassed": false,
+  "sourceCommit": "aca52da5e585b97cbce79cab7cddf123317e2dd6",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "2b6e3d046401d9bcccfbccfac39980378461f8a390c6c067e2cf79ee8f4c3c9e",
+  "buildInputSha256": "9169fbea5e70c7ff5329a2f241af39afdf8b8070fed1b63742e3394262e1fa42",
+  "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+  "platform": "linux/amd64",
+  "origins": {
+    "web": "https://staging.hambazi.top",
+    "api": "https://api-staging.hambazi.top",
+    "admin": "https://admin.hambazi.top"
+  },
+  "features": {
+    "kahrobaPrivateRuntime": true
+  },
+  "plannedRestrictionWritesEnabled": false,
+  "images": [
+    {
+      "role": "api",
+      "image": "hambazi-candidate/api:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:107d0514495f1d60fbfb60e323723c9cfdde2281f5922dbbdfca0a162fb83433",
+      "disposition": "new-application-candidate",
+      "locallyAvailable": true
+    },
+    {
+      "role": "bot",
+      "image": "hambazi-candidate/bot:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:e7df5ea53d3d8ffac0885a228df40fb43fe42dbfa6ee9c4fe03d0646d1cfc343",
+      "disposition": "new-application-candidate",
+      "locallyAvailable": true
+    },
+    {
+      "role": "worker",
+      "image": "hambazi-candidate/worker:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:8460ba296ef142848564be1d4ec42bc2e5514d4017764699b357a71227932272",
+      "disposition": "new-application-candidate",
+      "locallyAvailable": true
+    },
+    {
+      "role": "web",
+      "image": "hambazi-candidate/web:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:930afb7204f9bd7f3d8a5ef3f87fdefee270734e371223a4d40a0e64b34f16e8",
+      "disposition": "new-application-candidate",
+      "locallyAvailable": true
+    },
+    {
+      "role": "admin",
+      "image": "hambazi-candidate/admin:aca52da5e585b97cbce79cab7cddf123317e2dd6-2f7449968b356095@sha256:21ec2684f24609c2eb3bff8b4f6aba89ef134774338eddc1849f405d3b279bd6",
+      "disposition": "new-application-candidate",
+      "locallyAvailable": true
+    },
+    {
+      "role": "postgres-staging",
+      "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "disposition": "retain-existing-data-image-not-a-replacement",
+      "locallyAvailable": true
+    },
+    {
+      "role": "redis-staging",
+      "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "disposition": "retain-existing-data-image-not-a-replacement",
+      "locallyAvailable": false
+    }
+  ],
+  "recordedBaselineSource": "docs/security/admin-phase2-staging-deployment.json",
+  "liveTargetBindingVerified": false,
+  "deploymentPerformed": false
+}

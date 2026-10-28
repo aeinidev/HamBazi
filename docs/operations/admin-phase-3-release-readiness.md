@@ -1,8 +1,23 @@
 # آمادگی انتشار فاز سوم Admin روی Staging
 
-تاریخ بررسی: 2026-10-28. مرجع معماری ADR-090 است. این کار فقط آماده‌سازی محلی است؛ نصب، اتصال به Staging/Production، تغییر OWNER و شروع فاز چهارم مجاز نیستند. نتیجهٔ جاری در `docs/security/admin-phase3-docker-29.8.2-qualification.json` و نتیجهٔ تاریخی پیش از ارتقای pin در `docs/security/admin-phase3-release-qualification.json` ثبت شده است؛ این سند به‌تنهایی مجوز نصب نیست.
+تاریخ بررسی: 2026-10-28. مرجع معماری ADR-090 است. این کار فقط آماده‌سازی محلی است؛ نصب، اتصال به Staging/Production، تغییر OWNER و شروع فاز چهارم مجاز نیستند. نتیجهٔ جاری در [گزارش تکمیلی آماده‌سازی](../security/admin-phase3-staging-preparation.json)، اجرای ناموفق CI در `docs/security/admin-phase3-docker-29.8.2-qualification.json` و نتیجهٔ تاریخی پیش از ارتقای pin در `docs/security/admin-phase3-release-qualification.json` ثبت شده است؛ این سند به‌تنهایی مجوز نصب نیست.
 
-## بازبینی جاری Docker 29.8.2 — 2026-10-28
+## ادامهٔ آماده‌سازی با ریسک ثبت‌شده — انتشار NO-GO
+
+دستور مالک فقط ثبت ریسک timeout خط ۶۰۰ و ادامهٔ آماده‌سازی را مجاز می‌کند؛ پذیرش رسمی شکست CI یا استقرار نیست. تست‌ها، assertionها، timeoutها، workflow و سیاست‌های امنیتی بدون تغییر باقی ماندند. CI جامع همچنان ناموفق است و manifest موفق صادر نشده است.
+
+- candidate جدید از commit تمیز `aca52da5e585b97cbce79cab7cddf123317e2dd6` با originهای ثبت‌شدهٔ Staging و featureهای همان پروفایل ساخته شد. اختلاف با commit اجرای CI قبلی فقط مستندات است. پنج ایمیج API/Bot/Worker/Web/Admin اسکن شدند و تمام شدت‌ها صفرند؛ [فهرست ثابت artifactها](../security/admin-phase3-staging-artifacts.json) بستهٔ قابل نصب یا تأیید انتشار نیست.
+- ۴۰ تست Admin و مرورگرهای واقعیِ داخل harness، ۳۸ کنترل TLS/احراز هویت/RBAC/CSRF/Audit روی همان ایمیج، ارتقای دارای داده از ۱۹ به ۲۱ Migration و بازیابی CMS/AES-256-GCM همهٔ ۴۵ جدول و globals/دو دیتابیس موفق‌اند. علاوه بر fixture استاندارد، این کنترل‌ها با PostgreSQL ثبت‌شدهٔ Staging (`7de…`) نیز محلی اجرا شدند؛ Redis آن rehearsal همچنان fixture `16b…` بود.
+- ۲۰۰ تست infra با scanner واقعی و ۵۰ کنترل مالکیت کلیدهای Backup موفق‌اند. شش سناریوی release مرورگر در fixture مستقل Docker بدون skip موفق شدند. دو اجرای native هر ۳۰۵ تست Backend را پاس کردند، ولی مرحلهٔ مرورگر همان اجراها شکست خورد؛ این اجراها PASS کلی نیستند و جای CI Docker را نمی‌گیرند.
+- بررسی تشخیصیِ suiteهای بعد از خطای اولیه، timeout مستقل `private-room-match.test.ts:206` و سه timeout در `match-reconnect.test.ts:158/229/442` را آشکار کرد. هر شکست مستقل در گزارش JSON ثبت می‌شود؛ نتیجهٔ تشخیصی ناموفق باقی می‌ماند. موفقیت مرورگر مستقل یا تعویق تست ظرفیت این شکست‌ها را رفع نمی‌کند.
+- جمع‌آوری نهایی Docker همهٔ ۳۰۵ تست Backend را اجرا کرد: ۳۰۰ موفق و همان پنج timeout ناموفق. مراحل مستقل بعدی شامل Worker، پایداری پس از restart، هر شش سناریوی release مرورگر و restore منطقی ۴۵ جدول نیز کامل شدند؛ exit نهایی همچنان ۱ است. این runner تشخیصیِ خصوصی جای CI اصلی یا شواهد PASS نیست. اسکن نهایی تاریخچه/candidate و ممیزی وابستگی‌ها نیز بدون یافتهٔ بررسی‌نشده موفق‌اند؛ هیچ استثنای جدید اضافه نشد.
+- ایمیج دقیق Redis ثبت‌شدهٔ Staging (`a2b331…`) در Docker و آرشیوهای محلی موجود نیست؛ scan و سازگاری **تمام** سرویس‌های retained تأیید نشده‌اند. شش ایمیج baseline موجود جداگانه بررسی شدند: HIGH/CRITICAL/UNKNOWN صفر، PostgreSQL یک MEDIUM دارد. این بررسی جزئی، Qualification کامل baseline یا تأیید deadline سرور نیست. هیچ ایمیجی بی‌اجازه از سرور دریافت یا جایگزین نشده است.
+
+[ADR-091](../adr/091-proposed-phase3-staging-timeout-risk.md) صرفاً پیشنهاد مشروط و هنوز تصویب‌نشده برای R01/R02 است؛ timeoutهای reconnect و هر شکست مستقل دیگر را نمی‌پوشاند، بنابراین اکنون واجد شرایط اجرا نیست. پذیرش ریسک اولیه، CI را PASS نمی‌کند. مسیر پیش‌فرض، رفع علت و CI کامل موفق است.
+
+[برنامهٔ انتشار، بکاپ و Rollback](admin-phase-3-staging-release-plan.md) برای مجوز بعدی آماده است: full backup واقعی تازه، capsule رمزگذاری‌شدهٔ تنظیمات/کلیدها، کپی خارج سرور، بازیابی واقعی همان archive و receipt منطبق باید **پیش از نصب** تکمیل شوند. ابزارهای خصوصی قدیمی به release قبلی مقیدند؛ rebinding مسیر/گیرنده و بررسی نسخهٔ ابزار gate مراسم واقعی است. فعلاً بکاپ واقعی، live health یا تمدید/تغییر deadline انجام نشده است. خاموش‌کردن کل management پیشنهاد نمی‌شود؛ flag محرومیت جدید false می‌ماند و operations DSN، RBAC، تأیید فاز دوم و reconciliation حفظ می‌شوند.
+
+## شواهد اجرای قبلی Docker 29.8.2
 
 نسخهٔ مورد انتظار با مجوز مالک در workflow و toolchain به `29.8.2` منتقل شد؛
 ADR-041 و راهنمای CI/بازتولید نیز هماهنگ‌اند. بررسی نسخه همچنان دقیق است و

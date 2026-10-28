@@ -1,0 +1,1115 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-phase3-release-preparation-with-unresolved-tests-not-ci-pass-evidence",
+  "checkedAtUTC": "2026-10-28T15:01:02.873499+00:00",
+  "status": "NO-GO",
+  "localCiPassed": false,
+  "fullPhase3QualificationPassed": false,
+  "successfulCiManifestExported": false,
+  "stagingDeploymentReady": false,
+  "stagingDeploymentAuthorized": false,
+  "serverInspected": false,
+  "serverChanged": false,
+  "productionChanged": false,
+  "realOwnerTouched": false,
+  "phase4Started": false,
+  "capacityAcceptance": "deferred-to-future-server-not-a-correctness-waiver",
+  "candidateSource": {
+    "sourceCommit": "aca52da5e585b97cbce79cab7cddf123317e2dd6",
+    "sourceDirty": false,
+    "sourceSnapshotSha256": "2b6e3d046401d9bcccfbccfac39980378461f8a390c6c067e2cf79ee8f4c3c9e",
+    "buildInputSha256": "9169fbea5e70c7ff5329a2f241af39afdf8b8070fed1b63742e3394262e1fa42",
+    "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+    "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
+    "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217"
+  },
+  "sourceRelation": {
+    "previousCiCommit": "beaad2b26a5ddea3ef88234bb9075cba1f2db35d",
+    "candidateChangesSincePreviousCi": "documentation-only; same runtime, tests, lockfile and CI policies",
+    "currentWorktreeChanges": "documentation and measured evidence only"
+  },
+  "artifactInventory": {
+    "path": "docs/security/admin-phase3-staging-artifacts.json",
+    "sha256": "4110eab96e9b74f458c59086fddb0aebd6c584d7bcf8a902f905f49fcd6feead",
+    "notADeploymentManifest": true
+  },
+  "ci": {
+    "previousActualRun": "docs/security/admin-phase3-docker-29.8.2-qualification.json",
+    "passedGatesBeforeFailure": 23,
+    "failedGate": "migration-fault-release",
+    "exitCode": 1,
+    "fullEntrypointRerunThisPreparation": false,
+    "hostedGitHubActionsRun": false,
+    "evidenceNeverRelabelledPass": true
+  },
+  "toolchain": {
+    "node": "24.22.1",
+    "pnpm": "12.4.1",
+    "dockerExpected": "29.8.2",
+    "dockerObserved": "29.8.2",
+    "securityScannerPinsAndFreshnessUnchanged": true
+  },
+  "unchangedSourceChecks": [
+    {
+      "path": "apps/api/tests/integration/match-processing.test.ts",
+      "sha256": "b5ffdf90b13c19a27a5b1a7a7588f2802c508672db8bc11c0f7e157195660046",
+      "unchangedFromCandidate": true
+    },
+    {
+      "path": "apps/api/tests/integration/private-room-match.test.ts",
+      "sha256": "433187da4dd30c810994a32cae44221d231003705e8bbd6014152b1f7611a98c",
+      "unchangedFromCandidate": true
+    },
+    {
+      "path": "apps/api/tests/integration/match-reconnect.test.ts",
+      "sha256": "ef3f2482107322d92e8baef8420c03a999e3a779bbe162d8461d562855338dbd",
+      "unchangedFromCandidate": true
+    },
+    {
+      "path": "infra/ci/verify.mjs",
+      "sha256": "643b88ad55c3caa6b8cc1635bd02d4058ac86aea6abbf0e98fe355b3ac57d213",
+      "unchangedFromCandidate": true
+    },
+    {
+      "path": "infra/scripts/security-scan.mjs",
+      "sha256": "c7d85f9235c79fc7f3a4c66fd736d94e64706bfdf3dcde6e5d51e937d02fe1e1",
+      "unchangedFromCandidate": true
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "d6c36a76fd38f6dfbb44ad527d045a74da1afe388bbb83debd7db73e1bb3a29d",
+      "unchangedFromCandidate": true
+    }
+  ],
+  "stagingProfile": {
+    "webOrigin": "https://staging.hambazi.top",
+    "apiOrigin": "https://api-staging.hambazi.top",
+    "adminOrigin": "https://admin.hambazi.top",
+    "features": {
+      "kahrobaPrivateRuntime": true
+    },
+    "coreBuildResult": {
+      "stage": "image-build-staging",
+      "exitCode": 0,
+      "seconds": 911.44,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "standaloneBuildNotTheTimedCiGate": true,
+    "coreSmoke": {
+      "stage": "staging-core-smoke",
+      "exitCode": 0,
+      "seconds": 148.74,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "coreScan": {
+      "schemaVersion": 1,
+      "kind": "application-images",
+      "ok": true,
+      "status": "passed",
+      "database": {
+        "updatedAt": "2026-10-28T07:10:42.861393948Z",
+        "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+      },
+      "sourceCommit": "aca52da5e585b97cbce79cab7cddf123317e2dd6",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "2b6e3d046401d9bcccfbccfac39980378461f8a390c6c067e2cf79ee8f4c3c9e",
+      "buildInputSha256": "9169fbea5e70c7ff5329a2f241af39afdf8b8070fed1b63742e3394262e1fa42",
+      "images": [
+        {
+          "role": "api",
+          "ok": true,
+          "image": "hambazi-candidate/api:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:107d0514495f1d60fbfb60e323723c9cfdde2281f5922dbbdfca0a162fb83433",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "bot",
+          "ok": true,
+          "image": "hambazi-candidate/bot:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:e7df5ea53d3d8ffac0885a228df40fb43fe42dbfa6ee9c4fe03d0646d1cfc343",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "worker",
+          "ok": true,
+          "image": "hambazi-candidate/worker:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:8460ba296ef142848564be1d4ec42bc2e5514d4017764699b357a71227932272",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "web",
+          "ok": true,
+          "image": "hambazi-candidate/web:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:930afb7204f9bd7f3d8a5ef3f87fdefee270734e371223a4d40a0e64b34f16e8",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        }
+      ]
+    },
+    "adminImage": {
+      "schemaVersion": 1,
+      "purpose": "local-admin-phase3-candidate",
+      "productionReleaseApproved": false,
+      "image": "hambazi-candidate/admin:aca52da5e585b97cbce79cab7cddf123317e2dd6-2f7449968b356095@sha256:21ec2684f24609c2eb3bff8b4f6aba89ef134774338eddc1849f405d3b279bd6",
+      "adminSourceSha256": "2f7449968b35609561b52aa11313a177acfd7ff7a1742083216cd22f4865eb98",
+      "apiImage": "hambazi-candidate/api:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:107d0514495f1d60fbfb60e323723c9cfdde2281f5922dbbdfca0a162fb83433",
+      "runtimeImage": "hambazi-candidate/web:aca52da5e585b97cbce79cab7cddf123317e2dd6-9169fbea5e70c7ff@sha256:930afb7204f9bd7f3d8a5ef3f87fdefee270734e371223a4d40a0e64b34f16e8",
+      "sourceSnapshotSha256": "2b6e3d046401d9bcccfbccfac39980378461f8a390c6c067e2cf79ee8f4c3c9e",
+      "coreInventorySha256": "530d6e827033e3b498ef333c973888f80a00f447812e1e596d75bf6de265f20b"
+    },
+    "adminScan": {
+      "ok": true,
+      "image": "hambazi-candidate/admin:aca52da5e585b97cbce79cab7cddf123317e2dd6-2f7449968b356095@sha256:21ec2684f24609c2eb3bff8b4f6aba89ef134774338eddc1849f405d3b279bd6",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": [],
+      "database": {
+        "updatedAt": "2026-10-28T07:10:42.861393948Z",
+        "downloadedAt": "2026-10-28T11:08:34.116973482Z"
+      }
+    }
+  },
+  "adminQualification": {
+    "fixturePostgres": "sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+    "fixtureRedis": "sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+    "integrationTestsPassed": 40,
+    "actualPhase2AndPhase3BrowserSuitesInsideHarnessPassed": true,
+    "standardFixtureResult": {
+      "stage": "admin-profile-rehearsal",
+      "exitCode": 0,
+      "seconds": 266.79,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    },
+    "retainedPostgresResult": {
+      "stage": "retained-postgres-compatibility",
+      "exitCode": 0,
+      "seconds": 241.46,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    },
+    "retainedPostgresExactImageRuntime": {
+      "passed": true,
+      "checks": 38,
+      "image": "hambazi-candidate/admin:aca52da5e585b97cbce79cab7cddf123317e2dd6-2f7449968b356095@sha256:21ec2684f24609c2eb3bff8b4f6aba89ef134774338eddc1849f405d3b279bd6",
+      "fixtureMode": "production",
+      "databaseTLSVerifyFull": true,
+      "redisTLS": true,
+      "inboundTLSVerified": true,
+      "argon2NativeAsUid1000": true,
+      "plaintextProductionRejected": true,
+      "defaultDeny401": true,
+      "csrfOrigin403": true,
+      "realSyntheticOwnerLoginAndPendingIsolation": true,
+      "restrictionAndUnrestrictViaHttps": true,
+      "auditedPrivateNote": true,
+      "flagDisabledFallbackPreservesRestriction": true,
+      "exactImageExpiryWithInjectedFixtureClock": true,
+      "syntheticFixtureOnly": true,
+      "realOwnerTouched": false
+    },
+    "retainedPostgresMigration": {
+      "passed": true,
+      "scope": "owned-local-sql-upgrade",
+      "fromMigrations": 19,
+      "toMigrations": 21,
+      "populatedUserAndSyntheticOwnerUnchanged": true,
+      "existingAuditUnchanged": true,
+      "grantsApplied": true,
+      "destructiveMigration": false
+    },
+    "retainedRedisCompatibilityVerified": false,
+    "realOwnerOrServerUsed": false
+  },
+  "syntheticEncryptedBackupRestore": {
+    "scope": "local-synthetic-full-postgresql",
+    "fixture": true,
+    "cmsAeadVerifiedBeforeRestore": true,
+    "globalsAndAllNonTemplateDatabasesRestored": true,
+    "networkNoneNoHostVolumes": true,
+    "postgresVersion": "18.6",
+    "sourceImage": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "verificationImage": "sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+    "syntheticEncryptionKeyOnly": true,
+    "corruptionRejected": true,
+    "realOffServerBackupVerified": false,
+    "offServerCopyVerified": false,
+    "restoredDatabaseCount": 2,
+    "restoredTableCount": 45
+  },
+  "retainedBaselineIndividualScans": {
+    "scope": "local-available-phase2-baseline-individual-image-checks",
+    "allBaselineImagesAvailable": false,
+    "fullBaselineQualificationPassed": false,
+    "validatedWith": "existing admin-security.scan_deadline, exact image IDs, unchanged 24-hour/severity policy",
+    "database": {
+      "Version": 2,
+      "NextUpdate": "2026-10-29T07:10:42.861393507Z",
+      "UpdatedAt": "2026-10-28T07:10:42.861393948Z",
+      "DownloadedAt": "2026-10-28T11:08:34.116973482Z"
+    },
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+        "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+        "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+        "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "web",
+        "image": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+        "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "postgres-staging",
+        "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 1,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "admin",
+        "image": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+        "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      }
+    ],
+    "missingLocalArtifacts": [
+      {
+        "role": "redis-staging",
+        "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+      }
+    ],
+    "serverInspected": false,
+    "serverTimerModified": false
+  },
+  "separateReleaseBrowserDocker": {
+    "scope": "owned-local-release-browser-only",
+    "passed": true,
+    "stats": {
+      "startTime": "2026-10-28T13:53:02.438Z",
+      "duration": 72496.32800000001,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "file": "mvp.spec.ts",
+        "line": 291,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 27321
+      },
+      {
+        "file": "mvp.spec.ts",
+        "line": 316,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 25368
+      },
+      {
+        "file": "mvp.spec.ts",
+        "line": 389,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 430
+      },
+      {
+        "file": "mvp.spec.ts",
+        "line": 406,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 640
+      },
+      {
+        "file": "mvp.spec.ts",
+        "line": 422,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 2140
+      },
+      {
+        "file": "privacy.spec.ts",
+        "line": 10,
+        "status": "passed",
+        "timeout": false,
+        "codes": [],
+        "noMove": false,
+        "durationMs": 2604
+      }
+    ]
+  },
+  "nativeDiagnostics": {
+    "runs": [
+      {
+        "stage": "native-full-functional",
+        "exitCode": 1,
+        "seconds": 226.5,
+        "testCounts": [
+          "17",
+          "62",
+          "6",
+          "10",
+          "6",
+          "22",
+          "34",
+          "12",
+          "20",
+          "14",
+          "23",
+          "2",
+          "4",
+          "7",
+          "8",
+          "2",
+          "26",
+          "2",
+          "3",
+          "25"
+        ],
+        "browserCases": [],
+        "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+      },
+      {
+        "stage": "native-full-repeat",
+        "exitCode": 1,
+        "seconds": 225.17,
+        "testCounts": [
+          "17",
+          "62",
+          "6",
+          "10",
+          "6",
+          "22",
+          "34",
+          "12",
+          "20",
+          "14",
+          "23",
+          "2",
+          "4",
+          "7",
+          "8",
+          "2",
+          "26",
+          "2",
+          "3",
+          "25"
+        ],
+        "browserCases": [],
+        "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+      }
+    ],
+    "backendTestsPassedEachRun": 305,
+    "bothOverallPassed": false,
+    "failureStage": "release browser after backend tests",
+    "isolatedBrowser": {
+      "scope": "owned-local-release-browser-only",
+      "passed": false,
+      "stats": {
+        "startTime": "2026-10-28T14:41:24.583Z",
+        "duration": 57986.397,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "file": "mvp.spec.ts",
+          "line": 291,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 21794
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 316,
+          "status": "failed",
+          "timeout": true,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 16991
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 389,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 359
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 406,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 720
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 422,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 1971
+        },
+        {
+          "file": "privacy.spec.ts",
+          "line": 10,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 2499
+        }
+      ]
+    },
+    "nativeSuccessNeverSubstitutesForDockerCi": true
+  },
+  "security": {
+    "infraResult": {
+      "stage": "infra-full-security-tests",
+      "exitCode": 0,
+      "seconds": 14.38,
+      "testCounts": ["200"],
+      "browserCases": [],
+      "markers": []
+    },
+    "realScannerTestsPassed": 200,
+    "backupKeyOwnershipResult": {
+      "stage": "backup-key-ownership-tests",
+      "exitCode": 0,
+      "seconds": 0.06,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "keyOwnershipCasesPassed": 50,
+    "dependencyResult": {
+      "stage": "preparation-dependencies",
+      "exitCode": 0,
+      "seconds": 1.67,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "secretScanFinalResult": {
+      "stage": "preparation-secrets",
+      "exitCode": 0,
+      "seconds": 2.83,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "newScannerExceptions": false,
+    "policyRelaxed": false,
+    "secretScanSummary": {
+      "schemaVersion": 1,
+      "kind": "secrets",
+      "status": "passed",
+      "tool": {
+        "name": "gitleaks",
+        "version": "8.30.1",
+        "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+      },
+      "history": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 4,
+        "reviewedFalsePositives": 4
+      },
+      "files": 1226,
+      "current": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 1,
+        "reviewedFalsePositives": 1
+      },
+      "ok": true
+    },
+    "dependencyScanSummary": {
+      "schemaVersion": 1,
+      "kind": "dependencies",
+      "status": "passed",
+      "ok": true,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "findings": []
+    }
+  },
+  "supplementaryDiagnostics": {
+    "status": "completed-with-five-failures-not-passed",
+    "releaseGate": false,
+    "canGrantException": false,
+    "originalTestsAssertionsAndTimeoutsUnchanged": true,
+    "failureExitRetained": true,
+    "method": "private collector outside repository continues after recording failures solely to execute independent later suites; source CI remains fail-fast and failed",
+    "result": {
+      "stage": "supplementary-all-report",
+      "exitCode": 1,
+      "seconds": 414.07,
+      "testCounts": ["17", "3", "25"],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved."
+      ]
+    },
+    "collection": {
+      "scope": "local-supplementary-not-ci",
+      "allSuitesExecuted": true,
+      "allLaterStagesCompleted": true,
+      "overallPassed": false,
+      "knownFailureRetained": true,
+      "suites": [
+        {
+          "suite": "sessions.test.ts",
+          "passed": true,
+          "passedTests": 62,
+          "failedTests": 0
+        },
+        {
+          "suite": "bot-delivery.test.mjs",
+          "passed": true,
+          "passedTests": 6,
+          "failedTests": 0
+        },
+        {
+          "suite": "profile.test.ts",
+          "passed": true,
+          "passedTests": 10,
+          "failedTests": 0
+        },
+        {
+          "suite": "catalog.test.ts",
+          "passed": true,
+          "passedTests": 6,
+          "failedTests": 0
+        },
+        {
+          "suite": "rooms.test.ts",
+          "passed": true,
+          "passedTests": 22,
+          "failedTests": 0
+        },
+        {
+          "suite": "match-admission.test.ts",
+          "passed": true,
+          "passedTests": 34,
+          "failedTests": 0
+        },
+        {
+          "suite": "matchmaking.test.ts",
+          "passed": true,
+          "passedTests": 12,
+          "failedTests": 0
+        },
+        {
+          "suite": "match-processing.test.ts",
+          "passed": false,
+          "passedTests": 19,
+          "failedTests": 1,
+          "failures": [
+            {
+              "name": "keeps current-cursor recovery waves fresh across concurrent commands and locked role changes",
+              "durationMs": 5013.760000999999,
+              "timeout": true,
+              "locations": ["tests/integration/match-processing.test.ts:600:1"]
+            }
+          ]
+        },
+        {
+          "suite": "private-room-match.test.ts",
+          "passed": false,
+          "passedTests": 13,
+          "failedTests": 1,
+          "failures": [
+            {
+              "name": "recovers eight active private Matches concurrently without duplicate Room reads or durable effects",
+              "durationMs": 5017.122627,
+              "timeout": true,
+              "locations": ["tests/integration/private-room-match.test.ts:206:1"]
+            }
+          ]
+        },
+        {
+          "suite": "match-reconnect.test.ts",
+          "passed": false,
+          "passedTests": 20,
+          "failedTests": 3,
+          "failures": [
+            {
+              "name": "renews concurrent Presence heartbeats without views while retaining atomic lease and state guards",
+              "durationMs": 5016.3361589999995,
+              "timeout": true,
+              "locations": ["tests/integration/match-reconnect.test.ts:158:1"]
+            },
+            {
+              "name": "registers 32 pre-activation Presence subscriptions with one guard projection and atomic leases",
+              "durationMs": 5002.3608300000005,
+              "timeout": true,
+              "locations": ["tests/integration/match-reconnect.test.ts:229:1"]
+            },
+            {
+              "name": "reconnect-vs-timeout has one winner across independent PostgreSQL clients",
+              "durationMs": 5001.112681000002,
+              "timeout": true,
+              "locations": ["tests/integration/match-reconnect.test.ts:442:1"]
+            }
+          ]
+        },
+        {
+          "suite": "realtime.test.ts",
+          "passed": true,
+          "passedTests": 2,
+          "failedTests": 0
+        },
+        {
+          "suite": "transport-admission.test.ts",
+          "passed": true,
+          "passedTests": 4,
+          "failedTests": 0
+        },
+        {
+          "suite": "chat.test.ts",
+          "passed": true,
+          "passedTests": 7,
+          "failedTests": 0
+        },
+        {
+          "suite": "statistics.test.ts",
+          "passed": true,
+          "passedTests": 8,
+          "failedTests": 0
+        },
+        {
+          "suite": "diagnostics.test.ts",
+          "passed": true,
+          "passedTests": 2,
+          "failedTests": 0
+        },
+        {
+          "suite": "release-contract.test.mjs",
+          "passed": true,
+          "passedTests": 26,
+          "failedTests": 0
+        },
+        {
+          "suite": "personal-bots.test.ts",
+          "passed": true,
+          "passedTests": 2,
+          "failedTests": 0
+        }
+      ]
+    },
+    "backendCasesExecuted": 305,
+    "backendCasesPassed": 300,
+    "backendCasesFailed": 5,
+    "releaseBrowserCasesPassed": 6,
+    "restartPersistenceCompleted": true,
+    "logicalRestoreTablesVerified": 45,
+    "knownFailureExitCode": 1,
+    "underlyingRootCause": "unresolved; neither capacity-only nor Docker regression proven"
+  },
+  "risks": [
+    {
+      "id": "HB-ADMIN-P3-R01",
+      "test": "apps/api/tests/integration/match-processing.test.ts:600",
+      "limitMs": 5000,
+      "classification": "known-unresolved-timeout",
+      "ownerAuthorizedRecording": true,
+      "releaseWaiverApproved": false
+    },
+    {
+      "id": "HB-ADMIN-P3-R02",
+      "test": "apps/api/tests/integration/private-room-match.test.ts:206",
+      "limitMs": 5000,
+      "observedDurationMs": 5011.276517,
+      "classification": "new-unresolved-timeout",
+      "ownerAccepted": false
+    },
+    {
+      "id": "HB-ADMIN-P3-R03",
+      "tests": [
+        "apps/api/tests/integration/match-reconnect.test.ts:158",
+        "apps/api/tests/integration/match-reconnect.test.ts:229",
+        "apps/api/tests/integration/match-reconnect.test.ts:442"
+      ],
+      "limitMs": 5000,
+      "observedDurationMs": [5014.923303, 5002.026071, 5002.325237],
+      "classification": "new-unresolved-timeouts",
+      "ownerAccepted": false,
+      "coveredByProposedException": false
+    }
+  ],
+  "exceptionProposal": {
+    "adr": "docs/adr/091-proposed-phase3-staging-timeout-risk.md",
+    "status": "Proposed-not-approved",
+    "currentlyEligible": false,
+    "riskScope": ["HB-ADMIN-P3-R01", "HB-ADMIN-P3-R02"],
+    "otherFailuresNotCovered": true,
+    "maximumHoursAfterExplicitApproval": 24,
+    "approvedAtUTC": null,
+    "expiresAtUTC": null,
+    "securityDeadlinesNeverExtended": true,
+    "restrictionWritesRemainDisabled": true,
+    "existingPhase2OperationsDsnAndReconciliationPreserved": true,
+    "executableBypassCreated": false,
+    "deploymentStillNeedsSeparateApproval": true
+  },
+  "backupRollbackPlan": {
+    "path": "docs/operations/admin-phase-3-staging-release-plan.md",
+    "realBackupExecuted": false,
+    "realOffServerCopyVerified": false,
+    "realRestoreReceiptVerified": false,
+    "legacyReleasePathAndRecipientRebindingStillRequired": true,
+    "privateUserEntryOnly": true,
+    "rehearsalIsNotRealBackupAcceptance": true
+  },
+  "remainingReleaseGates": [
+    "Resolve independently failing correctness/lease/recovery tests and pass clean full CI; proposed exception cannot cover R03 or any additional failure.",
+    "Obtain exact retained Redis artifact lawfully, scan it and complete exact retained data-image qualification; fixture Redis is not a replacement.",
+    "Recheck all security evidence freshness, live target bindings, service health and actual containment deadline after deployment authorization.",
+    "Rebind reviewed backup tooling to fresh unique release output and recipient, then complete real encrypted full backup, off-server copy and exact-archive isolated restore receipt before cutover.",
+    "Obtain separate Staging deployment authorization; do not change Production, real OWNER or begin Phase4."
+  ],
+  "privateLocalEvidenceDirectory": "/home/mehdi/.cache/hambazi-phase3-staging-prep-1tpz6b5u",
+  "testResults": {
+    "admin-profile-build": {
+      "stage": "admin-profile-build",
+      "exitCode": 0,
+      "seconds": 119.93,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "admin-profile-rehearsal": {
+      "stage": "admin-profile-rehearsal",
+      "exitCode": 0,
+      "seconds": 266.79,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    },
+    "admin-profile-scan": {
+      "stage": "admin-profile-scan",
+      "exitCode": 0,
+      "seconds": 20.28,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "available-baseline-scan": {
+      "stage": "available-baseline-scan",
+      "exitCode": 2,
+      "seconds": 8.19,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "backup-key-ownership-tests": {
+      "stage": "backup-key-ownership-tests",
+      "exitCode": 0,
+      "seconds": 0.06,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "image-build-staging": {
+      "stage": "image-build-staging",
+      "exitCode": 0,
+      "seconds": 911.44,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "infra-full-security-tests": {
+      "stage": "infra-full-security-tests",
+      "exitCode": 0,
+      "seconds": 14.38,
+      "testCounts": ["200"],
+      "browserCases": [],
+      "markers": []
+    },
+    "native-full-functional": {
+      "stage": "native-full-functional",
+      "exitCode": 1,
+      "seconds": 226.5,
+      "testCounts": [
+        "17",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "native-full-repeat": {
+      "stage": "native-full-repeat",
+      "exitCode": 1,
+      "seconds": 225.17,
+      "testCounts": [
+        "17",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "native-release-browser-targeted": {
+      "stage": "native-release-browser-targeted",
+      "exitCode": 1,
+      "seconds": 67.06,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "release-browser-targeted": {
+      "stage": "release-browser-targeted",
+      "exitCode": 0,
+      "seconds": 99.34,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": [
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    },
+    "retained-data-scan": {
+      "stage": "retained-data-scan",
+      "exitCode": 1,
+      "seconds": 30.19,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "retained-postgres-compatibility": {
+      "stage": "retained-postgres-compatibility",
+      "exitCode": 0,
+      "seconds": 241.46,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    },
+    "staging-core-scan": {
+      "stage": "staging-core-scan",
+      "exitCode": 0,
+      "seconds": 23.73,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "staging-core-smoke": {
+      "stage": "staging-core-smoke",
+      "exitCode": 0,
+      "seconds": 148.74,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "supplementary-all-cases": {
+      "stage": "supplementary-all-cases",
+      "exitCode": 1,
+      "seconds": 225.82,
+      "testCounts": ["17"],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "supplementary-functional-repeat": {
+      "stage": "supplementary-functional-repeat",
+      "exitCode": 1,
+      "seconds": 183.84,
+      "testCounts": ["17"],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "supplementary-functional": {
+      "stage": "supplementary-functional",
+      "exitCode": 1,
+      "seconds": 174.31,
+      "testCounts": ["17"],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "supplementary-all-report": {
+      "stage": "supplementary-all-report",
+      "exitCode": 1,
+      "seconds": 414.07,
+      "testCounts": ["17", "3", "25"],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved."
+      ]
+    }
+  }
+}
