@@ -24,6 +24,8 @@
 8. در `advance`، binding اولیهٔ همان فراخوانی فقط پس از transition یا conflict دوباره خوانده می‌شود. اعتبارسنجی provenance و کنترل locked expectedVersion حفظ می‌شوند؛ cache مشترک یا حذف کنترل تازهٔ Room ایجاد نمی‌شود.
 9. projection خصوصی Match و readiness اعضا با یک SELECT پارامتری و ثابت، فقط در scope مالک Matches و بدون state مخفی، خوانده می‌شود. یک statement، snapshot سازگار همان نقطه را می‌دهد؛ حداکثر ۶۵ سطر برای تشخیص roster نامعتبر محدود است. مسیر create همچنان در تراکنش Serializable قبلی اجرا می‌شود و mutationها lock/version قبلی را حفظ می‌کنند.
 
+10. `check` همان format/lint/boundary/typecheck/test/build/contracts را حفظ می‌کند؛ typecheck، test و build در یک گراف Turbo اجرا می‌شوند تا وابستگی‌های مشترک در invocationهای جدا و اجباری چند بار تکرار نشوند. تست‌های Infra جداگانه حفظ‌اند. `TURBO_FORCE=true`، concurrency=1، گیت‌های ۲۸گانه و تمام مهلت‌ها ثابت می‌مانند.
+
 ## Alternatives
 
 - افزایش Timeout، کاهش fixture/موج، skip، خاموش‌کردن fsync یا پذیرش tmpfs: با الزامات این کار سازگار نیستند.

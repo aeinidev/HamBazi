@@ -10,7 +10,7 @@
   },
   "packageManager": "pnpm@12.4.1",
   "scripts": {
-    "check": "pnpm format:check && pnpm lint && pnpm check:architecture && pnpm typecheck && pnpm test && pnpm build && pnpm --filter @hambazi/api contract:check",
+    "check": "pnpm format:check && pnpm lint && pnpm check:architecture && turbo run typecheck test build && pnpm test:infra && pnpm --filter @hambazi/api contract:check",
     "check:architecture": "node tooling/eslint/check-architecture.mjs",
     "build": "turbo run build",
     "lint": "eslint . --max-warnings 0",

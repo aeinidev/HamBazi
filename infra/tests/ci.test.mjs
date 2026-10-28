@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,6 +21,46 @@ const pendingPlan = ["7C", "17C", "18B", "19"]
   .map((phase) => `### Phase ${phase} — synthetic\n\n- **Status:** Pending\n`)
   .join("\n");
 const action = (w, name) => w.jobs.verify.steps.find((step) => step.uses?.startsWith(`${name}@`));
+
+it("retains every workspace quality task in one forced Turbo graph and the non-Turbo checks", async () => {
+  const manifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  for (const command of [
+    "pnpm format:check",
+    "pnpm lint",
+    "pnpm check:architecture",
+    "pnpm test:infra",
+    "pnpm --filter @hambazi/api contract:check",
+  ])
+    expect(manifest.scripts.check.split(" && ")).toContain(command);
+  const taskCommand = manifest.scripts.check
+    .split(" && ")
+    .filter((command) => command.startsWith("turbo run "));
+  expect(taskCommand).toHaveLength(1);
+  const tasks = taskCommand[0].slice("turbo run ".length).split(" ");
+  expect(tasks.sort()).toEqual(["build", "test", "typecheck"]);
+  const output = await execute("pnpm", ["exec", "turbo", "run", ...tasks, "--dry=json"], {
+    cwd: root,
+    maxBuffer: 4 * 1024 * 1024,
+  });
+  const graph = JSON.parse(output.stdout);
+  const ids = graph.tasks
+    .filter((task) => task.command !== "<NONEXISTENT>")
+    .map((task) => task.taskId);
+  expect(new Set(ids).size).toBe(ids.length);
+  for (const parent of ["apps", "packages", "packages/games", "tooling"])
+    for (const entry of await readdir(join(root, parent), { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const path = join(root, parent, entry.name, "package.json");
+      const data = await readFile(path, "utf8").catch((error) => {
+        if (error.code === "ENOENT") return null;
+        throw error;
+      });
+      if (!data) continue;
+      const workspace = JSON.parse(data);
+      for (const task of tasks)
+        if (workspace.scripts?.[task]) expect(ids).toContain(`${workspace.name}#${task}`);
+    }
+});
 
 it("accepts reviewed workflow trust boundaries and keeps deferred capacity as a release gate", () => {
   validateWorkflow(workflow);
