@@ -5,6 +5,7 @@ import { accountCreationService, type AccountCreationPort } from "./application/
 import { createAccountRepository } from "./infrastructure/repositories/accounts.js";
 import { identityService, type UserIdentityPort } from "./application/identity.js";
 import { createIdentityRepository } from "./infrastructure/repositories/identity.js";
+import { createRestrictionExpiry } from "./infrastructure/repositories/restrictions.js";
 import { profileService } from "./application/profile.js";
 import { createProfileRepository } from "./infrastructure/repositories/profile.js";
 
@@ -22,7 +23,11 @@ export function createProfileCleanup(
   return async (input: { schemaVersion: 1; limit: number }) => {
     try {
       if (input.schemaVersion !== 1) return { ok: false as const };
-      return { ok: true as const, receipts: await repository.cleanup(input.limit), flows: 0 };
+      return {
+        ok: true as const,
+        receipts: await repository.cleanup(input.limit),
+        flows: await createRestrictionExpiry(database, clock).batch(input.limit),
+      };
     } catch {
       return { ok: false as const };
     }
@@ -31,8 +36,9 @@ export function createProfileCleanup(
 
 export function createUserIdentityPort(
   database: Parameters<typeof createIdentityRepository>[0],
+  clock?: { nowMs(): number },
 ): UserIdentityPort {
-  return identityService(createIdentityRepository(database));
+  return identityService(createIdentityRepository(database, clock));
 }
 
 export function createAccountCreationPort(
@@ -71,3 +77,5 @@ export function createUsersAdminOperations(
 ) {
   return createUsersAdminOperationsRepository(database, clock);
 }
+
+export { createUsersAdminDetailRepository as createUsersAdminDetail } from "./infrastructure/repositories/admin-detail.js";

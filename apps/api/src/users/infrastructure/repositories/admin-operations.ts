@@ -10,7 +10,11 @@ export function createUsersAdminOperationsRepository(
   const scope = database.forModule("users");
   const action = (input: AdminEffectCommand["action"]) => {
     const a = adminActionSchema.parse(input);
-    if (a.operation !== "USER_DISPLAY_NAME" && a.operation !== "USER_STATUS")
+    if (
+      a.operation !== "USER_DISPLAY_NAME" &&
+      a.operation !== "USER_RESTRICT" &&
+      a.operation !== "USER_UNRESTRICT"
+    )
       throw new Error("ADMIN_EFFECT_INVALID");
     return a;
   };
@@ -41,39 +45,98 @@ export function createUsersAdminOperationsRepository(
       );
       return row ? check(row, op) : null;
     },
-    execute(op: AdminEffectCommand) {
+    async execute(op: AdminEffectCommand) {
       const a = action(op.action);
       return scope.transaction(async (db) => {
-        await db.lockAdminEffect(op.id);
+        await db.lockAdminEffect(a.targetId);
         const previous = await db.userAdminEffect.findUnique({ where: { id: op.id } });
         if (previous) return check(previous, op);
         if (op.gameId !== null) throw new Error("ADMIN_EFFECT_INVALID");
-        const name =
-          a.operation === "USER_DISPLAY_NAME" ? normalizeDisplayName(a.displayName) : null;
+        if (a.operation === "USER_RESTRICT" || a.operation === "USER_UNRESTRICT") {
+          const now = new Date(clock.nowMs());
+          const active = await db.userRestriction.findFirst({
+            where: { userId: a.targetId, endedAt: null },
+          });
+          const restricting = a.operation === "USER_RESTRICT";
+          if (
+            !op.reasonCode ||
+            !["ABUSE", "SPAM", "SECURITY", "INCIDENT_RESPONSE", "APPEAL"].includes(op.reasonCode)
+          )
+            throw new Error("ADMIN_EFFECT_INVALID");
+          const valid = restricting
+            ? !active
+            : active
+              ? active.id === a.restrictionId
+              : a.restrictionId === null;
+          const changed = valid
+            ? await db.user.updateMany({
+                where: {
+                  id: a.targetId,
+                  profileVersion: a.expectedVersion,
+                  status: restricting ? "ACTIVE" : "BANNED",
+                },
+                data: {
+                  status: restricting ? "BANNED" : "ACTIVE",
+                  profileVersion: { increment: 1 },
+                  authVersion: { increment: 1 },
+                },
+              })
+            : { count: 0 };
+          if (changed.count === 1) {
+            if (restricting) {
+              const durations = {
+                HOUR_1: 3600000,
+                HOURS_24: 86400000,
+                DAYS_7: 604800000,
+                DAYS_30: 2592000000,
+                PERMANENT: null,
+              };
+              const duration = durations[a.duration];
+              await db.userRestriction.create({
+                data: {
+                  id: op.id,
+                  userId: a.targetId,
+                  realmId: op.realmId,
+                  actorId: op.actorId,
+                  duration: a.duration,
+                  reasonCode: op.reasonCode,
+                  createdAt: now,
+                  expiresAt: duration === null ? null : new Date(now.getTime() + duration),
+                },
+              });
+            } else if (active) {
+              await db.userRestriction.update({
+                where: { id: active.id },
+                data: { endedAt: now, endKind: "REVOKED", endedByOperationId: op.id },
+              });
+            }
+          }
+          const code = changed.count === 1 ? "APPLIED" : "VERSION_OR_STATE_CONFLICT";
+          await db.userAdminEffect.create({
+            data: {
+              id: op.id,
+              actorId: op.actorId,
+              realmId: op.realmId,
+              digest: op.digest,
+              targetId: a.targetId,
+              resultCode: code,
+              occurredAt: now,
+            },
+          });
+          return { code };
+        }
+        const name = normalizeDisplayName(a.displayName);
         const changed =
           name === undefined
             ? { count: 0 }
-            : a.operation === "USER_STATUS"
-              ? await db.user.updateMany({
-                  where: {
-                    id: a.targetId,
-                    profileVersion: a.expectedVersion,
-                    status: { in: ["ACTIVE", "BANNED"] },
-                  },
-                  data: {
-                    profileVersion: { increment: 1 },
-                    status: a.status,
-                    authVersion: { increment: 1 },
-                  },
-                })
-              : await db.user.updateMany({
-                  where: {
-                    id: a.targetId,
-                    profileVersion: a.expectedVersion,
-                    status: { in: ["ACTIVE", "BANNED"] },
-                  },
-                  data: { profileVersion: { increment: 1 }, displayName: name! },
-                });
+            : await db.user.updateMany({
+                where: {
+                  id: a.targetId,
+                  profileVersion: a.expectedVersion,
+                  status: { in: ["ACTIVE", "BANNED"] },
+                },
+                data: { profileVersion: { increment: 1 }, displayName: name },
+              });
         const code =
           name === undefined
             ? "INVALID_DISPLAY_NAME"

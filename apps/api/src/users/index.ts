@@ -18,3 +18,5 @@ export type { RegistrationPort, RegistrationProfile } from "./application/regist
 export { createUsersAdminRead } from "./module.js";
 
 export { createUsersAdminOperations } from "./module.js";
+
+export { createUsersAdminDetail } from "./module.js";

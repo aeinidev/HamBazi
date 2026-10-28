@@ -67,6 +67,25 @@ async function mock(page: Page, owner = true) {
       return reply({ schemaVersion: 1, next: "SIGNED_IN", csrfToken: csrf });
     }
     if (!state.signed) return error();
+    if (path === "management/meta")
+      return reply({
+        schemaVersion: 1,
+        permissions: state.permissions,
+        templates: {},
+        enabled: false,
+        restrictionsEnabled: false,
+      });
+    if (/^users\/[a-f0-9-]+\/profile$/.test(path))
+      return reply({
+        schemaVersion: 1,
+        id: path.split("/")[1],
+        displayName: "<img src=x onerror=alert(1)>",
+        publicHandle: "synthetic_handle",
+        status: "ACTIVE",
+        profileVersion: 0,
+        createdAt: "2026-10-25T09:00:00.000Z",
+        registrationCompletedAt: null,
+      });
     if (path === "me/access")
       return reply({
         schemaVersion: 1,
@@ -144,8 +163,20 @@ test("shared RTL login opens PIN only after a valid owner password; safe dashboa
       () => Object.keys(localStorage).length + Object.keys(sessionStorage).length,
     ),
   ).toBe(0);
+  const rowButton = page.locator("tbody button").first();
+  await rowButton.click();
+  await expect(page.getByRole("heading", { name: "پروفایل کاربر", exact: true })).toBeVisible();
+  await rowButton.click();
+  await expect(page.getByRole("heading", { name: "پروفایل کاربر", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "بازگشت به فهرست", exact: true }).click();
+  await page.getByLabel("جستجوی کاربر", { exact: true }).fill("clear-on-logout");
   await page.getByRole("button", { name: "خروج امن" }).click();
   await expect(page.getByRole("heading", { name: "به هم‌بازی خوش آمدید" })).toBeVisible();
+  await login(page);
+  await page.getByLabel("PIN شش‌رقمی", { exact: true }).fill("012345");
+  await page.getByRole("button", { name: "تأیید و ورود", exact: true }).click();
+  await page.getByRole("button", { name: "کاربران", exact: true }).click();
+  await expect(page.getByLabel("جستجوی کاربر", { exact: true })).toHaveValue("");
 });
 test("ordinary admin enters directly and revoked permissions disappear within five seconds", async ({
   page,

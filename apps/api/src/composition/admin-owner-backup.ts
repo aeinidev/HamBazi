@@ -13,6 +13,7 @@ const capsule = z.strictObject({
   schemaTag: z.enum([
     "admin-local-identity+password-rotation-v1",
     "admin-local-identity+access-management-v2",
+    "admin-local-identity+private-notes-v3",
   ]),
   runtimeEnvironment: z.string().max(65536),
   operatorEnvironment: z.string().max(65536),

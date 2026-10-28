@@ -29,6 +29,20 @@ const fixture = () => ({
   ADMIN_REDIS_URL: "redis://:synthetic@127.0.0.1:6379/0",
 });
 describe("explicit local Admin configuration", () => {
+  it("keeps restrictions closed unless mutations and explicit phase-three activation are both configured", () => {
+    expect(parseAdminConfig(fixture())!.restrictionsEnabled).toBe(false);
+    expect(() =>
+      parseAdminConfig({ ...fixture(), ADMIN_USER_RESTRICTIONS_ENABLED: "true" }),
+    ).toThrow("ADMIN_CONFIGURATION_INVALID");
+    const config = parseAdminConfig({
+      ...fixture(),
+      ADMIN_MUTATIONS_ENABLED: "true",
+      ADMIN_USER_RESTRICTIONS_ENABLED: "true",
+      ADMIN_OPERATIONS_DATABASE_URL:
+        "postgresql://hambazi_admin_operations:synthetic@127.0.0.1/test",
+    });
+    expect(config!.restrictionsEnabled).toBe(true);
+  });
   it("keeps mutations disabled and requires the distinct operations role on the same primary database", () => {
     expect(parseAdminConfig(fixture())!.operationsDatabaseUrl).toBeUndefined();
     const url = "postgresql://hambazi_admin_operations:synthetic@127.0.0.1/test";

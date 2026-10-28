@@ -128,3 +128,5 @@ export function createMatchesAdminOperations(
 ) {
   return createMatchesAdminOperationsRepository(database, clock);
 }
+
+export { createAdminUserHistoryRepository as createAdminUserHistory } from "./infrastructure/repositories/admin-user-history.js";

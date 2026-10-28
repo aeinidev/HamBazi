@@ -5,11 +5,14 @@ export interface AdminEffectCommand {
   realmId: string;
   digest: string;
   gameId: string | null;
+  reasonCode?: string;
   action: {
     operation: string;
     targetId: string;
     expectedVersion: number;
     displayName?: string;
     status?: string;
+    duration?: string;
+    restrictionId?: string | null;
   };
 }

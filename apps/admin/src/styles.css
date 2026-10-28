@@ -371,3 +371,40 @@ input[type="checkbox"] {
   border-block-start: 1px solid #405273;
   padding-block: 12px;
 }
+
+textarea {
+  background: #111827;
+  color: inherit;
+  border: 1px solid #454263;
+  border-radius: 0.5rem;
+  padding: 0.6rem;
+  width: 100%;
+  max-width: 100%;
+  min-height: 6rem;
+  font: inherit;
+}
+textarea:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+.user-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+.user-search label {
+  flex: 1;
+  min-width: min(15rem, 100%);
+}
+.user-detail {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .table-scroll table {
+    min-width: 36rem;
+  }
+}

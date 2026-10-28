@@ -21,7 +21,7 @@ const delegates = {
     "adminOperation",
   ],
   auth: ["session", "botUpdateReceipt", "botOnboardingFlow", "botSupportSubmission"],
-  users: ["user", "userSettings", "profileMutationReceipt", "userAdminEffect"],
+  users: ["user", "userSettings", "profileMutationReceipt", "userAdminEffect", "userRestriction"],
   games: ["game", "gameAdminEffect"],
   rooms: ["room", "roomMember", "roomCommandReceipt", "roomAdminEffect"],
   matches: [

@@ -215,6 +215,7 @@ describe("database infrastructure boundary", () => {
         "profileMutationReceipt",
         "user",
         "userAdminEffect",
+        "userRestriction",
         "userSettings",
       ]);
       expect("match" in db).toBe(false);

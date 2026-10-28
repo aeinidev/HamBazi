@@ -366,6 +366,31 @@ describe("owned local Nginx → private TLS Admin", () => {
       await t.close();
     }
   }, 30000);
+  it("exposes only authenticated phase-three reads and rejects direct moderation writes", async () => {
+    const t = await fixture();
+    const id = randomUUID();
+    try {
+      await t.enable();
+      for (const path of [
+        "users/search?search=fixture",
+        `users/${id}/profile`,
+        `users/${id}/history?limit=5`,
+        `users/${id}/restrictions`,
+        `operations/${id}/private-note`,
+      ]) {
+        expect((await t.send("/v1/admin/" + path)).status).toBe(401);
+      }
+      for (const path of [
+        `users/${id}/restrictions`,
+        `users/${id}/ban`,
+        `operations/${id}/private-note`,
+      ]) {
+        expect((await t.send("/v1/admin/" + path, {})).status).toBe(404);
+      }
+    } finally {
+      await t.close();
+    }
+  }, 30000);
   it("lets an ordinary admin sign in without PIN, denies missing grants and rate-limits before KDF", async () => {
     const t = await fixture();
     try {

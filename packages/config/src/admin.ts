@@ -37,6 +37,7 @@ const schema = z.object({
     .pipe(z.array(z.string().refine(privateIp)).min(1).max(16)),
   ADMIN_DATABASE_URL: z.string().url(),
   ADMIN_READ_DATABASE_URL: z.string().url(),
+  ADMIN_USER_RESTRICTIONS_ENABLED: z.enum(["true", "false"]).default("false"),
   ADMIN_MUTATIONS_ENABLED: z.enum(["true", "false"]).default("false"),
   ADMIN_OPERATIONS_DATABASE_URL: z.string().url().optional(),
   ADMIN_DB_POOL_MAX: integer(1, 10),
@@ -64,6 +65,8 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
   if (!p.success) throw new Error("ADMIN_CONFIGURATION_INVALID");
   const v = p.data;
   if ((v.ADMIN_MUTATIONS_ENABLED === "true") !== (v.ADMIN_OPERATIONS_DATABASE_URL !== undefined))
+    throw new Error("ADMIN_CONFIGURATION_INVALID");
+  if (v.ADMIN_USER_RESTRICTIONS_ENABLED === "true" && v.ADMIN_MUTATIONS_ENABLED !== "true")
     throw new Error("ADMIN_CONFIGURATION_INVALID");
   if (v.ADMIN_OPERATIONS_DATABASE_URL) {
     const operations = new URL(v.ADMIN_OPERATIONS_DATABASE_URL),
@@ -116,6 +119,7 @@ export function parseAdminConfig(environment: Readonly<Record<string, string | u
   )
     throw new Error("ADMIN_CONFIGURATION_INVALID");
   return Object.freeze({
+    restrictionsEnabled: v.ADMIN_USER_RESTRICTIONS_ENABLED === "true",
     ingressMode: v.ADMIN_INGRESS_MODE,
     proxyPeers,
     realmId: v.ADMIN_REALM,

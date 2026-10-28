@@ -35,6 +35,16 @@ export const adminOperationPermissions: Record<
   ROLE_SAVE: { write: "roles.edit", approve: "roles.manage", view: "roles.view" },
   ROLE_DELETE: { write: "roles.manage", approve: "roles.manage", view: "roles.view" },
   USER_DISPLAY_NAME: { write: "users.edit", approve: "users.approve", view: "users.view" },
+  USER_RESTRICT: {
+    write: "users.restrictions.manage",
+    approve: "users.restrictions.approve",
+    view: "users.restrictions.view",
+  },
+  USER_UNRESTRICT: {
+    write: "users.restrictions.manage",
+    approve: "users.restrictions.approve",
+    view: "users.restrictions.view",
+  },
   USER_STATUS: { write: "users.manage", approve: "users.approve", view: "users.view" },
   GAME_AVAILABILITY: { write: "games.manage", approve: "games.approve", view: "games.view" },
   ROOM_CLOSE: { write: "rooms.manage", approve: "rooms.approve", view: "rooms.view" },
@@ -84,6 +94,7 @@ export function createAdminManagement(deps: {
   clock: { nowMs(): number };
   newId(): string;
   products: Partial<Record<AdminAction["operation"], AdminProductPort>>;
+  restrictionsEnabled?: boolean;
 }) {
   const { repository, service, crypto, policy, clock, products } = deps;
   const at = () => new Date(clock.nowMs());
@@ -98,7 +109,13 @@ export function createAdminManagement(deps: {
     return p.data;
   }
   function permit(p: AdminPrincipal, op: AdminOperation, kind: "write" | "approve" | "view") {
-    // Phase-three moderation is unavailable even to OWNER; legacy grants cannot enable it.
+    if (
+      kind !== "view" &&
+      ["USER_RESTRICT", "USER_UNRESTRICT"].includes(op.action.operation) &&
+      !deps.restrictionsEnabled
+    )
+      throw new AdminFault("FORBIDDEN");
+    // Legacy status commands never become an activation path for the new restriction lifecycle.
     if (kind !== "view" && op.action.operation === "USER_STATUS") throw new AdminFault("FORBIDDEN");
     if (
       !adminAccess(p, adminOperationPermissions[op.action.operation][kind], op.gameId ?? undefined)
@@ -151,6 +168,7 @@ export function createAdminManagement(deps: {
       mode: op.mode,
       expiresAt: (op.approvedUntil ?? op.expiresAt).toISOString(),
       resultCode: op.resultCode,
+      ...(op.privateNoteCiphertext ? { hasPrivateNote: true } : {}),
       ...(generatedPassword ? { generatedPassword } : {}),
     });
   }
@@ -302,6 +320,34 @@ export function createAdminManagement(deps: {
     return op;
   }
   return Object.freeze({
+    async privateNote(token: unknown, operationId: string) {
+      parse(z.uuid(), operationId);
+      const a = await service.authenticate(token);
+      return repository.atomic(async (tx) => {
+        const p = await principal(tx, a.principal.operatorId);
+        const op = await fetch(tx, operationId);
+        if (
+          !adminAccess(p, "users.restrictions.notes.view") ||
+          !adminAccess(p, "users.restrictions.view") ||
+          !["USER_RESTRICT", "USER_UNRESTRICT"].includes(op.action.operation)
+        )
+          throw new AdminFault("FORBIDDEN");
+        await audit(tx, op, "PRIVATE_NOTE_VIEWED", p.operatorId);
+        if (!op.privateNoteCiphertext) return { schemaVersion: 1, privateNote: null };
+        if (!crypto.openPrivateNote) throw new AdminFault("ADMIN_UNAVAILABLE");
+        try {
+          return {
+            schemaVersion: 1,
+            privateNote: crypto.openPrivateNote(
+              op.privateNoteCiphertext,
+              JSON.stringify([policy.realmId, op.id, op.action.targetId]),
+            ),
+          };
+        } catch {
+          throw new AdminFault("ADMIN_UNAVAILABLE");
+        }
+      });
+    },
     async activity(token: unknown, operatorId: string) {
       parse(z.uuid(), operatorId);
       const a = await service.authenticate(token);
@@ -384,11 +430,32 @@ export function createAdminManagement(deps: {
     async request(token: unknown, input: unknown) {
       const p = parse(adminCommandRequestSchema, input),
         a = await service.authenticate(token);
+      if (
+        ["USER_RESTRICT", "USER_UNRESTRICT"].includes(p.action.operation) &&
+        !deps.restrictionsEnabled
+      )
+        throw new AdminFault("FORBIDDEN");
       if (p.action.operation === "USER_STATUS") throw new AdminFault("FORBIDDEN");
       const permission = adminOperationPermissions[p.action.operation].write;
       if (!adminAccess(a.principal, permission) && !adminGameScope(a.principal, permission)?.length)
         throw new AdminFault("FORBIDDEN");
-      const digest = crypto.digest(JSON.stringify([policy.environment, p.action, p.reasonCode]));
+      const restriction =
+        p.action.operation === "USER_RESTRICT" || p.action.operation === "USER_UNRESTRICT";
+      if (p.privateNote !== undefined && !restriction) throw new AdminFault("INVALID_INPUT");
+      if (
+        restriction &&
+        !["ABUSE", "SPAM", "SECURITY", "INCIDENT_RESPONSE", "APPEAL"].includes(p.reasonCode)
+      )
+        throw new AdminFault("INVALID_INPUT");
+      if (p.privateNote && !crypto.sealPrivateNote) throw new AdminFault("ADMIN_UNAVAILABLE");
+      const digest = crypto.digest(
+        JSON.stringify([
+          policy.environment,
+          p.action,
+          p.reasonCode,
+          ...(p.privateNote ? [p.privateNote] : []),
+        ]),
+      );
       const previous = await repository.atomic(async (tx) => {
         const op = await management(tx).operation(p.commandId);
         if (!op) return null;
@@ -443,6 +510,12 @@ export function createAdminManagement(deps: {
           digest,
           action: p.action,
           gameId: info?.gameId ?? null,
+          privateNoteCiphertext: p.privateNote
+            ? crypto.sealPrivateNote!(
+                p.privateNote,
+                JSON.stringify([policy.realmId, p.commandId, p.action.targetId]),
+              )
+            : null,
           reasonCode: p.reasonCode,
           state: "PENDING",
           mode: null,

@@ -5,7 +5,11 @@ import { createDatabase } from "@hambazi/database";
 import { adminAuditPageSchema, adminOverviewSchema, adminPageSchema } from "@hambazi/validation";
 import { createAdminCrypto, createAdminModule, type AdminReadPort } from "../admin/index.js";
 import { createRedisAuthRateLimiter } from "../auth/index.js";
-import { createUsersAdminOperations, createUsersAdminRead } from "../users/index.js";
+import {
+  createUsersAdminOperations,
+  createUsersAdminRead,
+  createUsersAdminDetail,
+} from "../users/index.js";
 import { createGamesAdminOperations, createGamesAdminRead } from "../games/index.js";
 import {
   createRoomsAdminOperations,
@@ -14,6 +18,7 @@ import {
 } from "../rooms/index.js";
 import {
   createMatchesAdminRead,
+  createAdminUserHistory,
   createMatchesAdminOperations,
   createMatchDiagnostics,
   createOutboxDiagnostics,
@@ -68,6 +73,7 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
       config.realmId,
       {
         crypto,
+        restrictionsEnabled: config.restrictionsEnabled,
         policy: config,
         clock,
         newId: randomUUID,
@@ -76,6 +82,8 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
       operationsDatabase
         ? {
             USER_DISPLAY_NAME: userOperations!,
+            USER_RESTRICT: userOperations!,
+            USER_UNRESTRICT: userOperations!,
             GAME_AVAILABILITY: createGamesAdminOperations(operationsDatabase, clock),
             ROOM_CLOSE: createRoomsAdminOperations(operationsDatabase, clock),
             MATCH_TERMINATE: createMatchesAdminOperations(operationsDatabase, clock),
@@ -110,7 +118,17 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     // Coalesce diagnostics across browser refreshes; cache is display-only, never authorization.
     let snapshot: Promise<ReturnType<typeof adminOverviewSchema.parse>> | undefined;
     let sampledAt = 0;
+    const userDetails = createUsersAdminDetail(readDatabase);
+    const history = createAdminUserHistory(readDatabase);
     const reads: AdminReadPort = {
+      restrictionsEnabled: config.restrictionsEnabled,
+      async userDetail(kind, id, query) {
+        return kind === "profile"
+          ? userDetails.profile(id)
+          : kind === "restrictions"
+            ? userDetails.restrictions(id, query.cursor, query.limit)
+            : history(id, query.cursor, query.limit);
+      },
       async page(kind, query, games, excluded) {
         return adminPageSchema.parse(await pages[kind](query, games, excluded));
       },

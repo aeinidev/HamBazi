@@ -137,6 +137,13 @@ export async function rehearseOwnerRestore(capsule: OwnerBackupCapsule) {
       ),
       "utf8",
     );
+    const noteSchema = await readFile(
+      new URL(
+        "../../../../packages/database/prisma/migrations/202610280001_admin_private_notes/migration.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
     const grants = await readFile(
       new URL("../../../../packages/database/prisma/admin-permissions.sql", import.meta.url),
       "utf8",
@@ -155,6 +162,8 @@ export async function rehearseOwnerRestore(capsule: OwnerBackupCapsule) {
         rotation +
         "\n" +
         managementSchema +
+        "\n" +
+        noteSchema +
         "\n" +
         grants.split("-- Metadata only:")[0] +
         "\nCOMMIT;\n" +

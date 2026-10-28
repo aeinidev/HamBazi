@@ -1,4 +1,11 @@
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import {
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+  hkdfSync,
+  createCipheriv,
+  createDecipheriv,
+} from "node:crypto";
 import { hash, verify, argon2id } from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
@@ -31,6 +38,9 @@ export function createAdminCrypto(options: {
     options.timeCost > 6
   )
     throw new Error("ADMIN_CRYPTO_CONFIGURATION_INVALID");
+  const noteKey = Buffer.from(
+    hkdfSync("sha256", command, options.realmId, "admin-restriction-note-v1", 32),
+  );
   const input = (value: string, kind: "password" | "pin") =>
     kind === "pin"
       ? createHmac("sha256", pepper)
@@ -48,6 +58,27 @@ export function createAdminCrypto(options: {
     aud: z.literal(options.audience),
   });
   const implementation: AdminCrypto = {
+    sealPrivateNote(value, binding) {
+      const iv = randomBytes(12);
+      const cipher = createCipheriv("aes-256-gcm", noteKey, iv);
+      cipher.setAAD(Buffer.from(binding));
+      return Buffer.concat([
+        iv,
+        cipher.update(value, "utf8"),
+        cipher.final(),
+        cipher.getAuthTag(),
+      ]).toString("base64url");
+    },
+    openPrivateNote(value, binding) {
+      const data = Buffer.from(value, "base64url");
+      if (data.length < 29 || data.length > 9000) throw new Error("ADMIN_NOTE_INVALID");
+      const decipher = createDecipheriv("aes-256-gcm", noteKey, data.subarray(0, 12));
+      decipher.setAAD(Buffer.from(binding));
+      decipher.setAuthTag(data.subarray(-16));
+      return Buffer.concat([decipher.update(data.subarray(12, -16)), decipher.final()]).toString(
+        "utf8",
+      );
+    },
     async hash(value, kind) {
       return hash(input(value, kind), {
         type: argon2id,

@@ -9,6 +9,11 @@ export const adminPermissionSchema = z.enum([
   "users.edit",
   "users.manage",
   "users.approve",
+  "users.history.view",
+  "users.restrictions.view",
+  "users.restrictions.manage",
+  "users.restrictions.approve",
+  "users.restrictions.notes.view",
   "games.view",
   "games.manage",
   "games.approve",
@@ -103,6 +108,18 @@ export const adminActionSchema = z.discriminatedUnion("operation", [
     displayName: z.string().min(1).max(128),
   }),
   z.strictObject({
+    operation: z.literal("USER_RESTRICT"),
+    targetId: id,
+    expectedVersion: version,
+    duration: z.enum(["HOUR_1", "HOURS_24", "DAYS_7", "DAYS_30", "PERMANENT"]),
+  }),
+  z.strictObject({
+    operation: z.literal("USER_UNRESTRICT"),
+    targetId: id,
+    expectedVersion: version,
+    restrictionId: id.nullable(),
+  }),
+  z.strictObject({
     operation: z.literal("USER_STATUS"),
     targetId: id,
     expectedVersion: version,
@@ -126,11 +143,16 @@ export const adminCommandRequestSchema = z.strictObject({
   schemaVersion: z.literal(1),
   commandId: id,
   action: adminActionSchema,
+  privateNote: z.string().trim().min(1).max(2000).optional(),
   reasonCode: z.enum([
     "ACCESS_ADMINISTRATION",
     "SUPPORT_CORRECTION",
     "MAINTENANCE",
     "INCIDENT_RESPONSE",
+    "ABUSE",
+    "SPAM",
+    "SECURITY",
+    "APPEAL",
   ]),
 });
 export const adminApprovalSchema = z.strictObject({
@@ -157,6 +179,7 @@ export const adminCommandResultSchema = z.strictObject({
   mode: z.enum(["OWNER_FINAL", "DUAL_CONTROL"]).nullable(),
   expiresAt: z.iso.datetime(),
   resultCode: z.string().nullable(),
+  hasPrivateNote: z.boolean().optional(),
   // Only the first successful create/reset response may contain this field; never persisted.
   generatedPassword: z
     .string()
@@ -214,6 +237,7 @@ export const adminCommandPageSchema = z.strictObject({
 });
 export const adminManagementMetaSchema = z.strictObject({
   schemaVersion: z.literal(1),
+  restrictionsEnabled: z.boolean().optional(),
   permissions: z.array(adminPermissionSchema).max(100),
   templates: z.record(z.string(), z.array(adminPermissionSchema).max(100)),
   enabled: z.boolean(),

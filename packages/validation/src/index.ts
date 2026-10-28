@@ -41,3 +41,11 @@ export {
   adminOverviewSchema,
   adminAuditPageSchema,
 } from "./admin.js";
+
+export {
+  adminUserQuerySchema,
+  adminUserProfileSchema,
+  adminUserRestrictionsSchema,
+  adminUserHistorySchema,
+  adminPrivateNoteSchema,
+} from "./admin-users.js";

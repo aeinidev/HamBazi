@@ -276,6 +276,36 @@ try {
   for (const line of phaseTwo.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
     process.stdout.write(line + "\n");
   process.stdout.write("ADMIN_PHASE_TWO_INTEGRATION_PASSED\n");
+  stage = "phase three integration";
+  const phaseThreeGrant = new Client({ connectionString: url("postgres") });
+  await phaseThreeGrant.connect();
+  try {
+    await phaseThreeGrant.query(
+      await readFile(
+        new URL("../../../../packages/database/prisma/permissions.sql", import.meta.url),
+        "utf8",
+      ),
+    );
+    await phaseThreeGrant.query(
+      await readFile(
+        new URL(
+          "../../../../packages/database/prisma/admin-phase3-permissions.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+  } finally {
+    await phaseThreeGrant.end();
+  }
+  const phaseThree = await run(
+    "pnpm",
+    ["--filter", "@hambazi/api", "exec", "vitest", "run", "tests/integration/admin-phase3.test.ts"],
+    { env, timeout: 240000, maxBuffer: 4 * 1024 * 1024 },
+  );
+  for (const line of phaseThree.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
+    process.stdout.write(line + "\n");
+  process.stdout.write("ADMIN_PHASE_THREE_INTEGRATION_PASSED\n");
   stage = "owner backup restore rehearsal";
   // The restart persistence test may get a new randomly allocated host port.
   port = (
@@ -401,10 +431,10 @@ try {
     process.stderr.write(`ADMIN_TEST_ERROR_CODE:${error.code}\n`);
   // Source locations/test names only, not SQL, assertion data, credential files or commands.
   for (const line of stderr.split("\n")) {
-    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill|phase2)/.test(line))
+    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill|phase2|phase3)/.test(line))
       process.stderr.write(line + "\n");
     const location = line.match(
-      /tests\/integration\/admin-(local|owner-drill|phase2).test.ts:\d+:\d+/,
+      /tests\/integration\/admin-(local|owner-drill|phase2|phase3).test.ts:\d+:\d+/,
     );
     if (location) process.stderr.write(location[0] + "\n");
     const fixed = line.match(/ADMIN_TEST_[A-Z_]+/);

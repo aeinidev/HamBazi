@@ -1,3 +1,4 @@
+import { UserDetail } from "./features/users/index.js";
 import { ManagementPanel, ResourceActions } from "./features/management/index.js";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -91,6 +92,9 @@ export function AdminApp() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [section, setSection] = useState("overview");
+  const [userSearch, setUserSearch] = useState(""),
+    [userStatus, setUserStatus] = useState("");
+  const [userFilters, setUserFilters] = useState("");
   const [cursor, setCursor] = useState<string | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [security, setSecurity] = useState(false);
@@ -117,6 +121,9 @@ export function AdminApp() {
     retry.current = null;
     setSecurity(false);
     setManagementEnabled(false);
+    setUserSearch("");
+    setUserStatus("");
+    setUserFilters("");
     setDetail(null);
     setCursor(null);
   }, [cache]);
@@ -236,12 +243,15 @@ export function AdminApp() {
     setLoading(true);
     setError("");
     void adminRequest(
-      section +
+      (section === "users" && !detail && userFilters ? "users/search" : section) +
         (detail
           ? `/${encodeURIComponent(detail)}`
           : cursor
             ? `?cursor=${encodeURIComponent(cursor)}`
-            : ""),
+            : "") +
+        (section === "users" && !detail && userFilters
+          ? `${cursor ? "&" : "?"}${userFilters}`
+          : ""),
       undefined,
       undefined,
       controller.signal,
@@ -266,6 +276,7 @@ export function AdminApp() {
     mode,
     section,
     cursor,
+    userFilters,
     detail,
     permitted,
     access?.authorizationVersion,
@@ -417,6 +428,10 @@ export function AdminApp() {
         </section>
       </main>
     );
+  const resourcePage = adminPageSchema.safeParse(data);
+  const resource = resourcePage.success
+    ? resourcePage.data.items.find((row) => row.id === detail)
+    : undefined;
   return (
     <div className="dashboard">
       <aside>
@@ -474,7 +489,7 @@ export function AdminApp() {
           <OwnerSecuritySettings csrf={csrf} completed={reset} />
         ) : (section === "admins" || section === "operations") && access ? (
           <ManagementPanel
-            key={`${section}:${access.authorizationVersion}:${access.policyRevision}`}
+            key={`${section}:${access.authorizationVersion}:${access.isOwner ? "owner" : access.policyRevision}`}
             kind={section}
             csrf={csrf}
             isOwner={access.isOwner}
@@ -488,23 +503,71 @@ export function AdminApp() {
         ) : (
           <>
             {detail && <button onClick={() => setDetail(null)}>بازگشت به فهرست</button>}
-            <ReadPanel data={data} next={setCursor} inspect={setDetail} />
-            {managementEnabled &&
-              detail &&
-              access &&
-              adminPageSchema.safeParse(data).success &&
-              adminPageSchema.parse(data).items[0] && (
-                <ResourceActions
-                  key={`${detail}:${access.authorizationVersion}:${access.policyRevision}}`}
-                  kind={section}
-                  row={adminPageSchema.parse(data).items[0]!}
-                  csrf={csrf}
-                  isOwner={access.isOwner}
-                  permissions={access.permissions}
-                  refreshed={inspect}
-                  reload={() => setResourceRevision((v) => v + 1)}
-                />
-              )}
+            {section === "users" && !detail && (
+              <form
+                className="table-panel user-search"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const q = new URLSearchParams();
+                  if (userSearch.trim()) q.set("search", userSearch.trim());
+                  if (userStatus) q.set("status", userStatus);
+                  setCursor(null);
+                  setUserFilters(q.toString());
+                }}
+              >
+                <label>
+                  جستجوی کاربر
+                  <input
+                    maxLength={64}
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder="نام، شناسهٔ عمومی یا UUID"
+                  />
+                </label>
+                <label>
+                  وضعیت کاربر
+                  <select value={userStatus} onChange={(e) => setUserStatus(e.target.value)}>
+                    <option value="">همه</option>
+                    <option value="ACTIVE">فعال</option>
+                    <option value="BANNED">محروم</option>
+                  </select>
+                </label>
+                <button>اعمال فیلتر</button>
+              </form>
+            )}
+            <ReadPanel
+              data={data}
+              next={setCursor}
+              inspect={(id) => {
+                if (id === detail) return;
+                setLoading(true);
+                setData(null);
+                setDetail(id);
+              }}
+            />
+            {section === "users" && detail && access && resource && (
+              <UserDetail
+                key={`${detail}:${access.authorizationVersion}:${access.policyRevision}`}
+                id={detail}
+                csrf={csrf}
+                isOwner={access.isOwner}
+                permissions={access.permissions}
+                refreshed={inspect}
+                reload={() => setResourceRevision((v) => v + 1)}
+              />
+            )}
+            {managementEnabled && detail && access && resource && (
+              <ResourceActions
+                key={`${detail}:${access.authorizationVersion}:${access.policyRevision}}`}
+                kind={section}
+                row={resource}
+                csrf={csrf}
+                isOwner={access.isOwner}
+                permissions={access.permissions}
+                refreshed={inspect}
+                reload={() => setResourceRevision((v) => v + 1)}
+              />
+            )}
           </>
         )}
       </main>

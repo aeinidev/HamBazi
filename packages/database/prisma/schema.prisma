@@ -22,6 +22,7 @@ model User {
   registrationCompletedAt DateTime?                @map("registration_completed_at") @db.Timestamptz(3)
   authVersion             Int                      @default(0) @map("auth_version")
   profileVersion          Int                      @default(0) @map("profile_version")
+  restrictions            UserRestriction[]
   profileReceipts         ProfileMutationReceipt[]
   settings                UserSettings?
   hostedRooms             Room[]
@@ -675,6 +676,7 @@ model AdminOperation {
   digest                       String        @db.Char(64)
   action                       Json
   gameId                       String?       @map("game_id")
+  privateNoteCiphertext        String?       @map("private_note_ciphertext")
   reasonCode                   String        @map("reason_code")
   state                        String
   mode                         String?
@@ -740,4 +742,23 @@ model MatchAdminEffect {
   occurredAt DateTime @map("occurred_at") @db.Timestamptz(3)
 
   @@map("match_admin_effects")
+}
+
+model UserRestriction {
+  id                 String    @id @db.Uuid
+  userId             String    @map("user_id") @db.Uuid
+  realmId            String    @map("realm_id")
+  actorId            String    @map("actor_id") @db.Uuid
+  reasonCode         String    @map("reason_code")
+  duration           String
+  createdAt          DateTime  @map("created_at") @db.Timestamptz(3)
+  expiresAt          DateTime? @map("expires_at") @db.Timestamptz(3)
+  endedAt            DateTime? @map("ended_at") @db.Timestamptz(3)
+  endKind            String?   @map("end_kind")
+  endedByOperationId String?   @map("ended_by_operation_id") @db.Uuid
+  user               User      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([userId, id])
+  @@index([endedAt, expiresAt])
+  @@map("user_restrictions")
 }

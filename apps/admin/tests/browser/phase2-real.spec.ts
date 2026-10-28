@@ -96,6 +96,9 @@ test("phase two real Backend: OWNER login, pending isolation, one-time manager c
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "تأیید همین عملیات", exact: true }).click();
     await page.getByRole("button", { name: "اجرای همین درخواست", exact: true }).click();
+    await page.waitForResponse(
+      (r) => r.url().endsWith("/v1/admin/me/access") && r.status() === 200,
+    );
     await expect(page.getByRole("status").filter({ hasText: /^انجام شد$/ })).toBeVisible();
     const directory = await (await context.request.get(origin + "/v1/admin/admins")).json();
     expect(

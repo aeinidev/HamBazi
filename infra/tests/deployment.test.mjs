@@ -314,11 +314,13 @@ it("rejects readable secret files and symlinks including parent directory links"
 });
 it("records all current migrations and contract hashes without approving compatibility", async () => {
   const evidence = await compatibilityInputs();
-  expect(evidence.migrations).toHaveLength(19);
+  expect(evidence.migrations).toHaveLength(21);
   expect(evidence.migrations.map((m) => m.id)).toEqual(
     expect.arrayContaining([
       "202610270001_admin_management",
       "202610270002_admin_product_operations",
+      "202610280001_admin_private_notes",
+      "202610280002_user_restrictions",
     ]),
   );
   expect(evidence.contracts.length).toBeGreaterThan(10);

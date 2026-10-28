@@ -1,5 +1,9 @@
 import { z } from "zod";
 import {
+  adminUserProfileSchema,
+  adminUserRestrictionsSchema,
+  adminUserHistorySchema,
+  adminPrivateNoteSchema,
   adminAccessSchema,
   adminManagementMetaSchema,
   adminActivitySchema,
@@ -83,12 +87,28 @@ export function adminOpenApiDocument() {
     ["admins/{id}/activity", adminActivitySchema],
     ["operations", adminCommandPageSchema],
     ["operations/{id}", adminCommandResultSchema],
+    ["operations/{id}/private-note", adminPrivateNoteSchema],
+    ["users/{id}/profile", adminUserProfileSchema],
+    ["users/{id}/history", adminUserHistorySchema],
+    ["users/{id}/restrictions", adminUserRestrictionsSchema],
   ] as const)
     paths[`/v1/admin/${path}`] = {
       get: {
         security: full,
         parameters: path.includes("{id}")
-          ? [pathId]
+          ? [
+              pathId,
+              ...(path.endsWith("/history") || path.endsWith("/restrictions")
+                ? [
+                    { in: "query", name: "cursor", schema: { type: "string", format: "uuid" } },
+                    {
+                      in: "query",
+                      name: "limit",
+                      schema: { type: "integer", minimum: 1, maximum: 50 },
+                    },
+                  ]
+                : []),
+            ]
           : path === "admins"
             ? [{ in: "query", name: "cursor", schema: { type: "string", format: "uuid" } }]
             : [],
@@ -138,6 +158,22 @@ export function adminOpenApiDocument() {
       },
     };
   }
+  paths["/v1/admin/users/search"] = {
+    get: {
+      security: full,
+      parameters: [
+        {
+          in: "query",
+          name: "search",
+          schema: { type: "string", minLength: 1, maxLength: 64, pattern: "^[^\\u0000]+$" },
+        },
+        { in: "query", name: "status", schema: { type: "string", enum: ["ACTIVE", "BANNED"] } },
+        { in: "query", name: "limit", schema: { type: "integer", minimum: 1, maximum: 50 } },
+        { in: "query", name: "cursor", schema: { type: "string", format: "uuid" } },
+      ],
+      responses: { "200": response(adminPageSchema), ...errors },
+    },
+  };
   for (const path of ["overview", "monitoring/summary", "audit-events"])
     paths[`/v1/admin/${path}`] = {
       get: {
@@ -150,7 +186,7 @@ export function adminOpenApiDocument() {
     };
   return {
     openapi: "3.1.0",
-    info: { title: "HamBazi Admin API", version: "1.2.0" },
+    info: { title: "HamBazi Admin API", version: "1.3.0" },
     paths,
     components: {
       securitySchemes: {

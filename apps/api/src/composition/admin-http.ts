@@ -152,7 +152,9 @@ export async function createAdminHttpApplication(
     }
     if (
       request.raw.url?.includes("?") &&
-      !/^\/v1\/admin\/(users|games|rooms|matches|admins)\?/.test(request.raw.url)
+      !/^\/v1\/admin\/(users(?:\/search|\/[0-9a-f-]+\/(?:history|restrictions))?|games|rooms|matches|admins)\?/.test(
+        request.raw.url,
+      )
     )
       return reply.code(400).send(body("INVALID_INPUT"));
   });

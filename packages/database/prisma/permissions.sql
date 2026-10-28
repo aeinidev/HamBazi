@@ -47,4 +47,9 @@ GRANT UPDATE (status) ON stats_generations TO hambazi_worker;
 GRANT UPDATE (value) ON stats_values TO hambazi_worker;
 GRANT SELECT, INSERT ON match_bot_seats TO hambazi_api;
 GRANT SELECT ON match_bot_seats TO hambazi_worker;
+-- Users-owned expiry runs in identity checks and the existing Worker cleanup.
+GRANT SELECT ON user_restrictions TO hambazi_api, hambazi_worker;
+GRANT UPDATE (ended_at,end_kind,ended_by_operation_id) ON user_restrictions TO hambazi_api, hambazi_worker;
+GRANT SELECT (id,status,profile_version,auth_version) ON users TO hambazi_worker;
+GRANT UPDATE (status,auth_version,profile_version,updated_at) ON users TO hambazi_worker;
 COMMIT;

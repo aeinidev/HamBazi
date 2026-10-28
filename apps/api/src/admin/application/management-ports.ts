@@ -23,6 +23,7 @@ export interface AdminOperation {
   digest: string;
   action: AdminAction;
   gameId: string | null;
+  privateNoteCiphertext?: string | null;
   reasonCode: string;
   state: "PENDING" | "APPROVED" | "SUCCEEDED" | "FAILED" | "UNKNOWN";
   mode: "OWNER_FINAL" | "DUAL_CONTROL" | null;

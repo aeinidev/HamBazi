@@ -102,3 +102,5 @@ export {
 export { createMatchesAdminRead } from "./module.js";
 
 export { createMatchesAdminOperations } from "./module.js";
+
+export { createAdminUserHistory } from "./module.js";

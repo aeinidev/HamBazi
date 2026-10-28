@@ -104,6 +104,8 @@ export interface AdminRepository {
   atomic<T>(operation: (tx: AdminTransaction) => Promise<T>): Promise<T>;
 }
 export interface AdminCrypto {
+  sealPrivateNote?(value: string, binding: string): string;
+  openPrivateNote?(value: string, binding: string): string;
   hash(value: string, kind: "password" | "pin"): Promise<string>;
   verify(verifier: string, value: string, kind: "password" | "pin"): Promise<boolean>;
   digest(value: string): string;

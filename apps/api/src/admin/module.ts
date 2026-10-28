@@ -8,7 +8,9 @@ import { createAdminProvisioning } from "./application/provisioning.js";
 export function createAdminModule(
   database: Parameters<typeof createAdminRepository>[0],
   realmId: string,
-  options: Omit<Parameters<typeof createAdminService>[0], "repository">,
+  options: Omit<Parameters<typeof createAdminService>[0], "repository"> & {
+    restrictionsEnabled?: boolean;
+  },
   products?: Partial<Record<AdminAction["operation"], AdminProductPort>>,
 ) {
   const repository = createAdminRepository(database, realmId);

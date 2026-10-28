@@ -276,7 +276,10 @@ export async function adminFixture(
     clock,
     repository,
     service,
-    management(products: Partial<Record<AdminAction["operation"], AdminProductPort>> = {}) {
+    management(
+      products: Partial<Record<AdminAction["operation"], AdminProductPort>> = {},
+      restrictionsEnabled = false,
+    ) {
       return createAdminManagement({
         repository,
         service,
@@ -284,6 +287,7 @@ export async function adminFixture(
         clock,
         newId: randomUUID,
         products,
+        restrictionsEnabled,
         policy: {
           realmId,
           environment: "test",

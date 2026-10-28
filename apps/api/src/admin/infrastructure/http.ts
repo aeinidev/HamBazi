@@ -13,7 +13,14 @@ import {
 import { APP_GUARD } from "@nestjs/core";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { adminExecuteSchema } from "@hambazi/validation";
+import {
+  adminExecuteSchema,
+  adminUserQuerySchema,
+  adminUserProfileSchema,
+  adminUserRestrictionsSchema,
+  adminUserHistorySchema,
+  adminPrivateNoteSchema,
+} from "@hambazi/validation";
 import { adminRoleTemplates } from "../application/management.js";
 import type { AdminManagement } from "../application/management.js";
 import type { AdminService } from "../application/service.js";
@@ -55,10 +62,22 @@ const querySchema = z.strictObject({
 export interface AdminReadPort {
   page(
     kind: "users" | "games" | "rooms" | "matches",
-    query: { cursor?: string; id?: string; limit: number },
+    query: {
+      cursor?: string;
+      id?: string;
+      limit: number;
+      search?: string;
+      status?: "ACTIVE" | "BANNED";
+    },
     games: readonly string[] | null,
     excluded?: readonly string[],
   ): Promise<unknown>;
+  userDetail?(
+    kind: "profile" | "history" | "restrictions",
+    id: string,
+    query: { cursor?: string; limit: number },
+  ): Promise<unknown>;
+  restrictionsEnabled?: boolean;
   overview(principal: AdminPrincipal): Promise<unknown>;
   audit(): Promise<unknown>;
 }
@@ -130,6 +149,7 @@ export function createAdminHttpModule(deps: {
         permissions: adminCapabilities,
         templates: adminRoleTemplates,
         enabled: !!deps.management,
+        restrictionsEnabled: deps.reads.restrictionsEnabled ?? false,
       };
     }
     @policy("admins.view")
@@ -152,6 +172,13 @@ export function createAdminHttpModule(deps: {
     @Get("operations")
     operations(@Req() request: FastifyRequest) {
       return management().list(cookie(request, adminCookie));
+    }
+    @policy("users.restrictions.notes.view")
+    @Get("operations/:id/private-note")
+    async privateNote(@Req() request: FastifyRequest, @Param("id") id: string) {
+      return adminPrivateNoteSchema.parse(
+        await management().privateNote(cookie(request, adminCookie), id),
+      );
     }
     @policy("SESSION")
     @Get("operations/:id")
@@ -284,8 +311,14 @@ export function createAdminHttpModule(deps: {
       kind: "users" | "games" | "rooms" | "matches",
       request: FastifyRequest,
       id?: string,
+      searching = false,
     ) {
-      const p = querySchema.parse(request.query);
+      const p: {
+        cursor?: string | undefined;
+        limit?: number | undefined;
+        search?: string | undefined;
+        status?: "ACTIVE" | "BANNED" | undefined;
+      } = searching ? adminUserQuerySchema.parse(request.query) : querySchema.parse(request.query);
       if (id !== undefined)
         (kind === "games" ? z.string().regex(/^[a-z][a-z0-9-]{0,63}$/) : z.uuid()).parse(id);
       if (p.cursor !== undefined)
@@ -299,11 +332,18 @@ export function createAdminHttpModule(deps: {
         {
           ...(p.cursor === undefined ? {} : { cursor: p.cursor }),
           ...(id === undefined ? {} : { id }),
+          ...(p.search !== undefined ? { search: p.search } : {}),
+          ...(p.status !== undefined ? { status: p.status } : {}),
           limit: id === undefined ? (p.limit ?? 25) : 1,
         },
         games,
         excluded,
       );
+    }
+    @policy("users.view")
+    @Get("users/search")
+    searchUsers(@Req() r: FastifyRequest) {
+      return this.page("users", r, undefined, true);
     }
     @policy("users.view")
     @Get("users")
@@ -324,6 +364,55 @@ export function createAdminHttpModule(deps: {
     @Get("matches")
     matches(@Req() r: FastifyRequest) {
       return this.page("matches", r);
+    }
+    async userDetail(
+      kind: "profile" | "history" | "restrictions",
+      request: FastifyRequest,
+      id: string,
+    ) {
+      z.uuid().parse(id);
+      const p = querySchema.parse(request.query);
+      if (p.cursor) z.uuid().parse(p.cursor);
+      const permission =
+        kind === "profile"
+          ? "users.view"
+          : kind === "history"
+            ? "users.history.view"
+            : "users.restrictions.view";
+      const a = await authenticated(request, permission);
+      if (
+        !adminAccess(a.principal, "users.view") ||
+        adminGameScope(a.principal, permission) !== null
+      )
+        throw new AdminFault("FORBIDDEN");
+      if (!deps.reads.userDetail) throw new AdminFault("ADMIN_UNAVAILABLE");
+      const raw = await deps.reads.userDetail(kind, id, {
+        ...(p.cursor ? { cursor: p.cursor } : {}),
+        limit: p.limit ?? 25,
+      });
+      if (raw === null) throw new AdminFault("FORBIDDEN");
+      return (
+        kind === "profile"
+          ? adminUserProfileSchema
+          : kind === "history"
+            ? adminUserHistorySchema
+            : adminUserRestrictionsSchema
+      ).parse(raw);
+    }
+    @policy("users.view")
+    @Get("users/:id/profile")
+    userProfile(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.userDetail("profile", r, id);
+    }
+    @policy("users.history.view")
+    @Get("users/:id/history")
+    userHistory(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.userDetail("history", r, id);
+    }
+    @policy("users.restrictions.view")
+    @Get("users/:id/restrictions")
+    userRestrictions(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.userDetail("restrictions", r, id);
     }
     @policy("users.view")
     @Get("users/:id")

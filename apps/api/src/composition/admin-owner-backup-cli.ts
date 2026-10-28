@@ -50,6 +50,7 @@ try {
   const base = parsePrivateEnvironment(environment);
   const config = parseAdminConfig({
     ...base,
+    ADMIN_USER_RESTRICTIONS_ENABLED: "false",
     ADMIN_MUTATIONS_ENABLED: "false",
     ADMIN_OPERATIONS_DATABASE_URL: undefined,
     ADMIN_DATABASE_URL: operatorDatabaseUrl(
@@ -140,7 +141,7 @@ try {
       realm: "staging",
       createdAtUTC: new Date().toISOString(),
       sourceRevision: policy.sourceRevision,
-      schemaTag: "admin-local-identity+access-management-v2",
+      schemaTag: "admin-local-identity+private-notes-v3",
       runtimeEnvironment: environment,
       operatorEnvironment,
       checkpoint,

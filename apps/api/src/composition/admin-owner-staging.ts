@@ -94,6 +94,7 @@ try {
     throw new Error();
   const config = parseAdminConfig({
     ...environment,
+    ADMIN_USER_RESTRICTIONS_ENABLED: "false",
     ADMIN_MUTATIONS_ENABLED: "false",
     ADMIN_OPERATIONS_DATABASE_URL: undefined,
     NODE_ENV: "production",

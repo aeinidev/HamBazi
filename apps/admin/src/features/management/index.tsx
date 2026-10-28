@@ -31,6 +31,8 @@ export const operationTitles: Record<AdminAction["operation"], string> = {
   ROLE_SAVE: "ذخیرهٔ نقش",
   ROLE_DELETE: "حذف نقش",
   USER_DISPLAY_NAME: "اصلاح نام نمایشی",
+  USER_RESTRICT: "محروم‌سازی کاربر",
+  USER_UNRESTRICT: "رفع محرومیت کاربر",
   USER_STATUS: "محروم‌سازی یا رفع محرومیت",
   GAME_AVAILABILITY: "پذیرش بازی‌های جدید",
   ROOM_CLOSE: "بستن اتاق پیش از شروع",
@@ -52,7 +54,14 @@ export function OperationFlow({
   ...props
 }: Props & { action?: AdminAction; existing?: Command; completed(): void }) {
   const [command, setCommand] = useState<Command | null>(existing ?? null),
-    [reason, setReason] = useState("MAINTENANCE");
+    [reason, setReason] = useState(
+      action?.operation === "USER_RESTRICT"
+        ? "ABUSE"
+        : action?.operation === "USER_UNRESTRICT"
+          ? "APPEAL"
+          : "MAINTENANCE",
+    );
+  const [privateNote, setPrivateNote] = useState("");
   const [password, setPassword] = useState(""),
     [pin, setPin] = useState(""),
     [confirmed, setConfirmed] = useState(false),
@@ -84,7 +93,13 @@ export function OperationFlow({
           adminCommandResultSchema.parse(
             await adminRequest(
               "operations",
-              { schemaVersion: 1, commandId: requestId, action, reasonCode: reason },
+              {
+                schemaVersion: 1,
+                commandId: requestId,
+                action,
+                reasonCode: reason,
+                ...(privateNote.trim() ? { privateNote: privateNote.trim() } : {}),
+              },
               csrf,
             ),
           ),
@@ -126,6 +141,7 @@ export function OperationFlow({
       setError(failure);
     } finally {
       setBusy(false);
+      setPrivateNote("");
       setPassword("");
       setPin("");
       setConfirmed(false);
@@ -138,7 +154,8 @@ export function OperationFlow({
       <h2>{intent ? operationTitles[intent.operation] : "عملیات مدیریتی"}</h2>
       {disabled && (
         <p role="alert">
-          محروم‌سازی و رفع محرومیت در فاز دوم فعال نیست؛ این درخواست فقط قابل مشاهده است.
+          این درخواست فقط قابل مشاهده است؛ برای اجرا از فرمان‌های جدید محرومیت و رفع محرومیت استفاده
+          کنید.
         </p>
       )}
       {intent && (
@@ -159,6 +176,24 @@ export function OperationFlow({
             <p>
               وضعیت درخواستی: <bdi>{intent.status}</bdi>
             </p>
+          )}
+          {"duration" in intent && (
+            <p>
+              مدت محرومیت:{" "}
+              {
+                {
+                  HOUR_1: "۱ ساعت",
+                  HOURS_24: "۲۴ ساعت",
+                  DAYS_7: "۷ روز",
+                  DAYS_30: "۳۰ روز",
+                  PERMANENT: "دائم",
+                }[intent.duration]
+              }
+              ؛ شروع از لحظهٔ اجرای موفق.
+            </p>
+          )}
+          {(intent.operation === "USER_RESTRICT" || intent.operation === "USER_UNRESTRICT") && (
+            <p>نشست‌های قبلی کاربر نامعتبر می‌شوند. نتیجه و وضعیت مسابقهٔ فعال تغییر نمی‌کند.</p>
           )}
           {"displayName" in intent && <p>نام جدید: {intent.displayName}</p>}
           {"grants" in intent && (
@@ -201,12 +236,38 @@ export function OperationFlow({
           <label>
             دلیل عملیات
             <select value={reason} onChange={(e) => setReason(e.target.value)}>
-              <option value="MAINTENANCE">نگه‌داری</option>
-              <option value="ACCESS_ADMINISTRATION">مدیریت دسترسی</option>
-              <option value="SUPPORT_CORRECTION">اصلاح با درخواست پشتیبانی</option>
-              <option value="INCIDENT_RESPONSE">رسیدگی امنیتی</option>
+              {intent?.operation === "USER_RESTRICT" || intent?.operation === "USER_UNRESTRICT" ? (
+                <>
+                  <option value="ABUSE">رفتار نامناسب</option>
+                  <option value="SPAM">هرزنامه</option>
+                  <option value="SECURITY">حفاظت امنیتی</option>
+                  <option value="INCIDENT_RESPONSE">رسیدگی به رخداد</option>
+                  <option value="APPEAL">رسیدگی به اعتراض</option>
+                </>
+              ) : (
+                <>
+                  <option value="MAINTENANCE">نگه‌داری</option>
+                  <option value="ACCESS_ADMINISTRATION">مدیریت دسترسی</option>
+                  <option value="SUPPORT_CORRECTION">اصلاح با درخواست پشتیبانی</option>
+                  <option value="INCIDENT_RESPONSE">رسیدگی امنیتی</option>
+                </>
+              )}
             </select>
           </label>
+          {(intent?.operation === "USER_RESTRICT" || intent?.operation === "USER_UNRESTRICT") && (
+            <label>
+              توضیح محرمانه (اختیاری)
+              <textarea
+                maxLength={2000}
+                value={privateNote}
+                onChange={(e) => setPrivateNote(e.target.value)}
+                autoComplete="off"
+              />
+              <span className="muted">
+                رمزگذاری می‌شود؛ فقط با مجوز مستقل و ثبت مشاهده قابل خواندن است.
+              </span>
+            </label>
+          )}
           <button disabled={busy}>ثبت درخواست تأیید</button>
         </form>
       ) : (
