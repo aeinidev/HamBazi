@@ -8,8 +8,8 @@ local PostgreSQL/Redis services only. It does not deploy or migrate real data.
 
 Use the pinned Node/pnpm toolchain and frozen installation. Docker/BuildKit must
 support timestamp rewriting and retention of locally built manifest references;
-the verified setup is Docker 29.8.1 with its containerd image store, Buildx 0.37.1
-and BuildKit 0.33.0 on Linux amd64. Build inputs and output are locked in
+the verified setup is Docker 29.8.2 with its containerd image store, Buildx 0.37.1
+and BuildKit 0.33.1 on Linux amd64. Build inputs and output are locked in
 `infra/docker/postgres/image-lock.json`. Run from the repository root:
 
 ```sh

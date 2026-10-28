@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "nodeVersion": "24.22.1",
   "corepackVersion": "0.35.0",
-  "dockerVersion": "29.8.1",
+  "dockerVersion": "29.8.2",
   "telegramSdk": {
     "url": "https://telegram.org/js/telegram-web-app.js",
     "integrity": "sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG"

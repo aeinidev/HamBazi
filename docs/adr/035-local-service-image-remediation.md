@@ -97,3 +97,10 @@ physical-volume adoption and verifies runtime role denial and restart persistenc
 These synthetic local checks do not authorize or prove migration of real data,
 arbitrary extensions/custom collations, offsite backup, staging networking or
 production deployment. Root scripts and application contracts/grants are unchanged.
+
+## Toolchain follow-up — 2026-10-28
+
+The reproduction above records the original measured toolchain. Current CI uses
+Docker 29.8.2 / BuildKit 0.33.1 under the dated amendment to ADR-041. Reproduction
+must still match the locked PostgreSQL digest; the patch update does not permit
+substituting an unreviewed service image.

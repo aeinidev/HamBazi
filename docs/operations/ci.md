@@ -12,7 +12,7 @@ on hosted runners; test deadlines and application behavior stay unchanged.
 
 ## Required gates
 
-The workflow provisions Node 24.20.0, Corepack 0.35.0 and root-declared pnpm
+The workflow provisions Node 24.22.1, Corepack 0.35.0 and root-declared pnpm
 12.4.1, then runs the declared frozen install. The verified tool installer
 creates a new private directory below `runner.temp`; existing directories are
 refused. Archive and binary hash mismatches or SDK integrity drift block.
@@ -21,7 +21,7 @@ archives and SDK bytes, never a verification bypass. CI downloads official bytes
 
 The stock runner's Docker/PostgreSQL versions do not reproduce the locked
 service image and restore clients. The official pinned Docker action installs
-29.8.1 with the containerd snapshotter and selects its own Docker context. The
+29.8.2 with the containerd snapshotter and selects its own Docker context. The
 PGDG script installs signed PostgreSQL 18 server/client packages only when CI,
 Linux x64 and Ubuntu noble guards match. Do not run this privileged provisioning
 script on a developer or production host. Browser binaries/system libraries
@@ -138,7 +138,7 @@ provision tools in an absolute new directory outside the checkout:
 SECURITY_SCANNER_DIR=/absolute/new/private/tools node infra/ci/provision-tools.mjs
 ```
 
-Use compatible Docker 29.8.1/containerd, PostgreSQL 18 binaries/share paths and
+Use compatible Docker 29.8.2/containerd, PostgreSQL 18 binaries/share paths and
 Chromium already provisioned without modifying the developer host. Set
 `TEST_POSTGRES_BIN`, `TEST_POSTGRES_SHARE`, `SECURITY_SCANNER_DIR`,
 `TELEGRAM_SDK_FIXTURE_PATH` and an owned `RUNNER_TEMP` outside the checkout; set

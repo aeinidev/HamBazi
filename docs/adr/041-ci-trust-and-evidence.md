@@ -29,7 +29,7 @@ integrity-bearing lockfile. Provision scanners and actionlint from reviewed
 HTTPS archives, verifying both archive and executable hashes before execution.
 Verify official Telegram SDK bytes against the existing public integrity pin.
 Install PostgreSQL 18 tools from the signed official PGDG Ubuntu repository on
-ephemeral runners only. Select Docker 29.8.1 with its containerd image store to
+ephemeral runners only. Select Docker 29.8.2 with its containerd image store to
 reproduce the already-reviewed local service image. No product policy changes.
 
 Force Turbo execution without remote/shared caches. Build public surfaces before
@@ -98,3 +98,16 @@ decision is resolved here.
 - [Official Docker setup action](https://github.com/docker/setup-docker-action)
 - [Official PostgreSQL Ubuntu packages](https://www.postgresql.org/download/linux/ubuntu/)
 - [actionlint releases](https://github.com/rhysd/actionlint/releases/tag/v1.7.12)
+
+## Amendment — Docker patch selection, 2026-10-28
+
+The owner authorized Docker 29.8.2 in place of 29.8.1 for local/CI Phase 3
+qualification. This is a reviewed parameter update, not an exception to the
+exact-version check. The [official patch release notes](https://docs.docker.com/engine/release-notes/29/#2982)
+include Engine and BuildKit security fixes. The local Linux amd64 engine uses
+API 1.56, containerd 2.3.6, Buildx 0.37.1 and BuildKit 0.33.1. Re-run the real
+CI entrypoint and image/migration/security checks against committed clean source.
+Keep snapshotter, action hashes, scanner policies, freshness and clean-source
+requirements unchanged. Historical 29.8.1 results remain historical evidence.
+This selection does not certify all host components or select the latest Engine;
+it does not authorize a server upgrade, deployment or capacity approval.

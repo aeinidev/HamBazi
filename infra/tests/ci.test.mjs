@@ -33,6 +33,20 @@ it("accepts reviewed workflow trust boundaries and keeps deferred capacity as a 
 });
 for (const [name, mutate] of [
   [
+    "previous Docker patch",
+    (w) => {
+      action(w, "docker/setup-docker-action").with.version = "v29.8.1";
+    },
+  ],
+  [
+    "disabled containerd snapshotter",
+    (w) => {
+      action(w, "docker/setup-docker-action").with["daemon-config"] = JSON.stringify({
+        features: { "containerd-snapshotter": false },
+      });
+    },
+  ],
+  [
     "write permission",
     (w) => {
       w.permissions.contents = "write";
