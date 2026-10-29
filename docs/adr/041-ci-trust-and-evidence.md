@@ -29,7 +29,7 @@ integrity-bearing lockfile. Provision scanners and actionlint from reviewed
 HTTPS archives, verifying both archive and executable hashes before execution.
 Verify official Telegram SDK bytes against the existing public integrity pin.
 Install PostgreSQL 18 tools from the signed official PGDG Ubuntu repository on
-ephemeral runners only. Select Docker 29.8.2 with its containerd image store to
+ephemeral runners only. Select Docker 29.9.2 with its containerd image store to
 reproduce the already-reviewed local service image. No product policy changes.
 
 Force Turbo execution without remote/shared caches. Build public surfaces before
@@ -111,3 +111,20 @@ Keep snapshotter, action hashes, scanner policies, freshness and clean-source
 requirements unchanged. Historical 29.8.1 results remain historical evidence.
 This selection does not certify all host components or select the latest Engine;
 it does not authorize a server upgrade, deployment or capacity approval.
+
+## Amendment — owner-approved Docker selection, 2026-10-29
+
+The owner authorized compatibility review and a synchronized local/CI pin update
+from 29.8.2 to 29.9.2 after the workstation's daemon changed independently.
+The exact-version preflight correctly rejected that drift; its check remains
+exact, and this amendment does not approve downgrading/upgrading any daemon.
+The [official release notes](https://docs.docker.com/engine/release-notes/29/#2992)
+describe the Go TLS certificate-chain security update; the intervening 29.9.1
+release also updates containerd security fixes. Registry TLS verification stays
+enabled. Workflow/toolchain pins are synchronized; negative checks reject both
+29.8.2 and 29.8.1 and the disabled snapshotter. Node, pnpm, action/tool hashes,
+scanner freshness/severities, forced execution, concurrency=1 and deadlines stay
+unchanged. Compatibility requires the full committed-source CI, image and
+migration/restart/restore/browser checks; this decision alone is not a PASS.
+Historical 29.8.x evidence stays unchanged. Staging/Production/OWNER, deployment
+and capacity approval remain outside this amendment.

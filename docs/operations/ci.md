@@ -21,7 +21,7 @@ archives and SDK bytes, never a verification bypass. CI downloads official bytes
 
 The stock runner's Docker/PostgreSQL versions do not reproduce the locked
 service image and restore clients. The official pinned Docker action installs
-29.8.2 with the containerd snapshotter and selects its own Docker context. The
+29.9.2 with the containerd snapshotter and selects its own Docker context. The
 PGDG script installs signed PostgreSQL 18 server/client packages only when CI,
 Linux x64 and Ubuntu noble guards match. Do not run this privileged provisioning
 script on a developer or production host. Browser binaries/system libraries
@@ -138,7 +138,7 @@ provision tools in an absolute new directory outside the checkout:
 SECURITY_SCANNER_DIR=/absolute/new/private/tools node infra/ci/provision-tools.mjs
 ```
 
-Use compatible Docker 29.8.2/containerd, PostgreSQL 18 binaries/share paths and
+Use compatible Docker 29.9.2/containerd, PostgreSQL 18 binaries/share paths and
 Chromium already provisioned without modifying the developer host. Set
 `TEST_POSTGRES_BIN`, `TEST_POSTGRES_SHARE`, `SECURITY_SCANNER_DIR`,
 `TELEGRAM_SDK_FIXTURE_PATH` and an owned `RUNNER_TEMP` outside the checkout; set
@@ -165,7 +165,7 @@ manifest as local candidate evidence, never a published source/release artifact.
 The local runner does not exercise GitHub's action service, privileged runner
 provisioning, artifact upload or repository protection settings.
 
-## Docker 29.8.2 local recheck
+## Historical Docker 29.8.2 local recheck
 
 The owner-authorized ADR-041 amendment updates both the exact CI pin and workflow.
 The [Phase 3 recheck](../security/admin-phase3-docker-29.8.2-qualification.json)
@@ -174,3 +174,13 @@ build/scan checks passed, but a reproducible 5000ms recovery correctness timeout
 blocks the full pipeline. Downstream browser commands passed separately; they do
 not replace a successful complete run or authorize staging deployment. Historical
 29.8.1 measurements are retained unchanged.
+
+## Docker 29.9.2 selection — 2026-10-29
+
+The owner approved reviewing and synchronizing the exact workflow/toolchain pin
+with the observed local 29.9.2 daemon. ADR-041 records the decision and official
+release notes. This is not a server upgrade or an exception to verification:
+29.8.2/29.8.1 and a disabled snapshotter remain negative cases. All 28 gates,
+forced tasks, concurrency=1, advisory freshness/severities, hashes and deadlines
+remain mandatory. Use the latest complete committed-source evidence; a stopped
+run or a preflight mismatch is not a successful qualification.

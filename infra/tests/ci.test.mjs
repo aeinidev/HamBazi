@@ -73,7 +73,13 @@ it("accepts reviewed workflow trust boundaries and keeps deferred capacity as a 
 });
 for (const [name, mutate] of [
   [
-    "previous Docker patch",
+    "previous Docker minor",
+    (w) => {
+      action(w, "docker/setup-docker-action").with.version = "v29.8.2";
+    },
+  ],
+  [
+    "older Docker patch",
     (w) => {
       action(w, "docker/setup-docker-action").with.version = "v29.8.1";
     },

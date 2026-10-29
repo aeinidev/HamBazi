@@ -56,7 +56,7 @@ jobs:
       - name: Compatible Docker and containerd image store
         uses: docker/setup-docker-action@2bf61fb9464cc67f0cbdeabed6aa0380accd1c70 # v5.5.0
         with:
-          version: "v29.8.2"
+          version: "v29.9.2"
           daemon-config: |
             { "features": { "containerd-snapshotter": true } }
       - name: PostgreSQL 18 tools from signed official packages
