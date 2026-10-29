@@ -160,8 +160,11 @@ function CoupContent({
       try {
         await runtime.realtime().request("game:command", body, okValue(matchAckSchema));
       } catch (error) {
-        if (error instanceof ClientError && error.code === "GAME_STATE_CONFLICT")
+        if (error instanceof ClientError && error.code === "GAME_STATE_CONFLICT") {
           await runtime.realtime().sync();
+          // A definitive rejection needs a new intent; only ambiguous failures retain this body.
+          throw new ClientError(error.code);
+        }
         throw error;
       }
       await runtime.realtime().sync();

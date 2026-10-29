@@ -44,6 +44,7 @@ function reset() {
     failCreate: false,
     createIds: [],
     conflict: false,
+    gameConflict: false,
   };
 }
 reset();
@@ -437,6 +438,10 @@ io.of("/v1").on("connection", (socket) =>
     if (event === "match:catchup")
       return ack(ok({ schemaVersion: 1, mode: "SNAPSHOT", events: [], snapshot: snapshot() }));
     if (event === "game:command") {
+      if (state.gameConflict) {
+        state.gameConflict = false;
+        return ack({ ok: false, error: { code: "GAME_STATE_CONFLICT", retryable: true } });
+      }
       state.snapshotVersion++;
       if (state.nextPhase) {
         state.coupPhase = state.nextPhase;

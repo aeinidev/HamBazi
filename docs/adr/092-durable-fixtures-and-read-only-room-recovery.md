@@ -28,6 +28,8 @@
 
 11. مانع مرورگر release یک race جدا در Realtime را آشکار کرد: `sync` هم‌زمان زود برمی‌گشت، invalidation میان یک read گم می‌شد و cursor می‌توانست gap مشاهده‌شده را با snapshot قدیمی پاک کند. cursor بالاترین seq مشاهده‌شده را حفظ می‌کند؛ snapshot دارای gap وارد UI نمی‌شود. syncها Promise مشترک و حداکثر دو read در هر نوبت دارند؛ در عقب‌ماندگی پایدار fail-closed و retry صریح مجاز است. timeout هر request، lease/heartbeat، احراز هویت، نقش، schema و action ID تغییر نمی‌کنند. completion اتصال قبلی مجوز تغییر وضعیت اتصال جدید ندارد. دو تست بازتولید ابتدا FAIL و پس از اصلاح موفق شدند؛ کنترل محدودبودن retry و قطع/اتصال دوباره نیز افزوده شد. این اصلاح برای ordinary/personal/Kahroba از همان transport مشترک استفاده می‌کند و سرویس جدید ندارد.
 
+12. تشخیص scalar-only اجرای یکپارچه نشان داد پس از `GAME_STATE_CONFLICT` قطعی، view تازه ACTIVE/PLAYER و اقدام مجاز بود ولی intent قدیمی با `retryable=true` UI را مسدود نگه می‌داشت. در چرخهٔ فرمان Coup و Kahroba، این رد قطعی پس از sync برای **همان intent** terminal است؛ اقدام تازه فقط با snapshot/شناسهٔ تازه و انتخاب صریح کاربر ساخته می‌شود. خطای مبهم شبکه همچنان دقیقاً همان action ID و body را برای بررسی نتیجه نگه می‌دارد. قرارداد خطا و version guard Backend تغییر نمی‌کنند. تست مرورگرِ conflict قطعی و تست lifecycle ابتدا روی رفتار قبلی FAIL و پس از اصلاح PASS شدند؛ هیچ test/timeout قبلی حذف یا تضعیف نشد.
+
 ## Alternatives
 
 - افزایش Timeout، کاهش fixture/موج، skip، خاموش‌کردن fsync یا پذیرش tmpfs: با الزامات این کار سازگار نیستند.

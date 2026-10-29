@@ -57,7 +57,11 @@ export function createKahrobaCommandLifecycle(deps: {
         if (epoch === generation) intent = null;
         await deps.sync();
       } catch (error) {
-        if (error instanceof ClientError && error.code === "GAME_STATE_CONFLICT") await deps.sync();
+        if (error instanceof ClientError && error.code === "GAME_STATE_CONFLICT") {
+          if (epoch === generation) intent = null;
+          await deps.sync();
+          throw new ClientError(error.code);
+        }
         if (epoch === generation && (!(error instanceof ClientError) || !error.retryable))
           intent = null;
         throw error;

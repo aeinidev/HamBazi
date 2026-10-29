@@ -275,6 +275,39 @@ test("re-authentication preserves a direct Match route", async ({ page }) => {
   await expect(page).toHaveURL(/#\/match\//);
 });
 
+test("a definitive Coup conflict refreshes and releases the rejected intent before a new action", async ({
+  page,
+  request,
+}) => {
+  await enterMatch(page);
+  const income = page.getByRole("button", { name: /^درآمد/ });
+  await expect.poll(() => income.isEnabled()).toBe(true);
+  await request.post(`${fixture}/__test/state`, {
+    data: { gameConflict: true, snapshotVersion: 3 },
+  });
+  await income.click();
+  await expect(
+    page.getByText("وضعیت بازی تغییر کرده است. میز را دوباره همگام کن.", { exact: true }),
+  ).toBeVisible();
+  await expect.poll(() => income.isEnabled()).toBe(true);
+  await expect(page.getByRole("button", { name: "تلاش دوباره", exact: true })).toHaveCount(0);
+  let saved = await (await request.get(`${fixture}/__test/state`)).json();
+  const rejected = saved.commands.filter(
+    (entry: { event: string }) => entry.event === "game:command",
+  );
+  expect(rejected).toHaveLength(1);
+  expect(rejected[0].input.expectedVersion).toBe(2);
+  await request.post(`${fixture}/__test/state`, { data: { nextPhase: "GAME_OVER" } });
+  await income.click();
+  await expect(page.getByRole("link", { name: "View your statistics" })).toBeVisible();
+  saved = await (await request.get(`${fixture}/__test/state`)).json();
+  const attempts = saved.commands.filter(
+    (entry: { event: string }) => entry.event === "game:command",
+  );
+  expect(attempts).toHaveLength(2);
+  expect(attempts[1].input.expectedVersion).toBe(3);
+  expect(attempts[1].input.actionId).not.toBe(attempts[0].input.actionId);
+});
 test("Coup controls follow server legal commands through action, proof, exchange, block and finish", async ({
   page,
   request,

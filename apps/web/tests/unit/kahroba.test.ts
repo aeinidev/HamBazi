@@ -57,9 +57,12 @@ it("retains one immutable command identity for ambiguous retry, fences double ta
   expect(request.mock.calls[0]![0]).toEqual(request.mock.calls[1]![0]);
   expect(newId).toHaveBeenCalledOnce();
   expect(lifecycle.blocked).toBe(false);
-  request.mockRejectedValueOnce(new ClientError("GAME_STATE_CONFLICT"));
+  request.mockRejectedValueOnce(new ClientError("GAME_STATE_CONFLICT", true));
   lifecycle.begin(s, command);
-  await expect(lifecycle.execute()).rejects.toThrow();
+  await expect(lifecycle.execute()).rejects.toMatchObject({
+    code: "GAME_STATE_CONFLICT",
+    retryable: false,
+  });
   expect(sync).toHaveBeenCalledTimes(2);
   expect(lifecycle.blocked).toBe(false);
 });
