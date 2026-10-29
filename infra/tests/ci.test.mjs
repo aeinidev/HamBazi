@@ -24,6 +24,10 @@ const action = (w, name) => w.jobs.verify.steps.find((step) => step.uses?.starts
 
 it("retains every workspace quality task in one forced Turbo graph and the non-Turbo checks", async () => {
   const manifest = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  const api = JSON.parse(await readFile(join(root, "apps/api/package.json"), "utf8"));
+  expect(
+    api.scripts.test.split(" ").filter((argument) => argument.startsWith("--maxWorkers=")),
+  ).toEqual(["--maxWorkers=2"]);
   for (const command of [
     "pnpm format:check",
     "pnpm lint",

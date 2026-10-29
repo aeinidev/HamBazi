@@ -39,7 +39,7 @@
     "contract:check": "node scripts/auth-contract.mjs && node scripts/bot-contract.mjs && node scripts/profile-contract.mjs && node scripts/catalog-contract.mjs && node scripts/rooms-contract.mjs && node scripts/realtime-contract.mjs && node scripts/statistics-contract.mjs && node scripts/personal-contract.mjs && node scripts/kahroba-contract.mjs && node scripts/kahroba-runtime-contract.mjs && node scripts/admin-contract.mjs",
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
-    "test": "vitest run tests/admin tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime tests/chat tests/leaderboard",
+    "test": "vitest run tests/admin tests/auth tests/users tests/games tests/http tests/rooms tests/matches tests/matchmaking tests/realtime tests/chat tests/leaderboard --maxWorkers=2",
     "test:integration": "vitest run tests/integration",
     "start:admin": "node dist/composition/admin-main.js",
     "admin:provision": "node dist/composition/admin-provision.js",
