@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "scope": "staging-phase3-authorized-deployment-preflight",
+  "clientDate": "2026-10-30",
+  "clientTimezone": "Asia/Tehran",
+  "checkedAtUTC": "2026-10-29T22:04:49.382864+00:00",
+  "status": "NO_GO_PRE_EXISTING_SECURITY_CONTAINMENT",
+  "stagingDeploymentAuthorized": true,
+  "deploymentStarted": false,
+  "qualifiedCodeCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+  "localArtifactBindingCheck": {
+    "scope": "local-qualified-artifact-binding-recheck",
+    "checkedAtUTC": "2026-10-29T22:06:48.297639+00:00",
+    "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+    "finalDocumentationCommit": "be24de36bd80377611e227059e47d0791a08350f",
+    "ciGates": 28,
+    "ciPassed": true,
+    "imageBindings": [
+      {
+        "role": "api",
+        "imageId": "sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+        "present": true
+      },
+      {
+        "role": "bot",
+        "imageId": "sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8",
+        "present": true
+      },
+      {
+        "role": "worker",
+        "imageId": "sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338",
+        "present": true
+      },
+      {
+        "role": "web",
+        "imageId": "sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+        "present": true
+      },
+      {
+        "role": "admin",
+        "imageId": "sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+        "present": true
+      }
+    ],
+    "retainedAdvisoryAgeHours": {
+      "UpdatedAt": 14.83,
+      "DownloadedAt": 13.45
+    },
+    "newScanPerformed": false,
+    "serverAdmissionAuthorizedByThisCheck": false
+  },
+  "services": [
+    {
+      "name": "/hambazi-server-api-1",
+      "id": "c4ec4c9b66e18c4a4c759911fc07661f146f926a8ad7b10ef3656231eca50c8a",
+      "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+      "running": false,
+      "status": "exited",
+      "health": "unhealthy",
+      "finishedAt": "2026-10-29T01:21:18.387014072Z"
+    },
+    {
+      "name": "/hambazi-server-bot-1",
+      "id": "2c8921778a7e537690dc0ba21787f88e9baf17f70bce662f548b956f8affde69",
+      "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+      "running": false,
+      "status": "exited",
+      "health": "unhealthy",
+      "finishedAt": "2026-10-29T01:21:18.094378245Z"
+    },
+    {
+      "name": "/hambazi-server-worker-1",
+      "id": "a7ecc04238b8655d04100079007a1af70b6d41941dfe15bd122666fcf4a275f7",
+      "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+      "running": false,
+      "status": "exited",
+      "health": "unhealthy",
+      "finishedAt": "2026-10-29T01:21:18.606346234Z"
+    },
+    {
+      "name": "/hambazi-server-web-1",
+      "id": "3bdc076678c5f5b9d22e74a32c9f8db9037cf767e3aeb101021555809f490245",
+      "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+      "running": false,
+      "status": "exited",
+      "health": "unhealthy",
+      "finishedAt": "2026-10-29T01:21:18.766814696Z"
+    },
+    {
+      "name": "/hambazi-server-postgres-staging-1",
+      "id": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2",
+      "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "running": true,
+      "status": "running",
+      "health": "healthy",
+      "finishedAt": "0001-01-01T00:00:00Z"
+    },
+    {
+      "name": "/hambazi-server-redis-staging-1",
+      "id": "d718077f893fcd410da571c3aacabb7e68dd4abff665c20225ee2dab823d4d8a",
+      "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "running": true,
+      "status": "running",
+      "health": null,
+      "finishedAt": "2026-10-25T20:35:48.787139241Z"
+    },
+    {
+      "name": "/hambazi-admin-api",
+      "id": "3cbd8525bbfbeef5487c47574b9aa3d1c5b6fee3d95f9dcf91c73269185dfd29",
+      "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+      "running": false,
+      "status": "exited",
+      "health": "unhealthy",
+      "finishedAt": "2026-10-29T01:21:17.415953914Z"
+    }
+  ],
+  "phaseTwoContainerAndImageIdsUnchanged": true,
+  "nginx": {
+    "active": true,
+    "configurationValid": true
+  },
+  "https": {
+    "staging.hambazi.top": {
+      "curlExit": 0,
+      "statusAndTlsVerify": "503 0"
+    },
+    "api-staging.hambazi.top": {
+      "curlExit": 0,
+      "statusAndTlsVerify": "503 0"
+    },
+    "admin.hambazi.top": {
+      "curlExit": 0,
+      "statusAndTlsVerify": "503 0"
+    }
+  },
+  "freeDiskBytes": 3092934656,
+  "security": {
+    "coreAndAdminDeadlineUTC": "2026-10-29T01:21:08Z",
+    "coreAndAdminDeadlineTehran": "2026-10-29T04:51:08+03:30",
+    "stateAndLastRuns": {
+      "core": {
+        "last-run.json": {
+          "ok": true,
+          "result": "unchanged",
+          "checkedAtUTC": "2026-10-28T06:00:40.872355+00:00",
+          "deadlineUTC": "2026-10-29T01:21:08Z",
+          "database": {
+            "Version": 2,
+            "UpdatedAt": "2026-10-28T01:21:08.391884645Z",
+            "DownloadedAt": "2026-10-28T06:00:27.781480695Z",
+            "NextUpdate": "2026-10-29T01:21:08.391884123Z"
+          }
+        },
+        "last-failure.json": {
+          "checkedAtUTC": "2026-10-29T22:01:03.681075+00:00",
+          "errorCode": "REPLACEMENT_SECURITY_BLOCKED"
+        },
+        "state.json": {
+          "deadlineUTC": "2026-10-29T01:21:08Z",
+          "database": {
+            "Version": 2,
+            "UpdatedAt": "2026-10-28T01:21:08.391884645Z",
+            "DownloadedAt": "2026-10-28T02:01:02.610890705Z",
+            "NextUpdate": "2026-10-29T01:21:08.391884123Z"
+          }
+        }
+      },
+      "admin": {
+        "last-run.json": {
+          "ok": true,
+          "checkedAtUTC": "2026-10-29T00:42:43.352614+00:00",
+          "deadlineUTC": "2026-10-29T01:21:08Z"
+        },
+        "state.json": {
+          "deadlineUTC": "2026-10-29T01:21:08Z",
+          "database": {
+            "Version": 2,
+            "UpdatedAt": "2026-10-28T01:21:08.391884645Z",
+            "DownloadedAt": "2026-10-28T02:40:21.607972847Z",
+            "NextUpdate": "2026-10-29T01:21:08.391884123Z"
+          }
+        }
+      }
+    },
+    "timers": {
+      "hambazi-server-security-renew.timer": {
+        "NextElapseUSecRealtime": "Thu 2026-10-29 23:01:58 UTC",
+        "LastTriggerUSec": "Thu 2026-10-29 22:01:03 UTC",
+        "Result": "success",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-admin-security-renew.timer": {
+        "NextElapseUSecRealtime": "",
+        "LastTriggerUSec": "Thu 2026-10-29 21:43:36 UTC",
+        "Result": "success",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-server-security-expiry.timer": {
+        "NextElapseUSecRealtime": "",
+        "LastTriggerUSec": "Thu 2026-10-29 01:21:17 UTC",
+        "Result": "success",
+        "ActiveState": "active",
+        "SubState": "elapsed"
+      },
+      "hambazi-admin-security-expiry.timer": {
+        "NextElapseUSecRealtime": "",
+        "LastTriggerUSec": "Thu 2026-10-29 01:21:17 UTC",
+        "Result": "success",
+        "ActiveState": "active",
+        "SubState": "elapsed"
+      },
+      "hambazi-server-security-renew.service": {
+        "Result": "exit-code",
+        "ExecMainStatus": "1",
+        "ActiveState": "failed",
+        "SubState": "failed"
+      },
+      "hambazi-admin-security-renew.service": {
+        "Result": "exit-code",
+        "ExecMainStatus": "1",
+        "ActiveState": "failed",
+        "SubState": "failed"
+      }
+    },
+    "containmentEvents": [
+      {
+        "event": "admin.security.contained",
+        "playerServicesPreserved": true,
+        "journalUTC": "2026-10-29T01:21:17.659868+00:00"
+      },
+      {
+        "event": "security.expiry.contained",
+        "dataServicesPreserved": true,
+        "journalUTC": "2026-10-29T01:21:18.861245+00:00"
+      }
+    ],
+    "firstRecordedCoreRenewFailureAfterLastSuccess": {
+      "event": "security.operation.failed",
+      "errorCode": "REPLACEMENT_SECURITY_BLOCKED",
+      "journalUTC": "2026-10-28T07:02:00.085840+00:00"
+    },
+    "initialRenewalFailureCauseProven": false,
+    "reviewedControllerSha256": {
+      "core": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+      "admin": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e"
+    },
+    "singleRegistryHeadProbe": {
+      "curlExit": 0,
+      "statusAndTlsVerify": "405 0"
+    },
+    "registryBlobDownloadOrScanProven": false,
+    "expiredStateCannotPassNormalRenewalGuard": true
+  },
+  "stopReason": "The approved healthy-target deployment path failed its first essential gate; user instruction 6 requires stopping. Existing containment must remain until a reviewed normal-policy re-admission succeeds.",
+  "performed": [
+    "read-only service/identity/security-state/timer/journal/HTTPS checks",
+    "local candidate digest and evidence-binding checks",
+    "local documentation"
+  ],
+  "notPerformed": [
+    "new real backup or off-server restore",
+    "server file upload or change",
+    "migration or grant",
+    "image load or deployment",
+    "service start/restart/reload",
+    "manual renewal, deadline edit, timer change or containment-marker removal",
+    "OWNER access, credential/session/PIN read or change",
+    "Production operation",
+    "capacity testing",
+    "Phase 4"
+  ],
+  "rollbackRequired": false,
+  "rollbackReason": "No release or server mutation was started; existing containment remains intact.",
+  "nextRequiredPlan": [
+    "Diagnose the initial automatic renewal failure; the fixed error code alone does not establish network or vulnerability cause.",
+    "Review safe re-admission from the already-expired state; normal --renew rejects expired deadlines and must not be bypassed.",
+    "Review the current backup tool paths and recipient binding, then obtain a fresh encrypted full backup and configuration/key capsule; verify the off-server copy and actual isolated restore before any migration.",
+    "Scan exact candidate and retained images with fresh official advisories; admit only under unchanged severity/freshness/identity rules and a normally derived finite window.",
+    "Follow the migration/deployment/QA/compatible-rollback plan only after all gates pass; preserve OWNER and data."
+  ]
+}
