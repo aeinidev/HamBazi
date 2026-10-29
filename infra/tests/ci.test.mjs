@@ -366,6 +366,11 @@ it("build evidence requires clean source and normal policy, projects scalars and
       join(repository, "apps/web/dist/client/index.html"),
       "<main>synthetic build</main>",
     );
+    const assets = "apps/web/dist/client/assets";
+    await mkdir(join(repository, assets));
+    const media = ["svg", "png", "jpg", "jpeg", "webp", "woff2", "ttf"];
+    for (const extension of media)
+      await writeFile(join(repository, assets, `fixture.${extension}`), Buffer.from([0, 255, 17]));
     const policy = join(repository, "apps/web/dist/client/security-headers.json");
     await writeFile(policy, '{"profile":"production"}');
     await writeFile(join(repository, "docs/contracts/example.openapi.json"), "{}");
@@ -396,7 +401,26 @@ it("build evidence requires clean source and normal policy, projects scalars and
     expect(result.productionReleaseApproved).toBe(false);
     expect(result.releaseGates.find((gate) => gate.phase === "17C").status).toBe("Pending");
     expect(result.files.every((file) => /^[a-f0-9]{64}$/.test(file.sha256))).toBe(true);
+    for (const extension of media)
+      expect(result.files.find((file) => file.path === `${assets}/fixture.${extension}`)).toEqual({
+        path: `${assets}/fixture.${extension}`,
+        bytes: 3,
+        sha256: createHash("sha256")
+          .update(Buffer.from([0, 255, 17]))
+          .digest("hex"),
+      });
     expect(JSON.stringify(result).includes("private-report")).toBe(false);
+    for (const path of [
+      `${assets}/unexpected.bin`,
+      "apps/web/dist/client/unexpected.png",
+      "apps/api/dist/unexpected.png",
+    ]) {
+      await writeFile(join(repository, path), "not an approved build artifact");
+      await expect(
+        writeEvidence(repository, join(directory, "unapproved-asset"), passed, {}),
+      ).rejects.toThrow();
+      await rm(join(repository, path));
+    }
     for (const scan of [
       { sourceCommit: "f".repeat(40), sourceDirty: false },
       { sourceCommit: result.commit, sourceDirty: true },

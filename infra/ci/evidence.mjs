@@ -40,7 +40,8 @@ async function inventory(root, path, output) {
       !info.isFile() ||
       info.size > 64 * 1024 * 1024 ||
       output.length >= 5000 ||
-      !/\.(?:js|json|css|html|map|ts)$/.test(path)
+      (!/\.(?:js|json|css|html|map|ts)$/.test(path) &&
+        !/^apps\/web\/dist\/client\/assets\/.+\.(?:svg|png|jpe?g|webp|woff2|ttf)$/.test(path))
     )
       invalid();
     output.push({ path, bytes: info.size, sha256: digest(await readFile(join(root, path))) });

@@ -30,6 +30,8 @@
 
 12. تشخیص scalar-only اجرای یکپارچه نشان داد پس از `GAME_STATE_CONFLICT` قطعی، view تازه ACTIVE/PLAYER و اقدام مجاز بود ولی intent قدیمی با `retryable=true` UI را مسدود نگه می‌داشت. در چرخهٔ فرمان Coup و Kahroba، این رد قطعی پس از sync برای **همان intent** terminal است؛ اقدام تازه فقط با snapshot/شناسهٔ تازه و انتخاب صریح کاربر ساخته می‌شود. خطای مبهم شبکه همچنان دقیقاً همان action ID و body را برای بررسی نتیجه نگه می‌دارد. قرارداد خطا و version guard Backend تغییر نمی‌کنند. تست مرورگرِ conflict قطعی و تست lifecycle ابتدا روی رفتار قبلی FAIL و پس از اصلاح PASS شدند؛ هیچ test/timeout قبلی حذف یا تضعیف نشد.
 
+13. اجرای کامل هر ۲۸ gate، خطای جداگانهٔ inventory شواهد را آشکار کرد: پسوندهای تصویر و فونت Web در allowlist نبودند. فقط انواعی که static server فعلی می‌شناسد (`svg/png/jpg/jpeg/webp/woff2/ttf`)، فقط زیر `apps/web/dist/client/assets/`، با همان hash/اندازه در manifest ثبت می‌شوند؛ فایل ناشناخته، media خارج این مسیر، symlink، مسیر مخفی، سقف اندازه/تعداد و کنترل source تمیز همچنان رد می‌شوند. تست بازتولید پیش از اصلاح FAIL و پس از اصلاح ۳۰ تست CI موفق شد؛ Qualification استاندارد دوباره لازم است.
+
 ## Alternatives
 
 - افزایش Timeout، کاهش fixture/موج، skip، خاموش‌کردن fsync یا پذیرش tmpfs: با الزامات این کار سازگار نیستند.
