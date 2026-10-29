@@ -1,8 +1,8 @@
 # آمادگی انتشار فاز سوم Admin روی Staging
 
-> وضعیت مقصد — 2026-10-30: مجوز Staging دریافت شد، اما [پیش‌بررسی واقعی](admin-phase-3-staging-2026-10-30.md) containment امنیتیِ ازقبل‌فعال و انقضای deadline را نشان داد. نصب/بکاپ تازه آغاز نشد؛ مقصد فعلاً NO-GO است. موفقیت محلی زیر، سلامت یا بازپذیری سرور را تأیید نمی‌کند.
+> وضعیت جاری — 2026-10-30: [بازیابی امن Staging](staging-recovery-20261030.md) موفق است و همان فاز دوم سرویس می‌دهد؛ مشکل containment قبلی رفع شد. طبق دستور تازهٔ مالک، **فاز سوم فعلاً نصب نمی‌شود**. Qualification محلی زیر تاریخی/معتبر در دامنهٔ خود باقی است؛ استقرار تازه مجوز جداگانه می‌خواهد.
 
-تاریخ تکمیل: 2026-10-30 (Asia/Tehran). زمان دقیق UTC آزمون‌ها در evidence ثبت است. **آماده‌سازی محلی موفق است؛ مجوز Staging دریافت شده، اما کنترل ضروری مقصد فعلاً NO-GO است.** مرجع جاری [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) است. CI و ساخت artifactها به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` و snapshot/digestهای ثبت‌شده متصل‌اند؛ اصلاح runtime در `a9dbf14` کامل شده و اختلاف تا commit آزموده‌شده شامل checkpoint مستنداتی، اصلاح محدود inventory شواهد CI با تست مثبت/منفی و محدودیت دو worker بین فایل‌های واحد API است. commit بعدی این گزارش نیز فقط مستندات/evidence است؛ CI برای آن commit مستنداتی ادعا نمی‌شود.
+تاریخ تکمیل: 2026-10-30 (Asia/Tehran). زمان دقیق UTC آزمون‌ها در evidence ثبت است. **آماده‌سازی محلی موفق است؛ Staging با فاز دوم بازیابی شده و نصب فاز سوم فعلاً HOLD است.** مرجع جاری [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) است. CI و ساخت artifactها به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` و snapshot/digestهای ثبت‌شده متصل‌اند؛ اصلاح runtime در `a9dbf14` کامل شده و اختلاف تا commit آزموده‌شده شامل checkpoint مستنداتی، اصلاح محدود inventory شواهد CI با تست مثبت/منفی و محدودیت دو worker بین فایل‌های واحد API است. commit بعدی این گزارش نیز فقط مستندات/evidence است؛ CI برای آن commit مستنداتی ادعا نمی‌شود.
 
 ## کنترل‌های تکمیل‌شده
 
@@ -43,7 +43,7 @@
 
 ## پیش‌شرط‌های نصب آینده
 
-[برنامهٔ Backup، نصب و Rollback](admin-phase-3-staging-release-plan.md) آماده است؛ مجوز Staging دریافت شده، ولی پیش از اجرای آن مانع containment فعلی باید طبق طرح بازبینی‌شده رفع شود:
+[برنامهٔ Backup، نصب و Rollback](admin-phase-3-staging-release-plan.md) آماده است؛ containment قبلی رفع شده، ولی طبق دستور جدید مالک نصب فاز سوم فعلاً متوقف است و اجرای تازه تأیید جداگانه می‌خواهد:
 
 1. تأیید صریح Staging و binding دقیق کد/artifact؛ تطبیق live image/config/grants، سلامت PostgreSQL/Redis/Nginx/API/Bot/Worker/Web/Admin و کنترل‌های امنیتی تازه، بدون تمدید deadline.
 2. full backup واقعی تازه و capsule رمزگذاری‌شدهٔ تنظیمات/کلیدها با ابزار و گیرندهٔ بازبینی‌شده؛ کپی خارج سرور، SHA-256 و بازیابی واقعی همان archive با receipt منطبق. ورود اطلاعات محرمانه فقط توسط مالک در ترمینال خصوصی است. rehearsal ساختگی جای این gate نیست؛ بکاپ OWNER جای full backup را نمی‌گیرد.

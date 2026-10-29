@@ -1,0 +1,1011 @@
+{
+  "schemaVersion": 1,
+  "scope": "authorized-staging-existing-phase2-security-recovery",
+  "clientDate": "2026-10-30",
+  "clientTimezone": "Asia/Tehran",
+  "status": "RECOVERED_EXISTING_PHASE2_PHASE3_NOT_INSTALLED",
+  "checkedAtUTC": "2026-10-29T23:04:20.231702+00:00",
+  "rootCause": {
+    "finding": "OS Nginx/nginx-common changed from reviewed 1.24.0-2ubuntu7.18 to 1.24.0-2ubuntu7.19; the exact host-package guard rejected core renewal before advisory refresh",
+    "evidence": {
+      "scope": "read-only-control-drift",
+      "checkedAtUTC": "2026-10-29T22:16:49.823923+00:00",
+      "hostPackagesExpected": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.18\nnginx-common=1.24.0-2ubuntu7.18\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+      "hostPackagesActual": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.19\nnginx-common=1.24.0-2ubuntu7.19\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+      "hostPackagesMatch": false,
+      "fileDrift": [
+        {
+          "path": "/etc/nginx/sites-available/hambazi",
+          "expectedSha256": "454d7262e99acc9bf3171339d3d4df191f158054ce410866476e166369161043",
+          "actualSha256": "b7d2e4456bf05e6e51f83d68a3884b9d4d40f49c790044d51716f72aaa6c4527",
+          "modifiedUTC": "2026-10-29T01:21:17.815969+00:00"
+        }
+      ],
+      "scannerSha256": "d89bcc6510a267f11b773398cbf1be5520ce39f9e8b6633178c4487f05b7d791",
+      "cacheMetadata": {
+        "core": {
+          "Version": 2,
+          "NextUpdate": "2026-10-29T01:21:08.391884123Z",
+          "UpdatedAt": "2026-10-28T01:21:08.391884645Z",
+          "DownloadedAt": "2026-10-28T06:00:27.781480695Z"
+        },
+        "admin": {
+          "Version": 2,
+          "NextUpdate": "2026-10-29T19:18:03.419608078Z",
+          "UpdatedAt": "2026-10-28T19:18:03.419608319Z",
+          "DownloadedAt": "2026-10-29T00:42:32.543775967Z"
+        }
+      },
+      "scanFiles": [
+        {
+          "role": "api",
+          "modifiedUTC": "2026-10-28T06:00:38.219561+00:00",
+          "counts": {}
+        },
+        {
+          "role": "bot",
+          "modifiedUTC": "2026-10-28T06:00:38.442565+00:00",
+          "counts": {}
+        },
+        {
+          "role": "worker",
+          "modifiedUTC": "2026-10-28T06:00:38.655569+00:00",
+          "counts": {}
+        },
+        {
+          "role": "web",
+          "modifiedUTC": "2026-10-28T06:00:38.860573+00:00",
+          "counts": {}
+        },
+        {
+          "role": "postgres-staging",
+          "modifiedUTC": "2026-10-28T06:00:39.119579+00:00",
+          "counts": {
+            "MEDIUM": 1
+          }
+        },
+        {
+          "role": "redis-staging",
+          "modifiedUTC": "2026-10-28T06:00:39.308582+00:00",
+          "counts": {
+            "MEDIUM": 1
+          }
+        },
+        {
+          "role": "admin",
+          "modifiedUTC": "2026-10-29T00:42:41.703777+00:00",
+          "counts": {}
+        }
+      ]
+    },
+    "packageProvenance": {
+      "checkedAtUTC": "2026-10-29T22:20:26.913179+00:00",
+      "scope": "read-only-nginx-upgrade-provenance",
+      "packageTimeline": [
+        "2026-10-28 06:23:36 upgrade nginx-common:all 1.24.0-2ubuntu7.18 1.24.0-2ubuntu7.19",
+        "2026-10-28 06:23:36 upgrade nginx:amd64 1.24.0-2ubuntu7.18 1.24.0-2ubuntu7.19",
+        "2026-10-28 06:23:38 status installed nginx-common:all 1.24.0-2ubuntu7.19",
+        "2026-10-28 06:23:39 status installed nginx:amd64 1.24.0-2ubuntu7.19"
+      ],
+      "packageVerification": {
+        "exitCode": 0,
+        "changedPaths": []
+      },
+      "aptTrustedOriginHints": {
+        "noble-security": true,
+        "security.ubuntu.com": false,
+        "archive.ubuntu.com": false,
+        "noble-updates": true
+      },
+      "expectedPlayerNginxSha256": "454d7262e99acc9bf3171339d3d4df191f158054ce410866476e166369161043",
+      "liveConfigCandidates": [
+        "/opt/hambazi/releases/admin-phase2-20261027/before/etc/nginx/sites-available/hambazi",
+        "/opt/hambazi/releases/admin-phase2-20261027/before/opt/hambazi/private/https-live.conf"
+      ],
+      "unitDefinitions": {
+        "hambazi-server.service": "NOT_FOUND",
+        "hambazi-admin.service": "# /etc/systemd/system/hambazi-admin.service\n[Unit]\nDescription=HamBazi SSH-only Admin\nAfter=docker.service network-online.target\nRequires=docker.service\nConflicts=hambazi-server-security-contain.service hambazi-admin-security-contain.service\n\n[Service]\nType=simple\nUMask=0077\nExecStartPre=/usr/bin/python3 /opt/hambazi/admin/ops/admin-security.py --admit\nExecStart=/usr/bin/docker start --attach hambazi-admin-api\nExecStop=/usr/bin/docker stop --time 15 hambazi-admin-api\nRestart=on-failure\nRestartSec=5\nTimeoutStartSec=30\nTimeoutStopSec=30\nStandardOutput=null\nStandardError=null\n\n[Install]\nWantedBy=multi-user.target\n",
+        "hambazi-server-security-renew.service": "# /etc/systemd/system/hambazi-server-security-renew.service\n[Unit]\nDescription=Renew exact-image security evidence for replacement restricted staging\nAfter=docker.service network-online.target\nRequires=docker.service\nWants=network-online.target\n\n[Service]\nType=oneshot\nUser=root\nUMask=0077\nExecStart=/usr/bin/python3 /opt/hambazi/ops/replacement-security.py --renew\nTimeoutStartSec=30min\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=strict\nProtectHome=true\nReadWritePaths=/opt/hambazi/security /etc/systemd/system/hambazi-server-security-expiry.timer\n\n",
+        "hambazi-admin-security-renew.service": "# /etc/systemd/system/hambazi-admin-security-renew.service\n[Unit]\nDescription=Renew exact-image private Admin security evidence\nAfter=network-online.target hambazi-admin.service\n\n[Service]\nType=oneshot\nUMask=0077\nExecStart=/usr/bin/python3 /opt/hambazi/admin/ops/admin-security.py --renew\nTimeoutStartSec=20min\n"
+      },
+      "coreBoundPaths": [
+        "/opt/hambazi/private/https-live.conf",
+        "/opt/hambazi/private/bot.env",
+        "/opt/hambazi/private/owner-admission.json",
+        "/opt/hambazi/private/postgres-10-roles.sh",
+        "/opt/hambazi/private/compose.json",
+        "/opt/hambazi/private/pg_hba.proposed.conf",
+        "/opt/hambazi/private/web.env",
+        "/opt/hambazi/private/redis.proposed.conf",
+        "/opt/hambazi/private/api.env",
+        "/opt/hambazi/private/redis-bootstrap.env",
+        "/opt/hambazi/private/staging-test-admission.json",
+        "/opt/hambazi/private/postgres-bootstrap.env",
+        "/opt/hambazi/private/postgres-start.sh",
+        "/opt/hambazi/private/postgres-99-image-policy.sh",
+        "/opt/hambazi/private/postgresql.proposed.conf",
+        "/opt/hambazi/private/worker.env",
+        "/opt/hambazi/private/compose-data.json",
+        "/opt/hambazi/private/start-redis-tls.sh",
+        "/opt/hambazi/private/tls/api-key.pem",
+        "/opt/hambazi/private/tls/ca-key.pem",
+        "/opt/hambazi/private/tls/api-ca.pem",
+        "/opt/hambazi/private/tls/redis-key.pem",
+        "/opt/hambazi/private/tls/api-cert.pem",
+        "/opt/hambazi/private/tls/bot-cert.pem",
+        "/opt/hambazi/private/tls/postgres-key.pem",
+        "/opt/hambazi/private/tls/postgres-cert.pem",
+        "/opt/hambazi/private/tls/api-ca-key.pem",
+        "/opt/hambazi/private/tls/data-ca.pem",
+        "/opt/hambazi/private/tls/bot-key.pem",
+        "/opt/hambazi/private/tls/api-ca.srl",
+        "/opt/hambazi/private/tls/redis-cert.pem",
+        "/opt/hambazi/private/tls/data-ca.srl",
+        "/etc/nginx/sites-available/hambazi",
+        "/opt/hambazi/evidence/https-maintenance.conf",
+        "/opt/hambazi/ops/replacement-security.py",
+        "/etc/systemd/system/hambazi-server-security-renew.service",
+        "/etc/systemd/system/hambazi-server-security-renew.timer",
+        "/etc/systemd/system/hambazi-server-security-contain.service"
+      ]
+    },
+    "firstObservedCoreFailureUTC": "2026-10-28T07:02:00.085840+00:00",
+    "expiredWindowUTC": "2026-10-29T01:21:08Z",
+    "automaticUpdaterIdentityProven": false
+  },
+  "remediation": {
+    "reviewedHostPackageBindingUpdated": true,
+    "onlyCoreControlChangedKeys": ["hostPackages"],
+    "adminControlUnchanged": true,
+    "controllersUnchanged": {
+      "core": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+      "admin": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e"
+    },
+    "normalSecurityPolicyUnchanged": true,
+    "expiryPolicyHours": 24,
+    "deadlineDerivedFromGenuineAdvisoryTimes": true,
+    "deadlineUTC": "2026-10-30T19:18:50Z",
+    "deadlineTehran": "2026-10-30T22:48:50+03:30",
+    "noArbitraryExtensionOrNewException": true,
+    "samePhase2ContainersAndImages": true,
+    "noImageRebuildOrReplacement": true,
+    "nginxActualMasterBinaryMatchesInstalledPackage": true,
+    "temporaryProxyMaintenanceUntilPrivateHealthPassed": true,
+    "normalAdminSystemdAdmissionGuardUsed": true
+  },
+  "securityQualification": {
+    "stage": "SECURITY_QUALIFICATION_PASSED",
+    "atUTC": "2026-10-29T22:31:15.445000+00:00",
+    "scope": "staging-phase2-recovery-only",
+    "passed": true,
+    "checkedAtUTC": "2026-10-29T22:31:15.443043+00:00",
+    "database": {
+      "Version": 2,
+      "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+      "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+      "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+    },
+    "corePotentialDeadlineUTC": "2026-10-30T19:18:50Z",
+    "adminPotentialDeadlineUTC": "2026-10-30T19:18:50Z",
+    "pins": {
+      "api": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+      "bot": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+      "worker": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+      "web": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+      "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+    },
+    "adminImage": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+    "counts": {
+      "api": {},
+      "bot": {},
+      "worker": {},
+      "web": {},
+      "postgres-staging": {
+        "MEDIUM": 1
+      },
+      "redis-staging": {
+        "MEDIUM": 1
+      },
+      "admin": {}
+    },
+    "normalPolicyUnchanged": true,
+    "deadlineApplied": false,
+    "servicesStarted": false,
+    "phase3Installed": false
+  },
+  "finalRuntime": {
+    "passed": true,
+    "checkedAtUTC": "2026-10-29T23:04:20.231702+00:00",
+    "scope": "staging-existing-phase2-recovery",
+    "services": {
+      "api": {
+        "containerId": "c4ec4c9b66e18c4a4c759911fc07661f146f926a8ad7b10ef3656231eca50c8a",
+        "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      },
+      "bot": {
+        "containerId": "2c8921778a7e537690dc0ba21787f88e9baf17f70bce662f548b956f8affde69",
+        "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      },
+      "worker": {
+        "containerId": "a7ecc04238b8655d04100079007a1af70b6d41941dfe15bd122666fcf4a275f7",
+        "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      },
+      "web": {
+        "containerId": "3bdc076678c5f5b9d22e74a32c9f8db9037cf767e3aeb101021555809f490245",
+        "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      },
+      "postgres-staging": {
+        "containerId": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2",
+        "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      },
+      "redis-staging": {
+        "containerId": "d718077f893fcd410da571c3aacabb7e68dd4abff665c20225ee2dab823d4d8a",
+        "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+        "running": true,
+        "health": null,
+        "publicPorts": false
+      },
+      "admin": {
+        "containerId": "3cbd8525bbfbeef5487c47574b9aa3d1c5b6fee3d95f9dcf91c73269185dfd29",
+        "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false
+      }
+    },
+    "nginxActive": true,
+    "normalWindows": {
+      "core": {
+        "deadlineUTC": "2026-10-30T19:18:50Z",
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+          "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+          "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+        }
+      },
+      "admin": {
+        "deadlineUTC": "2026-10-30T19:18:50Z",
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+          "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+          "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+        }
+      }
+    },
+    "normalRenewals": {
+      "core": {
+        "ok": true,
+        "result": "unchanged",
+        "checkedAtUTC": "2026-10-29T23:01:35.951600+00:00",
+        "deadlineUTC": "2026-10-30T19:18:50Z",
+        "images": 6,
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+          "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+          "DownloadedAt": "2026-10-29T23:01:25.213664139Z"
+        }
+      },
+      "admin": {
+        "ok": true,
+        "checkedAtUTC": "2026-10-29T22:52:19.887568+00:00",
+        "deadlineUTC": "2026-10-30T19:18:50Z"
+      }
+    },
+    "timers": {
+      "hambazi-server-security-renew.timer": {
+        "NextElapseUSecRealtime": "Fri 2026-10-30 00:01:50 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-admin-security-renew.timer": {
+        "NextElapseUSecRealtime": "",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-server-security-expiry.timer": {
+        "NextElapseUSecRealtime": "Fri 2026-10-30 19:18:50 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-admin-security-expiry.timer": {
+        "NextElapseUSecRealtime": "Fri 2026-10-30 19:18:50 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      }
+    },
+    "coreControlChangedKeys": ["hostPackages"],
+    "adminControlUnchanged": true,
+    "controllerHashes": {
+      "core": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+      "admin": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e"
+    },
+    "operatorHashes": {
+      "admin-controller.py": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e",
+      "readmit-resume-server.py": "7d227b43b8c0f24441e912b0be93aa8587bb873f751dcc3eec21840f2c389c00",
+      "readmit-server.py": "1047e9444695fb6287eadf44b3528dad840c2017f12ecd562780c468617fcaf3",
+      "core-controller.py": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+      "recovery-policy-resume.py": "897732981b29a2a70453a21d09a11f04ce6cc5fe0e3a046108f0484d388c4e73",
+      "recovery-policy.py": "29692c94b92c2fe3b4d7e530ea8d5e82abc647c5abffe075f6907ee6ca3d01a8"
+    },
+    "recovery": {
+      "scope": "staging-phase2-security-recovery",
+      "passed": true,
+      "completedAtUTC": "2026-10-29T22:48:16.540280+00:00",
+      "coreDeadlineUTC": "2026-10-30T19:18:50Z",
+      "adminDeadlineUTC": "2026-10-30T19:18:50Z",
+      "metadata": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+        "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+        "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+      },
+      "ownerAndSchema": {
+        "migrationCount": 19,
+        "phase3RestrictionTablePresent": false,
+        "owners": 1,
+        "credentialVersion": 2,
+        "sessionEpoch": 2,
+        "authorizationVersion": 1,
+        "status": "ACTIVE",
+        "pinFailures": 0,
+        "locked": false,
+        "passwordChanges": 1,
+        "pinChanges": 0
+      },
+      "ownerUnchanged": true,
+      "sameContainerAndImageIds": true,
+      "phase3Installed": false,
+      "hostPackagesBefore": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.18\nnginx-common=1.24.0-2ubuntu7.18\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+      "hostPackagesAfter": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.19\nnginx-common=1.24.0-2ubuntu7.19\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+      "freshCacheSha256": {
+        "core": "74cc77deb945b9cc6edf9967f3840d92286c59b0fda882b369dc9eda67cb5e07",
+        "admin": "74cc77deb945b9cc6edf9967f3840d92286c59b0fda882b369dc9eda67cb5e07"
+      },
+      "https": {
+        "staging.hambazi.top/": 200,
+        "api-staging.hambazi.top/v1/me": 401,
+        "admin.hambazi.top/": 200,
+        "admin.hambazi.top/v1/admin/me/access": 401
+      },
+      "freeDiskBytes": 3059834880,
+      "noDataRestoreOrMigration": true,
+      "normalAdmissionGuardUsed": true
+    },
+    "phase3Installed": false,
+    "productionChanged": false
+  },
+  "liveAcceptance": {
+    "directPublicHttps": {
+      "passed": true,
+      "checks": [
+        {
+          "host": "staging.hambazi.top",
+          "path": "/",
+          "status": 200,
+          "tlsVerified": true,
+          "directPublicNetwork": true
+        },
+        {
+          "host": "api-staging.hambazi.top",
+          "path": "/v1/me",
+          "status": 401,
+          "tlsVerified": true,
+          "directPublicNetwork": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/",
+          "status": 200,
+          "tlsVerified": true,
+          "directPublicNetwork": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/me/access",
+          "status": 401,
+          "tlsVerified": true,
+          "directPublicNetwork": true
+        }
+      ]
+    },
+    "phase2PublicSecurityChecks": {
+      "checkedAtUTC": "2026-10-29T22:54:32.039236+00:00",
+      "passed": true,
+      "checks": [
+        {
+          "host": "admin.hambazi.top",
+          "path": "/",
+          "method": "GET",
+          "status": 200,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/me/access",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/overview",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/management/meta",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/admins",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/operations",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/users",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/games",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/rooms",
+          "method": "GET",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/bootstrap",
+          "method": "POST",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/recovery",
+          "method": "POST",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/auth/password/reset",
+          "method": "POST",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/auth/forgot-password",
+          "method": "POST",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/auth/login",
+          "method": "POST",
+          "status": 403,
+          "tlsVerified": true
+        },
+        {
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/operations",
+          "method": "POST",
+          "status": 403,
+          "tlsVerified": true
+        },
+        {
+          "host": "staging.hambazi.top",
+          "path": "/",
+          "method": "GET",
+          "status": 200,
+          "tlsVerified": true
+        },
+        {
+          "host": "api-staging.hambazi.top",
+          "path": "/",
+          "method": "GET",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "bot-staging.hambazi.top",
+          "path": "/",
+          "method": "GET",
+          "status": 404,
+          "tlsVerified": true
+        },
+        {
+          "host": "api-staging.hambazi.top",
+          "path": "/v1/admin/admins",
+          "method": "GET",
+          "status": 404,
+          "tlsVerified": true
+        }
+      ],
+      "credentialsEntered": false,
+      "ownerCredentialsChanged": false
+    },
+    "anonymousBrowser": {
+      "checkedAtUTC": "2026-10-29T22:51:54.964Z",
+      "livePublicHttps": true,
+      "isolatedAnonymousBrowser": true,
+      "loginUsernamePasswordOnly": true,
+      "pinHiddenBeforePassword": true,
+      "rtl": true,
+      "mobileNoHorizontalOverflow": true,
+      "desktopNoHorizontalOverflow": true,
+      "credentialsEntered": false
+    },
+    "redisAuthenticatedTlsPing": true,
+    "nginxLiveBinaryMatchesInstalled": true,
+    "noCredentialsEntered": true
+  },
+  "localTests": {
+    "existingControllerTests": {
+      "stage": "recovery-security-unit",
+      "exitCode": 0,
+      "seconds": 1.92,
+      "testCounts": ["18"],
+      "browserCases": [],
+      "markers": []
+    },
+    "recoveryGuardTests": {
+      "passed": true,
+      "tests": 5,
+      "scope": "exact reviewed package binding, original verifier refusal/acceptance, temporary proxy guard preservation and bounded public readiness with TLS/status failures rejected",
+      "sourceSha256": "06556d6e8a9a6ced5b422c15f085e121323ad147cb6fc8e36a202ac6e8d6935a"
+    }
+  },
+  "attempts": {
+    "initialQualificationFailedBeforeServiceStartup": {
+      "exitCode": 1,
+      "events": [
+        {
+          "stage": "official-advisory-download",
+          "atUTC": "2026-10-29T22:23:50.712527+00:00"
+        },
+        {
+          "stage": "SECURITY_QUALIFICATION_FAILED",
+          "atUTC": "2026-10-29T22:24:10.575776+00:00",
+          "failedStage": "official-advisory-download",
+          "errorType": "Error",
+          "servicesStarted": false
+        }
+      ]
+    },
+    "duplicateCacheSpaceEvidence": {
+      "freeDiskBytes": 1656102912,
+      "recoveryFiles": [
+        {
+          "path": "admin-controller.py",
+          "bytes": 9945
+        },
+        {
+          "path": "core-controller.py",
+          "bytes": 10002
+        },
+        {
+          "path": "player-ingress.conf",
+          "bytes": 1567
+        },
+        {
+          "path": "before.json",
+          "bytes": 13028
+        },
+        {
+          "path": "admin-ingress.conf",
+          "bytes": 5447
+        },
+        {
+          "path": "cache/db/trivy.db",
+          "bytes": 1436418048
+        },
+        {
+          "path": "cache/db/metadata.json",
+          "bytes": 0
+        }
+      ]
+    },
+    "singleEmptyCacheQualification": {
+      "exitCode": 0,
+      "events": [
+        {
+          "stage": "official-advisory-download",
+          "atUTC": "2026-10-29T22:30:02.133375+00:00"
+        },
+        {
+          "stage": "scan-api",
+          "atUTC": "2026-10-29T22:30:27.736688+00:00",
+          "passed": true,
+          "counts": {}
+        },
+        {
+          "stage": "scan-bot",
+          "atUTC": "2026-10-29T22:30:38.581342+00:00",
+          "passed": true,
+          "counts": {}
+        },
+        {
+          "stage": "scan-worker",
+          "atUTC": "2026-10-29T22:30:48.476790+00:00",
+          "passed": true,
+          "counts": {}
+        },
+        {
+          "stage": "scan-web",
+          "atUTC": "2026-10-29T22:30:51.648739+00:00",
+          "passed": true,
+          "counts": {}
+        },
+        {
+          "stage": "scan-postgres-staging",
+          "atUTC": "2026-10-29T22:31:00.304532+00:00",
+          "passed": true,
+          "counts": {
+            "MEDIUM": 1
+          }
+        },
+        {
+          "stage": "scan-redis-staging",
+          "atUTC": "2026-10-29T22:31:03.677420+00:00",
+          "passed": true,
+          "counts": {
+            "MEDIUM": 1
+          }
+        },
+        {
+          "stage": "scan-admin",
+          "atUTC": "2026-10-29T22:31:15.197700+00:00",
+          "passed": true,
+          "counts": {}
+        },
+        {
+          "stage": "SECURITY_QUALIFICATION_PASSED",
+          "atUTC": "2026-10-29T22:31:15.445000+00:00",
+          "scope": "staging-phase2-recovery-only",
+          "passed": true,
+          "checkedAtUTC": "2026-10-29T22:31:15.443043+00:00",
+          "database": {
+            "Version": 2,
+            "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+            "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+            "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+          },
+          "corePotentialDeadlineUTC": "2026-10-30T19:18:50Z",
+          "adminPotentialDeadlineUTC": "2026-10-30T19:18:50Z",
+          "pins": {
+            "api": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+            "bot": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+            "worker": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+            "web": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+            "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+            "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+          },
+          "adminImage": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+          "counts": {
+            "api": {},
+            "bot": {},
+            "worker": {},
+            "web": {},
+            "postgres-staging": {
+              "MEDIUM": 1
+            },
+            "redis-staging": {
+              "MEDIUM": 1
+            },
+            "admin": {}
+          },
+          "normalPolicyUnchanged": true,
+          "deadlineApplied": false,
+          "servicesStarted": false,
+          "phase3Installed": false
+        }
+      ]
+    },
+    "firstPublicAdmissionFailedAndContained": {
+      "exitCode": 1,
+      "events": [
+        {
+          "stage": "NORMAL_POLICY_READMISSION_PUBLISHED",
+          "atUTC": "2026-10-29T22:39:37.595818+00:00",
+          "coreDeadlineUTC": "2026-10-30T19:18:50Z",
+          "adminDeadlineUTC": "2026-10-30T19:18:50Z",
+          "reviewedNginxPackageVersion": "1.24.0-2ubuntu7.19",
+          "policyUnchanged": true
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:39:43.619713+00:00",
+          "role": "api"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:39:49.431409+00:00",
+          "role": "worker"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:39:55.251953+00:00",
+          "role": "web"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:40:01.101772+00:00",
+          "role": "bot"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:40:23.938117+00:00",
+          "role": "admin"
+        },
+        {
+          "stage": "RECOVERY_FAILED",
+          "atUTC": "2026-10-29T22:40:27.732233+00:00",
+          "failedStage": "restore-approved-public-ingress",
+          "errorType": "AssertionError",
+          "safeCode": null
+        },
+        {
+          "event": "admin.security.contained",
+          "playerServicesPreserved": true
+        },
+        {
+          "event": "security.expiry.contained",
+          "dataServicesPreserved": true
+        },
+        {
+          "stage": "FAIL_CLOSED_CONTAINMENT_RESTORED",
+          "atUTC": "2026-10-29T22:40:29.309667+00:00",
+          "dataServicesPreserved": true
+        }
+      ]
+    },
+    "boundedPublicReadinessRecovery": {
+      "exitCode": 0,
+      "events": [
+        {
+          "stage": "EXISTING_NORMAL_QUALIFICATION_VERIFIED",
+          "atUTC": "2026-10-29T22:47:24.728562+00:00",
+          "coreDeadlineUTC": "2026-10-30T19:18:50Z",
+          "adminDeadlineUTC": "2026-10-30T19:18:50Z",
+          "noAdditionalWindowIssued": true
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:47:30.800893+00:00",
+          "role": "api"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:47:36.684688+00:00",
+          "role": "worker"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:47:42.437381+00:00",
+          "role": "web"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:47:48.272130+00:00",
+          "role": "bot"
+        },
+        {
+          "stage": "PRIVATE_SERVICE_READY",
+          "atUTC": "2026-10-29T22:48:09.767580+00:00",
+          "role": "admin"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:13.248064+00:00",
+          "host": "staging.hambazi.top",
+          "path": "/",
+          "statusAndTls": "503 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:13.297275+00:00",
+          "host": "api-staging.hambazi.top",
+          "path": "/v1/me",
+          "statusAndTls": "503 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:13.349368+00:00",
+          "host": "admin.hambazi.top",
+          "path": "/",
+          "statusAndTls": "200 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:13.406530+00:00",
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/me/access",
+          "statusAndTls": "401 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:13.962026+00:00",
+          "host": "staging.hambazi.top",
+          "path": "/",
+          "statusAndTls": "200 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:14.018520+00:00",
+          "host": "api-staging.hambazi.top",
+          "path": "/v1/me",
+          "statusAndTls": "401 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:14.066887+00:00",
+          "host": "admin.hambazi.top",
+          "path": "/",
+          "statusAndTls": "200 0"
+        },
+        {
+          "stage": "PUBLIC_HTTPS_PROBE",
+          "atUTC": "2026-10-29T22:48:14.124308+00:00",
+          "host": "admin.hambazi.top",
+          "path": "/v1/admin/me/access",
+          "statusAndTls": "401 0"
+        },
+        {
+          "stage": "STAGING_RECOVERED",
+          "atUTC": "2026-10-29T22:48:16.540739+00:00",
+          "scope": "staging-phase2-security-recovery",
+          "passed": true,
+          "completedAtUTC": "2026-10-29T22:48:16.540280+00:00",
+          "coreDeadlineUTC": "2026-10-30T19:18:50Z",
+          "adminDeadlineUTC": "2026-10-30T19:18:50Z",
+          "metadata": {
+            "Version": 2,
+            "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+            "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+            "DownloadedAt": "2026-10-29T22:30:15.102799252Z"
+          },
+          "ownerAndSchema": {
+            "migrationCount": 19,
+            "phase3RestrictionTablePresent": false,
+            "owners": 1,
+            "credentialVersion": 2,
+            "sessionEpoch": 2,
+            "authorizationVersion": 1,
+            "status": "ACTIVE",
+            "pinFailures": 0,
+            "locked": false,
+            "passwordChanges": 1,
+            "pinChanges": 0
+          },
+          "ownerUnchanged": true,
+          "sameContainerAndImageIds": true,
+          "phase3Installed": false,
+          "hostPackagesBefore": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.18\nnginx-common=1.24.0-2ubuntu7.18\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+          "hostPackagesAfter": "certbot=2.9.0-1\nnginx=1.24.0-2ubuntu7.19\nnginx-common=1.24.0-2ubuntu7.19\nopenssl=3.0.13-0ubuntu3.16\npython3-acme=2.9.0-1\npython3-certbot=2.9.0-1",
+          "freshCacheSha256": {
+            "core": "74cc77deb945b9cc6edf9967f3840d92286c59b0fda882b369dc9eda67cb5e07",
+            "admin": "74cc77deb945b9cc6edf9967f3840d92286c59b0fda882b369dc9eda67cb5e07"
+          },
+          "https": {
+            "staging.hambazi.top/": 200,
+            "api-staging.hambazi.top/v1/me": 401,
+            "admin.hambazi.top/": 200,
+            "admin.hambazi.top/v1/admin/me/access": 401
+          },
+          "freeDiskBytes": 3059834880,
+          "noDataRestoreOrMigration": true,
+          "normalAdmissionGuardUsed": true
+        }
+      ]
+    },
+    "auxiliaryFinalCollectorFailure": {
+      "exitCode": 1,
+      "notCountedAsQualificationPass": true,
+      "serviceOrPolicyMutations": false,
+      "replacedByIndependentFinalControllerServiceTimerAndRenewalVerification": true,
+      "cause": "Python syntax typo in the private collector; it did not execute. The final independent collector and timer queries succeeded."
+    }
+  },
+  "safety": {
+    "ownerMetadataBeforeAndAfterEqual": true,
+    "ownerCredentialSessionAuthorizationVersions": {
+      "migrationCount": 19,
+      "phase3RestrictionTablePresent": false,
+      "owners": 1,
+      "credentialVersion": 2,
+      "sessionEpoch": 2,
+      "authorizationVersion": 1,
+      "status": "ACTIVE",
+      "pinFailures": 0,
+      "locked": false,
+      "passwordChanges": 1,
+      "pinChanges": 0
+    },
+    "ownerCredentialsReadOrChanged": false,
+    "manualBusinessDatabaseWrites": false,
+    "migrationExecuted": false,
+    "databaseRestoreExecuted": false,
+    "productionChanged": false,
+    "phase3Installed": false,
+    "phase4Started": false,
+    "capacityAccepted": false,
+    "firewallChanged": false,
+    "newPublicBackendPorts": false,
+    "securityControllerChecksBypassed": false,
+    "securityThresholdOrFreshnessWeakened": false
+  },
+  "privateEvidenceDirectory": "/opt/hambazi/security/recovery-20261030-u_18zjd5",
+  "notPerformed": [
+    "real OWNER credential login",
+    "authenticated two-player Telegram gameplay",
+    "capacity/load/stress/soak acceptance",
+    "Phase 3 deployment or Phase 4"
+  ],
+  "remainingRisks": [
+    "Future changes to pinned host packages require reviewed rebinding and qualification; automatic acceptance or disabling OS security updates was not introduced.",
+    "Official advisory/registry outages or new blocking findings can still cause the unchanged finite containment policy to close service.",
+    "Staging disk capacity remains limited; this recovery does not establish future deployment/storage capacity."
+  ],
+  "normalRenewalTimerTiming": {
+    "hambazi-server-security-renew.timer": {
+      "TimersCalendar": "{ OnCalendar=*-*-* *:00:00 ; next_elapse=Fri 2026-10-30 00:00:00 UTC }",
+      "NextElapseUSecRealtime": "Fri 2026-10-30 00:01:50 UTC",
+      "NextElapseUSecMonotonic": "0",
+      "LastTriggerUSec": "Thu 2026-10-29 23:01:10 UTC",
+      "ActiveState": "active",
+      "SubState": "waiting"
+    },
+    "hambazi-admin-security-renew.timer": {
+      "TimersMonotonic": "{ OnBootUSec=10min ; next_elapse=10min }",
+      "NextElapseUSecRealtime": "",
+      "NextElapseUSecMonotonic": "1w 2d 10h 25min 22.949172s",
+      "LastTriggerUSec": "Thu 2026-10-29 22:43:36 UTC",
+      "ActiveState": "active",
+      "SubState": "waiting"
+    }
+  }
+}
