@@ -1,8 +1,8 @@
 # فاز سوم Admin — آماده‌سازی محلی
 
-مرجع تصمیم: ADR-090. مجوز فعلی فقط توسعه/تست محلی است؛ هیچ اتصال یا تغییر Staging/Production و هیچ تغییر حساب OWNER واقعی در این کار مجاز نیست.
+مرجع تصمیم: ADR-090. مجوز فعلی فقط توسعه/تست محلی است؛ هیچ تغییر Staging/Production یا حساب OWNER واقعی مجاز نیست. تنها inspect/export فقط‌خواندنی تصویر دقیق Redis برای بررسی محلی انجام شد؛ اطلاعات DB/OWNER خوانده نشد.
 
-این سند گزارش تاریخی پایان توسعه را نگه می‌دارد. وضعیت جاری در [گزارش آمادگی انتشار](admin-phase-3-release-readiness.md) و [شواهد تکمیلی](../security/admin-phase3-staging-preparation.json) ثبت شده است: طبق [checkpoint جدید](../security/admin-phase3-recovery-checkpoint.json)، ۳۰۶ تست Backend و شش release browser موفق‌اند، ولی CI کامل نشده و خطای I/O دیسک محلی انتشار را NO-GO نگه می‌دارد. نتیجهٔ تاریخی `docs/security/admin-phase3-release-qualification.json` و عبارت «مانع شناخته‌شده باقی نمانده» در پایین، وضعیت پیش از Qualification بعدی را شرح می‌دهند و تأیید انتشار فعلی نیستند.
+این سند گزارش تاریخی پایان توسعه را نگه می‌دارد. وضعیت جاری در [آمادگی انتشار](admin-phase-3-release-readiness.md) و [Qualification نهایی](../security/admin-phase3-final-qualification.json) ثبت است: CI واقعی هر ۲۸ gate، ۳۰۶ تست Backend و شش release browser موفق‌اند؛ artifactهای نهایی با Redis/PostgreSQL retained محلی بررسی شدند. این نتیجه مجوز استقرار یا پذیرش ظرفیت نیست. گزارش‌های اولیه و checkpoint توقف دیسک تاریخی‌اند و بدون بازنویسی حفظ شده‌اند.
 
 ## دامنه و مراحل
 

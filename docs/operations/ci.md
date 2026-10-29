@@ -144,6 +144,8 @@ Chromium already provisioned without modifying the developer host. Set
 `TELEGRAM_SDK_FIXTURE_PATH` and an owned `RUNNER_TEMP` outside the checkout; set
 `LD_LIBRARY_PATH` only if the local binaries require it. Then:
 
+Create the owned `RUNNER_TEMP` directory on disk with mode `0700` before invoking the entrypoint; assigning its environment variable does not create it.
+
 Set `TMPDIR` to an owned private directory on persistent local disk (for example,
 a private subdirectory of the runner's disk-backed temporary workspace). The
 isolated PostgreSQL container binds a newly created, exclusive data directory
@@ -184,3 +186,7 @@ release notes. This is not a server upgrade or an exception to verification:
 forced tasks, concurrency=1, advisory freshness/severities, hashes and deadlines
 remain mandatory. Use the latest complete committed-source evidence; a stopped
 run or a preflight mismatch is not a successful qualification.
+
+## Complete local Phase 3 qualification — 2026-10-30 (Asia/Tehran)
+
+The [final evidence](../security/admin-phase3-final-qualification.json) records all 28 real verification gates passing on clean commit `c7add7bf7b32e77b153abc6ebb411d4954e4a668`, using the exact Docker 29.9.2 pin. The combined release gate passed all 306 Backend tests and six browser cases with the original test deadlines. Exact retained Redis/PostgreSQL, final Staging-profile images and synthetic encrypted restore were also checked locally. No exception or hosted Actions success is claimed. Historical failures and the local storage interruption remain recorded; Staging promotion, fresh real backup/restore and capacity acceptance remain separate gates.

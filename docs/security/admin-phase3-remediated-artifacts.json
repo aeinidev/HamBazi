@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-admin-phase3-remediated-candidate",
+  "productionReleaseApproved": false,
+  "stagingDeploymentApproved": false,
+  "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+  "buildInputSha256": "5161e94f91139e1af78ac792ba1cbab66c032d9104eba37e4ef239ad779b162a",
+  "browserPolicy": {
+    "schemaVersion": 1,
+    "profile": "production",
+    "webOrigin": "https://staging.hambazi.top",
+    "apiOrigin": "https://api-staging.hambazi.top",
+    "frameAncestors": ["https://web.telegram.org"],
+    "headers": {
+      "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self' https://staging.hambazi.top wss://staging.hambazi.top https://api-staging.hambazi.top wss://api-staging.hambazi.top; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors https://web.telegram.org",
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+      "Cache-Control": "no-store",
+      "Strict-Transport-Security": "max-age=31536000"
+    }
+  },
+  "features": {
+    "kahrobaPrivateRuntime": true
+  },
+  "coreInventorySha256": "db3947c07aad84335534548196ea12bcea0d619232dc7eca1031ce287bc56ffd",
+  "coreImages": [
+    {
+      "role": "api",
+      "image": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9"
+    },
+    {
+      "role": "bot",
+      "image": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8"
+    },
+    {
+      "role": "worker",
+      "image": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338"
+    },
+    {
+      "role": "web",
+      "image": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6"
+    }
+  ],
+  "admin": {
+    "schemaVersion": 1,
+    "purpose": "local-admin-phase3-candidate",
+    "productionReleaseApproved": false,
+    "image": "hambazi-candidate/admin:c7add7bf7b32e77b153abc6ebb411d4954e4a668-c2e9d43769901e54@sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+    "adminSourceSha256": "c2e9d43769901e543cb9f8c54b35e51258349d32078a9b9d1485ae829dbf6af2",
+    "apiImage": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+    "runtimeImage": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+    "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+    "coreInventorySha256": "db3947c07aad84335534548196ea12bcea0d619232dc7eca1031ce287bc56ffd"
+  },
+  "retainedDataImages": {
+    "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+  },
+  "databaseImagesReplaced": false
+}

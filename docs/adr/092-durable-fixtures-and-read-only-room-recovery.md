@@ -44,6 +44,6 @@
 
 سطح داخلی Database و repository اتاق به‌صورت additive توسعه می‌یابد؛ Migration، سرویس و API عمومی تازه لازم نیست. آزمون واقعی دو connection باید ثبات snapshot هنگام commit هم‌زمان، رد UPDATE حتی با نقش دارای مجوز نوشتن، و قابلیت نوشتن پس از پایان snapshot را ثابت کند. آزمون‌های retry، مالکیت/پاک‌سازی fixture و کل suiteهای قبلی لازم‌اند؛ موفقیت جزئی CI موفق نیست. ظرفیت، سلامت زنده، بکاپ واقعی، مجوز انتشار و فاز چهارم از این تصمیم نتیجه‌گیری نمی‌شوند.
 
-## Validation checkpoint — 2026-10-29
+## Validation — 2026-10-30 (Asia/Tehran)
 
-[شواهد جاری](../security/admin-phase3-recovery-checkpoint.json): هر ۳۰۶ تست Backend و شش release browser در همان اجرای یکپارچه موفق شدند؛ تست‌های بازتولید catchup/intent قبل از اصلاح FAIL و بعد PASS بودند. CI فقط ۲۰ gate را تکمیل کرد و موفق نیست. قطع USB و خطای ext4 روی دیسک مخزن/Docker ادامهٔ Build/Qualification را متوقف کرد؛ حفظ commitها در کپی مستقل و bundle تأیید شد. کنترل‌ها و حدود زمان تغییر نکرده‌اند؛ این نتیجه مجوز استقرار یا پذیرش ظرفیت نیست.
+[Qualification نهایی محلی](../security/admin-phase3-final-qualification.json) هر ۲۸ gate واقعی CI را روی commit تمیز ثبت‌شده موفق تکمیل کرد؛ ۳۰۶ تست Backend و شش release browser در همان اجرا موفق‌اند. آزمون‌های بازتولید catchup/intent روی رفتار قبلی FAIL و پس از اصلاح PASS شدند. تصویر دقیق Redis و PostgreSQL retained، Migration دارای داده، TLS/RBAC/CSRF/Audit و بازیابی CMS/AES-256-GCM دو دیتابیس و ۴۵ جدول جداگانه موفق‌اند. تمام timeoutها، assertionهای قبلی و workload هدف حفظ‌اند. [Checkpoint توقف دیسک](../security/admin-phase3-recovery-checkpoint.json) تاریخی است؛ پس از اتصال سالم، Git/Docker بررسی و CI از ابتدا اجرا شد. این نتیجه مجوز استقرار یا پذیرش ظرفیت نیست.

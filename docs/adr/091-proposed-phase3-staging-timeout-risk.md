@@ -1,12 +1,16 @@
 # ADR-091 — ریسک timeout و پیشنهاد مشروط استثنای محدود Staging
 
-- **Status:** Proposed — ثبت ریسک مجاز است؛ استثنای انتشار تصویب نشده است.
+- **Status:** Withdrawn — 2026-10-30 (Asia/Tehran)؛ پس از اصلاح علت و Qualification محلی کامل. استثنا هرگز تصویب یا استفاده نشد.
 - **Owner:** مالک HamBazi
 - **Date:** 2026-10-28
-- **Supersedes:** هیچ‌کدام در وضعیت Proposed؛ ADR-041/087 و NO-GO فعلی برقرارند.
+- **Supersedes:** هیچ‌کدام؛ ADR-041/087 حفظ‌اند و استقرار همچنان مجوز جداگانه می‌خواهد.
 - **References:** ADR-023/026/048/078/079/087/090؛ [برنامه انتشار](../operations/admin-phase-3-staging-release-plan.md).
 
-## Context
+## پایان پیشنهاد — 2026-10-30 (Asia/Tehran)
+
+علت‌های R01/R02/R03 طبق [ADR-092](092-durable-fixtures-and-read-only-room-recovery.md) اصلاح و [CI واقعی کامل](../security/admin-phase3-final-qualification.json) با همان حدود زمان و پوشش موفق شد. مسیر عادی کنترل‌ها اجرا شد؛ manifest موفق واقعی به commit ثبت‌شده متصل است. تست ظرفیت، بکاپ واقعی تازه و مجوز نصب از این نتیجه حاصل نمی‌شوند. متن پایین، Context و پیشنهاد تاریخیِ پیش از اصلاح است؛ شرط حل‌نشده یا استثنای قابل اجرا در وضعیت جاری محسوب نمی‌شود. هیچ تأیید انسانی، زمان استثنا یا معافیت ساخته نشده است.
+
+## Context تاریخی
 
 مالک ادامهٔ آماده‌سازی را با ثبت timeout به‌عنوان ریسک شناخته‌شده مجاز کرده است؛ این دستور، مجوز استقرار یا عبور از gate نیست. اجرای واقعی CI در `migration-fault-release` شکست خورد. سناریوی `keeps current-cursor recovery waves fresh across concurrent commands and locked role changes` در `apps/api/tests/integration/match-processing.test.ts:600` در محیط Docker به حد ۵۰۰۰ms رسید. تست، داده‌های هشت Match و موج‌های هم‌زمان، assertionها و timeout بدون تغییر باقی می‌مانند.
 

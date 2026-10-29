@@ -1,0 +1,1440 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-phase3-release-preparation-only",
+  "checkedAtUTC": "2026-10-29T21:07:05.445808+00:00",
+  "clientDate": "2026-10-30",
+  "clientTimezone": "Asia/Tehran",
+  "status": "LOCAL_PREPARATION_PASSED_DEPLOYMENT_NOT_AUTHORIZED",
+  "codeCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+  "runtimeFixCommit": "a9dbf14a852f2b47ace78f5e793fe0df0046e2db",
+  "ciEvidenceInventoryFixCommit": "e8f3acce9cba8f80f09f7dd80c800efc6b84f547",
+  "ciEvidenceInventoryFix": {
+    "checkedAtUTC": "2026-10-29T20:02:10.275970+00:00",
+    "scope": "local-ci-evidence-inventory",
+    "diagnosticAll28GatesPassed": true,
+    "diagnosticEntrypointPassed": false,
+    "failureStage": "evidence",
+    "cause": "static Web media/font extensions were absent from the content-free inventory allowlist",
+    "fix": "hash approved static media/font types only under apps/web/dist/client/assets; all existing source/path/symlink/count/size and content-free restrictions retained",
+    "before": {
+      "stage": "evidence-assets-before",
+      "exitCode": 1,
+      "seconds": 1.22,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "after": {
+      "stage": "evidence-assets-after",
+      "exitCode": 0,
+      "seconds": 1.47,
+      "testCounts": ["30"],
+      "browserCases": [],
+      "markers": []
+    },
+    "securityException": false,
+    "standardQualificationRequired": true
+  },
+  "unitWorkerFixCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+  "apiUnitWorkerRootCause": {
+    "scope": "local-api-unit-runner-resource-control",
+    "defaultRun": {
+      "stage": "root-quality-after-evidence-fix",
+      "exitCode": 1,
+      "seconds": 301.63,
+      "testCounts": ["174", "15", "280", "3", "37", "91", "137", "32", "115", "141"],
+      "browserCases": [],
+      "markers": []
+    },
+    "defaultApiSummary": {
+      "failedTests": 35,
+      "passedTests": 1038,
+      "totalTests": 1073,
+      "timeoutMs": 5000,
+      "observedLoad1m": 15.076171875,
+      "logicalCpus": 8,
+      "oomObserved": false,
+      "diskErrorsObserved": false
+    },
+    "controlledSameSuite": {
+      "stage": "api-worker-bound-diagnosis",
+      "exitCode": 0,
+      "seconds": 20.86,
+      "testCounts": ["1073"],
+      "browserCases": [],
+      "markers": []
+    },
+    "fileWorkers": 2,
+    "withinTestConcurrencyReduced": false,
+    "timeoutIncrease": false,
+    "testsRemovedOrSkipped": false,
+    "globalCiDeadlineChanged": false
+  },
+  "storageReconnectionChecks": {
+    "checkedAtUTC": "2026-10-29T19:03:31.912016+00:00",
+    "externalMountOptions": "rw,relatime",
+    "currentBootKernelStorageErrors": [],
+    "externalGitFsckExitCode": 0,
+    "dockerVersion": "29.9.2",
+    "imageBindingsVerified": [
+      "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b"
+    ],
+    "sourceCommit": "045529c5f476dc480c2abb767c63f7f91f4928c9",
+    "hardwareReliabilityOrCapacityCertified": false
+  },
+  "ci": {
+    "entrypoint": "node infra/ci/verify.mjs",
+    "passed": true,
+    "hostedGitHubActionsRun": false,
+    "manifestSha256": "18eb0cd7f53899581886b0ee2e6319b7893371f26e5f188dc548e61cc7c2f12e",
+    "manifestPath": "/home/mehdi/.cache/hambazi-phase3-fix-tmsnjmzv/runner-stock-9f853f8ab2/hambazi-ci-evidence/manifest.json",
+    "schemaSha256": "9ef2716b3842e22be7f83904e7ffd6ae65f33fcd402e3b055bb8082b0936932c",
+    "tree": "aa756e713bb069fcd7c7016499923957d7c4975b",
+    "nodeVersion": "24.22.1",
+    "pnpmVersion": "12.4.1",
+    "dockerVersion": "29.9.2",
+    "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+    "toolchainSha256": "f44033093f999de93688d1ea4545aee8fb33c9fb45036c3878da507e527c6eaf",
+    "scanPolicySha256": "849b8cac976d82348138b3bfe7695ed5e5c2e1db8d6473cb872355f5fd48dfcb",
+    "gates": [
+      {
+        "stage": "workflow-lint",
+        "passed": true,
+        "durationMs": 10,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "secrets",
+        "passed": true,
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "secrets",
+          "status": "passed",
+          "ok": true,
+          "files": 1230,
+          "history": {
+            "ok": true,
+            "findings": 0
+          },
+          "current": {
+            "ok": true,
+            "findings": 0
+          }
+        },
+        "durationMs": 1958,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "dependencies",
+        "passed": true,
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "dependencies",
+          "status": "passed",
+          "ok": true,
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0
+          },
+          "findings": []
+        },
+        "durationMs": 1745,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "compiled-public-surfaces",
+        "passed": true,
+        "durationMs": 30181,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "root-quality",
+        "passed": true,
+        "durationMs": 322597,
+        "tests": 2448,
+        "browserCases": 0
+      },
+      {
+        "stage": "contracts-check",
+        "passed": true,
+        "durationMs": 3655,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "contracts-generate",
+        "passed": true,
+        "durationMs": 3614,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "contracts-format",
+        "passed": true,
+        "durationMs": 945,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "contracts-diff",
+        "passed": true,
+        "durationMs": 9,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "bot-integration",
+        "passed": true,
+        "durationMs": 1728,
+        "tests": 41,
+        "browserCases": 0
+      },
+      {
+        "stage": "postgres-image-build",
+        "passed": true,
+        "durationMs": 20870,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "redis-image-pull",
+        "passed": true,
+        "durationMs": 7975,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-postgres-image-pull",
+        "passed": true,
+        "durationMs": 6868,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-integration",
+        "passed": true,
+        "durationMs": 143072,
+        "tests": 40,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-private-node-image-pull",
+        "passed": true,
+        "durationMs": 2919,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-private-files-and-tty",
+        "passed": true,
+        "durationMs": 4390,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-ingress-image-pull",
+        "passed": true,
+        "durationMs": 6372,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-ingress",
+        "passed": true,
+        "durationMs": 29082,
+        "tests": 4,
+        "browserCases": 0
+      },
+      {
+        "stage": "admin-browser",
+        "passed": true,
+        "durationMs": 13940,
+        "tests": 0,
+        "browserCases": 7
+      },
+      {
+        "stage": "images",
+        "passed": true,
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "images",
+          "status": "passed",
+          "ok": true,
+          "database": {
+            "updatedAt": "2026-10-29T07:17:11.934066875Z",
+            "downloadedAt": "2026-10-29T08:39:49.184923821Z"
+          },
+          "images": [
+            {
+              "ok": true,
+              "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "ok": true,
+              "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            }
+          ]
+        },
+        "durationMs": 456,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "application-image-build",
+        "passed": true,
+        "durationMs": 852948,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "application-images",
+        "passed": true,
+        "scan": {
+          "schemaVersion": 1,
+          "kind": "application-images",
+          "status": "passed",
+          "ok": true,
+          "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+          "sourceDirty": false,
+          "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+          "buildInputSha256": "1cccc172824f50e54d3c2090375fa1fe3cd15e8e40e17f07f7cb0c9773eaafce",
+          "database": {
+            "updatedAt": "2026-10-29T07:17:11.934066875Z",
+            "downloadedAt": "2026-10-29T08:39:49.184923821Z"
+          },
+          "images": [
+            {
+              "role": "api",
+              "ok": true,
+              "image": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-1cccc172824f50e5@sha256:9420addb5f88fad9a4956fb6a5d2f2eb3636ba2d70ddbde7fbdc35f9e5b76f7f",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "bot",
+              "ok": true,
+              "image": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-1cccc172824f50e5@sha256:69e283b2ccd1ab2cc163a8e84d7c9c9d4ca93b7785b5a207c31b7a4ce5192c9c",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "worker",
+              "ok": true,
+              "image": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-1cccc172824f50e5@sha256:74ff695c6035b6da5155441e096cd2e6ab5bd66a5ad0ec21f0f690d3c343e47d",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            },
+            {
+              "role": "web",
+              "ok": true,
+              "image": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-1cccc172824f50e5@sha256:84b1623fe6302ab278f854025bed81fc4156025f1f5cb17415ad2e96b095570a",
+              "counts": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "unknown": 0
+              },
+              "findings": []
+            }
+          ]
+        },
+        "durationMs": 22612,
+        "tests": 0,
+        "browserCases": 0
+      },
+      {
+        "stage": "application-image-smoke",
+        "passed": true,
+        "durationMs": 134156,
+        "tests": 0,
+        "browserCases": 2,
+        "runtimeChecks": 46
+      },
+      {
+        "stage": "migration-fault-release",
+        "passed": true,
+        "durationMs": 185818,
+        "tests": 306,
+        "browserCases": 6
+      },
+      {
+        "stage": "ordinary-browser",
+        "passed": true,
+        "durationMs": 24942,
+        "tests": 0,
+        "browserCases": 31
+      },
+      {
+        "stage": "built-sdk-browser",
+        "passed": true,
+        "durationMs": 25132,
+        "tests": 0,
+        "browserCases": 39
+      },
+      {
+        "stage": "preview-isolation",
+        "passed": true,
+        "durationMs": 2873,
+        "tests": 0,
+        "browserCases": 2
+      },
+      {
+        "stage": "normal-web-build",
+        "passed": true,
+        "durationMs": 5278,
+        "tests": 0,
+        "browserCases": 0
+      }
+    ]
+  },
+  "dockerSelection": {
+    "ownerApprovedLocalAndCiPinUpdate": true,
+    "evidence": {
+      "serverVersion": "29.9.2",
+      "serverApiVersion": "1.56",
+      "clientVersion": "29.9.2",
+      "components": [
+        {
+          "Name": "Engine",
+          "Version": "29.9.2",
+          "Details": {
+            "ApiVersion": "1.56",
+            "Arch": "amd64",
+            "BuildTime": "Tue Oct 20 18:45:12 2026",
+            "Experimental": "false",
+            "GitCommit": "0367cbe",
+            "GoVersion": "go1.26.10",
+            "KernelVersion": "7.2.13-1-surface",
+            "MinAPIVersion": "1.40",
+            "Module": "github.com/moby/moby/v2",
+            "ModuleVersion": "v2.0.0+unknown",
+            "Os": "linux"
+          }
+        },
+        {
+          "Name": "containerd",
+          "Version": "v2.4.2",
+          "Details": {
+            "GitCommit": "b7a25261e029d68978bbf290df0a62fc819b3c51"
+          }
+        },
+        {
+          "Name": "runc",
+          "Version": "1.5.2",
+          "Details": {
+            "GitCommit": "v1.5.2-0-g29dd3dc2"
+          }
+        },
+        {
+          "Name": "docker-init",
+          "Version": "0.19.0",
+          "Details": {
+            "GitCommit": "de40ad0"
+          }
+        }
+      ],
+      "driverStatus": [["driver-type", "io.containerd.snapshotter.v1"]],
+      "buildx": "github.com/docker/buildx v0.38.1 0dbe87f36ed472fe36b6796c3f70b4210a731fc5",
+      "daemonChanged": false
+    },
+    "decision": "docs/adr/041-ci-trust-and-evidence.md",
+    "officialNotes": "https://docs.docker.com/engine/release-notes/29/#2992",
+    "serversUpgraded": false
+  },
+  "backend": {
+    "passed": true,
+    "totalTests": 306,
+    "databaseTests": 18,
+    "apiTests": 263,
+    "workerTests": 25,
+    "releaseBrowserCases": 6,
+    "fiveTimeoutsResolvedWithUnchangedLimits": true,
+    "sourceCoverageChecks": [
+      {
+        "file": "apps/api/tests/integration/match-processing.test.ts",
+        "directNamedCasesPreserved": 16,
+        "explicitDeadlineLiteralsPreserved": [],
+        "assertionCountNotReduced": true,
+        "byteUnchanged": true
+      },
+      {
+        "file": "apps/api/tests/integration/private-room-match.test.ts",
+        "directNamedCasesPreserved": 11,
+        "explicitDeadlineLiteralsPreserved": ["15000"],
+        "assertionCountNotReduced": true,
+        "byteUnchanged": false
+      },
+      {
+        "file": "apps/api/tests/integration/match-reconnect.test.ts",
+        "directNamedCasesPreserved": 21,
+        "explicitDeadlineLiteralsPreserved": ["15000"],
+        "assertionCountNotReduced": true,
+        "byteUnchanged": false
+      }
+    ]
+  },
+  "realtimeRegressionEvidence": {
+    "coalescedCatchupBefore": {
+      "stage": "realtime-race-before",
+      "exitCode": 1,
+      "seconds": 6.13,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "coalescedCatchupAfter": {
+      "stage": "realtime-race-after",
+      "exitCode": 0,
+      "seconds": 1.72,
+      "testCounts": ["13"],
+      "browserCases": [],
+      "markers": []
+    },
+    "cursorGatewayTests": {
+      "stage": "realtime-sequence-unit",
+      "exitCode": 0,
+      "seconds": 16.12,
+      "testCounts": ["61"],
+      "browserCases": [],
+      "markers": []
+    },
+    "safeCombinedBrowserFailure": {
+      "scope": "private-diagnostic-full-backend-then-browser-not-ci",
+      "passed": false,
+      "stats": {
+        "startTime": "2026-10-29T10:11:40.789Z",
+        "duration": 59834.409,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "file": "mvp.spec.ts",
+          "line": 292,
+          "title": "Account → Invite → real Coup → Finish → durable Worker statistics",
+          "status": "passed",
+          "durationMs": 22577,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 317,
+          "title": "Account → Find → real Coup with offline catch-up → Finish → Stats",
+          "status": "failed",
+          "durationMs": 17149,
+          "locations": [
+            "support.ts:9:72",
+            "mvp.spec.ts:197:19",
+            "mvp.spec.ts:233:19",
+            "mvp.spec.ts:335:10"
+          ]
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 390,
+          "title": "invalid signed Telegram launch cannot issue a session or create an account",
+          "status": "passed",
+          "durationMs": 421,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 407,
+          "title": "direct production entry requires durable registration before gameplay",
+          "status": "passed",
+          "durationMs": 674,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 423,
+          "title": "lost create response retries one intent; node drain denies mutation and restart preserves room",
+          "status": "passed",
+          "durationMs": 2650,
+          "locations": []
+        },
+        {
+          "file": "privacy.spec.ts",
+          "line": 10,
+          "title": "failed game-page checks keep private canaries out of diagnostics",
+          "status": "passed",
+          "durationMs": 2625,
+          "locations": []
+        }
+      ]
+    },
+    "definitiveConflictBrowserBefore": {
+      "stage": "conflict-ui-before",
+      "exitCode": 1,
+      "seconds": 9.95,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "definitiveConflictBrowserAfter": {
+      "stage": "conflict-ui-after",
+      "exitCode": 0,
+      "seconds": 4.53,
+      "testCounts": [],
+      "browserCases": ["1"],
+      "markers": []
+    },
+    "definitiveConflictKahrobaBefore": {
+      "stage": "conflict-kahroba-before",
+      "exitCode": 1,
+      "seconds": 1.82,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "combinedLifecycleUnitsAfter": {
+      "stage": "conflict-unit-after",
+      "exitCode": 0,
+      "seconds": 2.98,
+      "testCounts": ["27"],
+      "browserCases": [],
+      "markers": []
+    },
+    "fullFunctionalAfterFix": {
+      "stage": "backend-intent-fixed",
+      "exitCode": 0,
+      "seconds": 270.16,
+      "testCounts": [
+        "18",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved.",
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    }
+  },
+  "rootCauseEvidence": {
+    "diskCalibrationOnlyNotCapacity": {
+      "externalHddFdatasync8kMs": 22.119,
+      "externalHddFdatasync16kMs": 33.183,
+      "internalNvmeFdatasync8kMs": 1.647,
+      "internalNvmeFdatasync16kMs": 1.666
+    },
+    "serialFixturePreparationNearDeadline": true,
+    "roomRecoveryUsedGlobalWriterLock": true,
+    "corrections": [
+      "exclusive persistent fixture directories; fsync/synchronous_commit/full_page_writes stay on; reject tmpfs/ramfs",
+      "parallel independent setup and postconditions; preserve workload and assertions",
+      "probe database/service readiness; avoid unrelated full-record fixture reads",
+      "Serializable READ ONLY Room snapshots; writer locks/version checks unchanged",
+      "one bounded parameterized private-Match metadata/roster SELECT; no hidden state",
+      "reuse initial validated binding within the same advance call; fresh reads after transitions/conflicts",
+      "same five private-create attempts with bounded post-rollback jitter",
+      "start both real Presence nodes before clients; heartbeat/lease/grace bounds unchanged",
+      "bounded coalesced catchup; preserve observed gaps; never render an uncovered view or complete foreground sync too early",
+      "release definitively rejected Coup/Kahroba intents after sync; ambiguous network retry keeps original command identity",
+      "one forced Turbo DAG for required typecheck/test/build tasks; Infra and all other checks retained"
+    ]
+  },
+  "redis": {
+    "finding": "exact retained image was missing locally; no Redis incompatibility was established",
+    "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+    "archiveSha256": "7a7ace65b7749c77004ca58416cbbac07e0fe739f1f4dcf9b569087d7afde743",
+    "archiveBytes": 39301964,
+    "readOnlyStagingImageExport": true,
+    "beforeAndAfterImageIdMatched": true,
+    "databaseOrOwnerRead": false,
+    "binaryVersion": "Starting Redis Server\nRedis server v=8.10.2 sha=00000000:1 malloc=jemalloc-5.3.0 bits=64 build=6583f6419e33bdeb",
+    "fullFunctionalRun": {
+      "stage": "retained-redis-functional",
+      "exitCode": 0,
+      "seconds": 179.02,
+      "testCounts": [
+        "18",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved.",
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    },
+    "exactProductionTlsAdminFixturePassed": true,
+    "liveConfigurationDriftRecheckRequiredBeforeDeployment": true
+  },
+  "artifacts": {
+    "file": "docs/security/admin-phase3-remediated-artifacts.json",
+    "sha256": "36d685b96ace06f13e57daa0dd41572762c661872039265d7803218373a47b8c",
+    "coreScan": {
+      "schemaVersion": 1,
+      "kind": "application-images",
+      "ok": true,
+      "status": "passed",
+      "database": {
+        "updatedAt": "2026-10-29T07:17:11.934066875Z",
+        "downloadedAt": "2026-10-29T08:39:49.184923821Z"
+      },
+      "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+      "buildInputSha256": "5161e94f91139e1af78ac792ba1cbab66c032d9104eba37e4ef239ad779b162a",
+      "images": [
+        {
+          "role": "api",
+          "ok": true,
+          "image": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "bot",
+          "ok": true,
+          "image": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "worker",
+          "ok": true,
+          "image": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "web",
+          "ok": true,
+          "image": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        }
+      ]
+    },
+    "adminScan": {
+      "ok": true,
+      "image": "hambazi-candidate/admin:c7add7bf7b32e77b153abc6ebb411d4954e4a668-c2e9d43769901e54@sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": [],
+      "database": {
+        "updatedAt": "2026-10-29T07:17:11.934066875Z",
+        "downloadedAt": "2026-10-29T08:39:49.184923821Z"
+      }
+    },
+    "retainedBaselineAndConditionalRollbackScan": {
+      "scope": "local-retained-phase2-baseline-and-conditional-rollback",
+      "passed": true,
+      "checkedAtUTC": "2026-10-29T08:39:50.426426+00:00",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T07:17:11.934066735Z",
+        "UpdatedAt": "2026-10-29T07:17:11.934066875Z",
+        "DownloadedAt": "2026-10-29T08:39:49.184923821Z"
+      },
+      "images": [
+        {
+          "role": "api",
+          "image": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+          "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "bot",
+          "image": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+          "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "worker",
+          "image": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+          "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "web",
+          "image": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+          "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "postgres-staging",
+          "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+          "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 1,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "redis-staging",
+          "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+          "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 1,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        },
+        {
+          "role": "admin",
+          "image": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+          "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+          "counts": {
+            "INFO": 0,
+            "LOW": 0,
+            "MEDIUM": 0,
+            "HIGH": 0,
+            "CRITICAL": 0,
+            "UNKNOWN": 0
+          }
+        }
+      ],
+      "normalPolicyDeadlineIllustrationOnly": "2026-10-30T07:17:11Z",
+      "adminPolicyDeadlineIllustrationOnly": "2026-10-30T07:17:11Z",
+      "serverInspected": false,
+      "serverTimerModified": false
+    },
+    "stagingProfileSmoke": {
+      "stage": "staging-core-smoke",
+      "exitCode": 0,
+      "seconds": 77.27,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "exactAdminTlsAndFallback": {
+      "passed": true,
+      "checks": 38,
+      "image": "hambazi-candidate/admin:c7add7bf7b32e77b153abc6ebb411d4954e4a668-c2e9d43769901e54@sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+      "fixtureMode": "production",
+      "databaseTLSVerifyFull": true,
+      "redisTLS": true,
+      "inboundTLSVerified": true,
+      "argon2NativeAsUid1000": true,
+      "plaintextProductionRejected": true,
+      "defaultDeny401": true,
+      "csrfOrigin403": true,
+      "realSyntheticOwnerLoginAndPendingIsolation": true,
+      "restrictionAndUnrestrictViaHttps": true,
+      "auditedPrivateNote": true,
+      "flagDisabledFallbackPreservesRestriction": true,
+      "exactImageExpiryWithInjectedFixtureClock": true,
+      "syntheticFixtureOnly": true,
+      "realOwnerTouched": false
+    }
+  },
+  "migration": {
+    "passed": true,
+    "scope": "owned-local-sql-upgrade",
+    "fromMigrations": 19,
+    "toMigrations": 21,
+    "populatedUserAndSyntheticOwnerUnchanged": true,
+    "existingAuditUnchanged": true,
+    "grantsApplied": true,
+    "destructiveMigration": false
+  },
+  "backup": {
+    "scope": "local-synthetic-full-postgresql",
+    "actualStagingBackupPerformed": false,
+    "actualOffServerBackupCopyPerformed": false,
+    "realOwnerTouched": false,
+    "cmsAeadVerifiedBeforeRestore": true,
+    "isolatedNetworkNoneRestore": true,
+    "allNonTemplateDatabasesRestored": true,
+    "databases": 2,
+    "tables": 45,
+    "fullReceiptSha256": "b0cdd32d505d989d276728f0b2a991de5ff6ce407451c89c57816b3b815b559a",
+    "verificationImage": "sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+    "sourceImage": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "plan": "docs/operations/admin-phase-3-staging-release-plan.md"
+  },
+  "independentChecks": {
+    "qualification-final-stock": {
+      "stage": "qualification-final-stock",
+      "exitCode": 0,
+      "seconds": 1856.73,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "postgres-transfer-reconnected": {
+      "stage": "postgres-transfer-reconnected",
+      "exitCode": 0,
+      "seconds": 42.83,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "retained-redis-functional": {
+      "stage": "retained-redis-functional",
+      "exitCode": 0,
+      "seconds": 179.02,
+      "testCounts": [
+        "18",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved.",
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    },
+    "image-build-staging": {
+      "stage": "image-build-staging",
+      "exitCode": 0,
+      "seconds": 464.49,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "staging-core-scan": {
+      "stage": "staging-core-scan",
+      "exitCode": 0,
+      "seconds": 4.68,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "staging-core-smoke": {
+      "stage": "staging-core-smoke",
+      "exitCode": 0,
+      "seconds": 77.27,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "admin-profile-build": {
+      "stage": "admin-profile-build",
+      "exitCode": 0,
+      "seconds": 128.56,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "admin-profile-scan": {
+      "stage": "admin-profile-scan",
+      "exitCode": 0,
+      "seconds": 8.58,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "retained-all-rehearsal": {
+      "stage": "retained-all-rehearsal",
+      "exitCode": 0,
+      "seconds": 230.25,
+      "testCounts": ["13", "9", "14", "4"],
+      "browserCases": [],
+      "markers": [
+        "ADMIN_PHASE_TWO_INTEGRATION_PASSED",
+        "ADMIN_PHASE_THREE_INTEGRATION_PASSED",
+        "ADMIN_OWNER_BACKUP_RESTORE_REHEARSAL_PASSED",
+        "ADMIN_DISPOSABLE_INTEGRATION_PASSED"
+      ]
+    }
+  },
+  "unsuccessfulAttemptsRetained": {
+    "rootQualityDeadlineFailure": {
+      "stage": "qualification",
+      "exitCode": 1,
+      "seconds": 804.66,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "interruptedRun": {
+      "scope": "local-required-ci",
+      "status": "interrupted-no-completion-receipt",
+      "passed": false,
+      "sourceCommit": "b6d406498121dfb164f66c1544c4d81a69c3d79e",
+      "lastCompletedGates": ["workflow-lint", "secrets", "dependencies"],
+      "detectedAtUTC": "2026-10-29T08:37:27Z",
+      "serverChanged": false
+    },
+    "correctToolchainMismatchRejection": {
+      "stage": "resumed-qualification",
+      "exitCode": 1,
+      "seconds": 0.21,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "backendPassedButCombinedBrowserFailed": {
+      "stage": "resumed-backend",
+      "exitCode": 1,
+      "seconds": 187.87,
+      "testCounts": [
+        "18",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": [],
+      "markers": ["Migration deploy/redeploy, PostgreSQL restart, and integration checks passed."]
+    },
+    "independentBrowserRecheck": {
+      "scope": "owned-local-release-browser-only",
+      "passed": true,
+      "stats": {
+        "startTime": "2026-10-29T08:49:50.743Z",
+        "duration": 47965.7,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "file": "mvp.spec.ts",
+          "line": 291,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 18556,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 316,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 16414,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 389,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 169,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 406,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 291,
+          "locations": []
+        },
+        {
+          "file": "mvp.spec.ts",
+          "line": 422,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 2588,
+          "locations": []
+        },
+        {
+          "file": "privacy.spec.ts",
+          "line": 10,
+          "status": "passed",
+          "timeout": false,
+          "codes": [],
+          "noMove": false,
+          "durationMs": 1579,
+          "locations": []
+        }
+      ]
+    },
+    "packagingDnsFailure": {
+      "scope": "owned-local-packaging-failure",
+      "sourceCommit": "c68e26a4773f0782785ecf191282f826dcdc0e43",
+      "ref": "vedbjy91neaacco92dqcmm631",
+      "startedAt": "2026-10-29T12:29:20.711060193+03:30",
+      "completedAt": "2026-10-29T12:33:17.138117303+03:30",
+      "stage": "[build 5/8] RUN --mount=type=secret,id=hambazi_build_ca,target=/run/secrets/hambazi-build-ca.pem pnpm install --frozen-lockfile",
+      "failedPnpmInstall": true,
+      "dnsLookupFailure": true,
+      "tlsDisabled": false,
+      "serverChanged": false,
+      "subsequentSameFunctionBuildPassed": true,
+      "networkConfigurationChanged": false
+    },
+    "subsequentSameBuilderPassed": {
+      "stage": "packaging-diagnostic",
+      "exitCode": 0,
+      "seconds": 515.39,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "fullCiBrowserFailureBeforeIntentFix": {
+      "stage": "qualification-2992-complete",
+      "exitCode": 1,
+      "seconds": 1104.82,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "fullCiPackagingFailureOnFinalCode": {
+      "stage": "qualification-repaired",
+      "exitCode": 1,
+      "seconds": 689.81,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "interruptedDiagnosticBuild": {
+      "stage": "packaging-a9-diagnostic",
+      "exitCode": 1,
+      "seconds": 393.93,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "diagnosticInterruptionNote": "operator ended an owned build after mistaking non-live history counts for a stall; completed log showed active work; not a code failure or CI pass",
+    "reconnectedCiRunnerPreparationFailure": {
+      "stage": "qualification-verified",
+      "exitCode": 1,
+      "seconds": 506.06,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "localRunnerPreparationCause": {
+      "checkedAtUTC": "2026-10-29T19:13:16.882731+00:00",
+      "scope": "owned-local-runner-preparation",
+      "failedCi": "qualification-verified",
+      "missingRequiredDirectory": "/home/mehdi/.cache/hambazi-phase3-fix-tmsnjmzv/runner-verified-3dc65dd0fee9",
+      "parentExisted": true,
+      "buildFunctionMkdirIsNonRecursive": true,
+      "failedBeforeDockerApplicationBuild": true,
+      "correction": "create new exclusive 0700 RUNNER_TEMP before invoking unchanged CI",
+      "newDirectory": "/home/mehdi/.cache/hambazi-phase3-fix-tmsnjmzv/runner-complete-fdd87d1839f9",
+      "createdDirectoryMode": "0700",
+      "productOrGateCodeChanged": false,
+      "serverChanged": false
+    },
+    "reconnectedStockMigrationGateFailure": {
+      "stage": "qualification-complete",
+      "exitCode": 1,
+      "seconds": 1475.38,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "independentExactRerunPassed": {
+      "stage": "backend-reconnected-diagnosis",
+      "exitCode": 0,
+      "seconds": 181.64,
+      "testCounts": [
+        "18",
+        "62",
+        "6",
+        "10",
+        "6",
+        "22",
+        "34",
+        "12",
+        "20",
+        "14",
+        "23",
+        "2",
+        "4",
+        "7",
+        "8",
+        "2",
+        "26",
+        "2",
+        "3",
+        "25"
+      ],
+      "browserCases": ["6"],
+      "markers": [
+        "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+        "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved.",
+        "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+      ]
+    },
+    "diagnosticWholeCi": {
+      "stage": "qualification-observed-ready",
+      "exitCode": 1,
+      "seconds": 823.74,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "diagnosticEvidenceFailureCause": "all 28 gates passed but existing evidence inventory rejected legitimate static Web image/font files; narrow path/type fix and positive/negative regression verified, then stock CI rerun required",
+    "diagnosticObserverReceipt": {
+      "scope": "content-free-local-diagnostic-observer",
+      "failed": false,
+      "code": null,
+      "killed": false,
+      "restoreStages": [],
+      "locations": [],
+      "cleanup": [],
+      "timeoutMs": [],
+      "tests": [18, 62, 6, 10, 6, 22, 34, 12, 20, 14, 23, 2, 4, 7, 8, 2, 26, 2, 3, 25],
+      "browserCases": [6]
+    },
+    "stockBeforeUnitWorkerFix": {
+      "stage": "qualification-final-stock",
+      "exitCode": 1,
+      "seconds": 296.8,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "fullRootQualityFailureReproduced": {
+      "stage": "root-quality-after-evidence-fix",
+      "exitCode": 1,
+      "seconds": 301.63,
+      "testCounts": ["174", "15", "280", "3", "37", "91", "137", "32", "115", "141"],
+      "browserCases": [],
+      "markers": []
+    },
+    "workerBoundGuardBefore": {
+      "stage": "worker-bound-guard-before",
+      "exitCode": 1,
+      "seconds": 1.47,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "workerBoundInfrastructureAfter": {
+      "stage": "worker-bound-infra",
+      "exitCode": 0,
+      "seconds": 10.41,
+      "testCounts": ["209"],
+      "browserCases": [],
+      "markers": []
+    },
+    "stockFinalCiHasNoObserver": true,
+    "noFailureRelabeledAsPass": true
+  },
+  "securityControls": {
+    "exceptionApproved": false,
+    "exceptionUsed": false,
+    "timeoutIncrease": false,
+    "testRemovedOrSkippedToPass": false,
+    "newSecretScanExceptions": false,
+    "historyRewritten": false,
+    "tlsVerificationDisabled": false,
+    "serverTimerModified": false,
+    "ownerCredentialsReadOrChanged": false,
+    "serverMutations": false
+  },
+  "localRunnerTiming": {
+    "ciSeconds": 1856.73,
+    "buildSeconds": 852.948,
+    "unchangedBuildDeadlineSeconds": 900,
+    "coldBuildNearDeadline": true,
+    "capacityAcceptance": false
+  },
+  "remainingPredeploymentGates": [
+    "explicit Staging deployment approval",
+    "fresh full encrypted backup plus encrypted settings/key capsule and reviewed current-release tool/recipient binding",
+    "off-server checksum and isolated actual restore receipt for the same new real archive; owner enters secrets privately",
+    "fresh live Staging identity/config/image/grants/OWNER-metadata drift and all-service health checks",
+    "authorized live QA of users.view 403 while authenticated, ADMIN_REVOKE_SESSIONS execution receipt and old-session rejection, then DISABLED status for the temporary Phase 2 administrator; local tests do not attest its present live state",
+    "fresh image/advisory and security containment/deadline checks; never extend or bypass controls",
+    "approved exact artifact/code binding, image-load compatibility on the unchanged Staging daemon, and restriction flag decision; preserve compatible API/Worker expiry and reconciliation on rollback"
+  ],
+  "notPerformed": [
+    "Staging or Production deployment/change",
+    "real OWNER access or modification",
+    "actual Staging backup or restore",
+    "capacity/load/stress/soak acceptance",
+    "hosted GitHub Actions activation or repository-protection changes",
+    "Phase 4"
+  ]
+}
