@@ -2,7 +2,7 @@
 
 مرجع تصمیم: ADR-090. مجوز فعلی فقط توسعه/تست محلی است؛ هیچ اتصال یا تغییر Staging/Production و هیچ تغییر حساب OWNER واقعی در این کار مجاز نیست.
 
-این سند گزارش تاریخی پایان توسعه را نگه می‌دارد. وضعیت جاری در [گزارش آمادگی انتشار](admin-phase-3-release-readiness.md) و [شواهد تکمیلی](../security/admin-phase3-staging-preparation.json) ثبت شده است: CI به‌علت timeoutها ناموفق و انتشار NO-GO است. نتیجهٔ تاریخی `docs/security/admin-phase3-release-qualification.json` و عبارت «مانع شناخته‌شده باقی نمانده» در پایین، وضعیت پیش از Qualification بعدی را شرح می‌دهند و تأیید انتشار فعلی نیستند.
+این سند گزارش تاریخی پایان توسعه را نگه می‌دارد. وضعیت جاری در [گزارش آمادگی انتشار](admin-phase-3-release-readiness.md) و [شواهد تکمیلی](../security/admin-phase3-staging-preparation.json) ثبت شده است: طبق [checkpoint جدید](../security/admin-phase3-recovery-checkpoint.json)، ۳۰۶ تست Backend و شش release browser موفق‌اند، ولی CI کامل نشده و خطای I/O دیسک محلی انتشار را NO-GO نگه می‌دارد. نتیجهٔ تاریخی `docs/security/admin-phase3-release-qualification.json` و عبارت «مانع شناخته‌شده باقی نمانده» در پایین، وضعیت پیش از Qualification بعدی را شرح می‌دهند و تأیید انتشار فعلی نیستند.
 
 ## دامنه و مراحل
 

@@ -1,0 +1,408 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-phase3-preparation-checkpoint-not-release-qualification",
+  "checkedAtUTC": "2026-10-29T18:00:31.657583+00:00",
+  "clientDate": "2026-10-29",
+  "status": "NO_GO_LOCAL_STORAGE_FAILURE_AND_INCOMPLETE_QUALIFICATION",
+  "codeCommit": "a9dbf14a852f2b47ace78f5e793fe0df0046e2db",
+  "dockerPin": "29.9.2",
+  "dockerPinOwnerApproved": true,
+  "serverDockerChanged": false,
+  "backend": {
+    "stage": "backend-intent-fixed",
+    "exitCode": 0,
+    "seconds": 270.16,
+    "testCounts": [
+      "18",
+      "62",
+      "6",
+      "10",
+      "6",
+      "22",
+      "34",
+      "12",
+      "20",
+      "14",
+      "23",
+      "2",
+      "4",
+      "7",
+      "8",
+      "2",
+      "26",
+      "2",
+      "3",
+      "25"
+    ],
+    "browserCases": ["6"],
+    "markers": [
+      "Migration deploy/redeploy, PostgreSQL restart, and integration checks passed.",
+      "Disposable logical backup/restore reconciled 45 tables, constraints, triggers and grants; source preserved.",
+      "Isolated HTTP/PostgreSQL/Redis integration passed; no live Telegram credentials were used."
+    ]
+  },
+  "backendComposition": {
+    "database": 18,
+    "api": 263,
+    "worker": 25,
+    "total": 306,
+    "sameRunReleaseBrowserCases": 6
+  },
+  "coveragePreserved": [
+    {
+      "file": "apps/api/tests/integration/match-processing.test.ts",
+      "directNamedCasesPreserved": 16,
+      "explicitDeadlineLiteralsPreserved": [],
+      "assertionCountNotReduced": true,
+      "byteUnchanged": true
+    },
+    {
+      "file": "apps/api/tests/integration/private-room-match.test.ts",
+      "directNamedCasesPreserved": 11,
+      "explicitDeadlineLiteralsPreserved": ["15000"],
+      "assertionCountNotReduced": true,
+      "byteUnchanged": false
+    },
+    {
+      "file": "apps/api/tests/integration/match-reconnect.test.ts",
+      "directNamedCasesPreserved": 21,
+      "explicitDeadlineLiteralsPreserved": ["15000"],
+      "assertionCountNotReduced": true,
+      "byteUnchanged": false
+    }
+  ],
+  "ci": {
+    "entrypoint": "node infra/ci/verify.mjs",
+    "passed": false,
+    "result": {
+      "stage": "qualification-repaired",
+      "exitCode": 1,
+      "seconds": 689.81,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "passedGates": [
+      "workflow-lint",
+      "secrets",
+      "dependencies",
+      "compiled-public-surfaces",
+      "root-quality",
+      "contracts-check",
+      "contracts-generate",
+      "contracts-format",
+      "contracts-diff",
+      "bot-integration",
+      "postgres-image-build",
+      "redis-image-pull",
+      "admin-postgres-image-pull",
+      "admin-integration",
+      "admin-private-node-image-pull",
+      "admin-private-files-and-tty",
+      "admin-ingress-image-pull",
+      "admin-ingress",
+      "admin-browser",
+      "images"
+    ],
+    "failedGate": "application-image-build",
+    "successfulManifestIssued": false,
+    "hostedActionsRun": false
+  },
+  "regressions": {
+    "coalescedCatchupBefore": {
+      "stage": "realtime-race-before",
+      "exitCode": 1,
+      "seconds": 6.13,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "coalescedCatchupAfter": {
+      "stage": "realtime-race-after",
+      "exitCode": 0,
+      "seconds": 1.72,
+      "testCounts": ["13"],
+      "browserCases": [],
+      "markers": []
+    },
+    "definitiveConflictBrowserBefore": {
+      "stage": "conflict-ui-before",
+      "exitCode": 1,
+      "seconds": 9.95,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "definitiveConflictBrowserAfter": {
+      "stage": "conflict-ui-after",
+      "exitCode": 0,
+      "seconds": 4.53,
+      "testCounts": [],
+      "browserCases": ["1"],
+      "markers": []
+    },
+    "kahrobaConflictBefore": {
+      "stage": "conflict-kahroba-before",
+      "exitCode": 1,
+      "seconds": 1.82,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "combinedUnitsAfter": {
+      "stage": "conflict-unit-after",
+      "exitCode": 0,
+      "seconds": 2.98,
+      "testCounts": ["27"],
+      "browserCases": [],
+      "markers": []
+    }
+  },
+  "postgresTransfer": {
+    "stage": "postgres-transfer",
+    "exitCode": 0,
+    "seconds": 57.1,
+    "testCounts": [],
+    "browserCases": [],
+    "markers": []
+  },
+  "redis": {
+    "finding": "exact image absent locally; no incompatibility established",
+    "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+    "archiveSha256": "7a7ace65b7749c77004ca58416cbbac07e0fe739f1f4dcf9b569087d7afde743",
+    "binary": {
+      "scope": "local-exact-image-only",
+      "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "id": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+      "binaryVersion": "Starting Redis Server\nRedis server v=8.10.2 sha=00000000:1 malloc=jemalloc-5.3.0 bits=64 build=6583f6419e33bdeb",
+      "serverChanged": false
+    },
+    "readOnlyStagingImageExport": true,
+    "serverOrDatabaseOrOwnerChanged": false,
+    "exactRetainedFullFunctionalRerunCompleted": false
+  },
+  "retainedScan": {
+    "scope": "local-retained-phase2-baseline-and-conditional-rollback",
+    "passed": true,
+    "checkedAtUTC": "2026-10-29T08:39:50.426426+00:00",
+    "database": {
+      "Version": 2,
+      "NextUpdate": "2026-10-30T07:17:11.934066735Z",
+      "UpdatedAt": "2026-10-29T07:17:11.934066875Z",
+      "DownloadedAt": "2026-10-29T08:39:49.184923821Z"
+    },
+    "images": [
+      {
+        "role": "api",
+        "image": "hambazi-staging-phase2/api:20261027-54cd7a2a027b@sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+        "imageId": "sha256:54cd7a2a027bdf8d64a3ca78d28449d55770d289efb9006a553314740273f444",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "bot",
+        "image": "hambazi-staging-phase2/bot:20261027-dc1dc5cb4878@sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+        "imageId": "sha256:dc1dc5cb4878f282db4633bc5ff06e8a983beb14c076cc5d8a095e65ebb7bb8f",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "worker",
+        "image": "hambazi-staging-phase2/worker:20261027-86860e15be80@sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+        "imageId": "sha256:86860e15be80bf916e953b016cb2991e3e9e2ea393c0d2f28cde53da89ae594c",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "web",
+        "image": "hambazi-staging-phase2/web:20261027-83df1b3279d1@sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+        "imageId": "sha256:83df1b3279d10161ed944985dc26fc21a32a09d4a88370c9f701e7c74bdcf7de",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "postgres-staging",
+        "image": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 1,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "redis-staging",
+        "image": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+        "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 1,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "role": "admin",
+        "image": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+        "imageId": "sha256:2b138ffb108f68f473ae0b3708369a84b63bd7d2fdd4f57b1a2a5569070e45df",
+        "counts": {
+          "INFO": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0,
+          "UNKNOWN": 0
+        }
+      }
+    ],
+    "normalPolicyDeadlineIllustrationOnly": "2026-10-30T07:17:11Z",
+    "adminPolicyDeadlineIllustrationOnly": "2026-10-30T07:17:11Z",
+    "serverInspected": false,
+    "serverTimerModified": false
+  },
+  "storageIncident": {
+    "scope": "local-host-storage-incident",
+    "observedAtUTC": "2026-10-29T17:58:56.688539+00:00",
+    "mount": "/mnt/LinuxExternal",
+    "device": "/dev/sda1",
+    "filesystem": "ext4",
+    "observedOptions": ["emergency_ro", "shutdown"],
+    "kernelSignals": [
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["USB disconnect"]
+      },
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["Aborting journal"]
+      },
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["Buffer I/O error"]
+      },
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["EXT4-fs error"]
+      },
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["Buffer I/O error"]
+      },
+      {
+        "timestamp": "2026-10-29T20:37:50+03:30",
+        "signals": ["Remounting filesystem read-only"]
+      },
+      {
+        "timestamp": "2026-10-29T20:38:14+03:30",
+        "signals": ["Buffer I/O error"]
+      }
+    ],
+    "daemonOrFilesystemRepaired": false,
+    "testsNotRelabeledAsPassed": true,
+    "serverChanged": false,
+    "independentGitClone": "/home/mehdi/.cache/hambazi-docker2982-ckt22qp8/source",
+    "codeCommit": "a9dbf14a852f2b47ace78f5e793fe0df0046e2db"
+  },
+  "packagingDiagnostic": {
+    "firstAttempt": {
+      "stage": "packaging-a9-diagnostic",
+      "exitCode": 1,
+      "seconds": 393.93,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "firstAttemptEndedByOperator": true,
+    "note": "non-live Buildx history counts were mistaken for a stall; completed logs showed work still progressing; not evidence of a code failure",
+    "retry": {
+      "stage": "packaging-a9-retry",
+      "exitCode": 1,
+      "seconds": 181.07,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "retrySafeError": {
+      "passed": false,
+      "name": "Error",
+      "code": null,
+      "causeCode": null,
+      "gate": "CI_GATE_FAILED:packaging-bot",
+      "locations": ["gates.mjs:18:11", "build.mjs:236:7"]
+    },
+    "retryCompletedAllImages": false
+  },
+  "preservation": {
+    "independentClone": "/home/mehdi/.cache/hambazi-docker2982-ckt22qp8/source",
+    "branch": "codex/phase3-storage-recovery",
+    "gitFsckExitCode": 0,
+    "gitFsckMissingOrCorruptObjects": false,
+    "externalObjectAlternates": false,
+    "bundle": "/home/mehdi/.cache/hambazi-phase3-fix-tmsnjmzv/phase3-code-preserved.bundle",
+    "bundleSha256": "86f89f43f0e1addf21ea4b0c6a53732259942243eb24a5fcc24b1c0abb68680a",
+    "bundleVerifiedCompleteHistory": true,
+    "originalExternalWorktreeNotWrittenAfterIoFailure": true
+  },
+  "securityControls": {
+    "timeoutsIncreased": false,
+    "testsRemovedOrSkippedToPass": false,
+    "newSecretScanExceptions": false,
+    "historyRewritten": false,
+    "exceptionUsed": false,
+    "serverMutations": false,
+    "ownerTouched": false
+  },
+  "remaining": [
+    "restore stable local storage access and independently assess original external repository and Docker data before writing there; no automatic fsck/remount/daemon repair was performed",
+    "complete fresh final Docker builds/scans and actual full 28-gate CI on healthy storage",
+    "complete all-functional and Admin production-TLS/migration/restore fixture with exact retained Redis and PostgreSQL",
+    "only after separate Staging approval: fresh encrypted real backup, encrypted key/config capsule, off-server checksum and actual restore of matching archive; fresh target health/config/security checks"
+  ],
+  "deferred": [
+    "capacity/load/stress/soak on future server",
+    "Staging and Production deployment",
+    "real OWNER access or change",
+    "Phase 4"
+  ],
+  "checkpointReview": {
+    "fullHistoryAndCandidateSecretScan": {
+      "stage": "checkpoint-secrets",
+      "exitCode": 0,
+      "seconds": 2.12,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    },
+    "gitDiffCheckPassed": true,
+    "dockerTestsResumedAfterStorageFailure": false
+  }
+}

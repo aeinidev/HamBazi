@@ -39,3 +39,7 @@
 ## Consequences
 
 سطح داخلی Database و repository اتاق به‌صورت additive توسعه می‌یابد؛ Migration، سرویس و API عمومی تازه لازم نیست. آزمون واقعی دو connection باید ثبات snapshot هنگام commit هم‌زمان، رد UPDATE حتی با نقش دارای مجوز نوشتن، و قابلیت نوشتن پس از پایان snapshot را ثابت کند. آزمون‌های retry، مالکیت/پاک‌سازی fixture و کل suiteهای قبلی لازم‌اند؛ موفقیت جزئی CI موفق نیست. ظرفیت، سلامت زنده، بکاپ واقعی، مجوز انتشار و فاز چهارم از این تصمیم نتیجه‌گیری نمی‌شوند.
+
+## Validation checkpoint — 2026-10-29
+
+[شواهد جاری](../security/admin-phase3-recovery-checkpoint.json): هر ۳۰۶ تست Backend و شش release browser در همان اجرای یکپارچه موفق شدند؛ تست‌های بازتولید catchup/intent قبل از اصلاح FAIL و بعد PASS بودند. CI فقط ۲۰ gate را تکمیل کرد و موفق نیست. قطع USB و خطای ext4 روی دیسک مخزن/Docker ادامهٔ Build/Qualification را متوقف کرد؛ حفظ commitها در کپی مستقل و bundle تأیید شد. کنترل‌ها و حدود زمان تغییر نکرده‌اند؛ این نتیجه مجوز استقرار یا پذیرش ظرفیت نیست.

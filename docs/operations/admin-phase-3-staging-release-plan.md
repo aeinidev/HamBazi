@@ -1,11 +1,12 @@
 # برنامهٔ انتشار و بازگشت فاز سوم Admin — اجرا نشده
 
-محدوده: آماده‌سازی محلی برای Staging؛ بدون SSH، تغییر سرور/Firewall، تغییر OWNER یا فاز چهارم. مرجع قابلیت‌ها ADR-090 و پیشنهاد پذیرش ریسکِ هنوز تصویب‌نشده [ADR-091](../adr/091-proposed-phase3-staging-timeout-risk.md) است. نتیجه و artifactها در [گزارش تکمیلی](../security/admin-phase3-staging-preparation.json) ثبت می‌شوند. این برنامه مجوز اجرا نیست.
+محدوده: آماده‌سازی محلی برای Staging؛ بدون تغییر سرور/Firewall، OWNER یا فاز چهارم. تنها بررسی سرور در این ادامه، inspect/export فقط‌خواندنی تصویر دقیق Redis بود؛ دیتابیس/OWNER خوانده نشد. مرجع جاری [checkpoint](../security/admin-phase3-recovery-checkpoint.json) است: Qualification کامل نشده و خطای I/O دیسک محلی انتشار را مسدود می‌کند. برنامهٔ زیر اجرا نشده و مجوز اجرا نیست. مرجع قابلیت‌ها ADR-090 است؛ ADR-091 پیشنهادی، تصویب‌نشده و استفاده‌نشده باقی می‌ماند.
 
 ## بسته و تصمیم GO/NO-GO
 
 - candidate به commit تمیز، lockfile، schema/Migration، toolchain، تنظیمات build و digestهای ثابت متصل شود. پروفایلِ ثبت‌شدهٔ فاز دوم برای Web برابر `https://staging.hambazi.top`، API برابر `https://api-staging.hambazi.top` و Admin برابر `https://admin.hambazi.top` است؛ پیش از نصب، drift واقعی مقصد جداگانه احراز شود. هیچ فرض DNS یا تغییر origin روی سرور اعمال نشده است.
 - PostgreSQL و دادهٔ آن در انتشار Admin تعویض نمی‌شوند. baseline ثبت‌شدهٔ Staging در گزارش فاز دوم `hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b` است؛ `9ac84f…` ایمیج محلیِ آزمون/بازیابی است و نباید بی‌اجازه جای آن نصب شود. تطبیق live image پس از مجوز لازم است.
+- pin مصوب 29.9.2 فقط محلی/CI است؛ سرور ارتقا نمی‌یابد. تصویر دقیق Redis retained برابر `hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c` است. پس از مجوز، live binding و image-load compatibility روی daemon موجود پیش از cutover احراز شود.
 - مسیر عادی نیازمند CI کامل موفق است. مسیر پیشنهادی استثنا فقط با تأیید جداگانهٔ ADR-091، شرایط آن و روش اجرایی بازبینی‌شده قابل طرح است؛ پیشنهاد/ثبت ریسک مجوز bypass نیست. هر شکست مستقل یا شواهد stale، NO-GO است.
 - نصب با flag محرومیت خاموش پیشنهاد شده است. تنظیم فعلی mutations/operations DSN حفظ می‌شود؛ غیرفعال‌کردن کل management می‌تواند خواندن مدیران و reconciliation را هم متوقف کند و راهکار این طرح نیست. فعال‌سازی محرومیت تصمیم بعدیِ جداگانه است؛ entitlement کامل OWNER، Audit و محدودیت سه تلاش PIN تغییر نمی‌کنند.
 
