@@ -30,7 +30,8 @@ export function createRealtime(
   let disposed = false;
   let matchId: string | null = null;
   let sequence: ReturnType<typeof createMatchSequence> | undefined;
-  let syncing = false;
+  let syncing: Promise<void> | undefined;
+  let syncRequested = false;
   let generation = 0;
   // The personal gateway permits one pending request per socket. Keep polling,
   // reconnect lookups and foreground intents in the same bounded lane.
@@ -93,36 +94,46 @@ export function createRealtime(
     if (!result.success || result.data.matchId !== matchId || !sequence) return false;
     const action = sequence.snapshot(result.data);
     if (action === "INVALID") return false;
-    if (action === "APPLY") {
+    if (action === "APPLY" && !sequence.cursor().needsResync) {
       callbacks.snapshot(result.data);
       callbacks.resync(false);
     }
     callbacks.error(null);
     return result.data.lastEventSeq;
   }
-  async function sync() {
-    if (!matchId || syncing || !socket.connected) return;
-    syncing = true;
+  function sync(): Promise<void> {
+    if (!matchId || disposed || !socket.connected) return Promise.resolve();
+    syncRequested = true;
+    if (syncing) return syncing;
     const epoch = generation;
-    try {
-      const result = await request(
-        "match:catchup",
-        { schemaVersion: 1, matchId, afterSeq: sequence?.cursor().lastEventSeq ?? 0 },
-        okValue(catchupSchema),
-      );
-      if (epoch === generation) {
-        const applied = apply(result.value.snapshot);
-        if (applied === false || sequence?.cursor().needsResync)
-          callbacks.error(new ClientError("INVALID_RESPONSE"));
+    const pending = (async () => {
+      try {
+        // Coalesce signals during a read, but never poll an uncooperative server indefinitely.
+        for (let attempt = 0; attempt < 2; attempt++) {
+          syncRequested = false;
+          const result = await request(
+            "match:catchup",
+            { schemaVersion: 1, matchId, afterSeq: sequence?.cursor().lastEventSeq ?? 0 },
+            okValue(catchupSchema),
+          );
+          if (epoch !== generation || disposed) return;
+          if (apply(result.value.snapshot) === false) throw new ClientError("INVALID_RESPONSE");
+          if (!syncRequested && !sequence?.cursor().needsResync) return;
+        }
+        callbacks.snapshot(null);
+        callbacks.resync(true);
+        throw new ClientError("INVALID_RESPONSE", true);
+      } catch (error) {
+        if (!disposed && epoch === generation)
+          callbacks.error(
+            error instanceof ClientError ? error : new ClientError("NETWORK_ERROR", true),
+          );
       }
-    } catch (error) {
-      if (!disposed)
-        callbacks.error(
-          error instanceof ClientError ? error : new ClientError("NETWORK_ERROR", true),
-        );
-    } finally {
-      if (epoch === generation) syncing = false;
-    }
+    })().finally(() => {
+      if (syncing === pending) syncing = undefined;
+    });
+    syncing = pending;
+    return pending;
   }
   async function subscribe(id: string) {
     if (matchId && matchId !== id) {
@@ -175,7 +186,8 @@ export function createRealtime(
   });
   socket.on("disconnect", (reason: string) => {
     generation++;
-    syncing = false;
+    syncing = undefined;
+    syncRequested = false;
     sequence = matchId ? createMatchSequence(matchId) : undefined;
     callbacks.snapshot(null);
     callbacks.resync(true);
@@ -200,7 +212,8 @@ export function createRealtime(
     subscribe,
     sync,
     retry: () => {
-      socket.connect();
+      if (socket.connected) void sync();
+      else socket.connect();
     },
     close() {
       disposed = true;

@@ -26,6 +26,8 @@
 
 10. `check` همان format/lint/boundary/typecheck/test/build/contracts را حفظ می‌کند؛ typecheck، test و build در یک گراف Turbo اجرا می‌شوند تا وابستگی‌های مشترک در invocationهای جدا و اجباری چند بار تکرار نشوند. تست‌های Infra جداگانه حفظ‌اند. `TURBO_FORCE=true`، concurrency=1، گیت‌های ۲۸گانه و تمام مهلت‌ها ثابت می‌مانند.
 
+11. مانع مرورگر release یک race جدا در Realtime را آشکار کرد: `sync` هم‌زمان زود برمی‌گشت، invalidation میان یک read گم می‌شد و cursor می‌توانست gap مشاهده‌شده را با snapshot قدیمی پاک کند. cursor بالاترین seq مشاهده‌شده را حفظ می‌کند؛ snapshot دارای gap وارد UI نمی‌شود. syncها Promise مشترک و حداکثر دو read در هر نوبت دارند؛ در عقب‌ماندگی پایدار fail-closed و retry صریح مجاز است. timeout هر request، lease/heartbeat، احراز هویت، نقش، schema و action ID تغییر نمی‌کنند. completion اتصال قبلی مجوز تغییر وضعیت اتصال جدید ندارد. دو تست بازتولید ابتدا FAIL و پس از اصلاح موفق شدند؛ کنترل محدودبودن retry و قطع/اتصال دوباره نیز افزوده شد. این اصلاح برای ordinary/personal/Kahroba از همان transport مشترک استفاده می‌کند و سرویس جدید ندارد.
+
 ## Alternatives
 
 - افزایش Timeout، کاهش fixture/موج، skip، خاموش‌کردن fsync یا پذیرش tmpfs: با الزامات این کار سازگار نیستند.

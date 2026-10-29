@@ -1501,6 +1501,17 @@ it("handles gaps, stale snapshots, foreign matches and initial version zero in t
   expect(cursor.cursor().needsResync).toBe(false);
 });
 
+it("keeps the highest observed gap outstanding until an authoritative snapshot covers it", () => {
+  const cursor = createMatchSequence(matchId);
+  const base = { schemaVersion: 1, matchId, stateVersion: 2, lastEventSeq: 2 };
+  expect(cursor.snapshot(base)).toBe("APPLY");
+  expect(cursor.event({ schemaVersion: 1, matchId, seq: 4 })).toBe("GAP");
+  expect(cursor.snapshot({ ...base, stateVersion: 3, lastEventSeq: 3 })).toBe("APPLY");
+  expect(cursor.cursor().needsResync).toBe(true);
+  expect(cursor.snapshot({ ...base, stateVersion: 4, lastEventSeq: 4 })).toBe("APPLY");
+  expect(cursor.cursor().needsResync).toBe(false);
+});
+
 it("removes a subscription after membership loss and retries database projection failures without payload leakage", async () => {
   const d = dependencies();
   const f = delivery(d);

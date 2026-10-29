@@ -20,6 +20,7 @@ export function createMatchSequence(matchId: string) {
         return "INVALID";
       if (input.seq <= eventSeq) return "DUPLICATE";
       if (eventSeq < 0 || input.seq !== eventSeq + 1) {
+        eventSeq = input.seq; // An older in-flight snapshot must not erase a known gap.
         needsResync = true;
         return "GAP";
       }
