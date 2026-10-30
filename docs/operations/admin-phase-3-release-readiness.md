@@ -1,8 +1,8 @@
 # آمادگی انتشار فاز سوم Admin روی Staging
 
-> وضعیت جاری — 2026-10-30: [بازیابی امن Staging](staging-recovery-20261030.md) موفق است و همان فاز دوم سرویس می‌دهد؛ مشکل containment قبلی رفع شد. طبق دستور تازهٔ مالک، **فاز سوم فعلاً نصب نمی‌شود**. Qualification محلی زیر تاریخی/معتبر در دامنهٔ خود باقی است؛ استقرار تازه مجوز جداگانه می‌خواهد.
+> وضعیت جاری — 2026-10-30: [استقرار فاز سوم روی Staging](admin-phase-3-deployment-20261030.md) موفق است؛ سرویس‌ها، HTTPS و QA خواندنی OWNER تأییدند. محرومیت جدید طبق برنامه خاموش و QA زندهٔ ابطال نشست مدیر آزمایشی باز است. Qualification محلی زیر سابقهٔ آماده‌سازی است؛ نتیجهٔ مقصد در گزارش مستقل ثبت شده است.
 
-تاریخ تکمیل: 2026-10-30 (Asia/Tehran). زمان دقیق UTC آزمون‌ها در evidence ثبت است. **آماده‌سازی محلی موفق است؛ Staging با فاز دوم بازیابی شده و نصب فاز سوم فعلاً HOLD است.** مرجع جاری [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) است. CI و ساخت artifactها به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` و snapshot/digestهای ثبت‌شده متصل‌اند؛ اصلاح runtime در `a9dbf14` کامل شده و اختلاف تا commit آزموده‌شده شامل checkpoint مستنداتی، اصلاح محدود inventory شواهد CI با تست مثبت/منفی و محدودیت دو worker بین فایل‌های واحد API است. commit بعدی این گزارش نیز فقط مستندات/evidence است؛ CI برای آن commit مستنداتی ادعا نمی‌شود.
+تاریخ تکمیل: 2026-10-30 (Asia/Tehran). زمان دقیق UTC آزمون‌ها در evidence ثبت است. **آماده‌سازی محلی موفق بود؛ فاز سوم پس از مجوز جداگانه روی Staging مستقر شد.** مرجع جاری [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) است. CI و ساخت artifactها به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` و snapshot/digestهای ثبت‌شده متصل‌اند؛ اصلاح runtime در `a9dbf14` کامل شده و اختلاف تا commit آزموده‌شده شامل checkpoint مستنداتی، اصلاح محدود inventory شواهد CI با تست مثبت/منفی و محدودیت دو worker بین فایل‌های واحد API است. commit بعدی این گزارش نیز فقط مستندات/evidence است؛ CI برای آن commit مستنداتی ادعا نمی‌شود.
 
 ## کنترل‌های تکمیل‌شده
 
@@ -41,9 +41,9 @@
 
 ساخت سرد محلی در CI حدود ۸۵۳ ثانیه از مهلت ثابت ۹۰۰ ثانیه مصرف کرد. اجرای کامل موفق است، ولی حاشیهٔ این Build روی رایانهٔ فعلی کم است؛ شکست اجرای بعدی همچنان NO-GO می‌شود. این زمان، ظرفیت محصول یا سرور آینده را تأیید نمی‌کند.
 
-## پیش‌شرط‌های نصب آینده
+## کنترل‌های هر نصب بعدی
 
-[برنامهٔ Backup، نصب و Rollback](admin-phase-3-staging-release-plan.md) آماده است؛ containment قبلی رفع شده، ولی طبق دستور جدید مالک نصب فاز سوم فعلاً متوقف است و اجرای تازه تأیید جداگانه می‌خواهد:
+[برنامهٔ Backup، نصب و Rollback](admin-phase-3-staging-release-plan.md) در انتشار مجاز ۳۰ اکتبر اجرا شد؛ کنترل‌های زیر برای هر نصب بعدی همچنان لازم‌اند. اجرای تازه مجوز جداگانه می‌خواهد:
 
 1. تأیید صریح Staging و binding دقیق کد/artifact؛ تطبیق live image/config/grants، سلامت PostgreSQL/Redis/Nginx/API/Bot/Worker/Web/Admin و کنترل‌های امنیتی تازه، بدون تمدید deadline.
 2. full backup واقعی تازه و capsule رمزگذاری‌شدهٔ تنظیمات/کلیدها با ابزار و گیرندهٔ بازبینی‌شده؛ کپی خارج سرور، SHA-256 و بازیابی واقعی همان archive با receipt منطبق. ورود اطلاعات محرمانه فقط توسط مالک در ترمینال خصوصی است. rehearsal ساختگی جای این gate نیست؛ بکاپ OWNER جای full backup را نمی‌گیرد.
@@ -52,4 +52,4 @@
 5. پس از مجوز QA زنده، 403 مدیر دارای فقط `users.view` در حالت authenticated، receipt/Audit اجرای `ADMIN_REVOKE_SESSIONS` و رد نشست قبلی و سپس `DISABLED` شدن مدیر موقت جداگانه اثبات شوند. آزمون‌های محلی موفق، وضعیت فعلی حساب آزمایشیِ Staging یا نتیجهٔ شفاهی قبلی را بازتأیید نمی‌کنند.
 6. Rollback پس از هر اثر محرومیت باید API/Worker سازگار با enforcement/expiry/reconciliation را حفظ کند؛ حذف داده/Audit، down migration، بازگشت به فاز دوم ناسازگار یا restore روی DB زنده مجاز نیست.
 
-انجام نشده: تغییر Staging/Production/حساب واقعی OWNER/PIN، بکاپ واقعی تازه و سلامت زندهٔ تمام سرویس‌ها، پذیرش ظرفیت/Load/Stress/Soak و فاز چهارم. ریسک‌های Production مانند retention توضیح محرمانه، چرخش کلید، RPO/PITR و SLO تصمیم جداگانه می‌خواهند.
+در دامنهٔ آماده‌سازی محلی، تغییر Staging، بکاپ واقعی تازه و بررسی سلامت مقصد انجام نشده بودند؛ اجرای مجاز بعدی در [گزارش انتشار](admin-phase-3-deployment-20261030.md) ثبت است. Production و اطلاعات ورود OWNER/PIN تغییر نکردند؛ ظرفیت/Load/Stress/Soak و فاز چهارم انجام نشده‌اند. ریسک‌های Production مانند retention توضیح محرمانه، چرخش کلید، RPO/PITR و SLO تصمیم جداگانه می‌خواهند.

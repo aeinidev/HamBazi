@@ -1,6 +1,8 @@
-# برنامهٔ انتشار و بازگشت فاز سوم Admin — اجرا نشده
+# برنامهٔ انتشار و بازگشت فاز سوم Admin
 
-محدوده: آماده‌سازی محلی برای Staging؛ بدون تغییر سرور/Firewall، OWNER یا فاز چهارم. تنها بررسی سرور، inspect/export فقط‌خواندنی تصویر دقیق Redis بود؛ دیتابیس/OWNER خوانده نشد. [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` متصل‌اند. آماده‌سازی محلی موفق است؛ برنامهٔ زیر اجرا نشده و مجوز نصب نیست. مرجع قابلیت‌ها ADR-090 است؛ ADR-091 بدون تصویب یا استفاده، Withdrawn شد.
+> اجرای مجاز ۳۰ اکتبر در [گزارش انتشار](admin-phase-3-deployment-20261030.md) ثبت است. متن زیر کنترل‌های هر اجرای بعدی را تعیین می‌کند؛ خودِ این سند مجوز نصب تازه نیست.
+
+محدودهٔ طراحی اولیه: آماده‌سازی محلی برای Staging؛ بدون تغییر سرور/Firewall، OWNER یا فاز چهارم. تنها بررسی سرور، inspect/export فقط‌خواندنی تصویر دقیق Redis بود؛ دیتابیس/OWNER خوانده نشد. [Qualification نهایی](../security/admin-phase3-final-qualification.json) و [artifactهای دقیق](../security/admin-phase3-remediated-artifacts.json) به commit تمیز `c7add7bf7b32e77b153abc6ebb411d4954e4a668` متصل‌اند. آماده‌سازی محلی موفق بود؛ پس از مجوز مستقل، اجرای مقصد جداگانه ثبت شد. مجوز هر اجرای تازه جداگانه لازم است. مرجع قابلیت‌ها ADR-090 است؛ ADR-091 بدون تصویب یا استفاده، Withdrawn شد.
 
 ## بسته و تصمیم GO/NO-GO
 
@@ -16,6 +18,8 @@
 2. scan تازه به تمام ایمیج‌های واقعاً نصب‌شونده **و سرویس‌های retained** متصل باشد. کنترل‌های containment و renewal فعلی از روی شواهد معتبر بررسی شوند؛ نصب جدید ممکن است rebinding بازبینی‌شده بخواهد. تمدید deadline یا فعال‌سازی اجباری سرویس مجاز نیست.
 3. از مشخصات امن OWNER فقط baseline محدود تهیه شود: یک مالک، realm، status، credential/session/authorization version و وضعیت lock/failure؛ مقدار credential، verifier، کلید یا PIN خوانده/صادر نشود. پیش و پس از نصب metadata باید بدون تغییر ناخواسته بماند.
 4. نسخهٔ فعلی binaryها، Compose/Nginx، تنظیمات و vault bindings برای بازگشت حفظ شوند؛ hash و permissionها ثبت شوند. فایل‌های حساس تنها در آرشیو رمزگذاری‌شده قرار بگیرند.
+5. پیش از Maintenance، تمام فایل‌های کد Migration با منبع qualified تطبیق یابند. mount کد باید برای UID/GID=1000 قابل عبور/خواندن باشد: **تمام directoryهای همین درخت 0755، فایل کد/config بدون secret برابر 0644 و schema-engine برابر 0755**. tar data filter زیر umask=077 می‌تواند directoryهای 0700 بسازد؛ mode ظاهری archive کافی نیست. ریشهٔ release همچنان 0700 و credential/env برابر 0600 و **خارج از mount کد** بماند. Prisma واقعی `validate` با همان image، UID غیر root، mount فقط‌خواندنی و شبکهٔ none پیش از Maintenance اجرا شود؛ این آزمون جای Migration/دسترسی واقعی DB نیست.
+6. انتظار startup باید bounded و نیازمند Running+healthy باشد؛ systemd ممکن است پیش از آغاز واقعی Docker، وضعیت exited قبلی را نشان دهد. خروج قدیمی، healthy قدیمیِ stopped، unhealthy یا مهلت تمام‌شده هرگز PASS نیستند. بدون افزایش مهلت یا تغییر healthcheck محصول، readiness و `--admit` عادی کامل شوند.
 
 ## ۲ — بکاپ واقعی و مراسم بازیابی
 
@@ -31,7 +35,7 @@
 
 بکاپ رمزگذاری‌شده و کلید مستقل حداقل تا پایان بازهٔ بازگشتِ تأییدشده نگه‌داری شوند؛ حذف خودکار یا تعیین سیاست عمومی retention/PITR در این کار انجام نمی‌شود. RPO پس از snapshot و RTO سرور از آزمون محلی نتیجه‌گیری نمی‌شوند؛ بازگشت داده پس از ازسرگیری نوشتن، ارزیابی جداگانه می‌خواهد.
 
-## ۳ — نصب کنترل‌شده، فقط با مجوز بعدی
+## ۳ — نصب کنترل‌شده، فقط با مجوز همان اجرا
 
 - migrationهای additive `202610280001_admin_private_notes` و `202610280002_user_restrictions` با migrator و سپس grantهای موجود فاز سوم اعمال شوند. drift صفر، replay/redeploy و عدم تغییر metadata مالک بررسی شوند؛ grant گسترده، down migration و تغییر credential ممنوع‌اند.
 - API/Worker/Admin سازگار از digestهای تأییدشده نصب شوند. تعویض Web/Bot فقط اگر بستهٔ مصوب نیاز دارد؛ در غیر این صورت retained imageها نیز باید scan و سازگاری معتبر داشته باشند. PostgreSQL/Redis و volumeهای موجود حفظ شوند.

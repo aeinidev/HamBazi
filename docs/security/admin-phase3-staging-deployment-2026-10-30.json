@@ -1,0 +1,811 @@
+{
+  "schemaVersion": 1,
+  "scope": "staging-phase3-deployment-only",
+  "clientDate": "2026-10-30",
+  "clientTimezone": "Asia/Tehran",
+  "checkedAtUTC": "2026-10-30T09:14:16.623952+00:00",
+  "status": "DEPLOYED_HEALTHY_OWNER_READONLY_QA_PASSED_LIVE_ADMIN_REVOCATION_QA_PENDING",
+  "stagingDeploymentAuthorizedByOwner": true,
+  "codeCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+  "ci": {
+    "entrypoint": "node infra/ci/verify.mjs",
+    "all28GatesPassed": true,
+    "manifestSha256": "18eb0cd7f53899581886b0ee2e6319b7893371f26e5f188dc548e61cc7c2f12e",
+    "hostedGitHubActionsRun": false,
+    "codeChangesSinceQualifiedCommit": false,
+    "currentTurnFullCiRerunClaimed": false
+  },
+  "artifactInventorySha256": "36d685b96ace06f13e57daa0dd41572762c661872039265d7803218373a47b8c",
+  "deployed": {
+    "stage": "STAGING_PHASE3_DEPLOYED_HEALTHY",
+    "atUTC": "2026-10-30T09:01:01.784032+00:00",
+    "passed": true,
+    "completedAtUTC": "2026-10-30T09:01:01.679623+00:00",
+    "scope": "staging-phase3-only",
+    "pins": {
+      "api": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+      "bot": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8",
+      "worker": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338",
+      "web": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+      "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+    },
+    "adminImage": "sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+    "migrations": 21,
+    "legacyLogicalTablesPreserved": 43,
+    "owner": {
+      "owners": 1,
+      "credentialVersion": 2,
+      "sessionEpoch": 2,
+      "authorizationVersion": 1,
+      "status": "ACTIVE",
+      "pinFailures": 0,
+      "locked": false,
+      "passwordChanges": 1,
+      "pinChanges": 0
+    },
+    "ownerUnchanged": true,
+    "dataContainersUnchanged": true,
+    "restrictionsEnabled": false,
+    "securityDeadlineUTC": {
+      "core": "2026-10-31T07:16:25Z",
+      "admin": "2026-10-31T07:16:25Z"
+    },
+    "freeDiskBytes": 3501522944,
+    "authenticatedOwnerQa": "pending-private-user-check",
+    "capacityCertified": false,
+    "phase4Started": false
+  },
+  "maintenance": {
+    "beginUTC": "2026-10-30T08:57:01.055611+00:00",
+    "endUTC": "2026-10-30T09:01:01.679623+00:00",
+    "seconds": 240.62,
+    "beginTehran": "2026-10-30T12:27:01.055611+03:30",
+    "endTehran": "2026-10-30T12:31:01.679623+03:30"
+  },
+  "backup": {
+    "passed": true,
+    "checkedAtUTC": "2026-10-30T08:58:14.771233+00:00",
+    "archiveSha256": "1039d8acb043bcc4d036bd7c0141e6b805204853b38780444f8fe6e76044ae92",
+    "receiptSha256": "ff3fb84087171b4339ad2bd17e398f70e82aca5497d68203b2b9cea7ef865ae1",
+    "verifiedAtUTC": "2026-10-30T08:57:45.098Z",
+    "databases": 2,
+    "tables": 44,
+    "configurationFiles": 81,
+    "actualPrivateRestore": true,
+    "networkNoneNoHostVolumes": true,
+    "cipher": "CMS AuthEnvelopedData AES-256-GCM / RSA-3072",
+    "offServerArchive": "/home/mehdi/.local/share/hambazi/backups/staging/20261030-admin-phase3-r2-6fqogtxz/quiescent-postgresql.p7m",
+    "privateKeyCopiedToServer": false,
+    "passphraseEnteredIntoCodex": false,
+    "freshAfterControlledQuiescence": true,
+    "sourcePostgresqlImage": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+    "initialPreviousRestoreRehearsalOnly": true
+  },
+  "securityQualification": {
+    "passed": true,
+    "scope": "phase3-staging-retry-current-and-new-images",
+    "checkedAtUTC": "2026-10-30T08:51:48.554214+00:00",
+    "database": {
+      "Version": 2,
+      "NextUpdate": "2026-10-31T07:16:25.05417423Z",
+      "UpdatedAt": "2026-10-30T07:16:25.054174501Z",
+      "DownloadedAt": "2026-10-30T08:00:20.506907488Z"
+    },
+    "pins": {
+      "api": "hambazi-candidate/api:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+      "bot": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8",
+      "worker": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338",
+      "web": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+      "postgres-staging": "hambazi-security/postgres-staging:20261026-libcurl@sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+      "redis-staging": "hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c"
+    },
+    "adminImage": "sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+    "counts": {
+      "api": {},
+      "bot": {},
+      "worker": {},
+      "web": {},
+      "postgres-staging": {
+        "MEDIUM": 1
+      },
+      "redis-staging": {
+        "MEDIUM": 1
+      },
+      "admin": {}
+    },
+    "normalPolicyDeadlineIllustrationOnly": "2026-10-31T07:16:25Z",
+    "adminDeadlineIllustrationOnly": "2026-10-31T07:16:25Z",
+    "deadlineApplied": false,
+    "existingRuntimeUnchanged": true,
+    "freeDiskBytes": 3497537536
+  },
+  "finalRuntime": {
+    "passed": true,
+    "checkedAtUTC": "2026-10-30T09:14:16.623952+00:00",
+    "scope": "phase3-final-staging-read-only-acceptance",
+    "services": {
+      "api": {
+        "containerId": "11c353d9cd31a097948efcea365462d9bcb383a8c3d55b8b7db4400c923e54d1",
+        "imageId": "sha256:bd36e21894ab62c4c7ce00674405924545a8eff8382d033598c49ba9326cb5f9",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "bot": {
+        "containerId": "c03bf58087d0b1d34bba687b31363414e38bc8366524b7937b98150036314afa",
+        "imageId": "sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "worker": {
+        "containerId": "47d0f37e60b05b6d70dd59cd6a9cf4f8f48d05eaaf4fec3d754fc8a6918599bb",
+        "imageId": "sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "web": {
+        "containerId": "138ad4c8d6c5f0fc885074db7327da44ece26c40ab3f242647a40939039d8592",
+        "imageId": "sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "postgres-staging": {
+        "containerId": "59330e49ffc0723f418cc87e715efb583e5bd20e86d23e652c38e4c6327fa7f2",
+        "imageId": "sha256:7debbad54e22776478b9009964cab7f0aedcfb58569bc06c19ebb2a043e9757b",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "redis-staging": {
+        "containerId": "d718077f893fcd410da571c3aacabb7e68dd4abff665c20225ee2dab823d4d8a",
+        "imageId": "sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c",
+        "running": true,
+        "health": null,
+        "publicPorts": false,
+        "oomKilled": false
+      },
+      "admin": {
+        "containerId": "a0e3d2412943eef6ecfeac206c7a3f50969c60eef1af38f4bf7355e4046c2a89",
+        "imageId": "sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+        "running": true,
+        "health": "healthy",
+        "publicPorts": false,
+        "oomKilled": false
+      }
+    },
+    "nginxActive": true,
+    "nginxConfigValid": true,
+    "redisAuthenticatedStrictTlsPing": true,
+    "owner": {
+      "owners": 1,
+      "credentialVersion": 2,
+      "sessionEpoch": 2,
+      "authorizationVersion": 1,
+      "status": "ACTIVE",
+      "pinFailures": 0,
+      "locked": false,
+      "passwordChanges": 1,
+      "pinChanges": 0
+    },
+    "ownerUnchanged": true,
+    "signingPepperCommandKeysAndDatabaseCredentialsUnchanged": true,
+    "dataContainersAndVolumesUnchanged": true,
+    "migrations": 21,
+    "restrictionsEnabled": false,
+    "counts": {
+      "restrictions": 0,
+      "privateNotes": 0,
+      "unknownOperations": 0,
+      "ownerOldGenerationSessions": 4
+    },
+    "postdeployOwnerAudit": {
+      "ownerSuccessfulLoginsAfterDeploy": 1,
+      "ownerPasswordsVerifiedAfterDeploy": 1
+    },
+    "successfulPostdeployRevokeOperations": 0,
+    "timers": {
+      "hambazi-server-security-renew.timer": {
+        "NextElapseUSecRealtime": "Fri 2026-10-30 10:01:21 UTC",
+        "NextElapseUSecMonotonic": "0",
+        "LastTriggerUSec": "Fri 2026-10-30 09:01:44 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-admin-security-renew.timer": {
+        "NextElapseUSecRealtime": "",
+        "NextElapseUSecMonotonic": "1w 2d 20h 26min 15.297341s",
+        "LastTriggerUSec": "Fri 2026-10-30 08:52:45 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-server-security-expiry.timer": {
+        "NextElapseUSecRealtime": "Sat 2026-10-31 07:16:25 UTC",
+        "NextElapseUSecMonotonic": "0",
+        "LastTriggerUSec": "Thu 2026-10-29 01:21:17 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      },
+      "hambazi-admin-security-expiry.timer": {
+        "NextElapseUSecRealtime": "Sat 2026-10-31 07:16:25 UTC",
+        "NextElapseUSecMonotonic": "0",
+        "LastTriggerUSec": "Thu 2026-10-29 01:21:17 UTC",
+        "ActiveState": "active",
+        "SubState": "waiting"
+      }
+    },
+    "normalWindows": {
+      "core": {
+        "deadlineUTC": "2026-10-31T07:16:25Z",
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-31T07:16:25.05417423Z",
+          "UpdatedAt": "2026-10-30T07:16:25.054174501Z",
+          "DownloadedAt": "2026-10-30T08:00:20.506907488Z"
+        }
+      },
+      "admin": {
+        "deadlineUTC": "2026-10-31T07:16:25Z",
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-31T07:16:25.05417423Z",
+          "UpdatedAt": "2026-10-30T07:16:25.054174501Z",
+          "DownloadedAt": "2026-10-30T08:53:00.955245132Z"
+        }
+      }
+    },
+    "normalRenewals": {
+      "core": {
+        "ok": true,
+        "result": "unchanged",
+        "checkedAtUTC": "2026-10-30T09:02:18.213312+00:00",
+        "deadlineUTC": "2026-10-31T07:16:25Z",
+        "images": 6,
+        "database": {
+          "Version": 2,
+          "NextUpdate": "2026-10-31T07:16:25.05417423Z",
+          "UpdatedAt": "2026-10-30T07:16:25.054174501Z",
+          "DownloadedAt": "2026-10-30T09:02:00.116992248Z"
+        }
+      },
+      "admin": {
+        "ok": true,
+        "checkedAtUTC": "2026-10-30T09:00:55.062929+00:00",
+        "deadlineUTC": "2026-10-31T07:16:25Z"
+      }
+    },
+    "migrationValidation": {
+      "passed": true,
+      "migrations": 21,
+      "legacyLogicalTablesUnchanged": 43,
+      "ownerUnchanged": true,
+      "restrictions": 0,
+      "privateNotes": 0,
+      "privilegeChecks": {
+        "opsIdentityDenied": true,
+        "hiddenDenied": true,
+        "readerCannotWrite": true,
+        "auditImmutable": true,
+        "restrictionsImmutable": true,
+        "noEscalation": true
+      }
+    },
+    "controllerHashes": {
+      "core": "2a7e0a23f14dc6720d21df1ed283dd051182428f0b27c9341492861de263506f",
+      "admin": "85b39940aec1aea07708a64121285d04920d2d52b75bddd8b0dae66af814859e"
+    },
+    "phase3Installed": true,
+    "productionChanged": false,
+    "phase4Started": false,
+    "capacityCertified": false
+  },
+  "publicHttpsAcceptance": {
+    "passed": true,
+    "checkedAtUTC": "2026-10-30T09:02:53.086319+00:00",
+    "checks": [
+      {
+        "host": "admin.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/me/access",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/overview",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/management/meta",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/admins",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/operations",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/games",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/rooms",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/bootstrap",
+        "method": "POST",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/recovery",
+        "method": "POST",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/password/reset",
+        "method": "POST",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/forgot-password",
+        "method": "POST",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/auth/login",
+        "method": "POST",
+        "status": 403,
+        "expected": 403,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/operations",
+        "method": "POST",
+        "status": 403,
+        "expected": 403,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "api-staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "bot-staging.hambazi.top",
+        "path": "/",
+        "method": "GET",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "api-staging.hambazi.top",
+        "path": "/v1/admin/admins",
+        "method": "GET",
+        "status": 404,
+        "expected": 404,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users/search",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users/00000000-0000-4000-8000-000000000001/profile",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users/00000000-0000-4000-8000-000000000001/history",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/users/00000000-0000-4000-8000-000000000001/restrictions",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      },
+      {
+        "host": "admin.hambazi.top",
+        "path": "/v1/admin/operations/00000000-0000-4000-8000-000000000001/private-note",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "tlsVerified": true,
+        "passed": true
+      }
+    ],
+    "credentialsEntered": false,
+    "ownerCredentialsChanged": false
+  },
+  "anonymousBrowserAcceptance": {
+    "checkedAtUTC": "2026-10-30T09:03:11.349Z",
+    "livePublicHttps": true,
+    "isolatedAnonymousBrowser": true,
+    "loginUsernamePasswordOnly": true,
+    "pinHiddenBeforePassword": true,
+    "rtl": true,
+    "mobileNoHorizontalOverflow": true,
+    "desktopNoHorizontalOverflow": true,
+    "credentialsEntered": false
+  },
+  "ownerLiveQa": {
+    "reportedByOwner": true,
+    "ownerLogin": true,
+    "userSearch": true,
+    "profile": true,
+    "gameHistoryTab": true,
+    "restrictionHistoryTab": true,
+    "passwordOrPinChangeRequested": false,
+    "credentialsShared": false,
+    "freshLoginIndependentlyConfirmedByAudit": true
+  },
+  "localOperationalRegressionTests": {
+    "migrationPublicCodePermissions": {
+      "passed": true,
+      "network": "none",
+      "realDatabaseUsed": false,
+      "beforeMode": "0600",
+      "beforeExit": 1,
+      "beforeDeniedWithEacces": true,
+      "privateParentDeniedWithEacces": true,
+      "privateNestedSchemaDirectoryDenied": true,
+      "publicCodeDirectoryMode": "0755",
+      "afterMode": "0644",
+      "afterExit": 0,
+      "actualPrismaSchemaValidationPassed": true,
+      "metadata": {
+        "uid": 0,
+        "mode": 420,
+        "validatorUid": 1000
+      },
+      "credentialFileModeRemains": "0600",
+      "secretValuesInPublicConfig": false
+    },
+    "boundedNativeReadiness": {
+      "passed": true,
+      "cases": [
+        {
+          "case": "old-exit-then-start",
+          "accepted": true
+        },
+        {
+          "case": "persistent-exit",
+          "accepted": false
+        },
+        {
+          "case": "running-unhealthy",
+          "accepted": false
+        },
+        {
+          "case": "stopped-stale-healthy",
+          "accepted": false
+        }
+      ],
+      "operationalBudgetUnchangedSeconds": 90,
+      "productHealthchecksChanged": false
+    },
+    "publicReadiness": {
+      "passed": true,
+      "cases": [
+        {
+          "scenario": "immediate",
+          "expectedAcceptance": true,
+          "probeCalls": 4
+        },
+        {
+          "scenario": "transient",
+          "expectedAcceptance": true,
+          "probeCalls": 8
+        },
+        {
+          "scenario": "wrong-status",
+          "expectedAcceptance": false,
+          "probeCalls": 1
+        },
+        {
+          "scenario": "bad-tls",
+          "expectedAcceptance": false,
+          "probeCalls": 1
+        },
+        {
+          "scenario": "never-ready",
+          "expectedAcceptance": false,
+          "probeCalls": 16
+        }
+      ]
+    },
+    "backupAdmissionGate": {
+      "passed": true,
+      "backupGatePositive": 1,
+      "backupGateNegative": 6,
+      "pythonSyntaxPassed": true,
+      "privateTerminalCliSyntaxPassed": true
+    },
+    "permissionRollback": {
+      "stage": "phase3-install-rollback-permissions",
+      "exitCode": 0,
+      "seconds": 5.58,
+      "testCounts": [],
+      "browserCases": [],
+      "markers": []
+    }
+  },
+  "previousFailedAttempt": {
+    "deployment": {
+      "exitCode": 1,
+      "seconds": 8.33,
+      "events": [
+        {
+          "stage": "DEPLOYMENT_STOPPED",
+          "atUTC": "2026-10-30T00:06:48.310450+00:00",
+          "failedStage": "additive-migrations",
+          "errorType": "RuntimeError",
+          "safeCode": "COMMAND_FAILED_1"
+        },
+        {
+          "event": "admin.security.contained",
+          "playerServicesPreserved": true
+        },
+        {
+          "stage": "FAIL_CLOSED_CONTAINMENT",
+          "atUTC": "2026-10-30T00:06:48.504219+00:00",
+          "dataServicesPreserved": true
+        }
+      ]
+    },
+    "migrationFailureReadOnlyDiagnostic": {
+      "migrationConfigMode": "0o600",
+      "migrationConfigUid": 0,
+      "nonRootProbeExit": 1,
+      "nonRootProbe": {
+        "readable": false,
+        "errorCode": "EACCES"
+      },
+      "migrationCredentialFileRemoved": true
+    },
+    "firstRollbackFailure": {
+      "exitCode": 1,
+      "seconds": 51.92,
+      "events": [
+        {
+          "event": "admin.security.contained",
+          "playerServicesPreserved": true
+        },
+        {
+          "stage": "FAIL_CLOSED_CONTAINMENT",
+          "atUTC": "2026-10-30T00:09:14.393835+00:00",
+          "dataServicesPreserved": true
+        },
+        {
+          "stage": "ROLLBACK_REQUIRES_REVIEW_KEEP_CONTAINED",
+          "atUTC": "2026-10-30T00:09:42.789408+00:00",
+          "failedStage": "restore-original-runtime-files",
+          "errorType": "RuntimeError",
+          "safeCode": "CANDIDATE_EXITED"
+        },
+        {
+          "event": "admin.security.contained",
+          "playerServicesPreserved": true
+        },
+        {
+          "stage": "FAIL_CLOSED_CONTAINMENT",
+          "atUTC": "2026-10-30T00:09:59.325403+00:00",
+          "dataServicesPreserved": true
+        }
+      ]
+    },
+    "safeRollbackCompleted": {
+      "exitCode": 0,
+      "seconds": 100.69,
+      "events": [
+        {
+          "stage": "ROLLBACK_CORE_READY",
+          "atUTC": "2026-10-30T00:14:14.920647+00:00",
+          "role": "api"
+        },
+        {
+          "stage": "ROLLBACK_CORE_READY",
+          "atUTC": "2026-10-30T00:14:20.442188+00:00",
+          "role": "worker"
+        },
+        {
+          "stage": "ROLLBACK_CORE_READY",
+          "atUTC": "2026-10-30T00:14:25.973543+00:00",
+          "role": "web"
+        },
+        {
+          "stage": "ROLLBACK_CORE_READY",
+          "atUTC": "2026-10-30T00:14:31.692270+00:00",
+          "role": "bot"
+        },
+        {
+          "stage": "ROLLBACK_ADMIN_READY",
+          "atUTC": "2026-10-30T00:14:48.549026+00:00",
+          "normalAdmissionGuardUsed": true
+        },
+        {
+          "event": "security.renew.completed",
+          "result": "unchanged",
+          "deadlineUTC": "2026-10-30T19:18:50Z"
+        },
+        {
+          "event": "admin.security.renewed",
+          "deadlineUTC": "2026-10-30T19:18:50Z"
+        },
+        {
+          "stage": "SAFE_PHASE2_ROLLBACK_COMPLETED",
+          "atUTC": "2026-10-30T00:15:48.127708+00:00",
+          "passed": true,
+          "completedAtUTC": "2026-10-30T00:15:48.127035+00:00",
+          "scope": "complete-safe-phase2-rollback-only",
+          "migrations": 19,
+          "phase3Installed": false,
+          "sameContainerAndImageIds": true,
+          "ownerUnchanged": true,
+          "accessPrivilegesRestoredExactly": true,
+          "noLiveDataRestore": true,
+          "securityDeadlineUTC": {
+            "core": "2026-10-30T19:18:50Z",
+            "admin": "2026-10-30T19:18:50Z"
+          },
+          "freeDiskBytes": 3520376832
+        }
+      ]
+    },
+    "reusedPreviousImagesNoLiveDataRestore": true,
+    "schemaStayedAt19": true,
+    "failureNotDeclaredPassed": true
+  },
+  "transferAndSpace": {
+    "imageTagsWereAbsentAfterDigestOnlyExport": true,
+    "approvedTagsRestoredToExactVerifiedImageIds": true,
+    "imageBytesRebuiltOrModified": false,
+    "expiredPublicScannerCacheRemoval": {
+      "passed": true,
+      "removedExpiredPublicCacheBytes": 3265781760,
+      "freeDiskBytes": 6322872320,
+      "activeCachesUnchanged": true,
+      "imagesBackupsDataUnchanged": true
+    },
+    "activeCachesDataBackupsAndRollbackImagesPreserved": true
+  },
+  "safety": {
+    "productionChanged": false,
+    "ownerCredentialsChanged": false,
+    "ownerPinDeliberatelyFailedOrLocked": false,
+    "ownerBootstrapOrRecoveryInvoked": false,
+    "liveDatabaseRestore": false,
+    "destructiveMigration": false,
+    "postgresqlOrRedisContainerVolumeReplaced": false,
+    "firewallDnsOrPublicBackendPortsChanged": false,
+    "securityControllerSourceOrSeverityFreshnessPolicyChanged": false,
+    "newSecurityException": false,
+    "capacityCertified": false,
+    "phase4Started": false
+  },
+  "remainingAcceptanceItems": [
+    "Real authenticated users.view-only 403 and ADMIN_REVOKE_SESSIONS approval/execution/session rejection are not yet confirmed in live Staging; successful postdeployment revoke Audit count is zero. Local integration coverage does not replace this acceptance.",
+    "ADMIN_USER_RESTRICTIONS_ENABLED remains false under the approved release plan; restriction writes and live ban/unban tests require explicit activation/QA authorization.",
+    "Capacity, load, stress and soak remain deferred to the future server; this is not Production approval."
+  ],
+  "privateEvidenceDirectories": {
+    "attempt1Local": "/home/mehdi/.cache/hambazi-phase3-install-bk20sk52",
+    "attempt1Remote": "/opt/hambazi/releases/admin-phase3-20261030-bk20sk52",
+    "finalAttemptLocal": "/home/mehdi/.cache/hambazi-phase3-install-retry-6fqogtxz",
+    "finalAttemptRemote": "/opt/hambazi/releases/admin-phase3-20261030-r2-6fqogtxz"
+  }
+}
