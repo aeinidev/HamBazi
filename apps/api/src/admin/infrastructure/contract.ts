@@ -1,5 +1,20 @@
 import { z } from "zod";
 import {
+  adminGameSearchQuerySchema,
+  adminRoomSearchQuerySchema,
+  adminMatchSearchQuerySchema,
+  adminMatchHistoryQuerySchema,
+  adminGamePageSchema,
+  adminRoomPageSchema,
+  adminMatchPageSchema,
+  adminGameDetailSchema,
+  adminRoomDetailSchema,
+  adminMatchDetailSchema,
+  adminRoomPlayersSchema,
+  adminMatchPlayersSchema,
+  adminMatchHistorySchema,
+  adminRoomDiagnosticsSchema,
+  adminMatchDiagnosticsSchema,
   adminUserProfileSchema,
   adminUserRestrictionsSchema,
   adminUserHistorySchema,
@@ -174,6 +189,53 @@ export function adminOpenApiDocument() {
       responses: { "200": response(adminPageSchema), ...errors },
     },
   };
+  const queryParameters = (schema: z.ZodType) =>
+    Object.entries(json(schema).properties ?? {}).map(([name, property]) => ({
+      in: "query",
+      name,
+      schema: property,
+    }));
+  for (const [kind, query, page, detail] of [
+    ["games", adminGameSearchQuerySchema, adminGamePageSchema, adminGameDetailSchema],
+    ["rooms", adminRoomSearchQuerySchema, adminRoomPageSchema, adminRoomDetailSchema],
+    ["matches", adminMatchSearchQuerySchema, adminMatchPageSchema, adminMatchDetailSchema],
+  ] as const) {
+    paths[`/v1/admin/${kind}/search`] = {
+      get: {
+        security: full,
+        parameters: queryParameters(query),
+        responses: { "200": response(page), ...errors },
+      },
+    };
+    paths[`/v1/admin/${kind}/{id}/details`] = {
+      get: {
+        security: full,
+        parameters: [
+          kind === "games"
+            ? { ...pathId, schema: { type: "string", pattern: "^[a-z][a-z0-9-]{0,63}$" } }
+            : pathId,
+        ],
+        responses: { "200": response(detail), ...errors },
+      },
+    };
+  }
+  for (const [path, schema] of [
+    ["rooms/{id}/players", adminRoomPlayersSchema],
+    ["matches/{id}/players", adminMatchPlayersSchema],
+    ["matches/{id}/history", adminMatchHistorySchema],
+    ["rooms/{id}/diagnostics", adminRoomDiagnosticsSchema],
+    ["matches/{id}/diagnostics", adminMatchDiagnosticsSchema],
+  ] as const)
+    paths[`/v1/admin/${path}`] = {
+      get: {
+        security: full,
+        parameters: [
+          pathId,
+          ...(path.endsWith("/history") ? queryParameters(adminMatchHistoryQuerySchema) : []),
+        ],
+        responses: { "200": response(schema), ...errors },
+      },
+    };
   for (const path of ["overview", "monitoring/summary", "audit-events"])
     paths[`/v1/admin/${path}`] = {
       get: {

@@ -2289,9 +2289,14 @@
                           "rooms.view",
                           "rooms.manage",
                           "rooms.approve",
+                          "rooms.players.view",
+                          "rooms.diagnostics.view",
                           "matches.view",
                           "matches.manage",
                           "matches.approve",
+                          "matches.players.view",
+                          "matches.history.view",
+                          "matches.diagnostics.view",
                           "monitoring.view",
                           "audit.view",
                           "admins.view",
@@ -2332,9 +2337,14 @@
                             "rooms.view",
                             "rooms.manage",
                             "rooms.approve",
+                            "rooms.players.view",
+                            "rooms.diagnostics.view",
                             "matches.view",
                             "matches.manage",
                             "matches.approve",
+                            "matches.players.view",
+                            "matches.history.view",
+                            "matches.diagnostics.view",
                             "monitoring.view",
                             "audit.view",
                             "admins.view",
@@ -2711,9 +2721,14 @@
                                     "rooms.view",
                                     "rooms.manage",
                                     "rooms.approve",
+                                    "rooms.players.view",
+                                    "rooms.diagnostics.view",
                                     "matches.view",
                                     "matches.manage",
                                     "matches.approve",
+                                    "matches.players.view",
+                                    "matches.history.view",
+                                    "matches.diagnostics.view",
                                     "monitoring.view",
                                     "audit.view",
                                     "admins.view",
@@ -2816,9 +2831,14 @@
                                     "rooms.view",
                                     "rooms.manage",
                                     "rooms.approve",
+                                    "rooms.players.view",
+                                    "rooms.diagnostics.view",
                                     "matches.view",
                                     "matches.manage",
                                     "matches.approve",
+                                    "matches.players.view",
+                                    "matches.history.view",
+                                    "matches.diagnostics.view",
                                     "monitoring.view",
                                     "audit.view",
                                     "admins.view",
@@ -4007,9 +4027,14 @@
                                             "rooms.view",
                                             "rooms.manage",
                                             "rooms.approve",
+                                            "rooms.players.view",
+                                            "rooms.diagnostics.view",
                                             "matches.view",
                                             "matches.manage",
                                             "matches.approve",
+                                            "matches.players.view",
+                                            "matches.history.view",
+                                            "matches.diagnostics.view",
                                             "monitoring.view",
                                             "audit.view",
                                             "admins.view",
@@ -4133,9 +4158,14 @@
                                             "rooms.view",
                                             "rooms.manage",
                                             "rooms.approve",
+                                            "rooms.players.view",
+                                            "rooms.diagnostics.view",
                                             "matches.view",
                                             "matches.manage",
                                             "matches.approve",
+                                            "matches.players.view",
+                                            "matches.history.view",
+                                            "matches.diagnostics.view",
                                             "monitoring.view",
                                             "audit.view",
                                             "admins.view",
@@ -4882,9 +4912,14 @@
                                     "rooms.view",
                                     "rooms.manage",
                                     "rooms.approve",
+                                    "rooms.players.view",
+                                    "rooms.diagnostics.view",
                                     "matches.view",
                                     "matches.manage",
                                     "matches.approve",
+                                    "matches.players.view",
+                                    "matches.history.view",
+                                    "matches.diagnostics.view",
                                     "monitoring.view",
                                     "audit.view",
                                     "admins.view",
@@ -5008,9 +5043,14 @@
                                     "rooms.view",
                                     "rooms.manage",
                                     "rooms.approve",
+                                    "rooms.players.view",
+                                    "rooms.diagnostics.view",
                                     "matches.view",
                                     "matches.manage",
                                     "matches.approve",
+                                    "matches.players.view",
+                                    "matches.history.view",
+                                    "matches.diagnostics.view",
                                     "monitoring.view",
                                     "audit.view",
                                     "admins.view",
@@ -5447,9 +5487,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -5573,9 +5618,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -6317,9 +6367,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -6443,9 +6498,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -9034,9 +9094,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -9160,9 +9225,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -9936,9 +10006,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -10062,9 +10137,14 @@
                                       "rooms.view",
                                       "rooms.manage",
                                       "rooms.approve",
+                                      "rooms.players.view",
+                                      "rooms.diagnostics.view",
                                       "matches.view",
                                       "matches.manage",
                                       "matches.approve",
+                                      "matches.players.view",
+                                      "matches.history.view",
+                                      "matches.diagnostics.view",
                                       "monitoring.view",
                                       "audit.view",
                                       "admins.view",
@@ -13818,6 +13898,4393 @@
                     }
                   },
                   "required": ["schemaVersion", "items", "nextCursor", "asOf"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/games/search": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]|[1-4][0-9]|50)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^\\P{Cc}+$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["ACTIVE", "MAINTENANCE", "DISABLED"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "gameId",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "items": {
+                      "maxItems": 50,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                          },
+                          "slug": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "releaseStatus": {
+                            "type": "string",
+                            "enum": ["ACTIVE", "MAINTENANCE", "DISABLED"]
+                          },
+                          "admissionStatus": {
+                            "type": "string",
+                            "enum": ["ACTIVE", "MAINTENANCE", "DISABLED"]
+                          },
+                          "version": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2147483647
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "title",
+                          "releaseStatus",
+                          "admissionStatus",
+                          "version"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "items", "nextCursor"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/games/{id}/details": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "item": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                        },
+                        "slug": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "releaseStatus": {
+                          "type": "string",
+                          "enum": ["ACTIVE", "MAINTENANCE", "DISABLED"]
+                        },
+                        "admissionStatus": {
+                          "type": "string",
+                          "enum": ["ACTIVE", "MAINTENANCE", "DISABLED"]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2147483647
+                        },
+                        "minPlayers": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 64
+                        },
+                        "maxPlayers": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 64
+                        },
+                        "matchmakingEnabled": {
+                          "type": "boolean"
+                        },
+                        "privateRoomsEnabled": {
+                          "type": "boolean"
+                        },
+                        "chatEnabled": {
+                          "type": "boolean"
+                        },
+                        "voiceEnabled": {
+                          "type": "boolean"
+                        },
+                        "configSchemaVersion": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2147483647
+                        },
+                        "installedVersions": {
+                          "anyOf": [
+                            {
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "engineVersion": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 128
+                                  },
+                                  "stateSchemaVersion": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 2147483647
+                                  },
+                                  "rulesetVersion": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 128
+                                  }
+                                },
+                                "required": [
+                                  "engineVersion",
+                                  "stateSchemaVersion",
+                                  "rulesetVersion"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "title",
+                        "releaseStatus",
+                        "admissionStatus",
+                        "version",
+                        "minPlayers",
+                        "maxPlayers",
+                        "matchmakingEnabled",
+                        "privateRoomsEnabled",
+                        "chatEnabled",
+                        "voiceEnabled",
+                        "configSchemaVersion",
+                        "installedVersions"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "item"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/rooms/search": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]|[1-4][0-9]|50)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "gameId",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdFrom",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdTo",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "items": {
+                      "maxItems": 50,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "gameId": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
+                          },
+                          "version": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2147483647
+                          },
+                          "capacity": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 64
+                          },
+                          "hostUserId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "expiresAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "startedMatchId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "gameId",
+                          "status",
+                          "version",
+                          "capacity",
+                          "hostUserId",
+                          "createdAt",
+                          "updatedAt",
+                          "expiresAt",
+                          "startedMatchId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "items", "nextCursor"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/rooms/{id}/details": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "item": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "gameId": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["WAITING", "FULL", "STARTING", "STARTED", "CLOSED", "EXPIRED"]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2147483647
+                        },
+                        "capacity": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 64
+                        },
+                        "hostUserId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "startedMatchId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "gameId",
+                        "status",
+                        "version",
+                        "capacity",
+                        "hostUserId",
+                        "createdAt",
+                        "updatedAt",
+                        "expiresAt",
+                        "startedMatchId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "item"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/matches/search": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]|[1-4][0-9]|50)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "WAITING_FOR_PLAYERS",
+                "READY",
+                "STARTING",
+                "ACTIVE",
+                "FINISHED",
+                "TERMINATED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "gameId",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "playerId",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdFrom",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdTo",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "items": {
+                      "maxItems": 50,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "gameId": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                          },
+                          "roomId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "matchType": {
+                            "type": "string",
+                            "enum": ["PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "CREATED",
+                              "WAITING_FOR_PLAYERS",
+                              "READY",
+                              "STARTING",
+                              "ACTIVE",
+                              "FINISHED",
+                              "TERMINATED"
+                            ]
+                          },
+                          "version": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2147483647
+                          },
+                          "lastEventSeq": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2147483647
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "startedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "finishedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "pins": {
+                            "type": "object",
+                            "properties": {
+                              "engineVersion": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 128
+                              },
+                              "stateSchemaVersion": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 2147483647
+                              },
+                              "rulesetVersion": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 128
+                              }
+                            },
+                            "required": ["engineVersion", "stateSchemaVersion", "rulesetVersion"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "gameId",
+                          "roomId",
+                          "matchType",
+                          "status",
+                          "version",
+                          "lastEventSeq",
+                          "createdAt",
+                          "updatedAt",
+                          "startedAt",
+                          "finishedAt",
+                          "pins"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "items", "nextCursor"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/matches/{id}/details": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "item": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "gameId": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                        },
+                        "roomId": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "matchType": {
+                          "type": "string",
+                          "enum": ["PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "CREATED",
+                            "WAITING_FOR_PLAYERS",
+                            "READY",
+                            "STARTING",
+                            "ACTIVE",
+                            "FINISHED",
+                            "TERMINATED"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2147483647
+                        },
+                        "lastEventSeq": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2147483647
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "startedAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "finishedAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "pins": {
+                          "type": "object",
+                          "properties": {
+                            "engineVersion": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "stateSchemaVersion": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 2147483647
+                            },
+                            "rulesetVersion": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            }
+                          },
+                          "required": ["engineVersion", "stateSchemaVersion", "rulesetVersion"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "gameId",
+                        "roomId",
+                        "matchType",
+                        "status",
+                        "version",
+                        "lastEventSeq",
+                        "createdAt",
+                        "updatedAt",
+                        "startedAt",
+                        "finishedAt",
+                        "pins"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "item"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/rooms/{id}/players": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "roomId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "items": {
+                      "maxItems": 64,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "seat": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 63
+                          },
+                          "joinedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": ["userId", "seat", "joinedAt"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "roomId", "items"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/matches/{id}/players": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "matchId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "items": {
+                      "maxItems": 64,
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "userId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "seat": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 63
+                              },
+                              "joinedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "const": "REGISTERED_PLAYER"
+                              },
+                              "agentType": {
+                                "type": "string",
+                                "enum": ["HUMAN", "BOT"]
+                              },
+                              "connectionStatus": {
+                                "type": "string",
+                                "enum": ["CONNECTED", "DISCONNECTED", "REPLACED_BY_BOT"]
+                              },
+                              "connectionEpoch": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 2147483647
+                              },
+                              "readyAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "disconnectedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "disconnectDeadlineAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "replacedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "userId",
+                              "seat",
+                              "joinedAt",
+                              "kind",
+                              "agentType",
+                              "connectionStatus",
+                              "connectionEpoch",
+                              "readyAt",
+                              "disconnectedAt",
+                              "disconnectDeadlineAt",
+                              "replacedAt"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "SERVER_BOT"
+                              },
+                              "actorId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "userId": {
+                                "type": "null"
+                              },
+                              "seat": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 63
+                              },
+                              "agentType": {
+                                "type": "string",
+                                "const": "BOT"
+                              }
+                            },
+                            "required": ["kind", "actorId", "userId", "seat", "agentType"],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "matchId", "items"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/matches/{id}/history": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]|[1-4][0-9]|50)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "matchId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "items": {
+                      "maxItems": 50,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "seq": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 2147483647
+                          },
+                          "schemaVersion": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 2147483647
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "MATCH_LIFECYCLE_V1",
+                              "MATCH_INITIALIZED_V1",
+                              "MATCH_FINISHED_V1",
+                              "MATCH_FINISHED_V2",
+                              "PLAYER_DISCONNECTED_V1",
+                              "PLAYER_RECONNECTED_V1",
+                              "PLAYER_BOT_TAKEOVER_V1"
+                            ]
+                          },
+                          "actorUserId": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "seq",
+                          "schemaVersion",
+                          "type",
+                          "actorUserId",
+                          "createdAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "nextCursor": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 2147483647
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "results": {
+                      "maxItems": 64,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "placement": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "winner": {
+                            "type": ["boolean", "null"]
+                          }
+                        },
+                        "required": ["userId", "placement", "winner"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "schemaVersion",
+                    "asOf",
+                    "matchId",
+                    "items",
+                    "nextCursor",
+                    "results"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/rooms/{id}/diagnostics": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "gameId": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": ["NO_SIGNAL", "SUSPECTED", "UNKNOWN"]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "ROOM_EXPIRED",
+                        "DEADLINE_NOT_ELAPSED",
+                        "TERMINAL",
+                        "NOT_APPLICABLE",
+                        "NO_DURABLE_DEADLINE"
+                      ]
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "id", "gameId", "state", "reason"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z_]+$"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "retryable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["code", "message", "retryable"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["ok", "error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/matches/{id}/diagnostics": {
+      "get": {
+        "security": [
+          {
+            "adminCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "schemaVersion": {
+                      "type": "number",
+                      "const": 1
+                    },
+                    "asOf": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "gameId": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": ["NO_SIGNAL", "SUSPECTED", "UNKNOWN"]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "RECONNECT_OVERDUE",
+                        "DEADLINE_NOT_ELAPSED",
+                        "TERMINAL",
+                        "NOT_APPLICABLE",
+                        "NO_DURABLE_DEADLINE"
+                      ]
+                    }
+                  },
+                  "required": ["schemaVersion", "asOf", "id", "gameId", "state", "reason"],
                   "additionalProperties": false
                 }
               }

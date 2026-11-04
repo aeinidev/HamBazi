@@ -49,3 +49,4 @@ export {
   adminUserHistorySchema,
   adminPrivateNoteSchema,
 } from "./admin-users.js";
+export * from "./admin-game-management.js";
