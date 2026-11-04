@@ -144,18 +144,46 @@ try {
   };
   stage = "postgres readiness";
   let root;
+  let readinessCode = "UNKNOWN";
   for (let i = 0; i < 60; i++) {
     const c = new Client({ connectionString: url("postgres"), connectionTimeoutMillis: 1000 });
     try {
       await c.connect();
       root = c;
       break;
-    } catch {
+    } catch (error) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        /^[A-Z0-9_]{3,24}$/.test(String(error.code))
+      )
+        readinessCode = String(error.code);
       await c.end().catch(() => {});
       await new Promise((r) => setTimeout(r, 250));
     }
   }
-  if (!root) throw new Error();
+  if (!root) {
+    process.stderr.write(`ADMIN_TEST_READINESS_CODE:${readinessCode}\n`);
+    const state = await run("docker", [
+      "inspect",
+      "--format",
+      "{{.State.Status}} {{.State.ExitCode}} {{.State.OOMKilled}}",
+      name,
+    ]).catch(() => null);
+    const value = state?.stdout.trim();
+    if (
+      value &&
+      /^(created|running|paused|restarting|removing|exited|dead) -?[0-9]+ (true|false)$/.test(value)
+    )
+      process.stderr.write(`ADMIN_TEST_READINESS_STATE:${value}\n`);
+    const logs = await run("docker", ["logs", "--tail", "50", name]).catch(() => null);
+    const output = (logs?.stdout ?? "") + (logs?.stderr ?? "");
+    process.stderr.write(
+      `ADMIN_TEST_READINESS_LOG_SIGNALS:ready=${output.includes("database system is ready to accept connections")},fatal=${/FATAL|PANIC/.test(output)},noSpace=${/No space left on device/.test(output)}\n`,
+    );
+    throw new Error();
+  }
   stage = "roles and migrations";
   try {
     for (const role of [

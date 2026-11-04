@@ -1,6 +1,7 @@
 import {
   adminRoomPageSchema,
   adminRoomDetailSchema,
+  adminRoomPlayersSchema,
   type AdminRoomSearchQuery,
   type AdminRoomPage,
   type AdminRoomDetail,
@@ -133,7 +134,37 @@ export function createRoomsAdminManagementRead(database: ReturnType<typeof creat
       nextCursor: rows.length > limit ? rows[limit - 1]!.id : null,
     });
   }
+  async function players(
+    id: string,
+    games: readonly string[] | null,
+    excluded: readonly string[] = [],
+  ) {
+    return scope.snapshot(async (db) => {
+      const room = await db.room.findFirst({
+        where: {
+          id,
+          gameId: { ...(games === null ? {} : { in: [...games] }), notIn: [...excluded] },
+        },
+        select: { id: true },
+      });
+      if (!room) return null;
+      const rows = await db.roomMember.findMany({
+        where: { roomId: id },
+        orderBy: { seat: "asc" },
+        take: 65,
+        select: { userId: true, seat: true, joinedAt: true },
+      });
+      if (rows.length > 64) throw new Error("ADMIN_READ_OVERFLOW");
+      return adminRoomPlayersSchema.parse({
+        schemaVersion: 1,
+        asOf: new Date().toISOString(),
+        roomId: id,
+        items: rows.map(({ joinedAt, ...row }) => ({ ...row, joinedAt: joinedAt.toISOString() })),
+      });
+    });
+  }
   return {
+    players,
     search: (
       query: AdminRoomSearchQuery,
       games: readonly string[] | null,

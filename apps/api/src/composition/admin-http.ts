@@ -152,7 +152,7 @@ export async function createAdminHttpApplication(
     }
     if (
       request.raw.url?.includes("?") &&
-      !/^\/v1\/admin\/(users(?:\/search|\/[0-9a-f-]+\/(?:history|restrictions))?|games(?:\/search)?|rooms(?:\/search)?|matches(?:\/search)?|admins)\?/.test(
+      !/^\/v1\/admin\/(users(?:\/search|\/[0-9a-f-]+\/(?:history|restrictions))?|games(?:\/search)?|rooms(?:\/search)?|matches(?:\/search|\/[0-9a-f-]+\/history)?|admins)\?/.test(
         request.raw.url,
       )
     )

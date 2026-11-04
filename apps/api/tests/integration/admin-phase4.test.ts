@@ -34,12 +34,16 @@ import {
   adminMatchPageSchema,
   adminMatchDetailSchema,
   adminActionSchema,
+  adminRoomPlayersSchema,
+  adminMatchPlayersSchema,
+  adminMatchHistorySchema,
 } from "@hambazi/validation";
 import type {
   AdminAction,
   AdminGameSearchQuery,
   AdminRoomSearchQuery,
   AdminMatchSearchQuery,
+  AdminMatchHistoryQuery,
 } from "@hambazi/validation";
 
 if (
@@ -251,6 +255,15 @@ beforeAll(async () => {
       reads: {
         restrictionsEnabled: true,
         async management(resource, kind, id, query, gameScope, excluded) {
+          if (kind === "players" && resource !== "games")
+            return advanced[resource].players(id!, gameScope, excluded);
+          if (kind === "history" && resource === "matches")
+            return advanced.matches.history(
+              id!,
+              query as AdminMatchHistoryQuery,
+              gameScope,
+              excluded,
+            );
           if (kind === "details") return advanced[resource].detail(id!, gameScope, excluded);
           return resource === "games"
             ? advanced.games.search(query as AdminGameSearchQuery, gameScope, excluded)
@@ -481,11 +494,14 @@ describe("phase four scoped owning search and details", () => {
     );
     expect(last.items.map((r) => r.id)).toEqual(["phase-four-page-51"]);
     expect(last.nextCursor).toBeNull();
-    expect(
-      adminGamePageSchema
-        .parse((await http("games/search?search=%25&limit=50", token)).data)
-        .items.every((r) => r.title === "literal_%_page"),
-    ).toBe(true);
+    const literalPage = adminGamePageSchema.parse(
+      (await http("games/search?search=%25&limit=50", token)).data,
+    );
+    expect(literalPage.items.map((r) => r.id)).toEqual(
+      Array.from({ length: 50 }, (_, i) => `phase-four-page-${String(i + 1).padStart(2, "0")}`),
+    );
+    expect(literalPage.items.map((r) => r.title)).toEqual(Array(50).fill("literal_%_page"));
+    expect(literalPage.nextCursor).toBe("phase-four-page-50");
   });
   it.each(["rooms", "matches"] as const)("caps fifty actual %s rows", async (resource) => {
     const parser = resource === "rooms" ? adminRoomPageSchema : adminMatchPageSchema;
@@ -683,6 +699,373 @@ describe("phase four scoped owning search and details", () => {
       });
     } finally {
       await client.end();
+    }
+  });
+});
+
+const rosterRoom = "43000000-0000-4000-8000-000000000001";
+const rosterMatch = "44000000-0000-4000-8000-000000000001";
+const overflowRoom = "43000000-0000-4000-8000-000000000002";
+const overflowMatch = "44000000-0000-4000-8000-000000000002";
+const resultOverflowMatch = "44000000-0000-4000-8000-000000000003";
+const boundaryRoom = "43000000-0000-4000-8000-000000000003";
+const boundaryMatch = "44000000-0000-4000-8000-000000000004";
+const botActor = "45000000-0000-4000-8000-000000000001";
+beforeAll(async () => {
+  await root.query(
+    "INSERT INTO games(id,slug,title,min_players,max_players,status,matchmaking_enabled,private_rooms_enabled,chat_enabled,config_schema_version,config_jsonb,updated_at) VALUES('phase-four-roster','phase-four-roster','Roster',2,64,'ACTIVE',false,false,false,1,'{}',now())",
+  );
+  for (const id of [rosterRoom, overflowRoom, boundaryRoom])
+    await root.query(
+      "INSERT INTO rooms(id,game_id,host_user_id,capacity,invite_code,status,expires_at,updated_at) VALUES($1,'phase-four-roster',$2,64,$3,'WAITING','2030-01-01',now())",
+      [id, userId, "HIDDEN_" + id],
+    );
+  for (const id of [rosterMatch, overflowMatch, resultOverflowMatch, boundaryMatch])
+    await root.query(
+      "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,updated_at) VALUES($1,'phase-four-roster','PERSONAL_BOTS_V1','FINISHED','roster-engine',3,'roster-rules','{}',now())",
+      [id],
+    );
+  await root.query(
+    "INSERT INTO room_members(room_id,user_id,seat,joined_at) VALUES($1,$2,0,'2026-01-02'),($1,$3,1,'2026-01-03')",
+    [rosterRoom, userId, otherUser],
+  );
+  await root.query(
+    "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status,connection_epoch,ready_at,joined_at,disconnected_at,disconnect_deadline_at,replaced_at) VALUES($1,$2,0,'HUMAN','DISCONNECTED',4,'2026-01-02','2026-01-01','2026-01-03','2026-01-04',null),($1,$3,1,'BOT','REPLACED_BY_BOT',5,null,'2026-01-02','2026-01-03',null,'2026-01-04')",
+    [rosterMatch, userId, otherUser],
+  );
+  await root.query("INSERT INTO match_bot_seats(match_id,actor_id,seat) VALUES($1,$2,2)", [
+    rosterMatch,
+    botActor,
+  ]);
+  await root.query(
+    "INSERT INTO game_results(match_id,user_id,game_id,placement,winner,schema_version,metrics_jsonb) VALUES($1,$2,'phase-four-roster',1,true,1,'{\"secret\":\"HIDDEN_RESULT\"}')",
+    [rosterMatch, userId],
+  );
+  await root.query(
+    "INSERT INTO game_results(match_id,user_id,game_id,placement,winner,schema_version,metrics_jsonb) VALUES($1,$2,'phase-four-alpha',1,true,1,'{}')",
+    [matchIds[0], userId],
+  );
+  for (const [seq, type] of [
+    [1, "MATCH_INITIALIZED_V1"],
+    [2, "HIDDEN_CARD_DRAWN_V1"],
+    [3, "PLAYER_DISCONNECTED_V1"],
+    [4, "PLAYER_RECONNECTED_V1"],
+    [5, "PLAYER_BOT_TAKEOVER_V1"],
+    [6, "MATCH_FINISHED_V1"],
+    [7, "MATCH_FINISHED_V2"],
+    [8, "MATCH_LIFECYCLE_V1"],
+  ] as const)
+    await root.query(
+      "INSERT INTO game_events(id,match_id,seq,schema_version,type,actor_user_id,payload_jsonb,created_at) VALUES($1,$2,$3,1,$4,$5,'{\"secret\":\"HIDDEN_EVENT\"}','2026-01-03')",
+      [randomUUID(), rosterMatch, seq, type, seq === 1 ? null : userId],
+    );
+  await root.query(
+    "INSERT INTO users(id,telegram_user_id,display_name,public_handle,status,updated_at) SELECT ('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,950000000+n,'Synthetic','roster_'||n,'ACTIVE',now() FROM generate_series(1,65) n",
+  );
+  await root.query(
+    "INSERT INTO room_members(room_id,user_id,seat) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,n-1 FROM generate_series(1,65) n",
+    [overflowRoom],
+  );
+  await root.query(
+    "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,n-1,'HUMAN','CONNECTED' FROM generate_series(1,65) n",
+    [overflowMatch],
+  );
+  await root.query(
+    "INSERT INTO room_members(room_id,user_id,seat) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,n-1 FROM generate_series(1,64) n",
+    [boundaryRoom],
+  );
+  await root.query(
+    "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,n-1,'HUMAN','CONNECTED' FROM generate_series(1,64) n",
+    [boundaryMatch],
+  );
+  await root.query(
+    "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status) VALUES($1,$2,0,'HUMAN','CONNECTED')",
+    [resultOverflowMatch, userId],
+  );
+  await root.query(
+    "INSERT INTO game_results(match_id,user_id,game_id,placement,winner,schema_version,metrics_jsonb) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'phase-four-roster',1,true,1,'{}' FROM generate_series(1,65) n",
+    [resultOverflowMatch],
+  );
+
+  await root.query(
+    "INSERT INTO game_events(id,match_id,seq,schema_version,type,payload_jsonb) SELECT ('47000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,$1,n,1,'MATCH_LIFECYCLE_V1','{}' FROM generate_series(1,51) n",
+    [boundaryMatch],
+  );
+});
+describe("phase four private roster and history metadata", () => {
+  it("reads real RoomMember and MatchPlayer fields without inventing bot users or readiness", async () => {
+    const room = await http(`rooms/${rosterRoom}/players`, token);
+    expect(room.status).toBe(200);
+    expect(adminRoomPlayersSchema.parse(room.data).items).toEqual([
+      { userId, seat: 0, joinedAt: "2026-01-02T00:00:00.000Z" },
+      { userId: otherUser, seat: 1, joinedAt: "2026-01-03T00:00:00.000Z" },
+    ]);
+    const match = await http(`matches/${rosterMatch}/players`, token);
+    expect(match.status).toBe(200);
+    expect(adminMatchPlayersSchema.parse(match.data).items).toEqual([
+      {
+        kind: "REGISTERED_PLAYER",
+        userId,
+        seat: 0,
+        joinedAt: "2026-01-01T00:00:00.000Z",
+        agentType: "HUMAN",
+        connectionStatus: "DISCONNECTED",
+        connectionEpoch: 4,
+        readyAt: "2026-01-02T00:00:00.000Z",
+        disconnectedAt: "2026-01-03T00:00:00.000Z",
+        disconnectDeadlineAt: "2026-01-04T00:00:00.000Z",
+        replacedAt: null,
+      },
+      {
+        kind: "REGISTERED_PLAYER",
+        userId: otherUser,
+        seat: 1,
+        joinedAt: "2026-01-02T00:00:00.000Z",
+        agentType: "BOT",
+        connectionStatus: "REPLACED_BY_BOT",
+        connectionEpoch: 5,
+        readyAt: null,
+        disconnectedAt: "2026-01-03T00:00:00.000Z",
+        disconnectDeadlineAt: null,
+        replacedAt: "2026-01-04T00:00:00.000Z",
+      },
+      { kind: "SERVER_BOT", actorId: botActor, userId: null, seat: 2, agentType: "BOT" },
+    ]);
+    expect(
+      adminMatchDetailSchema.parse((await http(`matches/${rosterMatch}/details`, token)).data).item
+        .roomId,
+    ).toBeNull();
+    expect(match.text + room.text).not.toMatch(
+      /HIDDEN|payload|stateJsonb|invite|telegram|displayName/,
+    );
+  });
+  it("paginates only allowlisted event metadata by exclusive seq and shows durable registered results", async () => {
+    const response = await http(`matches/${rosterMatch}/history?limit=2`, token);
+    expect(response.status).toBe(200);
+    const first = adminMatchHistorySchema.parse(response.data);
+    expect(first.items.map((e) => [e.seq, e.type, e.actorUserId])).toEqual([
+      [1, "MATCH_INITIALIZED_V1", null],
+      [3, "PLAYER_DISCONNECTED_V1", userId],
+    ]);
+    expect(first.nextCursor).toBe(3);
+    expect(first.results).toEqual([
+      { userId, placement: 1, winner: true },
+      { userId: otherUser, placement: null, winner: null },
+    ]);
+    const second = adminMatchHistorySchema.parse(
+      (await http(`matches/${rosterMatch}/history?limit=2&cursor=3`, token)).data,
+    );
+    expect(second.items.map((e) => e.seq)).toEqual([4, 5]);
+    expect(second.nextCursor).toBe(5);
+    const last = adminMatchHistorySchema.parse(
+      (await http(`matches/${rosterMatch}/history?cursor=5&limit=50`, token)).data,
+    );
+    expect(last.items.map((e) => e.seq)).toEqual([6, 7, 8]);
+    expect(last.nextCursor).toBeNull();
+    expect(response.text).not.toMatch(/HIDDEN|payload|metrics|stateJsonb/);
+    expect(
+      adminMatchHistorySchema.parse((await http(`matches/${matchIds[0]}/history`, token)).data)
+        .results,
+    ).toEqual([{ userId, placement: null, winner: null }]);
+  });
+  it("caps an actual fifty-event page before the exclusive next sequence", async () => {
+    const first = adminMatchHistorySchema.parse(
+      (await http(`matches/${boundaryMatch}/history?limit=50`, token)).data,
+    );
+    expect(first.items).toHaveLength(50);
+    expect(first.nextCursor).toBe(50);
+    const last = adminMatchHistorySchema.parse(
+      (await http(`matches/${boundaryMatch}/history?limit=50&cursor=50`, token)).data,
+    );
+    expect(last.items.map((e) => e.seq)).toEqual([51]);
+    expect(last.nextCursor).toBeNull();
+  });
+  it("limits the actual reader to metadata columns and denies writes in each new projection", async () => {
+    const client = new Client({ connectionString: process.env.TEST_ADMIN_READER_URL! });
+    await client.connect();
+    try {
+      expect(
+        (
+          await client.query(
+            "SELECT user_id,seat,joined_at FROM room_members WHERE room_id=$1 ORDER BY seat",
+            [rosterRoom],
+          )
+        ).rows,
+      ).toHaveLength(2);
+      expect(
+        (
+          await client.query("SELECT actor_id,seat FROM match_bot_seats WHERE match_id=$1", [
+            rosterMatch,
+          ])
+        ).rows,
+      ).toEqual([{ actor_id: botActor, seat: 2 }]);
+      expect(
+        (
+          await client.query(
+            "SELECT seq,schema_version,actor_user_id,created_at FROM game_events WHERE match_id=$1",
+            [rosterMatch],
+          )
+        ).rows,
+      ).toHaveLength(8);
+      for (const sql of [
+        "SELECT metrics_jsonb FROM game_results",
+        "SELECT payload_jsonb FROM game_events",
+        "SELECT state_jsonb FROM matches",
+        "SELECT invite_code FROM rooms",
+        "UPDATE room_members SET seat=seat",
+        "UPDATE match_players SET seat=seat",
+        "UPDATE match_bot_seats SET seat=seat",
+        "UPDATE game_results SET winner=winner",
+        "UPDATE game_events SET seq=seq",
+      ])
+        await expect(client.query(sql)).rejects.toMatchObject({ code: "42501" });
+    } finally {
+      await client.end();
+    }
+  });
+  it("intersects base and fine permissions and subtracts denials before owner reads", async () => {
+    const operatorId = randomUUID();
+    const created = await execute({
+      operation: "ADMIN_CREATE",
+      targetId: operatorId,
+      expectedVersion: 0,
+      username: "phase_four_roster_reader",
+    });
+    const allPermissions = [
+      "rooms.view",
+      "rooms.players.view",
+      "matches.view",
+      "matches.players.view",
+      "matches.history.view",
+    ] as const;
+    const grant = (
+      permission: (typeof allPermissions)[number],
+      gameIds: string[] | null,
+      deny = false,
+    ) => ({ permission, environment: "test", gameIds, deny });
+    const scenarios = [
+      {
+        grants: [
+          grant("rooms.players.view", null),
+          grant("matches.players.view", null),
+          grant("matches.history.view", null),
+        ],
+        status: 403,
+      },
+      { grants: [grant("rooms.view", null), grant("matches.view", null)], status: 403 },
+      {
+        grants: [
+          grant("rooms.view", ["phase-four-alpha"]),
+          grant("rooms.players.view", ["phase-four-roster"]),
+          grant("matches.view", ["phase-four-alpha"]),
+          grant("matches.players.view", ["phase-four-roster"]),
+          grant("matches.history.view", ["phase-four-roster"]),
+        ],
+        status: 403,
+      },
+      {
+        grants: [
+          grant("rooms.view", ["phase-four-alpha", "phase-four-roster"]),
+          grant("rooms.players.view", ["phase-four-beta", "phase-four-roster"]),
+          grant("matches.view", ["phase-four-alpha", "phase-four-roster"]),
+          grant("matches.players.view", ["phase-four-beta", "phase-four-roster"]),
+          grant("matches.history.view", ["phase-four-beta", "phase-four-roster"]),
+        ],
+        status: 200,
+      },
+      {
+        grants: [
+          ...allPermissions.map((p) => grant(p, null)),
+          grant("rooms.view", ["phase-four-roster"], true),
+          grant("matches.view", ["phase-four-roster"], true),
+        ],
+        status: 403,
+      },
+      {
+        grants: [
+          ...allPermissions.map((p) => grant(p, null)),
+          grant("rooms.players.view", ["phase-four-roster"], true),
+          grant("matches.players.view", ["phase-four-roster"], true),
+          grant("matches.history.view", ["phase-four-roster"], true),
+        ],
+        status: 403,
+      },
+    ];
+    let previousSession: string | undefined;
+    for (let i = 0; i < scenarios.length; i++) {
+      const scenario = scenarios[i]!;
+      await execute({
+        operation: "ADMIN_ACCESS",
+        targetId: operatorId,
+        expectedVersion: i + 1,
+        roleIds: [],
+        grants: scenario.grants,
+      });
+      if (previousSession)
+        expect((await http(`matches/${rosterMatch}/history`, previousSession)).status).toBe(
+          scenario.status,
+        );
+      const signedIn = await module.service.login({
+        schemaVersion: 1,
+        commandId: randomUUID(),
+        username: "phase_four_roster_reader",
+        password: created.generatedPassword,
+      });
+      previousSession = signedIn.token;
+      for (const path of [
+        `rooms/${rosterRoom}/players`,
+        `matches/${rosterMatch}/players`,
+        `matches/${rosterMatch}/history?limit=1`,
+      ])
+        expect((await http(path, signedIn.token)).status).toBe(scenario.status);
+      for (const path of [
+        `rooms/${roomIds[0]}/players`,
+        `matches/${matchIds[0]}/players`,
+        `matches/${matchIds[0]}/history`,
+      ])
+        expect((await http(path, signedIn.token)).status).toBe(
+          scenario.status === 200 || i < 3 ? 403 : 200,
+        );
+      if (scenario.status === 200) {
+        expect((await http(`matches/${matchIds[0]}/players`, signedIn.token)).status).toBe(403);
+        expect((await http(`matches/${randomUUID()}/players`, signedIn.token)).status).toBe(403);
+      }
+    }
+    token = await loginOwner();
+  }, 30000);
+  it("fails closed on roster/result overflow and rejects malformed or extra query input", async () => {
+    expect(
+      adminRoomPlayersSchema.parse((await http(`rooms/${boundaryRoom}/players`, token)).data).items,
+    ).toHaveLength(64);
+    expect(
+      adminMatchPlayersSchema.parse((await http(`matches/${boundaryMatch}/players`, token)).data)
+        .items,
+    ).toHaveLength(64);
+    expect(
+      adminMatchHistorySchema.parse((await http(`matches/${boundaryMatch}/history`, token)).data)
+        .results,
+    ).toHaveLength(64);
+    for (const path of [
+      `rooms/${overflowRoom}/players`,
+      `matches/${overflowMatch}/players`,
+      `matches/${overflowMatch}/history`,
+      `matches/${resultOverflowMatch}/history`,
+    ])
+      expect((await http(path, token)).status).toBe(503);
+    for (const query of [
+      "cursor=0",
+      "cursor=2147483648",
+      "cursor=01",
+      "limit=51",
+      "limit=0",
+      "payload=true",
+      "gameId=phase-four-alpha",
+    ])
+      expect((await http(`matches/${rosterMatch}/history?${query}`, token)).status).toBe(400);
+    for (const resource of ["rooms", "matches"]) {
+      expect((await http(`${resource}/${rosterMatch}/players?limit=1`, token)).status).toBe(400);
+      expect((await http(`${resource}/${randomUUID()}/players`, token)).status).toBe(403);
+      expect((await http(`${resource}/${rosterMatch}/players`)).status).toBe(401);
     }
   });
 });

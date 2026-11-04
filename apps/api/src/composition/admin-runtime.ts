@@ -9,6 +9,7 @@ import {
   type AdminGameSearchQuery,
   type AdminRoomSearchQuery,
   type AdminMatchSearchQuery,
+  type AdminMatchHistoryQuery,
 } from "@hambazi/validation";
 import { createAdminCrypto, createAdminModule, type AdminReadPort } from "../admin/index.js";
 import { createRedisAuthRateLimiter } from "../auth/index.js";
@@ -141,6 +142,10 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     const reads: AdminReadPort = {
       restrictionsEnabled: config.restrictionsEnabled,
       async management(resource, kind, id, query, games, excluded) {
+        if (kind === "players" && resource !== "games")
+          return advanced[resource].players(id!, games, excluded);
+        if (kind === "history" && resource === "matches")
+          return advanced.matches.history(id!, query as AdminMatchHistoryQuery, games, excluded);
         if (kind === "details") return advanced[resource].detail(id!, games, excluded);
         return resource === "games"
           ? advanced.games.search(query as AdminGameSearchQuery, games, excluded)

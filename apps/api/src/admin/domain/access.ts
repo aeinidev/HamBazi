@@ -39,6 +39,22 @@ export function adminGameScope(
 export function adminReadScope(
   principal: AdminPrincipal,
   permission: string,
+  ...required: readonly string[]
+): { games: readonly string[] | null; excluded: readonly string[] } {
+  const scopes = [permission, ...required].map((p) => permissionReadScope(principal, p));
+  const excluded = [...new Set(scopes.flatMap((s) => s.excluded))];
+  let games: readonly string[] | null = null;
+  for (const scope of scopes) {
+    if (scope.games !== null) {
+      const allowed = scope.games;
+      games = games === null ? allowed : games.filter((id) => allowed.includes(id));
+    }
+  }
+  return { games: games?.filter((id) => !excluded.includes(id)) ?? null, excluded };
+}
+function permissionReadScope(
+  principal: AdminPrincipal,
+  permission: string,
 ): { games: readonly string[] | null; excluded: readonly string[] } {
   if (!(adminCapabilities as readonly string[]).includes(permission))
     return { games: [], excluded: [] };

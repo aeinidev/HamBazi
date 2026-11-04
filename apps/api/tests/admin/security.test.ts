@@ -1,6 +1,11 @@
 import { generateKeyPairSync, randomUUID, sign } from "node:crypto";
 import { describe, it, expect } from "vitest";
-import { adminAccess, adminGameScope, type AdminPrincipal } from "../../src/admin/domain/access.js";
+import {
+  adminAccess,
+  adminGameScope,
+  adminReadScope,
+  type AdminPrincipal,
+} from "../../src/admin/domain/access.js";
 import {
   createAdminProvisioningAuthority,
   adminProvisioningStatement,
@@ -216,6 +221,74 @@ describe("OWNER and scoped entitlements", () => {
     expect(adminAccess({ ...base, isOwner: true }, "unknown.manage")).toBe(false);
     expect(adminGameScope({ ...base, isOwner: true }, "unknown.manage")).toEqual([]);
     expect(adminAccess(base, "matches.view")).toBe(false);
+  });
+  it("intersects required read grants and unions both permissions' denials", () => {
+    const principal = {
+      ...base,
+      grants: [
+        {
+          permission: "matches.view",
+          environment: "test",
+          gameIds: ["coup", "kahroba"],
+          deny: false,
+        },
+        {
+          permission: "matches.players.view",
+          environment: "test",
+          gameIds: ["kahroba", "other"],
+          deny: false,
+        },
+      ],
+    };
+    expect(adminReadScope(principal, "matches.view", "matches.players.view")).toEqual({
+      games: ["kahroba"],
+      excluded: [],
+    });
+    expect(
+      adminReadScope(
+        { ...principal, grants: principal.grants.slice(1) },
+        "matches.view",
+        "matches.players.view",
+      ),
+    ).toEqual({ games: [], excluded: [] });
+    expect(
+      adminReadScope(
+        { ...principal, grants: principal.grants.slice(0, 1) },
+        "matches.view",
+        "matches.players.view",
+      ),
+    ).toEqual({ games: [], excluded: [] });
+    const global = {
+      ...base,
+      grants: [
+        { permission: "matches.view", environment: "test", gameIds: null, deny: false },
+        { permission: "matches.players.view", environment: "test", gameIds: null, deny: false },
+        { permission: "matches.view", environment: "test", gameIds: ["coup"], deny: true },
+        {
+          permission: "matches.players.view",
+          environment: "test",
+          gameIds: ["kahroba"],
+          deny: true,
+        },
+      ],
+    };
+    expect(adminReadScope(global, "matches.view", "matches.players.view")).toEqual({
+      games: null,
+      excluded: ["coup", "kahroba"],
+    });
+    expect(
+      adminReadScope(
+        {
+          ...global,
+          grants: [
+            ...global.grants,
+            { permission: "matches.players.view", environment: "test", gameIds: null, deny: true },
+          ],
+        },
+        "matches.view",
+        "matches.players.view",
+      ).games,
+    ).toEqual([]);
   });
   it("combines matching scopes and lets individual denial dominate", () => {
     const p = {

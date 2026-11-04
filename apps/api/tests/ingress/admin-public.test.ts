@@ -379,6 +379,9 @@ describe("owned local Nginx → private TLS Admin", () => {
         "games/coup/details",
         `rooms/${id}/details`,
         `matches/${id}/details`,
+        `rooms/${id}/players`,
+        `matches/${id}/players`,
+        `matches/${id}/history?limit=5`,
         `users/${id}/profile`,
         `users/${id}/history?limit=5`,
         `users/${id}/restrictions`,
@@ -392,6 +395,9 @@ describe("owned local Nginx → private TLS Admin", () => {
         "games/coup/details",
         `rooms/${id}/details`,
         `matches/${id}/details`,
+        `rooms/${id}/players`,
+        `matches/${id}/players`,
+        `matches/${id}/history`,
         `operations/${id}/private-note`,
       ]) {
         expect((await t.send("/v1/admin/" + path, {})).status).toBe(404);

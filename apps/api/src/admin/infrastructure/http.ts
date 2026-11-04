@@ -29,6 +29,11 @@ import {
   adminGameDetailSchema,
   adminRoomDetailSchema,
   adminMatchDetailSchema,
+  adminRoomPlayersSchema,
+  adminMatchPlayersSchema,
+  adminMatchHistorySchema,
+  adminMatchHistoryQuerySchema,
+  type AdminMatchHistoryQuery,
   type AdminGameSearchQuery,
   type AdminRoomSearchQuery,
   type AdminMatchSearchQuery,
@@ -91,9 +96,10 @@ export interface AdminReadPort {
   ): Promise<unknown>;
   management?(
     resource: "games" | "rooms" | "matches",
-    kind: "search" | "details",
+    kind: "search" | "details" | "players" | "history",
     id: string | undefined,
-    query: AdminGameSearchQuery | AdminRoomSearchQuery | AdminMatchSearchQuery,
+    query:
+      AdminGameSearchQuery | AdminRoomSearchQuery | AdminMatchSearchQuery | AdminMatchHistoryQuery,
     games: readonly string[] | null,
     excluded?: readonly string[],
   ): Promise<unknown>;
@@ -403,6 +409,48 @@ export function createAdminHttpModule(deps: {
       );
       if (raw === null) throw new AdminFault("FORBIDDEN");
       return (id === undefined ? selected.page : selected.detail).parse(raw);
+    }
+    async resourceMetadata(
+      resource: "rooms" | "matches",
+      kind: "players" | "history",
+      request: FastifyRequest,
+      id: string,
+    ) {
+      const permission =
+        kind === "players" ? (`${resource}.players.view` as const) : "matches.history.view";
+      const a = await authenticated(request, `${resource}.view`);
+      const { games, excluded } = adminReadScope(a.principal, `${resource}.view`, permission);
+      if (games?.length === 0) throw new AdminFault("FORBIDDEN");
+      z.uuid().parse(id);
+      const query =
+        kind === "history"
+          ? adminMatchHistoryQuerySchema.parse(request.query)
+          : z.strictObject({}).parse(request.query);
+      if (!deps.reads.management) throw new AdminFault("ADMIN_UNAVAILABLE");
+      const raw = await deps.reads.management(resource, kind, id, query, games, excluded);
+      if (raw === null) throw new AdminFault("FORBIDDEN");
+      return (
+        kind === "history"
+          ? adminMatchHistorySchema
+          : resource === "rooms"
+            ? adminRoomPlayersSchema
+            : adminMatchPlayersSchema
+      ).parse(raw);
+    }
+    @policy("rooms.players.view")
+    @Get("rooms/:id/players")
+    roomPlayers(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceMetadata("rooms", "players", r, id);
+    }
+    @policy("matches.players.view")
+    @Get("matches/:id/players")
+    matchPlayers(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceMetadata("matches", "players", r, id);
+    }
+    @policy("matches.history.view")
+    @Get("matches/:id/history")
+    matchHistory(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceMetadata("matches", "history", r, id);
     }
     @policy("games.view")
     @Get("games/search")
