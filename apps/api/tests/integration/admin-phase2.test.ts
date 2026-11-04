@@ -30,6 +30,7 @@ import {
   createMatchesAdminOperations,
   createMatchesAdminRead,
   createMatchProcessingPort,
+  type MatchGame,
 } from "../../src/matches/index.js";
 import { createAdminHttpApplication } from "../../src/composition/admin-http.js";
 import { createAuthSessions } from "../../src/auth/index.js";
@@ -627,6 +628,147 @@ describe("phase two on owned PostgreSQL with real database roles", () => {
       writes.forModule("matches").execute((db) => db.matchAdminEffect.deleteMany({})),
     ).rejects.toThrow();
   });
+  it("arbitrates real finish commands versus Admin termination and rejects later terminal mutations", async () => {
+    const credential = new Client({ connectionString: process.env.TEST_ADMIN_OPERATIONS_URL! });
+    await credential.connect();
+    try {
+      await expect(
+        credential.query("SELECT action_id FROM processed_commands"),
+      ).rejects.toMatchObject({ code: "42501" });
+    } finally {
+      await credential.end();
+    }
+    const game: MatchGame = {
+      gameId: "kahroba",
+      descriptor: {
+        engineVersion: "finish-fixture",
+        stateSchemaVersion: 1,
+        rulesetVersion: "finish-rules",
+        commandSchemaVersion: 1,
+        eventSchemaVersion: 1,
+      },
+      initialize: () => ({}),
+      restore: (snapshot) => snapshot,
+      execute: () => ({
+        state: { finished: true },
+        events: [{ type: "SYNTHETIC_FINISH", schemaVersion: 1, payload: {} }],
+        result: {
+          winnerId: userId,
+          reason: "LAST_PLAYER",
+          placements: [
+            { playerId: userId, place: 1 },
+            { playerId: otherUser, place: 2 },
+          ],
+          metrics: {},
+        },
+      }),
+    };
+    const writer = createMatchProcessingPort(
+      player,
+      { clock, games: [game] },
+      createUserIdentityPort(player),
+    );
+    for (const mode of ["finish-first", "terminate-first", "race"]) {
+      const matchId = randomUUID();
+      await root.query(
+        "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,updated_at) VALUES($1,'kahroba','STANDARD','ACTIVE','finish-fixture',1,'finish-rules','{}',now())",
+        [matchId],
+      );
+      for (const [seat, id] of [userId, otherUser].entries())
+        await root.query(
+          "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status) VALUES($1,$2,$3,'HUMAN','CONNECTED')",
+          [matchId, id, seat],
+        );
+      const commandId = await prepare({
+        operation: "MATCH_TERMINATE",
+        targetId: matchId,
+        expectedVersion: 0,
+      });
+      const finishCommand = {
+        schemaVersion: 1,
+        actionId: randomUUID(),
+        matchId,
+        expectedVersion: 0,
+        command: { finish: true },
+      };
+      const finish = () => writer.command(userId, finishCommand);
+      const terminate = () => module.management!.execute(token, commandId);
+      const outcomes =
+        mode === "finish-first"
+          ? ([await finish(), await terminate()] as const)
+          : mode === "terminate-first"
+            ? await (async () => {
+                const admin = await terminate();
+                const settled = admin.state === "UNKNOWN" ? await terminate() : admin;
+                expect(settled.state).toBe("SUCCEEDED");
+                return [await finish(), settled] as const;
+              })()
+            : await Promise.all([finish(), terminate()]);
+      const [finished, terminated] = outcomes;
+      if (mode === "finish-first" && !finished.ok)
+        throw new Error("ADMIN_TEST_SYNTHETIC_FINISH_" + finished.error.code);
+      if (mode === "terminate-first") expect(finished.ok).toBe(false);
+      if (!finished.ok) expect(finished.error.code).toBe("GAME_STATE_CONFLICT");
+      const expectedTermination = finished.ok ? "FAILED" : "SUCCEEDED";
+      // Concurrent admission may remain UNKNOWN until the existing receipt reconciliation runs.
+      expect(["UNKNOWN", expectedTermination]).toContain(terminated.state);
+      expect((await module.management!.execute(token, commandId)).state).toBe(expectedTermination);
+      const row = (
+        await root.query(
+          "SELECT status,state_version,last_event_seq,engine_version,ruleset_version FROM matches WHERE id=$1",
+          [matchId],
+        )
+      ).rows[0]!;
+      expect(row).toMatchObject({
+        status: finished.ok ? "FINISHED" : "TERMINATED",
+        state_version: 1,
+        last_event_seq: finished.ok ? 2 : 1,
+        engine_version: "finish-fixture",
+        ruleset_version: "finish-rules",
+      });
+      expect(
+        (
+          await root.query("SELECT count(*)::int AS n FROM match_results WHERE match_id=$1", [
+            matchId,
+          ])
+        ).rows[0]!.n,
+      ).toBe(finished.ok ? 1 : 0);
+      expect(
+        (
+          await root.query("SELECT count(*)::int AS n FROM game_events WHERE match_id=$1", [
+            matchId,
+          ])
+        ).rows[0]!.n,
+      ).toBe(row.last_event_seq);
+      expect(
+        (
+          await root.query("SELECT count(*)::int AS n FROM processed_commands WHERE match_id=$1", [
+            matchId,
+          ])
+        ).rows[0]!.n,
+      ).toBe(1);
+      expect((await module.management!.execute(token, commandId)).state).toBe(expectedTermination);
+      const repeated = await execute({
+        operation: "MATCH_TERMINATE",
+        targetId: matchId,
+        expectedVersion: 1,
+      });
+      expect(repeated.state).toBe("FAILED");
+      expect(
+        (
+          await root.query("SELECT status,state_version,last_event_seq FROM matches WHERE id=$1", [
+            matchId,
+          ])
+        ).rows[0],
+      ).toEqual({ status: row.status, state_version: 1, last_event_seq: row.last_event_seq });
+      const nextFinish = await writer.command(userId, {
+        ...finishCommand,
+        actionId: randomUUID(),
+        expectedVersion: 1,
+      });
+      expect(nextFinish).toMatchObject({ ok: false, error: { code: "GAME_STATE_CONFLICT" } });
+    }
+  }, 30000);
   it("runs the built Persian UI against real TLS Backend, cookies, CSRF, OWNER_FINAL and generated credentials", async () => {
     const allocation = createServer();
     await new Promise<void>((resolve) => allocation.listen(0, "127.0.0.1", resolve));

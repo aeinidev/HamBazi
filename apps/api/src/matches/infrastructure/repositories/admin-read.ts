@@ -2,6 +2,7 @@ import {
   adminMatchPageSchema,
   adminMatchDetailSchema,
   adminMatchPlayersSchema,
+  adminMatchDiagnosticsSchema,
   adminMatchHistorySchema,
   adminMatchHistoryEventSchema,
   type AdminMatchHistoryQuery,
@@ -280,7 +281,65 @@ export function createMatchesAdminManagementRead(database: ReturnType<typeof cre
       });
     });
   }
+  async function diagnostics(
+    id: string,
+    games: readonly string[] | null,
+    excluded: readonly string[] = [],
+  ) {
+    return scope.snapshot(async (db) => {
+      const match = await db.match.findFirst({
+        where: {
+          id,
+          gameId: { ...(games === null ? {} : { in: [...games] }), notIn: [...excluded] },
+        },
+        select: { id: true, gameId: true, status: true },
+      });
+      if (!match) return null;
+      const players =
+        match.status === "ACTIVE"
+          ? await db.matchPlayer.findMany({
+              where: {
+                matchId: id,
+                agentType: "HUMAN",
+                connectionStatus: "DISCONNECTED",
+                replacedAt: null,
+              },
+              orderBy: { seat: "asc" },
+              take: 65,
+              select: { disconnectDeadlineAt: true },
+            })
+          : [];
+      if (players.length > 64) throw new Error("ADMIN_READ_OVERFLOW");
+      const at = new Date();
+      let state: "NO_SIGNAL" | "SUSPECTED" | "UNKNOWN" = "UNKNOWN";
+      let reason = "NO_DURABLE_DEADLINE";
+      if (match.status === "FINISHED" || match.status === "TERMINATED") {
+        state = "NO_SIGNAL";
+        reason = "TERMINAL";
+      } else if (
+        players.some(
+          (p) =>
+            p.disconnectDeadlineAt !== null && p.disconnectDeadlineAt.getTime() <= at.getTime(),
+        )
+      ) {
+        state = "SUSPECTED";
+        reason = "RECONNECT_OVERDUE";
+      } else if (players.length > 0 && players.every((p) => p.disconnectDeadlineAt !== null)) {
+        state = "NO_SIGNAL";
+        reason = "DEADLINE_NOT_ELAPSED";
+      }
+      return adminMatchDiagnosticsSchema.parse({
+        schemaVersion: 1,
+        asOf: at.toISOString(),
+        id: match.id,
+        gameId: match.gameId,
+        state,
+        reason,
+      });
+    });
+  }
   return {
+    diagnostics,
     players,
     history,
     search: (

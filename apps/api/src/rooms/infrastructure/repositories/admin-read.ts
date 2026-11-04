@@ -2,6 +2,7 @@ import {
   adminRoomPageSchema,
   adminRoomDetailSchema,
   adminRoomPlayersSchema,
+  adminRoomDiagnosticsSchema,
   type AdminRoomSearchQuery,
   type AdminRoomPage,
   type AdminRoomDetail,
@@ -163,7 +164,46 @@ export function createRoomsAdminManagementRead(database: ReturnType<typeof creat
       });
     });
   }
+  async function diagnostics(
+    id: string,
+    games: readonly string[] | null,
+    excluded: readonly string[] = [],
+  ) {
+    return scope.snapshot(async (db) => {
+      const room = await db.room.findFirst({
+        where: {
+          id,
+          gameId: { ...(games === null ? {} : { in: [...games] }), notIn: [...excluded] },
+        },
+        select: { id: true, gameId: true, status: true, expiresAt: true },
+      });
+      if (!room) return null;
+      const at = new Date();
+      let state: "NO_SIGNAL" | "SUSPECTED" | "UNKNOWN" = "UNKNOWN";
+      let reason = "NO_DURABLE_DEADLINE";
+      if (room.status === "CLOSED" || room.status === "EXPIRED") {
+        state = "NO_SIGNAL";
+        reason = "TERMINAL";
+      } else if (room.status === "STARTED") {
+        state = "NO_SIGNAL";
+        reason = "NOT_APPLICABLE";
+      } else if (room.status === "WAITING" || room.status === "FULL") {
+        const elapsed = room.expiresAt.getTime() <= at.getTime();
+        state = elapsed ? "SUSPECTED" : "NO_SIGNAL";
+        reason = elapsed ? "ROOM_EXPIRED" : "DEADLINE_NOT_ELAPSED";
+      }
+      return adminRoomDiagnosticsSchema.parse({
+        schemaVersion: 1,
+        asOf: at.toISOString(),
+        id: room.id,
+        gameId: room.gameId,
+        state,
+        reason,
+      });
+    });
+  }
   return {
+    diagnostics,
     players,
     search: (
       query: AdminRoomSearchQuery,

@@ -106,7 +106,8 @@ export function createMatchesAdminOperationsRepository(
             lastEventSeq: seq,
             status: "TERMINATED",
           };
-          await db.processedCommand.create({
+          // No returned command columns are needed by this writer's narrow credential.
+          await db.processedCommand.createMany({
             data: {
               matchId: a.targetId,
               actionId: op.id,
@@ -118,7 +119,6 @@ export function createMatchesAdminOperationsRepository(
               resultJsonb: ack,
               createdAt: time,
             },
-            select: { matchId: true },
           });
           await db.outboxEvent.create({
             data: {

@@ -45,10 +45,10 @@ export function createRoomsAdminOperationsRepository(
     execute(op: AdminEffectCommand) {
       const a = action(op.action);
       return scope.transaction(async (db) => {
-        await db.lockRooms();
         await db.lockAdminEffect(op.id);
         const previous = await db.roomAdminEffect.findUnique({ where: { id: op.id } });
         if (previous) return check(previous, op);
+        // Guarded UPDATE participates in the Room table lane without broader LOCK privileges.
         const changed = await db.room.updateMany({
           where: {
             id: a.targetId,

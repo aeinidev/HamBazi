@@ -142,6 +142,8 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     const reads: AdminReadPort = {
       restrictionsEnabled: config.restrictionsEnabled,
       async management(resource, kind, id, query, games, excluded) {
+        if (kind === "diagnostics" && resource !== "games")
+          return advanced[resource].diagnostics(id!, games, excluded);
         if (kind === "players" && resource !== "games")
           return advanced[resource].players(id!, games, excluded);
         if (kind === "history" && resource === "matches")

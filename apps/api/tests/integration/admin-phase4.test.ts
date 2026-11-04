@@ -37,6 +37,8 @@ import {
   adminRoomPlayersSchema,
   adminMatchPlayersSchema,
   adminMatchHistorySchema,
+  adminRoomDiagnosticsSchema,
+  adminMatchDiagnosticsSchema,
 } from "@hambazi/validation";
 import type {
   AdminAction,
@@ -255,6 +257,8 @@ beforeAll(async () => {
       reads: {
         restrictionsEnabled: true,
         async management(resource, kind, id, query, gameScope, excluded) {
+          if (kind === "diagnostics" && resource !== "games")
+            return advanced[resource].diagnostics(id!, gameScope, excluded);
           if (kind === "players" && resource !== "games")
             return advanced[resource].players(id!, gameScope, excluded);
           if (kind === "history" && resource === "matches")
@@ -1068,4 +1072,307 @@ describe("phase four private roster and history metadata", () => {
       expect((await http(`${resource}/${rosterMatch}/players`)).status).toBe(401);
     }
   });
+});
+
+describe("phase four evidence-based private diagnostics", () => {
+  it.each([
+    ["WAITING", "2000-01-01", "SUSPECTED", "ROOM_EXPIRED"],
+    ["FULL", "2000-01-01", "SUSPECTED", "ROOM_EXPIRED"],
+    ["WAITING", "2099-01-01", "NO_SIGNAL", "DEADLINE_NOT_ELAPSED"],
+    ["STARTING", "2000-01-01", "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    ["STARTED", "2000-01-01", "NO_SIGNAL", "NOT_APPLICABLE"],
+    ["CLOSED", "2000-01-01", "NO_SIGNAL", "TERMINAL"],
+    ["EXPIRED", "2000-01-01", "NO_SIGNAL", "TERMINAL"],
+  ])(
+    "diagnoses Room %s with expiry %s as %s/%s without mutation",
+    async (status, expiry, state, reason) => {
+      const id = randomUUID();
+      await root.query(
+        "INSERT INTO rooms(id,game_id,host_user_id,capacity,invite_code,status,expires_at,updated_at) VALUES($1,'phase-four-alpha',$2,2,$3,$4,$5,now())",
+        [id, userId, "HIDDEN_DIAGNOSTIC_" + id, status, expiry],
+      );
+      const response = await http(`rooms/${id}/diagnostics`, token);
+      expect(response.status).toBe(200);
+      const diagnostic = adminRoomDiagnosticsSchema.parse(response.data);
+      expect(diagnostic).toMatchObject({
+        schemaVersion: 1,
+        id,
+        gameId: "phase-four-alpha",
+        state,
+        reason,
+      });
+      expect(Math.abs(Date.now() - Date.parse(diagnostic.asOf))).toBeLessThan(10000);
+      expect(response.text).not.toMatch(/HIDDEN|invite|payload|stateJsonb/);
+      expect(
+        (await root.query("SELECT status,state_version FROM rooms WHERE id=$1", [id])).rows[0],
+      ).toEqual({ status, state_version: 0 });
+      if (["WAITING", "FULL"].includes(status!)) {
+        const closed = await execute({ operation: "ROOM_CLOSE", targetId: id, expectedVersion: 0 });
+        expect(closed.state).toBe("SUCCEEDED");
+        expect((await module.management!.execute(token, closed.commandId)).state).toBe("SUCCEEDED");
+        expect(
+          (await root.query("SELECT status,state_version FROM rooms WHERE id=$1", [id])).rows[0],
+        ).toEqual({ status: "CLOSED", state_version: 1 });
+      }
+      if (["STARTING", "STARTED", "CLOSED", "EXPIRED"].includes(status!)) {
+        const result = await execute({ operation: "ROOM_CLOSE", targetId: id, expectedVersion: 0 });
+        expect(["FAILED", "UNKNOWN"]).toContain(result.state);
+        expect((await module.management!.execute(token, result.commandId)).state).toBe("FAILED");
+      }
+    },
+    30000,
+  );
+  it.each([
+    ["ACTIVE", "DISCONNECTED", "HUMAN", "2000-01-01", null, "SUSPECTED", "RECONNECT_OVERDUE"],
+    ["ACTIVE", "DISCONNECTED", "HUMAN", "2099-01-01", null, "NO_SIGNAL", "DEADLINE_NOT_ELAPSED"],
+    ["ACTIVE", "DISCONNECTED", "HUMAN", null, null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    ["ACTIVE", "CONNECTED", "HUMAN", "2000-01-01", null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    ["ACTIVE", "DISCONNECTED", "BOT", "2000-01-01", null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    [
+      "ACTIVE",
+      "REPLACED_BY_BOT",
+      "HUMAN",
+      "2000-01-01",
+      "2000-01-02",
+      "UNKNOWN",
+      "NO_DURABLE_DEADLINE",
+    ],
+    [
+      "ACTIVE",
+      "DISCONNECTED",
+      "HUMAN",
+      "2000-01-01",
+      "2000-01-02",
+      "UNKNOWN",
+      "NO_DURABLE_DEADLINE",
+    ],
+    ["CREATED", "DISCONNECTED", "HUMAN", "2000-01-01", null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    [
+      "WAITING_FOR_PLAYERS",
+      "DISCONNECTED",
+      "HUMAN",
+      "2000-01-01",
+      null,
+      "UNKNOWN",
+      "NO_DURABLE_DEADLINE",
+    ],
+    ["READY", "DISCONNECTED", "HUMAN", "2000-01-01", null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    ["STARTING", "DISCONNECTED", "HUMAN", "2000-01-01", null, "UNKNOWN", "NO_DURABLE_DEADLINE"],
+    ["FINISHED", "DISCONNECTED", "HUMAN", "2000-01-01", null, "NO_SIGNAL", "TERMINAL"],
+    ["TERMINATED", "DISCONNECTED", "HUMAN", "2000-01-01", null, "NO_SIGNAL", "TERMINAL"],
+  ])(
+    "diagnoses Match %s/%s/%s deadline %s replaced %s as %s/%s",
+    async (status, connection, agent, deadline, replaced, state, reason) => {
+      const id = randomUUID();
+      await root.query(
+        "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,updated_at) VALUES($1,'phase-four-alpha','STANDARD',$2,'diagnostic-engine',1,'diagnostic-rules','{\"hidden\":true}',now())",
+        [id, status],
+      );
+      await root.query(
+        "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status,disconnected_at,disconnect_deadline_at,replaced_at) VALUES($1,$2,0,$3,$4,'1999-12-31',$5,$6)",
+        [id, userId, agent, connection, deadline, replaced],
+      );
+      const response = await http(`matches/${id}/diagnostics`, token);
+      expect(response.status).toBe(200);
+      expect(adminMatchDiagnosticsSchema.parse(response.data)).toMatchObject({
+        id,
+        gameId: "phase-four-alpha",
+        state,
+        reason,
+      });
+      expect(response.text).not.toMatch(/hidden|payload|stateJsonb|deadlineAt|userId/);
+      expect(
+        (
+          await root.query("SELECT status,state_version,last_event_seq FROM matches WHERE id=$1", [
+            id,
+          ])
+        ).rows[0],
+      ).toEqual({ status, state_version: 0, last_event_seq: 0 });
+      if (["FINISHED", "TERMINATED"].includes(status!)) {
+        const result = await execute({
+          operation: "MATCH_TERMINATE",
+          targetId: id,
+          expectedVersion: 0,
+        });
+        expect(["FAILED", "UNKNOWN"]).toContain(result.state);
+        expect((await module.management!.execute(token, result.commandId)).state).toBe("FAILED");
+        expect(
+          (
+            await root.query(
+              "SELECT status,state_version,last_event_seq FROM matches WHERE id=$1",
+              [id],
+            )
+          ).rows[0],
+        ).toEqual({ status, state_version: 0, last_event_seq: 0 });
+      }
+    },
+    30000,
+  );
+  it("keeps absent or incomplete live deadlines unknown and fails closed on eligible roster overflow", async () => {
+    const id = randomUUID();
+    await root.query(
+      "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,updated_at) VALUES($1,'phase-four-alpha','STANDARD','ACTIVE','diagnostic-engine',1,'diagnostic-rules','{}',now())",
+      [id],
+    );
+    const diagnostic = async () =>
+      adminMatchDiagnosticsSchema.parse((await http(`matches/${id}/diagnostics`, token)).data);
+    expect(await diagnostic()).toMatchObject({ state: "UNKNOWN", reason: "NO_DURABLE_DEADLINE" });
+    await root.query(
+      "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status,disconnect_deadline_at) VALUES($1,$2,0,'HUMAN','DISCONNECTED','2099-01-01'),($1,$3,1,'HUMAN','DISCONNECTED',null)",
+      [id, userId, otherUser],
+    );
+    expect(await diagnostic()).toMatchObject({ state: "UNKNOWN", reason: "NO_DURABLE_DEADLINE" });
+    await root.query(
+      "UPDATE match_players SET disconnect_deadline_at='2000-01-01' WHERE match_id=$1 AND user_id=$2",
+      [id, userId],
+    );
+    expect(await diagnostic()).toMatchObject({ state: "SUSPECTED", reason: "RECONNECT_OVERDUE" });
+    const bounded = randomUUID();
+    await root.query(
+      "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,updated_at) VALUES($1,'phase-four-alpha','STANDARD','ACTIVE','diagnostic-engine',1,'diagnostic-rules','{}',now())",
+      [bounded],
+    );
+    await root.query(
+      "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status,disconnect_deadline_at) SELECT $1,('46000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,n-1,'HUMAN','DISCONNECTED','2099-01-01'::timestamptz FROM generate_series(1,64) n",
+      [bounded],
+    );
+    expect(
+      adminMatchDiagnosticsSchema.parse((await http(`matches/${bounded}/diagnostics`, token)).data),
+    ).toMatchObject({ state: "NO_SIGNAL", reason: "DEADLINE_NOT_ELAPSED" });
+    await root.query(
+      "INSERT INTO match_players(match_id,user_id,seat,agent_type,connection_status,disconnect_deadline_at) VALUES($1,'46000000-0000-4000-8000-000000000065',64,'HUMAN','DISCONNECTED','2099-01-01')",
+      [bounded],
+    );
+    expect((await http(`matches/${bounded}/diagnostics`, token)).status).toBe(503);
+  });
+  it("intersects diagnostic and resource grants, applies denies, and rejects extra query or pending sessions", async () => {
+    const operatorId = randomUUID();
+    const created = await execute({
+      operation: "ADMIN_CREATE",
+      targetId: operatorId,
+      expectedVersion: 0,
+      username: "phase_four_diagnostics",
+    });
+    const permissions = [
+      "rooms.view",
+      "rooms.diagnostics.view",
+      "matches.view",
+      "matches.diagnostics.view",
+    ] as const;
+    const grant = (
+      permission: (typeof permissions)[number],
+      gameIds: string[] | null,
+      deny = false,
+    ) => ({ permission, gameIds, deny, environment: "test" });
+    const scenarios = [
+      {
+        grants: permissions
+          .filter((p) => p.endsWith("diagnostics.view"))
+          .map((p) => grant(p, null)),
+        alpha: 403,
+        beta: 403,
+      },
+      { grants: [grant("rooms.view", null), grant("matches.view", null)], alpha: 403, beta: 403 },
+      {
+        grants: permissions.map((p) =>
+          grant(p, p.endsWith("diagnostics.view") ? ["phase-four-beta"] : ["phase-four-alpha"]),
+        ),
+        alpha: 403,
+        beta: 403,
+      },
+      {
+        grants: permissions.map((p) =>
+          grant(
+            p,
+            p.endsWith("diagnostics.view")
+              ? ["phase-four-alpha", "phase-four-roster"]
+              : ["phase-four-alpha", "phase-four-beta"],
+          ),
+        ),
+        alpha: 200,
+        beta: 403,
+      },
+      {
+        grants: [
+          ...permissions.map((p) => grant(p, null)),
+          grant("rooms.view", ["phase-four-alpha"], true),
+          grant("matches.view", ["phase-four-alpha"], true),
+        ],
+        alpha: 403,
+        beta: 200,
+      },
+      {
+        grants: [
+          ...permissions.map((p) => grant(p, null)),
+          grant("rooms.diagnostics.view", ["phase-four-alpha"], true),
+          grant("matches.diagnostics.view", ["phase-four-alpha"], true),
+        ],
+        alpha: 403,
+        beta: 200,
+      },
+      {
+        grants: [
+          ...permissions.map((p) => grant(p, null)),
+          grant("rooms.diagnostics.view", null, true),
+          grant("matches.diagnostics.view", null, true),
+        ],
+        alpha: 403,
+        beta: 403,
+      },
+    ];
+    let previousSession: string | undefined;
+    for (const [i, scenario] of scenarios.entries()) {
+      await execute({
+        operation: "ADMIN_ACCESS",
+        targetId: operatorId,
+        expectedVersion: i + 1,
+        roleIds: [],
+        grants: scenario.grants,
+      });
+      if (previousSession)
+        expect((await http(`matches/${matchIds[0]}/diagnostics`, previousSession)).status).toBe(
+          scenario.alpha,
+        );
+      previousSession = (
+        await module.service.login({
+          schemaVersion: 1,
+          commandId: randomUUID(),
+          username: "phase_four_diagnostics",
+          password: created.generatedPassword,
+        })
+      ).token;
+      for (const [resource, ids] of [
+        ["rooms", roomIds],
+        ["matches", matchIds],
+      ] as const) {
+        expect((await http(`${resource}/${ids[0]}/diagnostics`, previousSession)).status).toBe(
+          scenario.alpha,
+        );
+        expect((await http(`${resource}/${ids[2]}/diagnostics`, previousSession)).status).toBe(
+          scenario.beta,
+        );
+      }
+    }
+    token = await loginOwner();
+    const pending = await module.service.login({
+      schemaVersion: 1,
+      commandId: randomUUID(),
+      username,
+      password,
+    });
+    for (const [resource, id] of [
+      ["rooms", roomIds[0]],
+      ["matches", matchIds[0]],
+    ]) {
+      expect((await http(`${resource}/${id}/diagnostics`)).status).toBe(401);
+      expect((await http(`${resource}/${id}/diagnostics`, pending.token)).status).toBe(401);
+      expect((await http(`${resource}/${id}/diagnostics?limit=1`, token)).status).toBe(400);
+      expect((await http(`${resource}/${randomUUID()}/diagnostics`, token)).status).toBe(403);
+      expect((await http(`${resource}/not-a-uuid/diagnostics`, token)).status).toBe(400);
+      expect(
+        (await http(`${resource}/${id}/diagnostics`, token, { repair: true }, crypto.csrf(token)))
+          .status,
+      ).toBe(404);
+    }
+  }, 30000);
 });

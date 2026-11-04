@@ -32,6 +32,8 @@ import {
   adminRoomPlayersSchema,
   adminMatchPlayersSchema,
   adminMatchHistorySchema,
+  adminRoomDiagnosticsSchema,
+  adminMatchDiagnosticsSchema,
   adminMatchHistoryQuerySchema,
   type AdminMatchHistoryQuery,
   type AdminGameSearchQuery,
@@ -96,7 +98,7 @@ export interface AdminReadPort {
   ): Promise<unknown>;
   management?(
     resource: "games" | "rooms" | "matches",
-    kind: "search" | "details" | "players" | "history",
+    kind: "search" | "details" | "players" | "history" | "diagnostics",
     id: string | undefined,
     query:
       AdminGameSearchQuery | AdminRoomSearchQuery | AdminMatchSearchQuery | AdminMatchHistoryQuery,
@@ -412,12 +414,12 @@ export function createAdminHttpModule(deps: {
     }
     async resourceMetadata(
       resource: "rooms" | "matches",
-      kind: "players" | "history",
+      kind: "players" | "history" | "diagnostics",
       request: FastifyRequest,
       id: string,
     ) {
       const permission =
-        kind === "players" ? (`${resource}.players.view` as const) : "matches.history.view";
+        kind === "history" ? "matches.history.view" : (`${resource}.${kind}.view` as const);
       const a = await authenticated(request, `${resource}.view`);
       const { games, excluded } = adminReadScope(a.principal, `${resource}.view`, permission);
       if (games?.length === 0) throw new AdminFault("FORBIDDEN");
@@ -432,10 +434,24 @@ export function createAdminHttpModule(deps: {
       return (
         kind === "history"
           ? adminMatchHistorySchema
-          : resource === "rooms"
-            ? adminRoomPlayersSchema
-            : adminMatchPlayersSchema
+          : kind === "diagnostics"
+            ? resource === "rooms"
+              ? adminRoomDiagnosticsSchema
+              : adminMatchDiagnosticsSchema
+            : resource === "rooms"
+              ? adminRoomPlayersSchema
+              : adminMatchPlayersSchema
       ).parse(raw);
+    }
+    @policy("rooms.diagnostics.view")
+    @Get("rooms/:id/diagnostics")
+    roomDiagnostics(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceMetadata("rooms", "diagnostics", r, id);
+    }
+    @policy("matches.diagnostics.view")
+    @Get("matches/:id/diagnostics")
+    matchDiagnostics(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceMetadata("matches", "diagnostics", r, id);
     }
     @policy("rooms.players.view")
     @Get("rooms/:id/players")
