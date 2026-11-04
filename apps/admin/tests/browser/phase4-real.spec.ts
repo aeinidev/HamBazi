@@ -146,7 +146,17 @@ test("phase four searches the real game catalog", async ({ browser }) => {
       .getByRole("button", { name: "42000000-0000-4000-8000-000000000003", exact: true })
       .click();
     await expect(page.getByText("اتاق: بدون اتاق", { exact: true })).toBeVisible();
-    await expect(page.getByText(/نوع مسابقه: ناشناخته/)).toContainText("PERSONAL_BOTS_V1");
+    await expect(page.getByText("نوع مسابقه: شخصی با ربات‌ها", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "بازگشت به فهرست", exact: true }).click();
+    step = "MATCH_UNKNOWN_TYPE";
+    await page
+      .getByLabel("جستجوی مسابقه", { exact: true })
+      .fill(process.env.TEST_ADMIN_PHASE4_UNKNOWN_MATCH_ID!);
+    await page.getByRole("button", { name: "اعمال فیلتر", exact: true }).click();
+    await page
+      .getByRole("button", { name: process.env.TEST_ADMIN_PHASE4_UNKNOWN_MATCH_ID!, exact: true })
+      .click();
+    await expect(page.getByText(/نوع مسابقه: ناشناخته/)).toContainText("__proto__");
     await page.getByRole("button", { name: "بازگشت به فهرست", exact: true }).click();
     step = "MATCH_PAGINATION";
     await expect(page.getByLabel("ایجاد از (UTC، ISO 8601)", { exact: true })).toHaveValue(

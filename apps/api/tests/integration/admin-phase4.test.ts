@@ -386,22 +386,32 @@ beforeAll(async () => {
 });
 describe("phase four scoped owning search and details", () => {
   it("runs phase-four browser acceptance against the owned TLS backend", async () => {
-    const result = await promisify(execFile)(
-      "pnpm",
-      ["--filter", "@hambazi/admin", "test:browser", "phase4-real.spec.ts"],
-      {
-        env: {
-          ...process.env,
-          TEST_ADMIN_PHASE4_URL: origin,
-          TEST_ADMIN_PHASE4_USERNAME: username,
-          TEST_ADMIN_PHASE4_PASSWORD: password,
-          TEST_ADMIN_PHASE4_PIN: pin,
-        },
-        timeout: 120000,
-        maxBuffer: 2 * 1024 * 1024,
-      },
+    const unknownMatchId = randomUUID();
+    await root.query(
+      "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,created_at,updated_at) VALUES($1,'phase-four-alpha','__proto__','ACTIVE','pinned-engine',2,'pinned-rules','{}'::jsonb,'2026-01-02','2026-01-03')",
+      [unknownMatchId],
     );
-    expect(result.stdout).toContain("PHASE4_BROWSER_EXECUTED");
+    try {
+      const result = await promisify(execFile)(
+        "pnpm",
+        ["--filter", "@hambazi/admin", "test:browser", "phase4-real.spec.ts"],
+        {
+          env: {
+            ...process.env,
+            TEST_ADMIN_PHASE4_URL: origin,
+            TEST_ADMIN_PHASE4_USERNAME: username,
+            TEST_ADMIN_PHASE4_PASSWORD: password,
+            TEST_ADMIN_PHASE4_PIN: pin,
+            TEST_ADMIN_PHASE4_UNKNOWN_MATCH_ID: unknownMatchId,
+          },
+          timeout: 120000,
+          maxBuffer: 2 * 1024 * 1024,
+        },
+      );
+      expect(result.stdout).toContain("PHASE4_BROWSER_EXECUTED");
+    } finally {
+      await root.query("DELETE FROM matches WHERE id=$1", [unknownMatchId]);
+    }
   }, 130000);
   it("activates all six authenticated paths and keeps legacy rows strict", async () => {
     for (const [kind, id] of [

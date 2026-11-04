@@ -197,6 +197,8 @@ function MatchFields({ item }: { item: AdminMatchDetail["item"] }) {
           "اتاق خصوصی"
         ) : item.matchType === "MATCHMAKING" ? (
           "هم‌بازی‌یابی"
+        ) : item.matchType === "PERSONAL_BOTS_V1" ? (
+          "شخصی با ربات‌ها"
         ) : (
           <>
             ناشناخته · <bdi>{item.matchType}</bdi>
