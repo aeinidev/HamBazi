@@ -3,6 +3,8 @@ import { randomUUID, randomBytes, randomInt } from "node:crypto";
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:net";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import { createDatabase } from "@hambazi/database";
 import {
@@ -383,6 +385,24 @@ beforeAll(async () => {
   }
 });
 describe("phase four scoped owning search and details", () => {
+  it("runs phase-four browser acceptance against the owned TLS backend", async () => {
+    const result = await promisify(execFile)(
+      "pnpm",
+      ["--filter", "@hambazi/admin", "test:browser", "phase4-real.spec.ts"],
+      {
+        env: {
+          ...process.env,
+          TEST_ADMIN_PHASE4_URL: origin,
+          TEST_ADMIN_PHASE4_USERNAME: username,
+          TEST_ADMIN_PHASE4_PASSWORD: password,
+          TEST_ADMIN_PHASE4_PIN: pin,
+        },
+        timeout: 120000,
+        maxBuffer: 2 * 1024 * 1024,
+      },
+    );
+    expect(result.stdout).toContain("PHASE4_BROWSER_EXECUTED");
+  }, 130000);
   it("activates all six authenticated paths and keeps legacy rows strict", async () => {
     for (const [kind, id] of [
       ["games", "phase-four-alpha"],

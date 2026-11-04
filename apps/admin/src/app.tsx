@@ -1,3 +1,4 @@
+import { GameManagement } from "./features/game-management/index.js";
 import { UserDetail } from "./features/users/index.js";
 import { ManagementPanel, ResourceActions } from "./features/management/index.js";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
@@ -232,7 +233,7 @@ export function AdminApp() {
       setSection(allowed[0]?.[0] ?? "");
       return;
     }
-    if (section === "admins" || section === "operations") {
+    if (["admins", "operations", "games", "rooms", "matches"].includes(section)) {
       setData(null);
       setLoading(false);
       return;
@@ -495,6 +496,19 @@ export function AdminApp() {
             isOwner={access.isOwner}
             permissions={access.permissions}
             refreshed={refreshed}
+          />
+        ) : (section === "games" || section === "rooms" || section === "matches") &&
+          access &&
+          permitted ? (
+          <GameManagement
+            key={`${section}:${access.authorizationVersion}:${access.policyRevision}:${access.isOwner}:${access.permissions.join(",")}`}
+            kind={section}
+            csrf={csrf}
+            isOwner={access.isOwner}
+            permissions={access.permissions}
+            managementEnabled={managementEnabled}
+            resourceRevision={resourceRevision}
+            refreshed={inspect}
           />
         ) : loading ? (
           <p role="status">در حال دریافت اطلاعات…</p>

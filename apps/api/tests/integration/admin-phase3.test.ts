@@ -86,8 +86,10 @@ const worker = createDatabase({
 });
 let time = Date.now();
 const clock = { nowMs: () => time };
+let helperSessionTime: number | null = null;
 beforeEach(() => {
   time = Date.now();
+  helperSessionTime = null;
 });
 const realmId = "phase-three",
   username = "phase_three_owner",
@@ -123,7 +125,7 @@ async function loginOwner() {
   ).token;
 }
 async function prepare(action: AdminAction, privateNote?: string) {
-  token = await loginOwner();
+  if (helperSessionTime !== time) token = await loginOwner();
   const commandId = randomUUID();
   await module.management!.request(token, {
     schemaVersion: 1,
@@ -143,6 +145,7 @@ async function prepare(action: AdminAction, privateNote?: string) {
       confirmed: true,
     })
   ).token;
+  helperSessionTime = time;
   return commandId;
 }
 async function execute(action: AdminAction) {
