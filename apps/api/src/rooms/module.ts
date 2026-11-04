@@ -24,3 +24,5 @@ export function createRoomsAdminOperations(
 ) {
   return createRoomsAdminOperationsRepository(database, clock);
 }
+
+export { createRoomsAdminManagementRead } from "./infrastructure/repositories/admin-read.js";

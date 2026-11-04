@@ -14,3 +14,5 @@ export { roomResponseSchema } from "./infrastructure/rooms-contract.js";
 export { createRoomsAdminRead } from "./module.js";
 
 export { createRoomsAdminOperations } from "./module.js";
+
+export { createRoomsAdminManagementRead } from "./module.js";

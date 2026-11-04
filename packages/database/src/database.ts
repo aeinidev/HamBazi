@@ -66,6 +66,34 @@ type PrivateRoomMatchRow = Pick<
   | "stateSchemaVersion"
   | "rulesetVersion"
 > & { userId: string | null; seat: number | null; readyAt: Date | null };
+type AdminMatchReadQuery = {
+  id?: string;
+  cursor?: string | undefined;
+  limit: number;
+  gameId?: string | undefined;
+  status?: string | undefined;
+  search?: string | undefined;
+  playerId?: string | undefined;
+  createdFrom?: string | undefined;
+  createdTo?: string | undefined;
+};
+type AdminMatchReadRow = Pick<
+  Match,
+  | "id"
+  | "gameId"
+  | "roomId"
+  | "matchType"
+  | "status"
+  | "stateVersion"
+  | "lastEventSeq"
+  | "createdAt"
+  | "updatedAt"
+  | "startedAt"
+  | "finishedAt"
+  | "engineVersion"
+  | "stateSchemaVersion"
+  | "rulesetVersion"
+>;
 const matchIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
   ? Omit<OwnedClient<O>, "outboxEvent"> & {
@@ -79,6 +107,11 @@ export type ScopedClient<O extends DatabaseOwner> = (O extends "chat"
         lockMatch(id: string): Promise<void>;
         lockMatchPresence(id: string): Promise<MatchPresenceRow | null>;
         readPrivateRoomMatch(roomId: string): Promise<PrivateRoomMatchRow[]>;
+        readAdminMatches(
+          query: AdminMatchReadQuery,
+          games: readonly string[] | null,
+          excluded: readonly string[],
+        ): Promise<AdminMatchReadRow[]>;
       }
     : object) &
   (O extends "users" | "games" | "rooms" | "matches"
@@ -239,6 +272,46 @@ function scope<O extends DatabaseOwner>(
       : {}),
     ...(owner === "matches"
       ? {
+          async readAdminMatches(
+            query: AdminMatchReadQuery,
+            games: readonly string[] | null,
+            excluded: readonly string[],
+          ): Promise<AdminMatchReadRow[]> {
+            if (
+              !Number.isInteger(query.limit) ||
+              query.limit < 1 ||
+              query.limit > 50 ||
+              [query.id, query.cursor, query.playerId].some(
+                (id) => id !== undefined && !matchIdPattern.test(id),
+              ) ||
+              [query.createdFrom, query.createdTo].some(
+                (at) => at !== undefined && !Number.isFinite(Date.parse(at)),
+              ) ||
+              (query.createdFrom !== undefined &&
+                query.createdTo !== undefined &&
+                Date.parse(query.createdFrom) > Date.parse(query.createdTo))
+            )
+              throw new DatabaseError("DATABASE_QUERY_INVALID");
+            // Fixed Matches-owned metadata and EXISTS keep player filtering ahead of pagination.
+            return client.$queryRaw<AdminMatchReadRow[]>`
+              SELECT m.id, m.game_id AS "gameId", m.room_id AS "roomId", m.match_type AS "matchType",
+                m.status, m.state_version AS "stateVersion", m.last_event_seq AS "lastEventSeq",
+                m.created_at AS "createdAt", m.updated_at AS "updatedAt", m.started_at AS "startedAt",
+                m.finished_at AS "finishedAt", m.engine_version AS "engineVersion",
+                m.state_schema_version AS "stateSchemaVersion", m.ruleset_version AS "rulesetVersion"
+              FROM matches m
+              WHERE (${query.id ?? null}::uuid IS NULL OR m.id=${query.id ?? null}::uuid)
+                AND (${query.cursor ?? null}::uuid IS NULL OR m.id > ${query.cursor ?? null}::uuid)
+                AND (${games === null} OR m.game_id IN (SELECT jsonb_array_elements_text(${JSON.stringify(games ?? [])}::jsonb)))
+                AND m.game_id NOT IN (SELECT jsonb_array_elements_text(${JSON.stringify(excluded)}::jsonb))
+                AND (${query.gameId ?? null}::text IS NULL OR m.game_id=${query.gameId ?? null})
+                AND (${query.status ?? null}::text IS NULL OR m.status=${query.status ?? null})
+                AND (${query.search ?? null}::text IS NULL OR m.id::text=lower(${query.search ?? null}) OR m.game_id=${query.search ?? null})
+                AND (${query.playerId ?? null}::uuid IS NULL OR EXISTS (SELECT 1 FROM match_players p WHERE p.match_id=m.id AND p.user_id=${query.playerId ?? null}::uuid))
+                AND (${query.createdFrom ?? null}::timestamptz IS NULL OR m.created_at>=${query.createdFrom ?? null}::timestamptz)
+                AND (${query.createdTo ?? null}::timestamptz IS NULL OR m.created_at<=${query.createdTo ?? null}::timestamptz)
+              ORDER BY m.id ASC LIMIT ${query.limit + 1}`;
+          },
           async readPrivateRoomMatch(roomId: string): Promise<PrivateRoomMatchRow[]> {
             if (!matchIdPattern.test(roomId)) throw new DatabaseError("DATABASE_QUERY_INVALID");
             // One statement gives metadata and readiness the same MVCC snapshot without a read transaction.

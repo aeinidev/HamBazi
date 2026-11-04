@@ -13,6 +13,26 @@ const options = {
 };
 
 describe("database infrastructure boundary", () => {
+  it("bounds the fixed Admin Match projection before I/O and exposes it only to Matches", async () => {
+    const database = createDatabase(options);
+    try {
+      await database.forModule("matches").execute(async (db) => {
+        for (const limit of [0, 51, 1.5])
+          await expect(db.readAdminMatches({ limit }, null, [])).rejects.toMatchObject({
+            code: "DATABASE_QUERY_INVALID",
+          });
+        await expect(
+          db.readAdminMatches({ limit: 1, playerId: "invalid" }, null, []),
+        ).rejects.toMatchObject({ code: "DATABASE_QUERY_INVALID" });
+      });
+      for (const owner of ["admin", "rooms", "games", "users", "auth", "outbox"] as const)
+        await database.forModule(owner).execute(async (db) => {
+          expect("readAdminMatches" in db).toBe(false);
+        });
+    } finally {
+      await database.disconnect();
+    }
+  });
   it("restricts the fixed private Match projection to Matches and validates its Room identity before I/O", async () => {
     const database = createDatabase(options);
     try {

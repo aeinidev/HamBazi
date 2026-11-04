@@ -110,7 +110,8 @@ export const adminMatchRowSchema = z.strictObject({
   id,
   gameId: slug,
   roomId: id.nullable(),
-  matchType: z.enum(["PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"]),
+  // Stored metadata also includes historical producer types; it is not command authority.
+  matchType: z.string().min(1).max(64),
   status: matchStatus,
   version: counter,
   lastEventSeq: counter,

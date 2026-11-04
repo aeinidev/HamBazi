@@ -24,3 +24,5 @@ export function createGamesAdminOperations(
 ) {
   return createGamesAdminOperationsRepository(database, clock);
 }
+
+export { createGamesAdminManagementRead } from "./infrastructure/repositories/admin-read.js";

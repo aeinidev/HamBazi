@@ -15912,7 +15912,8 @@
                           },
                           "matchType": {
                             "type": "string",
-                            "enum": ["PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"]
+                            "minLength": 1,
+                            "maxLength": 64
                           },
                           "status": {
                             "type": "string",
@@ -16346,7 +16347,8 @@
                         },
                         "matchType": {
                           "type": "string",
-                          "enum": ["PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"]
+                          "minLength": 1,
+                          "maxLength": 64
                         },
                         "status": {
                           "type": "string",

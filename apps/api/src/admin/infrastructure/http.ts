@@ -20,6 +20,18 @@ import {
   adminUserRestrictionsSchema,
   adminUserHistorySchema,
   adminPrivateNoteSchema,
+  adminGameSearchQuerySchema,
+  adminRoomSearchQuerySchema,
+  adminMatchSearchQuerySchema,
+  adminGamePageSchema,
+  adminRoomPageSchema,
+  adminMatchPageSchema,
+  adminGameDetailSchema,
+  adminRoomDetailSchema,
+  adminMatchDetailSchema,
+  type AdminGameSearchQuery,
+  type AdminRoomSearchQuery,
+  type AdminMatchSearchQuery,
 } from "@hambazi/validation";
 import { adminRoleTemplates } from "../application/management.js";
 import type { AdminManagement } from "../application/management.js";
@@ -76,6 +88,14 @@ export interface AdminReadPort {
     kind: "profile" | "history" | "restrictions",
     id: string,
     query: { cursor?: string; limit: number },
+  ): Promise<unknown>;
+  management?(
+    resource: "games" | "rooms" | "matches",
+    kind: "search" | "details",
+    id: string | undefined,
+    query: AdminGameSearchQuery | AdminRoomSearchQuery | AdminMatchSearchQuery,
+    games: readonly string[] | null,
+    excluded?: readonly string[],
   ): Promise<unknown>;
   restrictionsEnabled?: boolean;
   overview(principal: AdminPrincipal): Promise<unknown>;
@@ -339,6 +359,80 @@ export function createAdminHttpModule(deps: {
         games,
         excluded,
       );
+    }
+    async resourceManagement(
+      resource: "games" | "rooms" | "matches",
+      request: FastifyRequest,
+      id?: string,
+    ) {
+      const a = await authenticated(request, `${resource}.view`);
+      const { games, excluded } = adminReadScope(a.principal, `${resource}.view`);
+      if (games?.length === 0) throw new AdminFault("FORBIDDEN");
+      const schemas = {
+        games: {
+          query: adminGameSearchQuerySchema,
+          page: adminGamePageSchema,
+          detail: adminGameDetailSchema,
+        },
+        rooms: {
+          query: adminRoomSearchQuerySchema,
+          page: adminRoomPageSchema,
+          detail: adminRoomDetailSchema,
+        },
+        matches: {
+          query: adminMatchSearchQuerySchema,
+          page: adminMatchPageSchema,
+          detail: adminMatchDetailSchema,
+        },
+      };
+      const selected = schemas[resource];
+      const query =
+        id === undefined
+          ? selected.query.parse(request.query)
+          : z.strictObject({}).parse(request.query);
+      if (id !== undefined)
+        (resource === "games" ? z.string().regex(/^[a-z][a-z0-9-]{0,63}$/) : z.uuid()).parse(id);
+      if (!deps.reads.management) throw new AdminFault("ADMIN_UNAVAILABLE");
+      const raw = await deps.reads.management(
+        resource,
+        id === undefined ? "search" : "details",
+        id,
+        query,
+        games,
+        excluded,
+      );
+      if (raw === null) throw new AdminFault("FORBIDDEN");
+      return (id === undefined ? selected.page : selected.detail).parse(raw);
+    }
+    @policy("games.view")
+    @Get("games/search")
+    searchGames(@Req() r: FastifyRequest) {
+      return this.resourceManagement("games", r);
+    }
+    @policy("rooms.view")
+    @Get("rooms/search")
+    searchRooms(@Req() r: FastifyRequest) {
+      return this.resourceManagement("rooms", r);
+    }
+    @policy("matches.view")
+    @Get("matches/search")
+    searchMatches(@Req() r: FastifyRequest) {
+      return this.resourceManagement("matches", r);
+    }
+    @policy("games.view")
+    @Get("games/:id/details")
+    gameDetails(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceManagement("games", r, id);
+    }
+    @policy("rooms.view")
+    @Get("rooms/:id/details")
+    roomDetails(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceManagement("rooms", r, id);
+    }
+    @policy("matches.view")
+    @Get("matches/:id/details")
+    matchDetails(@Req() r: FastifyRequest, @Param("id") id: string) {
+      return this.resourceManagement("matches", r, id);
     }
     @policy("users.view")
     @Get("users/search")

@@ -373,6 +373,12 @@ describe("owned local Nginx → private TLS Admin", () => {
       await t.enable();
       for (const path of [
         "users/search?search=fixture",
+        "games/search?limit=5",
+        "rooms/search?limit=5",
+        "matches/search?limit=5",
+        "games/coup/details",
+        `rooms/${id}/details`,
+        `matches/${id}/details`,
         `users/${id}/profile`,
         `users/${id}/history?limit=5`,
         `users/${id}/restrictions`,
@@ -383,6 +389,9 @@ describe("owned local Nginx → private TLS Admin", () => {
       for (const path of [
         `users/${id}/restrictions`,
         `users/${id}/ban`,
+        "games/coup/details",
+        `rooms/${id}/details`,
+        `matches/${id}/details`,
         `operations/${id}/private-note`,
       ]) {
         expect((await t.send("/v1/admin/" + path, {})).status).toBe(404);

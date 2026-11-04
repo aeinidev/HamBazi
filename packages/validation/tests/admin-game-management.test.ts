@@ -385,3 +385,21 @@ describe("strict allowlisted Admin resource projections", () => {
     ]);
   });
 });
+
+// Older durable rows predate the current producers; metadata must preserve their type.
+describe("persisted Match type compatibility", () => {
+  it.each(["STANDARD", "PRIVATE", "PRIVATE_ROOM", "MATCHMAKING", "PERSONAL_BOTS_V1"])(
+    "preserves %s without relabeling",
+    (matchType) => {
+      expect(validation.adminMatchRowSchema.parse({ ...match, matchType }).matchType).toBe(
+        matchType,
+      );
+    },
+  );
+});
+
+describe("bounded Match type metadata", () => {
+  it.each(["", "x".repeat(65)])("rejects empty or oversized persisted type", (matchType) => {
+    expect(validation.adminMatchRowSchema.safeParse({ ...match, matchType }).success).toBe(false);
+  });
+});

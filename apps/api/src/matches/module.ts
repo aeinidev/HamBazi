@@ -130,3 +130,5 @@ export function createMatchesAdminOperations(
 }
 
 export { createAdminUserHistoryRepository as createAdminUserHistory } from "./infrastructure/repositories/admin-user-history.js";
+
+export { createMatchesAdminManagementRead } from "./infrastructure/repositories/admin-read.js";

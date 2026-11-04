@@ -66,6 +66,7 @@ try {
     name,
   ]);
   volumeCreated = true;
+  stage = "postgres container";
   await run(
     "docker",
     [
@@ -102,6 +103,7 @@ try {
     `bind 0.0.0.0\nprotected-mode yes\nrequirepass ${password}\nsave ""\nappendonly no\n`,
     { mode: 0o600 },
   );
+  stage = "redis container";
   await run(
     "docker",
     [
@@ -140,6 +142,7 @@ try {
     value.pathname = "/" + databaseName;
     return value.toString();
   };
+  stage = "postgres readiness";
   let root;
   for (let i = 0; i < 60; i++) {
     const c = new Client({ connectionString: url("postgres"), connectionTimeoutMillis: 1000 });
@@ -306,6 +309,31 @@ try {
   for (const line of phaseThree.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
     process.stdout.write(line + "\n");
   process.stdout.write("ADMIN_PHASE_THREE_INTEGRATION_PASSED\n");
+  stage = "phase four integration";
+  const phaseFourGrant = new Client({ connectionString: url("postgres") });
+  await phaseFourGrant.connect();
+  try {
+    await phaseFourGrant.query(
+      await readFile(
+        new URL(
+          "../../../../packages/database/prisma/admin-phase4-permissions.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+  } finally {
+    await phaseFourGrant.end();
+  }
+
+  const phaseFour = await run(
+    "pnpm",
+    ["--filter", "@hambazi/api", "exec", "vitest", "run", "tests/integration/admin-phase4.test.ts"],
+    { env, timeout: 150000, maxBuffer: 4 * 1024 * 1024 },
+  );
+  for (const line of phaseFour.stdout.match(/Test Files[^\n]*|Tests\s+[^\n]*/g) ?? [])
+    process.stdout.write(line + "\n");
+  process.stdout.write("ADMIN_PHASE_FOUR_INTEGRATION_PASSED\n");
   stage = "owner backup restore rehearsal";
   // The restart persistence test may get a new randomly allocated host port.
   port = (
@@ -430,11 +458,15 @@ try {
   )
     process.stderr.write(`ADMIN_TEST_ERROR_CODE:${error.code}\n`);
   // Source locations/test names only, not SQL, assertion data, credential files or commands.
-  for (const line of stderr.split("\n")) {
-    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill|phase2|phase3)/.test(line))
+  const assertions =
+    error && typeof error === "object" && "stdout" in error ? String(error.stdout) : "";
+  for (const line of (stderr + "\n" + assertions).split("\n")) {
+    const statusAssertion = line.match(/AssertionError: expected [0-9]+ to be [0-9]+/);
+    if (statusAssertion) process.stderr.write(statusAssertion[0] + "\n");
+    if (/^ FAIL\s+tests\/integration\/admin-(local|owner-drill|phase2|phase3|phase4)/.test(line))
       process.stderr.write(line + "\n");
     const location = line.match(
-      /tests\/integration\/admin-(local|owner-drill|phase2|phase3).test.ts:\d+:\d+/,
+      /tests\/integration\/admin-(local|owner-drill|phase2|phase3|phase4).test.ts:\d+:\d+/,
     );
     if (location) process.stderr.write(location[0] + "\n");
     const fixed = line.match(/ADMIN_TEST_[A-Z_]+/);

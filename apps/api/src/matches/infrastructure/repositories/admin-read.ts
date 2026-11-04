@@ -1,3 +1,10 @@
+import {
+  adminMatchPageSchema,
+  adminMatchDetailSchema,
+  type AdminMatchSearchQuery,
+  type AdminMatchPage,
+  type AdminMatchDetail,
+} from "@hambazi/validation";
 import type { createDatabase } from "@hambazi/database";
 export function createMatchesAdminReadRepository(database: ReturnType<typeof createDatabase>) {
   const scope = database.forModule("matches");
@@ -65,5 +72,79 @@ export function createMatchesAdminReadRepository(database: ReturnType<typeof cre
       })),
       nextCursor: rows.length > query.limit ? rows[query.limit - 1]!.id : null,
     };
+  };
+}
+
+export function createMatchesAdminManagementRead(database: ReturnType<typeof createDatabase>) {
+  const scope = database.forModule("matches");
+  function read(
+    query: AdminMatchSearchQuery,
+    games: readonly string[] | null,
+    excluded: readonly string[],
+  ): Promise<AdminMatchPage>;
+  function read(
+    query: AdminMatchSearchQuery,
+    games: readonly string[] | null,
+    excluded: readonly string[],
+    id: string,
+  ): Promise<AdminMatchDetail | null>;
+  async function read(
+    query: AdminMatchSearchQuery,
+    games: readonly string[] | null,
+    excluded: readonly string[],
+    id?: string,
+  ) {
+    const limit = id === undefined ? (query.limit ?? 25) : 1;
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) throw new Error("ADMIN_READ_INVALID");
+    const rows = await scope.snapshot((db) =>
+      db.readAdminMatches(
+        { ...query, limit, ...(id === undefined ? {} : { id }) },
+        games,
+        excluded,
+      ),
+    );
+    const asOf = new Date().toISOString();
+    const items = rows
+      .slice(0, limit)
+      .map(
+        ({
+          stateVersion,
+          createdAt,
+          updatedAt,
+          startedAt,
+          finishedAt,
+          engineVersion,
+          stateSchemaVersion,
+          rulesetVersion,
+          ...row
+        }) => ({
+          ...row,
+          version: stateVersion,
+          createdAt: createdAt.toISOString(),
+          updatedAt: updatedAt.toISOString(),
+          startedAt: startedAt?.toISOString() ?? null,
+          finishedAt: finishedAt?.toISOString() ?? null,
+          pins: { engineVersion, stateSchemaVersion, rulesetVersion },
+        }),
+      );
+    if (id !== undefined)
+      return items[0]
+        ? adminMatchDetailSchema.parse({ schemaVersion: 1, asOf, item: items[0] })
+        : null;
+    return adminMatchPageSchema.parse({
+      schemaVersion: 1,
+      asOf,
+      items,
+      nextCursor: rows.length > limit ? rows[limit - 1]!.id : null,
+    });
+  }
+  return {
+    search: (
+      query: AdminMatchSearchQuery,
+      games: readonly string[] | null,
+      excluded: readonly string[] = [],
+    ) => read(query, games, excluded),
+    detail: (id: string, games: readonly string[] | null, excluded: readonly string[] = []) =>
+      read({}, games, excluded, id),
   };
 }

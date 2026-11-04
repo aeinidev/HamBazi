@@ -2,7 +2,14 @@ import { readFile } from "node:fs/promises";
 import { randomBytes, randomUUID } from "node:crypto";
 import { parseAdminConfig } from "@hambazi/config";
 import { createDatabase } from "@hambazi/database";
-import { adminAuditPageSchema, adminOverviewSchema, adminPageSchema } from "@hambazi/validation";
+import {
+  adminAuditPageSchema,
+  adminOverviewSchema,
+  adminPageSchema,
+  type AdminGameSearchQuery,
+  type AdminRoomSearchQuery,
+  type AdminMatchSearchQuery,
+} from "@hambazi/validation";
 import { createAdminCrypto, createAdminModule, type AdminReadPort } from "../admin/index.js";
 import { createRedisAuthRateLimiter } from "../auth/index.js";
 import {
@@ -10,14 +17,20 @@ import {
   createUsersAdminRead,
   createUsersAdminDetail,
 } from "../users/index.js";
-import { createGamesAdminOperations, createGamesAdminRead } from "../games/index.js";
+import {
+  createGamesAdminOperations,
+  createGamesAdminRead,
+  createGamesAdminManagementRead,
+} from "../games/index.js";
 import {
   createRoomsAdminOperations,
   createRoomsAdminRead,
+  createRoomsAdminManagementRead,
   createRoomDiagnostics,
 } from "../rooms/index.js";
 import {
   createMatchesAdminRead,
+  createMatchesAdminManagementRead,
   createAdminUserHistory,
   createMatchesAdminOperations,
   createMatchDiagnostics,
@@ -110,6 +123,11 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
       rooms: createRoomsAdminRead(readDatabase),
       matches: createMatchesAdminRead(readDatabase),
     };
+    const advanced = {
+      games: createGamesAdminManagementRead(readDatabase),
+      rooms: createRoomsAdminManagementRead(readDatabase),
+      matches: createMatchesAdminManagementRead(readDatabase),
+    };
     const sources = {
       matches: createMatchDiagnostics(readDatabase),
       rooms: createRoomDiagnostics(readDatabase),
@@ -122,6 +140,14 @@ export async function startAdmin(environment: Readonly<Record<string, string | u
     const history = createAdminUserHistory(readDatabase);
     const reads: AdminReadPort = {
       restrictionsEnabled: config.restrictionsEnabled,
+      async management(resource, kind, id, query, games, excluded) {
+        if (kind === "details") return advanced[resource].detail(id!, games, excluded);
+        return resource === "games"
+          ? advanced.games.search(query as AdminGameSearchQuery, games, excluded)
+          : resource === "rooms"
+            ? advanced.rooms.search(query as AdminRoomSearchQuery, games, excluded)
+            : advanced.matches.search(query as AdminMatchSearchQuery, games, excluded);
+      },
       async userDetail(kind, id, query) {
         return kind === "profile"
           ? userDetails.profile(id)
