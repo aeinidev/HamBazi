@@ -387,6 +387,32 @@ beforeAll(async () => {
 describe("phase four scoped owning search and details", () => {
   it("runs phase-four browser acceptance against the owned TLS backend", async () => {
     const unknownMatchId = randomUUID();
+    const suspectedRoomId = randomUUID();
+    await root.query(
+      "INSERT INTO rooms(id,game_id,host_user_id,capacity,invite_code,status,expires_at,updated_at) VALUES($1,'phase-four-alpha',$2,4,$3,'WAITING','2000-01-01',now())",
+      [suspectedRoomId, userId, "HIDDEN_BROWSER_" + suspectedRoomId],
+    );
+    const browserReaderId = randomUUID();
+    const browserReader = await execute({
+      operation: "ADMIN_CREATE",
+      targetId: browserReaderId,
+      expectedVersion: 0,
+      username: "phase_four_browser_reader",
+    });
+    await execute({
+      operation: "ADMIN_ACCESS",
+      targetId: browserReaderId,
+      expectedVersion: 1,
+      roleIds: [],
+      grants: (
+        ["rooms.view", "rooms.players.view", "matches.view", "matches.history.view"] as const
+      ).map((permission) => ({
+        permission,
+        environment: "test",
+        gameIds: null,
+        deny: false,
+      })),
+    });
     await root.query(
       "INSERT INTO matches(id,game_id,match_type,status,engine_version,state_schema_version,ruleset_version,state_jsonb,created_at,updated_at) VALUES($1,'phase-four-alpha','__proto__','ACTIVE','pinned-engine',2,'pinned-rules','{}'::jsonb,'2026-01-02','2026-01-03')",
       [unknownMatchId],
@@ -403,6 +429,10 @@ describe("phase four scoped owning search and details", () => {
             TEST_ADMIN_PHASE4_PASSWORD: password,
             TEST_ADMIN_PHASE4_PIN: pin,
             TEST_ADMIN_PHASE4_UNKNOWN_MATCH_ID: unknownMatchId,
+            TEST_ADMIN_PHASE4_SUSPECTED_ROOM_ID: suspectedRoomId,
+            TEST_ADMIN_PHASE4_USER_ID: userId,
+            TEST_ADMIN_PHASE4_READER_USERNAME: "phase_four_browser_reader",
+            TEST_ADMIN_PHASE4_READER_PASSWORD: browserReader.generatedPassword,
           },
           timeout: 120000,
           maxBuffer: 2 * 1024 * 1024,
@@ -411,6 +441,7 @@ describe("phase four scoped owning search and details", () => {
       expect(result.stdout).toContain("PHASE4_BROWSER_EXECUTED");
     } finally {
       await root.query("DELETE FROM matches WHERE id=$1", [unknownMatchId]);
+      await root.query("DELETE FROM rooms WHERE id=$1", [suspectedRoomId]);
     }
   }, 130000);
   it("activates all six authenticated paths and keeps legacy rows strict", async () => {

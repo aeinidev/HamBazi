@@ -501,13 +501,25 @@ export function AdminApp() {
           access &&
           permitted ? (
           <GameManagement
-            key={`${section}:${access.authorizationVersion}:${access.policyRevision}:${access.isOwner}:${access.permissions.join(",")}`}
+            key={`${section}:${detail}:${access.authorizationVersion}:${access.policyRevision}:${access.isOwner}:${access.permissions.join(",")}`}
             kind={section}
             csrf={csrf}
             isOwner={access.isOwner}
             permissions={access.permissions}
             managementEnabled={managementEnabled}
             resourceRevision={resourceRevision}
+            initialId={detail}
+            navigate={(kind, id) => {
+              if (!access.permissions.includes(`${kind}.view`)) return;
+              generation.current++;
+              setData(null);
+              setLoading(true);
+              setError("");
+              setSecurity(false);
+              setCursor(null);
+              setDetail(id);
+              setSection(kind);
+            }}
             refreshed={inspect}
           />
         ) : loading ? (

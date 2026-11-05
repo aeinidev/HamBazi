@@ -9,6 +9,8 @@ import {
 } from "@hambazi/validation";
 import { adminRequest } from "../../platform/http.js";
 import { ResourceActions } from "../management/index.js";
+import { ResourceSubviews, ProfileLink } from "./subviews.js";
+import { Timestamp } from "./timestamp.js";
 
 export interface ManagementProps {
   kind: "games" | "rooms" | "matches";
@@ -17,6 +19,7 @@ export interface ManagementProps {
   permissions: string[];
   managementEnabled: boolean;
   refreshed(): Promise<void>;
+  navigate(kind: "users" | "rooms" | "matches", id: string): void;
 }
 export const statusTitles: Record<string, string> = {
   ACTIVE: "فعال",
@@ -34,15 +37,6 @@ export const statusTitles: Record<string, string> = {
   FINISHED: "پایان‌یافته",
   TERMINATED: "متوقف‌شده",
 };
-export function Timestamp({ value }: { value: string | null }) {
-  return value ? (
-    <time dateTime={value}>
-      {new Date(value).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" })} · تهران (Asia/Tehran)
-    </time>
-  ) : (
-    <>ثبت نشده</>
-  );
-}
 type Detail =
   | { kind: "games"; data: AdminGameDetail }
   | { kind: "rooms"; data: AdminRoomDetail }
@@ -101,11 +95,20 @@ export function ResourceDetail(props: ManagementProps & { id: string; reload(): 
             {detail.kind === "games" ? (
               <GameFields item={detail.data.item} />
             ) : detail.kind === "rooms" ? (
-              <RoomFields item={detail.data.item} />
+              <RoomFields
+                item={detail.data.item}
+                permissions={props.permissions}
+                navigate={props.navigate}
+              />
             ) : (
-              <MatchFields item={detail.data.item} />
+              <MatchFields
+                item={detail.data.item}
+                permissions={props.permissions}
+                navigate={props.navigate}
+              />
             )}
           </div>
+          {kind !== "games" && <ResourceSubviews {...props} kind={kind} id={id} />}
           {props.managementEnabled && (
             <ResourceActions
               {...props}
@@ -159,7 +162,11 @@ function GameFields({ item }: { item: AdminGameDetail["item"] }) {
     </>
   );
 }
-function RoomFields({ item }: { item: AdminRoomDetail["item"] }) {
+function RoomFields({
+  item,
+  permissions,
+  navigate,
+}: { item: AdminRoomDetail["item"] } & Pick<ManagementProps, "permissions" | "navigate">) {
   return (
     <>
       <p>
@@ -168,9 +175,22 @@ function RoomFields({ item }: { item: AdminRoomDetail["item"] }) {
       <p>وضعیت: {statusTitles[item.status]}</p>
       <p>ظرفیت: {item.capacity}</p>
       <p>
-        میزبان: <bdi>{item.hostUserId}</bdi>
+        میزبان: <ProfileLink id={item.hostUserId} permissions={permissions} navigate={navigate} />
       </p>
-      <p>مسابقهٔ شروع‌شده: {item.startedMatchId ? <bdi>{item.startedMatchId}</bdi> : "ثبت نشده"}</p>
+      <p>
+        مسابقهٔ شروع‌شده:{" "}
+        {item.startedMatchId ? (
+          permissions.includes("matches.view") ? (
+            <button onClick={() => navigate("matches", item.startedMatchId!)}>
+              مشاهدهٔ مسابقه <bdi>{item.startedMatchId}</bdi>
+            </button>
+          ) : (
+            <bdi>{item.startedMatchId}</bdi>
+          )
+        ) : (
+          "ثبت نشده"
+        )}
+      </p>
       <p>
         ایجاد: <Timestamp value={item.createdAt} />
       </p>
@@ -183,14 +203,31 @@ function RoomFields({ item }: { item: AdminRoomDetail["item"] }) {
     </>
   );
 }
-function MatchFields({ item }: { item: AdminMatchDetail["item"] }) {
+function MatchFields({
+  item,
+  permissions,
+  navigate,
+}: { item: AdminMatchDetail["item"] } & Pick<ManagementProps, "permissions" | "navigate">) {
   return (
     <>
       <p>
         بازی: <bdi>{item.gameId}</bdi>
       </p>
       <p>وضعیت: {statusTitles[item.status]}</p>
-      <p>اتاق: {item.roomId ? <bdi>{item.roomId}</bdi> : "بدون اتاق"}</p>
+      <p>
+        اتاق:{" "}
+        {item.roomId ? (
+          permissions.includes("rooms.view") ? (
+            <button onClick={() => navigate("rooms", item.roomId!)}>
+              مشاهدهٔ اتاق <bdi>{item.roomId}</bdi>
+            </button>
+          ) : (
+            <bdi>{item.roomId}</bdi>
+          )
+        ) : (
+          "بدون اتاق"
+        )}
+      </p>
       <p>
         نوع مسابقه:{" "}
         {item.matchType === "PRIVATE_ROOM" ? (

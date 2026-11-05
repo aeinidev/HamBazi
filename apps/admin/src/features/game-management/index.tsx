@@ -11,7 +11,8 @@ import {
   type AdminMatchPage,
 } from "@hambazi/validation";
 import { adminRequest } from "../../platform/http.js";
-import { ResourceDetail, statusTitles, Timestamp, type ManagementProps } from "./details.js";
+import { ResourceDetail, statusTitles, type ManagementProps } from "./details.js";
+import { Timestamp } from "./timestamp.js";
 
 const titles = { games: "بازی", rooms: "اتاق", matches: "مسابقه" };
 const states = {
@@ -29,7 +30,9 @@ const states = {
 };
 type Page = AdminGamePage | AdminRoomPage | AdminMatchPage;
 
-export function GameManagement(props: ManagementProps & { resourceRevision: number }) {
+export function GameManagement(
+  props: ManagementProps & { resourceRevision: number; initialId: string | null },
+) {
   const { kind } = props;
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -39,7 +42,7 @@ export function GameManagement(props: ManagementProps & { resourceRevision: numb
   const [createdTo, setCreatedTo] = useState("");
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(props.initialId);
   const [revision, setRevision] = useState(0);
   const [page, setPage] = useState<{ key: string; data: Page } | null>(null);
   const [error, setError] = useState("");
