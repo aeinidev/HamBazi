@@ -93,6 +93,11 @@ export async function createAdminHttpApplication(
   const fastify = adapter.getInstance();
   let inFlight = 0;
   const admitted = new WeakSet<object>();
+  const admitting = new WeakSet<object>();
+  const aborted = new WeakSet<object>();
+  const release = (request: object) => {
+    if (admitted.delete(request)) inFlight--;
+  };
   fastify.addHook("onRequest", async (request, reply) => {
     reply.headers({
       "Cache-Control": "no-store",
@@ -137,8 +142,14 @@ export async function createAdminHttpApplication(
     inFlight++;
     admitted.add(request);
     // Durable logout must remain possible during an ephemeral limiter outage.
-    if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(clientIp)))
-      return reply.code(429).send(body("RATE_LIMITED"));
+    admitting.add(request);
+    try {
+      if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(clientIp)))
+        return reply.code(429).send(body("RATE_LIMITED"));
+    } finally {
+      admitting.delete(request);
+      if (aborted.delete(request)) release(request);
+    }
   });
   fastify.addHook("preHandler", async (request, reply) => {
     if (request.raw.url === "/v1/admin/auth/login") {
@@ -159,7 +170,11 @@ export async function createAdminHttpApplication(
       return reply.code(400).send(body("INVALID_INPUT"));
   });
   fastify.addHook("onResponse", async (request) => {
-    if (admitted.delete(request)) inFlight--;
+    release(request);
+  });
+  fastify.addHook("onRequestAbort", async (request) => {
+    if (admitting.has(request)) aborted.add(request);
+    else release(request);
   });
   const app = await NestFactory.create<NestFastifyApplication>(
     createAdminHttpModule(deps),

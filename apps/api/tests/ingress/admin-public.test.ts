@@ -41,6 +41,7 @@ async function fixture(wrongUpstreamName = false) {
   let app: Awaited<ReturnType<typeof createAdminHttpApplication>> | undefined,
     created = false;
   const observedIps: string[] = [];
+  let admissionGate: Promise<void> | undefined;
   try {
     await run("openssl", [
       "req",
@@ -87,6 +88,7 @@ async function fixture(wrongUpstreamName = false) {
         maxInFlight: 8,
         admitIp: async (ip) => {
           observedIps.push(ip);
+          await admissionGate;
           return true;
         },
         admitIdentity: async () => true,
@@ -235,6 +237,42 @@ async function fixture(wrongUpstreamName = false) {
       f,
       send,
       observedIps,
+      blockAdmissions: () => {
+        let unblock!: () => void;
+        admissionGate = new Promise<void>((resolve) => {
+          unblock = resolve;
+        });
+        return () => {
+          admissionGate = undefined;
+          unblock();
+        };
+      },
+      hold: async () => {
+        const count = observedIps.length;
+        const req = request({
+          hostname: "127.0.0.1",
+          port: backend,
+          path: "/v1/admin/auth/login",
+          method: "POST",
+          ca: cert,
+          servername: "admin-api.internal",
+          headers: {
+            host: "admin.hambazi.top",
+            origin: "https://admin.hambazi.top",
+            "content-type": "application/json",
+            "content-length": "100",
+            "x-hambazi-client-ip": "127.0.0.1",
+          },
+        });
+        req.on("error", () => {});
+        req.write("{");
+        while (observedIps.length === count) await new Promise((r) => setTimeout(r, 10));
+        return async () => {
+          const closed = new Promise<void>((r) => req.once("close", r));
+          req.destroy();
+          await closed;
+        };
+      },
       enable: () => writeFile(join(directory, "web/public-enabled"), ""),
       contain: () => writeFile(join(directory, "web/maintenance"), ""),
       close: async () => {
@@ -254,6 +292,35 @@ const command = () => ({ schemaVersion: 1, commandId: randomUUID() });
 const cookie = (reply: { headers: Record<string, unknown> }) =>
   (reply.headers["set-cookie"] as string[])[0]!.split(";")[0]!;
 describe("owned local Nginx → private TLS Admin", () => {
+  it("releases admission after aborted request bodies", async () => {
+    const t = await fixture();
+    try {
+      const release = [];
+      for (let i = 0; i < 8; i++) release.push(await t.hold());
+      const valid = () =>
+        t.send("/v1/admin/me/access", undefined, { "x-hambazi-client-ip": "127.0.0.1" }, true);
+      expect((await valid()).status).toBe(429);
+      for (const abort of release) await abort();
+      await expect.poll(async () => (await valid()).status).toBe(401);
+      const second = [];
+      for (let i = 0; i < 8; i++) second.push(await t.hold());
+      expect((await valid()).status).toBe(429);
+      for (const abort of second) await abort();
+      await expect.poll(async () => (await valid()).status).toBe(401);
+      const unblock = t.blockAdmissions();
+      try {
+        const pending = [];
+        for (let i = 0; i < 8; i++) pending.push(await t.hold());
+        for (const abort of pending) await abort();
+        expect((await valid()).status).toBe(429);
+      } finally {
+        unblock();
+      }
+      await expect.poll(async () => (await valid()).status).toBe(401);
+    } finally {
+      await t.close();
+    }
+  }, 30000);
   it("does not contact the application when the private upstream certificate hostname is wrong", async () => {
     const t = await fixture(true);
     try {
