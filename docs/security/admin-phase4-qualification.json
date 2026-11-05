@@ -1447,7 +1447,6 @@
   "remainingGates": [
     "Compatible rollback artifact retaining known writer/transport fixes: build, fresh scan and smoke/rehearsal not yet performed",
     "Passing unchanged whole CI for reviewed final source",
-    "Controller-coordinated independent final whole-change review",
     "Separately authorized live Staging identity/health/deadline/advisory/drift/grant/ingress checks",
     "Fresh encrypted full database/globals/config-key capsule, offserver same-archive hash, genuine isolated restore receipt for same final archive before cutover",
     "Live Phase3 limited-role403 and ADMIN_REVOKE_SESSIONS receipt/Audit/revoked-session QA"
@@ -1474,7 +1473,13 @@
   "evidenceLogPairCount": 60,
   "review": {
     "perTaskReviews": "Recorded in SDD progress ledger",
-    "finalIndependentReview": "PENDING_CONTROLLER",
-    "implementerSelfReview": "Scanned final documentation for source/artifact/entrypoint limits; final validation evidence is recorded separately."
+    "finalIndependentReview": "COMPLETE_NO_NEW_MATERIAL_CODE_FINDINGS_NOT_READY_TO_MERGE",
+    "implementerSelfReview": "Scanned final documentation for source/artifact/entrypoint limits; final validation evidence is recorded separately.",
+    "reviewedRange": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e..c33e060bb19ab86c07147785eb3c6559e26ceeef",
+    "finalReviewReport": "docs/security/admin-phase4-final-review.md",
+    "localImplementationCompliant": true,
+    "readyToMerge": false,
+    "qualificationCondition": "Final unchanged whole CI remains failed; no deployment approval.",
+    "retainedMinor": "History cursor OpenAPI decimal range exceeds runtime int32 limit."
   }
 }
