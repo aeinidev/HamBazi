@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { z } from "zod";
+import { z } from "zod";
 import * as validation from "../src/index.js";
 
 const id = "a9659a20-93bb-4b86-a7bc-fc64600da8f6";
@@ -98,6 +98,64 @@ describe("Admin game management queries", () => {
       false,
     );
     expect(schema("adminRoomSearchQuerySchema").safeParse({ playerId: id }).success).toBe(false);
+  });
+
+  it("documents the same positive int32 history cursor range that runtime accepts", () => {
+    const query = validation.adminMatchHistoryQuerySchema;
+    const document = z.toJSONSchema(query, { io: "input" });
+    const cursor = document.properties!.cursor as { pattern: string };
+    const pattern = new RegExp(cursor.pattern);
+    for (const value of [
+      "1",
+      "9",
+      "10",
+      "999999999",
+      "1000000000",
+      "1999999999",
+      "2000000000",
+      "2099999999",
+      "2100000000",
+      "2139999999",
+      "2140000000",
+      "2146999999",
+      "2147000000",
+      "2147399999",
+      "2147400000",
+      "2147479999",
+      "2147480000",
+      "2147482999",
+      "2147483000",
+      "2147483599",
+      "2147483600",
+      "2147483639",
+      "2147483640",
+      "2147483647",
+      "2147483648",
+      "2147483649",
+      "2147483650",
+      "2147483700",
+      "2147484000",
+      "2147490000",
+      "2147500000",
+      "2148000000",
+      "2150000000",
+      "2200000000",
+      "3000000000",
+      "9999999999",
+      "10000000000",
+      "0",
+      "01",
+      "-1",
+      "1.0",
+      "1e1",
+      "",
+      " 1",
+      "1 ",
+    ]) {
+      const accepted = /^[1-9][0-9]*$/.test(value) && Number(value) <= 2147483647;
+      expect(query.safeParse({ cursor: value }).success, value).toBe(accepted);
+      expect(pattern.test(value), `documented cursor ${value}`).toBe(accepted);
+    }
   });
 
   it("uses bounded positive event sequences rather than resource cursors for history", () => {

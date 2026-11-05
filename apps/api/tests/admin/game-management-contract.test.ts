@@ -69,10 +69,12 @@ describe("Admin game management OpenAPI", () => {
     expect(operation.get.parameters[0]).toMatchObject({ in: "path", name: "id" });
     if (path.endsWith("/history")) {
       expect(operation.get.parameters.map((p) => p.name)).toEqual(["id", "cursor", "limit"]);
-      expect(operation.get.parameters[1]!.schema).toMatchObject({
-        type: "string",
-        pattern: "^[1-9][0-9]{0,9}$",
-      });
+      const cursor = operation.get.parameters[1]!.schema;
+      expect(cursor).toMatchObject({ type: "string" });
+      const pattern = new RegExp(cursor.pattern as string);
+      for (const value of ["1", "2147483647"]) expect(pattern.test(value)).toBe(true);
+      for (const value of ["0", "01", "2147483648", "9999999999"])
+        expect(pattern.test(value)).toBe(false);
     }
     const result = operation.get.responses["200"]!.content["application/json"]!.schema;
     expect(result.additionalProperties).toBe(false);
