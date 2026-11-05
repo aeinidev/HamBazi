@@ -1,614 +1,314 @@
 {
   "schemaVersion": 1,
   "kind": "admin-phase4-local-qualification",
-  "recordedAtUtc": "2026-11-05T13:12:08.597913+00:00",
-  "status": "NO_GO",
-  "automatedChecksPassed": false,
+  "recordedAtUtc": "2026-11-05T22:12:36.920389+00:00",
+  "status": "LOCAL_CHECKS_PASSED_HISTORICAL_CAUSE_UNRESOLVED",
+  "automatedChecksPassed": true,
   "productionReady": false,
   "deploymentAuthorized": false,
+  "requestedHistoricalRootCauseResolved": false,
   "source": {
-    "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
+    "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+    "tree": "98de5e1791c7b4c6a5c5ef16f6e173cb48b62833",
     "fullHistory": true,
-    "clean": true,
+    "cleanAtCiEvidence": true,
     "developerEnvPresent": false,
+    "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+    "buildInputSha256": "d92f24248aa882654675c8de402d8f849871298c6d10dbca09dab1f33e17e90b",
     "migrationSqlFiles": 21,
-    "migrationDirectoryTrackedFiles": 22,
     "migrationsUnchangedFrom": "bf34fc0",
     "adminPhase4GrantSha256": "8d34f1ffa8f2e83cbb760ae07993dae66ce9705ca02bf6cc306707f84d0b7b02",
-    "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-    "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
-    "laterDocumentationCommitIsTestedCode": false
+    "laterDocumentationCommitsAreTestedRuntime": false
   },
   "execution": {
     "scope": "local synthetic disposable only",
-    "privateDirectory": "/home/mehdi/.cache/hambazi-phase4-qualification-RQhIxa",
-    "candidateDirectory": "/home/mehdi/.cache/hambazi-phase4-qualification-RQhIxa/candidate",
-    "pinnedNode": "24.22.1",
-    "pinnedPnpm": "12.4.1",
-    "pinnedDockerServer": "29.9.2",
+    "privateDirectory": "/home/mehdi/.cache/hambazi-phase4-final-fix-vetmgy4h",
+    "candidateDirectory": "/home/mehdi/.cache/hambazi-phase4-final-fix-vetmgy4h/candidate",
+    "node": "24.22.1",
+    "pnpm": "12.4.1",
+    "dockerServer": "29.9.2",
     "dockerHost": "unix:///var/run/docker.sock",
     "developerApplicationEnvironmentInherited": false,
     "globalDockerConfigurationChanged": false,
     "heavyGatesRunSerially": true,
-    "trackedCandidateModeCorrection": "Non-secret tracked files only: standard readable modes, executable bits retained; outer execution/candidate directories private. No application code or gate timeout changed for environment repairs."
+    "trackedNonsecretModes": "644/755 within a private0700 outer directory before CI"
   },
   "standardCi": {
     "entrypoint": "node infra/ci/verify.mjs",
-    "unchanged": true,
+    "sourceAndGateCommandsUnchanged": true,
+    "passed": true,
     "gateCount": 28,
-    "passed": false,
-    "attempts": [
-      {
-        "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78",
-        "evidence": "standard-ci",
-        "passedGateCount": 13,
-        "failedGate": "admin-integration",
-        "provenEnvironmentFailure": "Task-private Docker wrapper duplicate --host; direct harness exit125. Wrapper corrected only."
-      },
-      {
-        "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78",
-        "evidence": "standard-ci-fixed-wrapper",
-        "passedGateCount": 4,
-        "failedGate": "root-quality",
-        "causeEstablished": false
-      },
-      {
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "evidence": "final-standard-ci",
-        "passedGateCount": 23,
-        "failedGate": "migration-fault-release",
-        "passed": false,
-        "causeEstablished": false
-      }
-    ],
-    "postFixCandidateWholeEntrypointPassed": false,
-    "notRepeatedBlindly": "Prior forced-equivalent root check has real Kahroba model timeouts. Controller authorized exactly one final unchanged entrypoint on30eaec0 after all proven environment corrections and genuine fresh DB; no further loops after its result. No engine/workload/deadline change."
+    "passedGateCount": 28,
+    "unrunGateCount": 0,
+    "exitCode": 0,
+    "durationSeconds": 1937.28,
+    "evidence": "whole-ci-diagnostic",
+    "manifestPath": "runner/hambazi-ci-evidence/manifest.json",
+    "manifestSha256": "b2beb7e8e8c6a390a6ecebe20917167a3d68ebc284f3856220b7539f3ff8ff9a",
+    "diagnosticContext": {
+      "parentNodePreload": "capture-migration-failure.mjs",
+      "sourceSha256": "db568dc0fa489115ecad05e71abcc91f8de4ca38e926519e92866574e6ab4e72",
+      "privateObserver": true,
+      "notSetViaNodeOptions": true,
+      "notPreloadedInChildNodeProcesses": true,
+      "selectedCommands": ["pnpm check", "pnpm test:auth-http:local"],
+      "semantics": "Original execFile and original promisified promise returned; only rejection metadata observed. No substitutions, retries or gate/assertion/timeout changes.",
+      "retainedFields": [
+        "fixed stage",
+        "numeric/fixed-format process code",
+        "killed boolean",
+        "signal",
+        "constrained test source locations/timeouts",
+        "existing fixed harness stage/location lines"
+      ],
+      "successAndRejectionPreservationSelfTestPassed": true,
+      "rawCanaryExcludedBySelfTest": true,
+      "newFailureCaptured": false,
+      "uninstrumentedEntrypointRerunClaimed": false
+    }
   },
   "gates": [
     {
       "stage": "workflow-lint",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Actual unchanged entrypoint on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. The earlier attempt remains separately recorded.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "passed": true,
+      "durationMs": 10,
+      "tests": 0,
+      "browserCases": 0
     },
     {
       "stage": "secrets",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Actual unchanged entrypoint on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. The earlier attempt remains separately recorded.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "passed": true,
+      "scan": {
+        "schemaVersion": 1,
+        "kind": "secrets",
+        "status": "passed",
+        "ok": true,
+        "files": 1257,
+        "history": {
+          "ok": true,
+          "findings": 0
+        },
+        "current": {
+          "ok": true,
+          "findings": 0
+        }
+      },
+      "durationMs": 4174,
+      "tests": 0,
+      "browserCases": 0
     },
     {
       "stage": "dependencies",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Actual unchanged entrypoint on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. The earlier attempt remains separately recorded.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "compiled-public-surfaces",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Actual unchanged entrypoint on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. The earlier attempt remains separately recorded.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "root-quality",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "standard-ci-fixed-wrapper",
-        "root-check-forced-diagnostic",
-        "root-check-diagnostic",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Second actual entrypoint failed here with suppressed details. Equivalent forced diagnostic failed 5 Kahroba model cases at unchanged 5000ms (132/137); cause of suppressed failure unestablished. Cached direct check pass is not forced-gate evidence.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "contracts-check",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "contracts-generate",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "contracts-format",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "contracts-diff",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "bot-integration",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "postgres-image-build",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "redis-image-pull",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-postgres-image-pull",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["standard-ci", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. First actual entrypoint passed this gate on ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78. Contract diagnostic and infra diagnostic are additional scoped evidence, not a final-source whole-CI pass.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-integration",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["admin-postfix-diagnostic", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Current candidate: 13+10+14+40+4=81 passing cases; preserves earlier failures.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-private-node-image-pull",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["remaining-admin-private-node-image-pull", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Equivalent individual unchanged gate command on current candidate.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-private-files-and-tty",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "remaining-admin-private-files-and-tty",
-        "private-stage-diagnostic",
-        "private-mode-corrected",
-        "private-standard-modes",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Original EACCES retained; standard readable non-secret candidate modes corrected, unchanged private root-file and real PTY gate passed.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-ingress-image-pull",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["remaining-admin-ingress-image-pull", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Equivalent individual unchanged gate command on current candidate.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-ingress",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["remaining-admin-ingress", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Equivalent individual unchanged gate command on current candidate. Five cases passed, including aborted-body admission and preserved hard cap.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "admin-browser",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": ["remaining-admin-browser", "final-standard-ci"],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Equivalent individual unchanged gate command on current candidate. Seven passed; four real-backend cases skipped here and exercised only by the owned integration harness.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "images",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "remaining-images",
-        "trivy-db-diagnostic",
-        "trivy-official-ghcr",
-        "images-after-official-probe",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Prior default403 and bounded officialGHCR timeout retained. Later unchanged core scan obtained genuine fresh DB; current data-image scan passes with matching fresh metadata. No bypass or freshness exception.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "application-image-build",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "remaining-application-image-build",
-        "application-rebuild-readable",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Original four images retained. Exact API UID1000 package-manifest EACCES reproduced; unchanged build repeated from standard readable source modes into a separate inventory. Final statuses refer only to the named exact artifacts and actual results; scan freshness is independent.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "application-images",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "remaining-application-images",
-        "application-images-readable",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Original four images retained. Exact API UID1000 package-manifest EACCES reproduced; unchanged build repeated from standard readable source modes into a separate inventory. Final statuses refer only to the named exact artifacts and actual results; scan freshness is independent.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "application-image-smoke",
-      "status": "PASSED_ENTRYPOINT",
-      "evidence": [
-        "remaining-application-image-smoke",
-        "application-smoke-disk",
-        "application-smoke-readable",
-        "api-image-readability",
-        "api-image-readable-green",
-        "application-smoke-final",
-        "final-standard-ci"
-      ],
-      "notes": "Final current-source unchanged entrypoint passed this gate. Original four images retained. Exact API UID1000 package-manifest EACCES reproduced; unchanged build repeated from standard readable source modes into a separate inventory. Final statuses refer only to the named exact artifacts and actual results; scan freshness is independent.",
-      "entrypointExecution": "PASSED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "migration-fault-release",
-      "status": "FAILED_ENTRYPOINT",
-      "evidence": [
-        "remaining-migration-fault-release",
-        "migration-fault-readable",
-        "final-standard-ci"
-      ],
-      "notes": "Original Redis EACCES failure retained. Exact gate passed after source mode normalization: 306 Vitest tests/22 files, 6 release browser cases; disposable logical restore reconciles45 tables/constraints/triggers/grants. Not a real-data backup receipt. Final current-source entrypoint failed here; suppressed output supplies no cause. Earlier direct passes are independent and do not override it.",
-      "entrypointExecution": "FAILED",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "stage": "ordinary-browser",
-      "status": "PASSED_DIAGNOSTIC",
-      "evidence": ["remaining-ordinary-browser"],
-      "notes": "Equivalent individual unchanged gate on current candidate; 31 passed.",
-      "entrypointExecution": "UNRUN_AFTER_FAILURE"
-    },
-    {
-      "stage": "built-sdk-browser",
-      "status": "PASSED_DIAGNOSTIC",
-      "evidence": ["remaining-built-sdk-browser"],
-      "notes": "Equivalent individual unchanged gate on current candidate; 39 passed.",
-      "entrypointExecution": "UNRUN_AFTER_FAILURE"
-    },
-    {
-      "stage": "preview-isolation",
-      "status": "PASSED_DIAGNOSTIC",
-      "evidence": ["remaining-preview-isolation"],
-      "notes": "Equivalent individual unchanged gate on current candidate; 2 passed.",
-      "entrypointExecution": "UNRUN_AFTER_FAILURE"
-    },
-    {
-      "stage": "normal-web-build",
-      "status": "PASSED_DIAGNOSTIC",
-      "evidence": ["remaining-normal-web-build"],
-      "notes": "Equivalent individual unchanged gate on current candidate; build exit0.",
-      "entrypointExecution": "UNRUN_AFTER_FAILURE"
-    }
-  ],
-  "adminBuildReceiptNote": "Initial queue-driver interruption left artifact and full build log but no observed process-exit receipt. Same manifest-verified context and identical cached final Docker build command were rerun; confirmed build/identity result and fresh final-digest scan are authoritative.",
-  "adminArtifactChecks": {
-    "build": {
-      "status": "PASSED",
-      "evidence": "admin-image-build-confirmed"
-    },
-    "scan": {
-      "status": "PASSED",
-      "evidence": "admin-image-scan-confirmed"
-    },
-    "productionTlsSmoke": {
-      "status": "PASSED",
-      "evidence": "admin-image-production-smoke"
-    },
-    "runningImageIdentityTls": {
-      "status": "PASSED",
-      "evidence": "admin-image-identity-tls"
-    }
-  },
-  "additionalChecks": {
-    "apiUnit": {
-      "evidence": "admin-fix-api-unit",
-      "passed": 1085,
-      "binding": "working tree containing eventual30eaec0 admission fix before its commit"
-    },
-    "apiTypecheck": {
-      "evidence": "admin-fix-typecheck",
-      "exitCode": 0
-    },
-    "scopedLint": {
-      "evidence": "admin-fix-lint",
-      "exitCode": 0
-    },
-    "infra": {
-      "evidence": "infra-diagnostic",
-      "files": 22,
-      "passed": 209,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    "fullBuild": {
-      "evidence": "postfix-build",
-      "successfulTasks": 14,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    "contracts": {
-      "evidence": "contract-diagnostic",
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    "abortedBodyRegression": {
-      "red": "admin-abort-red",
-      "green": "admin-abort-green",
-      "hardCap": "admin-abort-hardcap",
-      "commit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-      "proved": "Aborted partial request bodies exhausted admission permits; minimal idempotent cleanup preserves pending-admission and active hard cap.",
-      "originalBrowserFailureCauseEstablished": false
-    }
-  },
-  "security": {
-    "freshImageScansPassed": true,
-    "scannerVersion": "0.74.0",
-    "scannerSha256": "d89bcc6510a267f11b773398cbf1be5520ce39f9e8b6633178c4487f05b7d791",
-    "databaseMetadata": {
-      "Version": 2,
-      "NextUpdate": "2026-11-06T07:00:54.926777259Z",
-      "UpdatedAt": "2026-11-05T07:00:54.926777429Z",
-      "DownloadedAt": "2026-11-05T12:42:55.159104169Z"
-    },
-    "freshnessBypassUsed": false,
-    "databaseUpdateAttempts": [
-      "remaining-images",
-      "trivy-db-diagnostic",
-      "trivy-official-ghcr",
-      "application-images-readable",
-      "images-after-official-probe"
-    ],
-    "freshDatabaseObtainedBy": "application-images-readable",
-    "officialAlternativeRepository": "ghcr.io/aquasecurity/trivy-db:2",
-    "officialRepositoryDocs": "https://trivy.dev/docs/dev/configuration/db/",
-    "requiredImageCount": 7,
-    "requiredRoles": ["postgres", "redis", "api", "bot", "worker", "web", "admin"],
-    "dependencyAudit": {
-      "status": "PASSED_ENTRYPOINT",
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-      "moderate": 1,
-      "high": 0,
-      "critical": 0,
-      "advisory": "GHSA-g3hv-75wg-m249",
-      "evidence": "final-standard-ci"
-    },
-    "noNewScanException": true
-  },
-  "dataImagePins": {
-    "postgres": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
-    "redis": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403"
-  },
-  "artifacts": [
-    {
-      "path": "runner/hambazi-packaging/images.json",
-      "sha256": "18af0949611bff547f621db2d435cc75d1e1a956fd5c4a5282cf4b84dc4cf5a7",
-      "data": {
+      "passed": true,
+      "scan": {
         "schemaVersion": 1,
-        "purpose": "local-packaging-candidate",
-        "productionReleaseApproved": false,
-        "platform": "linux/amd64",
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "sourceDirty": false,
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "buildInputSha256": "a40131653d1447fb954cd2532e60ee74bc575351ada792573fa48f2a00451db8",
-        "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
-        "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
-        "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217",
-        "browserPolicy": {
-          "schemaVersion": 1,
-          "profile": "production",
-          "webOrigin": null,
-          "apiOrigin": null,
-          "frameAncestors": [],
-          "headers": {
-            "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
-            "Referrer-Policy": "no-referrer",
-            "X-Content-Type-Options": "nosniff",
-            "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-            "Cache-Control": "no-store",
-            "Strict-Transport-Security": "max-age=31536000"
-          }
-        },
-        "images": [
-          {
-            "role": "api",
-            "image": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:587fa1473eaffdca1f2c90024c71fb68c38e528dcfcf93787ba31c4bec971a96"
-          },
-          {
-            "role": "bot",
-            "image": "hambazi-candidate/bot:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:132047c945e4fd05a77051407445b9f2015a93f5cf4c27d60c59ac3884d3d3ad"
-          },
-          {
-            "role": "worker",
-            "image": "hambazi-candidate/worker:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:57f4b586e76d2e3c6548de0c353717f26c495d11c3cf239ec3bdc58b319d894a"
-          },
-          {
-            "role": "web",
-            "image": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:6fee68e6a0e85733f5e82a349cba00b4c31f8bd0606a9cf2b36c80fe8169965b"
-          }
-        ]
-      }
-    },
-    {
-      "path": "runner/hambazi-packaging-readable/images.json",
-      "sha256": "2b499b97ee2770d2f3d8835a87d5a9c9ccad01276d42db25eac7fcd2dda24203",
-      "data": {
-        "schemaVersion": 1,
-        "purpose": "local-packaging-candidate",
-        "productionReleaseApproved": false,
-        "platform": "linux/amd64",
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "sourceDirty": false,
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "buildInputSha256": "a40131653d1447fb954cd2532e60ee74bc575351ada792573fa48f2a00451db8",
-        "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
-        "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
-        "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217",
-        "browserPolicy": {
-          "schemaVersion": 1,
-          "profile": "production",
-          "webOrigin": null,
-          "apiOrigin": null,
-          "frameAncestors": [],
-          "headers": {
-            "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
-            "Referrer-Policy": "no-referrer",
-            "X-Content-Type-Options": "nosniff",
-            "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-            "Cache-Control": "no-store",
-            "Strict-Transport-Security": "max-age=31536000"
-          }
-        },
-        "images": [
-          {
-            "role": "api",
-            "image": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:e4200a02be728a413dc49d76e2da329e277ef45e85a5242bc03a73e1fa613a95"
-          },
-          {
-            "role": "bot",
-            "image": "hambazi-candidate/bot:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:9e86e87b7838c571149b16f830430f0f1bc730d35c81532ed3185593b75b9e1b"
-          },
-          {
-            "role": "worker",
-            "image": "hambazi-candidate/worker:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:0631bd875261b9de030a4316458f92f09730990ae69cb33d40d40e29124241e7"
-          },
-          {
-            "role": "web",
-            "image": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:ae9ad3f686aab656abf48a8973e78cc0682849244f12eaeffc4fdcf40916e08b"
-          }
-        ]
-      }
-    },
-    {
-      "path": "admin-image.json",
-      "sha256": "0c36a585c4060fac630d112a4e46a4912b7748206e099dfe23d15d555870be55",
-      "data": {
-        "schemaVersion": 1,
-        "purpose": "local-admin-phase4-candidate",
-        "productionReleaseApproved": false,
-        "image": "hambazi-candidate/admin:30eaec017dd52dd50fd611bf5f68ee875329131d-cec58191723137cf@sha256:59a0d0da75dfa9d8f1b84268e12ac61479315c2e3464b393ed7f39529cddffa0",
-        "adminSourceSha256": "cec58191723137cf6ffcb862053c561ccc5f6aad6c960e912db88f2b4ed14d0a",
-        "apiImage": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:e4200a02be728a413dc49d76e2da329e277ef45e85a5242bc03a73e1fa613a95",
-        "runtimeImage": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:ae9ad3f686aab656abf48a8973e78cc0682849244f12eaeffc4fdcf40916e08b",
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "coreInventorySha256": "2b499b97ee2770d2f3d8835a87d5a9c9ccad01276d42db25eac7fcd2dda24203"
-      }
-    },
-    {
-      "path": "admin-source-manifest.json",
-      "sha256": "d8f5504f0f1b06f513161f8f2c107a2d638c2e07d4f0e0bdaf4c59615206f684",
-      "entryCount": 22400
-    },
-    {
-      "path": "admin-exact-image.json",
-      "sha256": "6c6d2790c17ad352c752e70b19fd64b76708d89ccad30da0f40ae8ae3d3956db",
-      "data": {
-        "passed": true,
-        "checks": 43,
-        "image": "hambazi-candidate/admin:30eaec017dd52dd50fd611bf5f68ee875329131d-cec58191723137cf@sha256:59a0d0da75dfa9d8f1b84268e12ac61479315c2e3464b393ed7f39529cddffa0",
-        "actualContainerImage": "sha256:59a0d0da75dfa9d8f1b84268e12ac61479315c2e3464b393ed7f39529cddffa0",
-        "expectedImageId": "sha256:59a0d0da75dfa9d8f1b84268e12ac61479315c2e3464b393ed7f39529cddffa0",
-        "explicitLoopbackOrigin": "https://127.0.0.1:42449",
-        "actualImageIdentityMatched": true,
-        "fixtureMode": "production",
-        "databaseTLSVerifyFull": true,
-        "redisTLS": true,
-        "inboundTLSVerified": true,
-        "argon2NativeAsUid1000": true,
-        "plaintextProductionRejected": true,
-        "defaultDeny401": true,
-        "csrfOrigin403": true,
-        "realSyntheticOwnerLoginAndPendingIsolation": true,
-        "restrictionAndUnrestrictViaHttps": true,
-        "auditedPrivateNote": true,
-        "flagDisabledFallbackPreservesRestriction": true,
-        "exactImageExpiryWithInjectedFixtureClock": true,
-        "syntheticFixtureOnly": true,
-        "realOwnerTouched": false
-      }
-    },
-    {
-      "path": "admin-image.scan.json",
-      "sha256": "8c32a6184a9edfeb62d71fbed7bd4e6f3dab3e123b0f1f2b693a06c69af8c6fe",
-      "data": {
+        "kind": "dependencies",
+        "status": "passed",
         "ok": true,
-        "image": "hambazi-candidate/admin:30eaec017dd52dd50fd611bf5f68ee875329131d-cec58191723137cf@sha256:59a0d0da75dfa9d8f1b84268e12ac61479315c2e3464b393ed7f39529cddffa0",
         "counts": {
           "info": 0,
           "low": 0,
-          "moderate": 0,
+          "moderate": 1,
           "high": 0,
-          "critical": 0,
-          "unknown": 0
+          "critical": 0
         },
-        "findings": [],
+        "findings": [
+          {
+            "id": "GHSA-g3hv-75wg-m249",
+            "package": "minimatch",
+            "severity": "moderate"
+          }
+        ]
+      },
+      "durationMs": 2486,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "compiled-public-surfaces",
+      "passed": true,
+      "durationMs": 62164,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "root-quality",
+      "passed": true,
+      "durationMs": 304364,
+      "tests": 2497,
+      "browserCases": 0
+    },
+    {
+      "stage": "contracts-check",
+      "passed": true,
+      "durationMs": 5645,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "contracts-generate",
+      "passed": true,
+      "durationMs": 5606,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "contracts-format",
+      "passed": true,
+      "durationMs": 1417,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "contracts-diff",
+      "passed": true,
+      "durationMs": 14,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "bot-integration",
+      "passed": true,
+      "durationMs": 2696,
+      "tests": 41,
+      "browserCases": 0
+    },
+    {
+      "stage": "postgres-image-build",
+      "passed": true,
+      "durationMs": 23983,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "redis-image-pull",
+      "passed": true,
+      "durationMs": 10816,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-postgres-image-pull",
+      "passed": true,
+      "durationMs": 24918,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-integration",
+      "passed": true,
+      "durationMs": 237151,
+      "tests": 81,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-private-node-image-pull",
+      "passed": true,
+      "durationMs": 7702,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-private-files-and-tty",
+      "passed": true,
+      "durationMs": 5985,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-ingress-image-pull",
+      "passed": true,
+      "durationMs": 3836,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-ingress",
+      "passed": true,
+      "durationMs": 38870,
+      "tests": 5,
+      "browserCases": 0
+    },
+    {
+      "stage": "admin-browser",
+      "passed": true,
+      "durationMs": 17516,
+      "tests": 0,
+      "browserCases": 7
+    },
+    {
+      "stage": "images",
+      "passed": true,
+      "scan": {
+        "schemaVersion": 1,
+        "kind": "images",
+        "status": "passed",
+        "ok": true,
         "database": {
           "updatedAt": "2026-11-05T07:00:54.926777429Z",
           "downloadedAt": "2026-11-05T12:42:55.159104169Z"
-        }
-      }
+        },
+        "images": [
+          {
+            "ok": true,
+            "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+            "counts": {
+              "info": 0,
+              "low": 0,
+              "moderate": 0,
+              "high": 0,
+              "critical": 0,
+              "unknown": 0
+            },
+            "findings": []
+          },
+          {
+            "ok": true,
+            "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+            "counts": {
+              "info": 0,
+              "low": 0,
+              "moderate": 0,
+              "high": 0,
+              "critical": 0,
+              "unknown": 0
+            },
+            "findings": []
+          }
+        ]
+      },
+      "durationMs": 900,
+      "tests": 0,
+      "browserCases": 0
     },
     {
-      "path": "runner/hambazi-packaging-readable/images.json.scan.json",
-      "sha256": "b9c5793e11df22006453be4fa81ac32e23ab4e47c014ba8a633c47e20abb9ae5",
-      "data": {
+      "stage": "application-image-build",
+      "passed": true,
+      "durationMs": 641624,
+      "tests": 0,
+      "browserCases": 0
+    },
+    {
+      "stage": "application-images",
+      "passed": true,
+      "scan": {
         "schemaVersion": 1,
         "kind": "application-images",
-        "ok": true,
         "status": "passed",
+        "ok": true,
+        "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+        "sourceDirty": false,
+        "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+        "buildInputSha256": "d92f24248aa882654675c8de402d8f849871298c6d10dbca09dab1f33e17e90b",
         "database": {
           "updatedAt": "2026-11-05T07:00:54.926777429Z",
           "downloadedAt": "2026-11-05T12:42:55.159104169Z"
         },
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "sourceDirty": false,
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "buildInputSha256": "a40131653d1447fb954cd2532e60ee74bc575351ada792573fa48f2a00451db8",
         "images": [
           {
             "role": "api",
             "ok": true,
-            "image": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:e4200a02be728a413dc49d76e2da329e277ef45e85a5242bc03a73e1fa613a95",
+            "image": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
             "counts": {
               "info": 0,
               "low": 0,
@@ -622,7 +322,7 @@
           {
             "role": "bot",
             "ok": true,
-            "image": "hambazi-candidate/bot:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:9e86e87b7838c571149b16f830430f0f1bc730d35c81532ed3185593b75b9e1b",
+            "image": "hambazi-candidate/bot:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:295734287eb0c2fb1ad8f933123e00ed57410c8ef1be38f253c8961d35654390",
             "counts": {
               "info": 0,
               "low": 0,
@@ -636,7 +336,7 @@
           {
             "role": "worker",
             "ok": true,
-            "image": "hambazi-candidate/worker:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:0631bd875261b9de030a4316458f92f09730990ae69cb33d40d40e29124241e7",
+            "image": "hambazi-candidate/worker:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:09abe2ed174cc1ab2fdb4a10774f7339875fe7c060b31764dca3c42cf8264dfc",
             "counts": {
               "info": 0,
               "low": 0,
@@ -650,7 +350,7 @@
           {
             "role": "web",
             "ok": true,
-            "image": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:ae9ad3f686aab656abf48a8973e78cc0682849244f12eaeffc4fdcf40916e08b",
+            "image": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
             "counts": {
               "info": 0,
               "low": 0,
@@ -662,697 +362,544 @@
             "findings": []
           }
         ]
-      }
+      },
+      "durationMs": 26703,
+      "tests": 0,
+      "browserCases": 0
     },
     {
-      "path": "runner-final-ci/hambazi-packaging/images.json",
-      "sha256": "2b499b97ee2770d2f3d8835a87d5a9c9ccad01276d42db25eac7fcd2dda24203",
-      "data": {
-        "schemaVersion": 1,
-        "purpose": "local-packaging-candidate",
-        "productionReleaseApproved": false,
-        "platform": "linux/amd64",
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "sourceDirty": false,
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "buildInputSha256": "a40131653d1447fb954cd2532e60ee74bc575351ada792573fa48f2a00451db8",
-        "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
-        "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
-        "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217",
-        "browserPolicy": {
-          "schemaVersion": 1,
-          "profile": "production",
-          "webOrigin": null,
-          "apiOrigin": null,
-          "frameAncestors": [],
-          "headers": {
-            "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
-            "Referrer-Policy": "no-referrer",
-            "X-Content-Type-Options": "nosniff",
-            "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-            "Cache-Control": "no-store",
-            "Strict-Transport-Security": "max-age=31536000"
-          }
-        },
-        "images": [
-          {
-            "role": "api",
-            "image": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:e4200a02be728a413dc49d76e2da329e277ef45e85a5242bc03a73e1fa613a95"
-          },
-          {
-            "role": "bot",
-            "image": "hambazi-candidate/bot:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:9e86e87b7838c571149b16f830430f0f1bc730d35c81532ed3185593b75b9e1b"
-          },
-          {
-            "role": "worker",
-            "image": "hambazi-candidate/worker:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:0631bd875261b9de030a4316458f92f09730990ae69cb33d40d40e29124241e7"
-          },
-          {
-            "role": "web",
-            "image": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:ae9ad3f686aab656abf48a8973e78cc0682849244f12eaeffc4fdcf40916e08b"
-          }
-        ]
-      }
+      "stage": "application-image-smoke",
+      "passed": true,
+      "durationMs": 147345,
+      "tests": 0,
+      "browserCases": 2,
+      "runtimeChecks": 46
     },
     {
-      "path": "runner-final-ci/hambazi-packaging/images.json.scan.json",
-      "sha256": "b9c5793e11df22006453be4fa81ac32e23ab4e47c014ba8a633c47e20abb9ae5",
-      "data": {
-        "schemaVersion": 1,
-        "kind": "application-images",
-        "ok": true,
-        "status": "passed",
-        "database": {
-          "updatedAt": "2026-11-05T07:00:54.926777429Z",
-          "downloadedAt": "2026-11-05T12:42:55.159104169Z"
-        },
-        "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
-        "sourceDirty": false,
-        "sourceSnapshotSha256": "1abc8d79fee82c060f47b96b18d512fd9203e31088d0320d62ee51abe2f890b8",
-        "buildInputSha256": "a40131653d1447fb954cd2532e60ee74bc575351ada792573fa48f2a00451db8",
-        "images": [
-          {
-            "role": "api",
-            "ok": true,
-            "image": "hambazi-candidate/api:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:e4200a02be728a413dc49d76e2da329e277ef45e85a5242bc03a73e1fa613a95",
-            "counts": {
-              "info": 0,
-              "low": 0,
-              "moderate": 0,
-              "high": 0,
-              "critical": 0,
-              "unknown": 0
-            },
-            "findings": []
-          },
-          {
-            "role": "bot",
-            "ok": true,
-            "image": "hambazi-candidate/bot:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:9e86e87b7838c571149b16f830430f0f1bc730d35c81532ed3185593b75b9e1b",
-            "counts": {
-              "info": 0,
-              "low": 0,
-              "moderate": 0,
-              "high": 0,
-              "critical": 0,
-              "unknown": 0
-            },
-            "findings": []
-          },
-          {
-            "role": "worker",
-            "ok": true,
-            "image": "hambazi-candidate/worker:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:0631bd875261b9de030a4316458f92f09730990ae69cb33d40d40e29124241e7",
-            "counts": {
-              "info": 0,
-              "low": 0,
-              "moderate": 0,
-              "high": 0,
-              "critical": 0,
-              "unknown": 0
-            },
-            "findings": []
-          },
-          {
-            "role": "web",
-            "ok": true,
-            "image": "hambazi-candidate/web:30eaec017dd52dd50fd611bf5f68ee875329131d-a40131653d1447fb@sha256:ae9ad3f686aab656abf48a8973e78cc0682849244f12eaeffc4fdcf40916e08b",
-            "counts": {
-              "info": 0,
-              "low": 0,
-              "moderate": 0,
-              "high": 0,
-              "critical": 0,
-              "unknown": 0
-            },
-            "findings": []
-          }
-        ]
-      }
+      "stage": "migration-fault-release",
+      "passed": true,
+      "durationMs": 271566,
+      "tests": 306,
+      "browserCases": 6
+    },
+    {
+      "stage": "ordinary-browser",
+      "passed": true,
+      "durationMs": 36906,
+      "tests": 0,
+      "browserCases": 31
+    },
+    {
+      "stage": "built-sdk-browser",
+      "passed": true,
+      "durationMs": 39515,
+      "tests": 0,
+      "browserCases": 39
+    },
+    {
+      "stage": "preview-isolation",
+      "passed": true,
+      "durationMs": 4087,
+      "tests": 0,
+      "browserCases": 2
+    },
+    {
+      "stage": "normal-web-build",
+      "passed": true,
+      "durationMs": 8126,
+      "tests": 0,
+      "browserCases": 0
     }
   ],
+  "diagnosis": {
+    "historicalFailure": {
+      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
+      "evidenceCommit": "8c1e6690e789cc91cbe0cee359203c38a1442061",
+      "failedGate": "migration-fault-release",
+      "passedGates": 23,
+      "unrunGates": 4,
+      "rootCauseEstablished": false,
+      "originalDiagnosticsAvailable": false
+    },
+    "baselineReproduction": {
+      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
+      "sameGateCommandAndCiFlags": true,
+      "samePrecedingGateSequence": false,
+      "evidence": "migration-baseline",
+      "exitCode": 0,
+      "durationSeconds": 280.66,
+      "integrationCases": 306,
+      "integrationFiles": 22,
+      "releaseBrowserCases": 6,
+      "restoredTables": 45
+    },
+    "newWholeCiMigration": {
+      "stage": "migration-fault-release",
+      "passed": true,
+      "durationMs": 271566,
+      "tests": 306,
+      "browserCases": 6
+    },
+    "conclusion": "Failure did not recur either in the previous-runtime standalone gate or in the new-source complete gate sequence. Causality remains unestablished. Cursor correction does not establish or claim a migration failure repair.",
+    "migrationRuntimeTestOrDeadlineChanged": false,
+    "speculativeFixOrRiskExceptionApplied": false
+  },
+  "cursorCorrection": {
+    "fixed": true,
+    "range": "positive decimal int32,1..2147483647",
+    "runtimeNumericBoundPreserved": true,
+    "generatedInputPatternNowBoundsMaximum": true,
+    "redEvidence": "cursor-contract-red",
+    "greenEvidence": [
+      "cursor-contract-green",
+      "cursor-api-contract",
+      "cursor-types",
+      "cursor-lint",
+      "cursor-contract-check"
+    ],
+    "validationCases": 151,
+    "apiCases": 1085,
+    "frozenBaselineOrCompatibilityCheckerChanged": false
+  },
+  "security": {
+    "policyUnchanged": true,
+    "newExceptions": 0,
+    "secrets": {
+      "schemaVersion": 1,
+      "kind": "secrets",
+      "status": "passed",
+      "ok": true,
+      "files": 1257,
+      "history": {
+        "ok": true,
+        "findings": 0
+      },
+      "current": {
+        "ok": true,
+        "findings": 0
+      }
+    },
+    "dependencies": {
+      "schemaVersion": 1,
+      "kind": "dependencies",
+      "status": "passed",
+      "ok": true,
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 1,
+        "high": 0,
+        "critical": 0
+      },
+      "findings": [
+        {
+          "id": "GHSA-g3hv-75wg-m249",
+          "package": "minimatch",
+          "severity": "moderate"
+        }
+      ]
+    },
+    "dataImages": {
+      "schemaVersion": 1,
+      "kind": "images",
+      "status": "passed",
+      "ok": true,
+      "database": {
+        "updatedAt": "2026-11-05T07:00:54.926777429Z",
+        "downloadedAt": "2026-11-05T12:42:55.159104169Z"
+      },
+      "images": [
+        {
+          "ok": true,
+          "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "ok": true,
+          "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        }
+      ]
+    },
+    "coreImages": {
+      "schemaVersion": 1,
+      "kind": "application-images",
+      "ok": true,
+      "status": "passed",
+      "database": {
+        "updatedAt": "2026-11-05T07:00:54.926777429Z",
+        "downloadedAt": "2026-11-05T12:42:55.159104169Z"
+      },
+      "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+      "buildInputSha256": "d92f24248aa882654675c8de402d8f849871298c6d10dbca09dab1f33e17e90b",
+      "images": [
+        {
+          "role": "api",
+          "ok": true,
+          "image": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "bot",
+          "ok": true,
+          "image": "hambazi-candidate/bot:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:295734287eb0c2fb1ad8f933123e00ed57410c8ef1be38f253c8961d35654390",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "worker",
+          "ok": true,
+          "image": "hambazi-candidate/worker:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:09abe2ed174cc1ab2fdb4a10774f7339875fe7c060b31764dca3c42cf8264dfc",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        },
+        {
+          "role": "web",
+          "ok": true,
+          "image": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
+          "counts": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "unknown": 0
+          },
+          "findings": []
+        }
+      ]
+    },
+    "adminImage": {
+      "ok": true,
+      "image": "hambazi-candidate/admin:ae6a3ed7369a25db4a03a3566db44c35161a93fc-11397ac7d079c177@sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "unknown": 0
+      },
+      "findings": [],
+      "database": {
+        "updatedAt": "2026-11-05T07:00:54.926777429Z",
+        "downloadedAt": "2026-11-05T12:42:55.159104169Z"
+      }
+    }
+  },
+  "artifacts": {
+    "coreInventory": {
+      "schemaVersion": 1,
+      "purpose": "local-packaging-candidate",
+      "productionReleaseApproved": false,
+      "platform": "linux/amd64",
+      "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+      "sourceDirty": false,
+      "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+      "buildInputSha256": "d92f24248aa882654675c8de402d8f849871298c6d10dbca09dab1f33e17e90b",
+      "lockfileSha256": "bf77b02f142ff7466b6e634e0b05786d1c29f71f63b4260228f5e6a8bd5cbda0",
+      "dockerfileSha256": "3ebaf10da6d3cf6dab843e92fb72c55f678a85c098e51aa0aa572bffc033e5e7",
+      "baseLockSha256": "ca4008d9f49292341a609cc783875d2edea167401232b5744b0a417564147217",
+      "browserPolicy": {
+        "schemaVersion": 1,
+        "profile": "production",
+        "webOrigin": null,
+        "apiOrigin": null,
+        "frameAncestors": [],
+        "headers": {
+          "Content-Security-Policy": "default-src 'none'; script-src 'self' 'sha384-PyI6uk8O3pfRRl4+CaepaS++FqtEbco/HaV3jzdYl4y+U7HMQvn3gWVfKhjuzfzG'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https://t.me; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+          "Referrer-Policy": "no-referrer",
+          "X-Content-Type-Options": "nosniff",
+          "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+          "Cache-Control": "no-store",
+          "Strict-Transport-Security": "max-age=31536000"
+        }
+      },
+      "images": [
+        {
+          "role": "api",
+          "image": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc"
+        },
+        {
+          "role": "bot",
+          "image": "hambazi-candidate/bot:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:295734287eb0c2fb1ad8f933123e00ed57410c8ef1be38f253c8961d35654390"
+        },
+        {
+          "role": "worker",
+          "image": "hambazi-candidate/worker:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:09abe2ed174cc1ab2fdb4a10774f7339875fe7c060b31764dca3c42cf8264dfc"
+        },
+        {
+          "role": "web",
+          "image": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc"
+        }
+      ]
+    },
+    "adminImage": {
+      "schemaVersion": 1,
+      "purpose": "local-admin-phase4-candidate",
+      "productionReleaseApproved": false,
+      "image": "hambazi-candidate/admin:ae6a3ed7369a25db4a03a3566db44c35161a93fc-11397ac7d079c177@sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+      "adminSourceSha256": "11397ac7d079c1771d1b87a43659655052583298385987d5a32b7d3d1c5f93b2",
+      "apiImage": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
+      "runtimeImage": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
+      "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+      "coreInventorySha256": "6232452c7034e371bf95eddca753113058f407922b67a17faebe4f2c77b41571"
+    },
+    "adminExactImageChecks": {
+      "passed": true,
+      "checks": 43,
+      "image": "hambazi-candidate/admin:ae6a3ed7369a25db4a03a3566db44c35161a93fc-11397ac7d079c177@sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+      "actualContainerImage": "sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+      "expectedImageId": "sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+      "explicitLoopbackOrigin": "https://127.0.0.1:34365",
+      "actualImageIdentityMatched": true,
+      "fixtureMode": "production",
+      "databaseTLSVerifyFull": true,
+      "redisTLS": true,
+      "inboundTLSVerified": true,
+      "argon2NativeAsUid1000": true,
+      "plaintextProductionRejected": true,
+      "defaultDeny401": true,
+      "csrfOrigin403": true,
+      "realSyntheticOwnerLoginAndPendingIsolation": true,
+      "restrictionAndUnrestrictViaHttps": true,
+      "auditedPrivateNote": true,
+      "flagDisabledFallbackPreservesRestriction": true,
+      "exactImageExpiryWithInjectedFixtureClock": true,
+      "syntheticFixtureOnly": true,
+      "realOwnerTouched": false
+    },
+    "productionReleaseApproved": false
+  },
+  "previousQualification": {
+    "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d",
+    "status": "NO_GO",
+    "reportCommit": "8c1e6690e789cc91cbe0cee359203c38a1442061",
+    "reportPath": "docs/security/admin-phase4-qualification.json",
+    "reportSha256": "3e0fb2a859ff24c68dfb74cd7c6aa36060376a22fd8789eb745dffd235b3e229",
+    "privateDirectory": "/home/mehdi/.cache/hambazi-phase4-qualification-RQhIxa",
+    "evidenceLogPairs": 60,
+    "historicalRecordRetainedInGit": true,
+    "limits": [
+      "Earlier Task2/3/4 container/readiness failures, ECONNRESET and timeouts remain failures with unestablished causes as recorded in the SDD ledger.",
+      "Earlier Task5 Phase2/Phase3 five-second failures and focused/collect-all successes are not full qualification.",
+      "Task6 original browser failure followed by429 is retained; later proven abort leak does not establish the original browser failure cause.",
+      "Forced Kahroba model seeds7-11/four seats time out at5000ms; no engine/workload/timeouts changed.",
+      "Expected fixture telemetry and history cursor OpenAPI decimal-pattern/int32-description mismatch remain deferred minors.",
+      "Final current-source unchanged CI failed at migration-fault-release after23/28gates passed; four later gates unrun in that entrypoint. Earlier direct306+6 pass is independent; failure cause unestablished.",
+      "Individual diagnostics and artifact smoke are not a whole-CI pass. Prior-candidate gate passes do not become final-source entrypoint evidence."
+    ]
+  },
   "evidenceFiles": [
     {
-      "id": "admin-abort-green",
+      "id": "admin-exact-image-identity",
       "exitCode": 0,
-      "durationSeconds": 11.0,
-      "resultSha256": "d3bd035827ed7957fce1a6b323a31ea4279c04cb040d2525b6b196be127f954b",
-      "logSha256": "6580b1cc6e9b1ed49259a4b1c8f7ce67b07b6bc02dde87a3a785e58f8ef21971",
-      "logBytes": 391,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-abort-hardcap",
-      "exitCode": 0,
-      "durationSeconds": 7.18,
-      "resultSha256": "9316086d8d131ae117d59b23fd065c732b881a63db91438d95414140f4638af4",
-      "logSha256": "99c9df0a41da27add1e56b3058485d555a7d6b1099c3168a20451fd854c2d477",
-      "logBytes": 388,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-abort-red",
-      "exitCode": 1,
-      "durationSeconds": 10.24,
-      "resultSha256": "ff3d87158df09622b000e292cd4275859ef5aea6eafd57758237e045bc95c7d4",
-      "logSha256": "db68849705651d46357e8cbaa6e72b1155aee0f3ea4fb726dc34310509b93d4c",
-      "logBytes": 1608,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-diagnostic",
-      "exitCode": 1,
-      "durationSeconds": 0.21,
-      "resultSha256": "a81051dc8e4bab315e95d49369c7c066ee995c05d20b15875785dec86e373f02",
-      "logSha256": "12e908568f4f46417171560e1fd1a1cc136dc04f0a457d008e72a52ed3b55ab0",
-      "logBytes": 300,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "admin-fix-api-unit",
-      "exitCode": 0,
-      "durationSeconds": 22.11,
-      "resultSha256": "355c349e7287ba2a12bc401d290a6656a774f6a6a3fb9639ed5f8c7ea9a1a9b4",
-      "logSha256": "59fc6fed5084780ae2b152cb29ffce469208034b0c9eb6f0eb4a9c550c1b9fc1",
-      "logBytes": 6111,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-fix-format",
-      "exitCode": 0,
-      "durationSeconds": 0.31,
-      "resultSha256": "e5154f88394494bb4cc698650c8ea5606db7587c6158cbe0b629cc35a928e3c4",
-      "logSha256": "6e1ffcd298ffaa2812951679b051406c97d201bec988bdcff9139c00a0c54dbc",
-      "logBytes": 105,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-fix-ingress",
-      "exitCode": 0,
-      "durationSeconds": 35.06,
-      "resultSha256": "5741bf8263d88b8d7ebdaa67b4c061e378519e148e800a5f30b68425accc5ddb",
-      "logSha256": "5a64aa1cbb2cb85fb8730ab3d67e1f3826ef56a22eaceacc7840b5a70a674bae",
-      "logBytes": 812,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-fix-lint",
-      "exitCode": 0,
-      "durationSeconds": 0.72,
-      "resultSha256": "ceec05ff85ecec09077a8864145af676a86cd51661a05d49c78dbd8319d7c89f",
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "logBytes": 0,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-fix-typecheck",
-      "exitCode": 0,
-      "durationSeconds": 17.3,
-      "resultSha256": "5facc6672cec5f4ba74df3c4d332566a9e66322b10f1bd4e656040edc090906f",
-      "logSha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0",
-      "logBytes": 84,
-      "sourceBinding": "Pre-commit working tree regression/check; eventual admission fix30eaec0, no whole-tree fingerprint recorded for this particular attempt."
-    },
-    {
-      "id": "admin-full-diagnostic",
-      "exitCode": 1,
-      "durationSeconds": 123.68,
-      "resultSha256": "a6a63fdbd4510f38a1cb60e2d269e96cdf2ff36f9a89a891bc07b857e1e50d6c",
-      "logSha256": "48335da5b994078beeb4ae63e381daf21ec509465bd64e5a0553816a84515170",
-      "logBytes": 8712,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "admin-image-build-confirmed",
-      "exitCode": 0,
-      "durationSeconds": 8.39,
-      "resultSha256": "60e09bedf5da467dade7e5fa53472d9aa377476111413e38d1a9463c1d669c5b",
-      "logSha256": "f8a2af175e8019049ce169713300b5e23a5d8b771f262563db8b190eb58ec5e4",
-      "logBytes": 2695,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "admin-image-harness-syntax",
-      "exitCode": 0,
-      "durationSeconds": 0.03,
-      "resultSha256": "691c66037e6b89e703537b2de8ed963e3dd209706caf7d3dcc40d0df59e27ceb",
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "logBytes": 0,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "admin-image-identity-tls",
-      "exitCode": 0,
-      "durationSeconds": 63.24,
-      "resultSha256": "5ff1b01b3f691836a6c3ffa7cfaf35cbda8e2369b115cd7a99cfd8154ddeb442",
+      "durationSeconds": 75.3,
+      "resultSha256": "2afe69d8386c9b960c4840bcea7864d5e2eb1064b146965836dc622de46b5bf5",
       "logSha256": "e8507a12144e9883b4c1d56f4a01585c6977e3f2e02cc48e7b5982dcef6bea3e",
-      "logBytes": 89,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "sourceBinding": "ae6a3ed isolated candidate"
     },
     {
-      "id": "admin-image-production-smoke",
+      "id": "admin-image-build",
       "exitCode": 0,
-      "durationSeconds": 236.14,
-      "resultSha256": "27e88c331a6ab54bef8adf33c98ff889460bd463a1d5c1fe0723e455a0dccb54",
-      "logSha256": "f99cb4fe654d9c48bd9fd4fc837513e0e27290ae1e800e94a465646269e4b4fa",
-      "logBytes": 468,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "admin-image-scan-confirmed",
-      "exitCode": 0,
-      "durationSeconds": 0.42,
-      "resultSha256": "2c26ad2e0530e1cea0b556fe5df67ade217a16117a375c23757fb09c634f975d",
-      "logSha256": "3fa14375aded3a269bf4cd603a9d913517f273a95103433132545de50b5b2716",
-      "logBytes": 371,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 113.93,
+      "resultSha256": "f02c35acbe2297d55be1a59c5edaefc4874070fc0d96e768f3e7c7c1a7c726f8",
+      "logSha256": "6a005b2facbdce0e7e9edd251e89b6cecd2b7f1788d4cf6ccdb292948fbfcd61",
+      "sourceBinding": "ae6a3ed isolated candidate"
     },
     {
       "id": "admin-image-scan",
       "exitCode": 0,
-      "durationSeconds": 8.23,
-      "resultSha256": "f378faae39e3dd91c7cef60b98c3fb4b2dced98bea64d227bdca36ed336720da",
-      "logSha256": "155811d935ffaeec9226535d8d94facdef99392a25f201ebf85f8dece44c7138",
-      "logBytes": 371,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 18.17,
+      "resultSha256": "c5f2fc67de524e5f42caf3281d2dd2027dc1deec5661acc522d0c76334d8689c",
+      "logSha256": "417aec8f3059fb77c8f34a34e9c81ed3a0f4b73ac55c6c5facfafccbc184c04a",
+      "sourceBinding": "ae6a3ed isolated candidate"
     },
     {
-      "id": "admin-postfix-diagnostic",
+      "id": "blocker-toolchain",
       "exitCode": 0,
-      "durationSeconds": 189.41,
-      "resultSha256": "3e42a4c462f9d5d649d01ba084f1934543a0ce23768fd969e45dceaf4376519f",
-      "logSha256": "879d171e93bcf7a7265ec7d6a4964551147b40bfc95b4fcddd1fdff9d4436d24",
-      "logBytes": 450,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 0.21,
+      "resultSha256": "3b8103559cd69fa8cfb28ba892742b98c57bbfe386d3918148e9d37c9ce5eb8d",
+      "logSha256": "b3f0080cdc908c7268e0cd909542c65ef3fc7cd182d81b385b5f5e231084c70e",
+      "sourceBinding": "private diagnostic helper self-check, not application qualification"
     },
     {
-      "id": "admin-running-image-identity-corrected",
-      "exitCode": 1,
-      "durationSeconds": 64.8,
-      "resultSha256": "fa4685ba58bcd7149c844db4e2dcbab72cfd15917d17816724ffecf2dc731cb3",
-      "logSha256": "e602e57530a7183a6eae8d21f9ef6c260638202477e0e8550c0adb4ae243a6ef",
-      "logBytes": 377,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "admin-running-image-identity",
-      "exitCode": 1,
-      "durationSeconds": 0.03,
-      "resultSha256": "a089a563e747d49c470e6d9371573ebf3913fffb7336a99bff14c4c4dcc74dda",
-      "logSha256": "ef61e619d924670fcea006d4978206797435067a4949590d6667c3663184d871",
-      "logBytes": 1085,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "api-image-readability",
-      "exitCode": 1,
-      "durationSeconds": 2.22,
-      "resultSha256": "60c892164f4f25a97238df5e4780cd5da841d7798fb976f80c73195091a7014e",
-      "logSha256": "37c755cf3c6b677641fd150403bd8ab834aa2fe955c314401b40170d7a47ff70",
-      "logBytes": 287,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "api-image-readable-green",
+      "id": "cursor-api-contract",
       "exitCode": 0,
-      "durationSeconds": 49.91,
-      "resultSha256": "031861b887ff5379b7171a8e240e923daae55393aa2fdddd028163dbb8bcbffc",
-      "logSha256": "11e92e45f1ba62c71460af542aef6475cf594541f9ab899e87af86cd89dbfb90",
-      "logBytes": 253,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 34.2,
+      "resultSha256": "e65cda2de9ae374f53d751fd82092be59a053fa65c4939d39575dd4301c719de",
+      "logSha256": "7daab33f2b8c8dc1ce34e462a368f7fb1617f6f106cf6c22b763c62883dc4018",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
     },
     {
-      "id": "application-images-readable",
+      "id": "cursor-compiled",
       "exitCode": 0,
-      "durationSeconds": 124.5,
-      "resultSha256": "96f0de1c1260553973d01e7fa6435e1946b7fb426a5de35efed545dad956e312",
-      "logSha256": "b9c5793e11df22006453be4fa81ac32e23ab4e47c014ba8a633c47e20abb9ae5",
-      "logBytes": 2084,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 28.75,
+      "resultSha256": "7837311e93b6a1f58095b8f50e5291c8475f78e23047ea481dbfce2eeb1fed09",
+      "logSha256": "f72b3311e7aaae36ed11a77ccf245154ec5deae3993f0c3e23a0a64e869d15b8",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
     },
     {
-      "id": "application-rebuild-readable",
+      "id": "cursor-contract-check",
       "exitCode": 0,
-      "durationSeconds": 885.99,
-      "resultSha256": "4e93b2e8d06fdac192b437886362a6392daf9d0c063ce5d6c8a0569ac481c62e",
-      "logSha256": "3d00226b4a9d81fbb3b9c480340ee89172d9123e8392c4200bdb486f423ffb82",
-      "logBytes": 195,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "application-smoke-disk",
-      "exitCode": 1,
-      "durationSeconds": 51.85,
-      "resultSha256": "15c61c724c6624c7d41da3b8d4608f21b4926549fb1c902b56a2cd3ec10d7fed",
-      "logSha256": "0afa6c4981bbdf8b2feac695c75e917fcab5fd0c81b2d64554d5e93ee7c9c156",
-      "logBytes": 29,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "application-smoke-final",
-      "exitCode": 0,
-      "durationSeconds": 150.04,
-      "resultSha256": "f0d9cab9b8a7d4073cd89aa7b090b66a531e09a39ebc97adfe82d1690087978b",
-      "logSha256": "057a0d15dd015f548de259356a3d796d8955aabe90778db86c01a32da7aa422d",
-      "logBytes": 126,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "application-smoke-readable",
-      "exitCode": 1,
-      "durationSeconds": 60.98,
-      "resultSha256": "c36b0342f911c647d0f003db7bf9a3f866321268c29fbc1746bc42882e789156",
-      "logSha256": "289088060fd76c764290646d108a45a7cf0ebb9009c3aa06e1b2501ee5873723",
-      "logBytes": 35,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "contract-diagnostic",
-      "exitCode": 0,
-      "durationSeconds": 3.52,
-      "resultSha256": "48eb1fdee91c92de515a1db1cfb9b742a73fb507db3ef8f4f3f1f45443f56b9a",
+      "durationSeconds": 6.53,
+      "resultSha256": "5b506f3df67f97f013af00a8529d05deb894496a592bd366dda09ffee00f2491",
       "logSha256": "39323097b795f88cdf69168424214da304978f0fe0626eab28a7037d5ba04119",
-      "logBytes": 1089,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
     },
     {
-      "id": "final-standard-ci",
-      "exitCode": 1,
-      "durationSeconds": 864.14,
-      "resultSha256": "7270300bf64cc9f364f79361d3e81906eaffbdd2b753acad2086ce09dd347a19",
-      "logSha256": "22df67ce43d60d545bbcb5f2bf65ccebc0e7fcbbf66d5f67f7e54bba0be45269",
-      "logBytes": 3549,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "fix-candidate-install",
+      "id": "cursor-contract-format",
       "exitCode": 0,
-      "durationSeconds": 0.11,
-      "resultSha256": "51097589e9d8d7c9fb6c49d43df75ea4e5dacff6c00f07e7d28fdb17bafe1f0f",
-      "logSha256": "a98ee77dd00a4b18cf827430cce7f5250c3d29b62c0b0d9f1b65e630cc889267",
-      "logBytes": 177,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 1.67,
+      "resultSha256": "16162c9904e724bbd23776a4915f55096a104a4cd305d50ca09e9af113962224",
+      "logSha256": "194fa517c2ce996dfa4f80d47c8cac6acbce680168638ddf8fcff7ec348cb75a",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
+    },
+    {
+      "id": "cursor-contract-generate",
+      "exitCode": 0,
+      "durationSeconds": 8.74,
+      "resultSha256": "47eb591dc45c9cfc21bdf31a54c3acdc6699acfa9f615540042a34ce5f6c3faa",
+      "logSha256": "09b0b6a6fa568cf35096c4172d791506932c2959a4a652a73dd8926e075b9819",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
+    },
+    {
+      "id": "cursor-contract-green",
+      "exitCode": 0,
+      "durationSeconds": 1.57,
+      "resultSha256": "dfb83111e684d593049669736a9a5a7a679b52340a0f6d31ccd4b37d1956a3ef",
+      "logSha256": "edf4a9dae0131fad7ea3986694f2bf5140f4c91dd31c9cdd177d5858b1872ded",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
+    },
+    {
+      "id": "cursor-contract-red",
+      "exitCode": 1,
+      "durationSeconds": 3.87,
+      "resultSha256": "6395761bab55a95967c1039c78f2b7eaeb7c74460ba746f29973cb2ca7b9fa71",
+      "logSha256": "6ee3cbc4da4e56b01052ffcdd2b5427ceabc376253af2acec4456249aa758ef1",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
+    },
+    {
+      "id": "cursor-lint",
+      "exitCode": 0,
+      "durationSeconds": 5.58,
+      "resultSha256": "b23ce816483e88febf651ae632e25753d5b0615af008b2dae59c260fc6ac2a2f",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
+    },
+    {
+      "id": "cursor-types",
+      "exitCode": 0,
+      "durationSeconds": 7.18,
+      "resultSha256": "16b0949dc4d29d5ab6e335f0567474d7645faa1e7befa6e0afa4d8cb662ef0e4",
+      "logSha256": "674614ab84fa8d36bebf997be3419d967e39f709bdf24739f36ca9309bee82d0",
+      "sourceBinding": "precommit cursor working tree; eventual ae6a3ed, no whole-tree fingerprint recorded for this narrow attempt"
     },
     {
       "id": "frozen-install",
       "exitCode": 0,
-      "durationSeconds": 220.04,
-      "resultSha256": "d614b908d857c0592ddc25a3bdbe02d816ea96bf0991df0d6c0ccafb4a985fde",
-      "logSha256": "816f11b26728b49bd19ec846327c15848985b462e0af941a68bdb4039544f063",
-      "logBytes": 8316,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
+      "durationSeconds": 175.79,
+      "resultSha256": "80521fc7b1ba845349ddae48540a6f65715e99b30cbac25e8a855bba6271b159",
+      "logSha256": "2673a7cfdd3fcec8db6c8fcb80e9ad16ad6086848ac5be6b986c49c13d288594",
+      "sourceBinding": "ae6a3ed isolated candidate"
     },
     {
-      "id": "images-after-official-probe",
+      "id": "migration-baseline",
       "exitCode": 0,
-      "durationSeconds": 0.67,
-      "resultSha256": "8d036aea0f8a633feb619ed30814eaedc52265ae344d6d586d7cc0e2d7554e18",
-      "logSha256": "f21d35760fb9ae4e8240619d510979f77d65cdfd75e9191e3972a4e3a6455b1c",
-      "logBytes": 1018,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 280.66,
+      "resultSha256": "3c3464fef3376c656f3bf35ed2393e5ba873119e23f6f9ced18cb2be9a60ae7a",
+      "logSha256": "34bc09d8dc6e648cbc01d7f1572391739840b186b9a3ad7904591dc7ac031446",
+      "sourceBinding": "30eaec0 previous-runtime isolated candidate"
     },
     {
-      "id": "infra-diagnostic",
+      "id": "observer-selftest-final",
       "exitCode": 0,
-      "durationSeconds": 10.26,
-      "resultSha256": "ec1056434dd167c51fddf4ff1aa5799422f7b467a76676b078b25c20df144687",
-      "logSha256": "3f8f60f0a9b996f2b95961ff66ac0f8d68821da2af112bc9be6d01d60e41b86f",
-      "logBytes": 3578,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
+      "durationSeconds": 0.17,
+      "resultSha256": "46c5870f228b699dce8bb02ca4b3d1cf34b40483af7dbd9242b586c6a5b28eb1",
+      "logSha256": "bf5b0147b1d421de927b421daa1e4a3d8e651ff8b4ec16732b4553c7640b5fa0",
+      "sourceBinding": "private diagnostic helper self-check, not application qualification"
     },
     {
-      "id": "migration-fault-readable",
+      "id": "observer-selftest",
       "exitCode": 0,
-      "durationSeconds": 187.33,
-      "resultSha256": "8d3254d3fc854ec317b06a50a2ce1c8251233f24bb690b95f65db27a78cbe3c0",
-      "logSha256": "0268ce5b96b705cac363e79d811048a6977688309cab860fa808f335247c061a",
-      "logBytes": 33144,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 0.11,
+      "resultSha256": "d31e143f9ef99c1f6fe3632d460b43d3e29c75d10407d716a6137e7bbd90d136",
+      "logSha256": "bf5b0147b1d421de927b421daa1e4a3d8e651ff8b4ec16732b4553c7640b5fa0",
+      "sourceBinding": "private diagnostic helper self-check, not application qualification"
     },
     {
-      "id": "postfix-build",
+      "id": "whole-ci-diagnostic",
       "exitCode": 0,
-      "durationSeconds": 30.78,
-      "resultSha256": "eea0eb22cf760304968a3b7c9930c85f0422751a0a1a3edcf2faac150cff359f",
-      "logSha256": "db97d92de6aafadc6f898f82a8b05d3b249078a429c93a57349c9a4c896a007d",
-      "logBytes": 4527,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "postgres-stage-disk",
-      "exitCode": 0,
-      "durationSeconds": 14.55,
-      "resultSha256": "5b4e0f098634da7b0e975845340244bd03ed3c4ab2a914abc86e9c4b1b493e62",
-      "logSha256": "d9d9a664c34f5ba4012e7017e8a6a463902bff3a1b04878e80f4e80505ceeb8b",
-      "logBytes": 27,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "postgres-stage-tmpfs",
-      "exitCode": 1,
-      "durationSeconds": 0.06,
-      "resultSha256": "c2e0c1853fadb5ae73172d484116ae67e04ac0083e96497d470d1e0345def325",
-      "logSha256": "c141aba64564a3d19b8f59114fa68802d8820b9729c5e956239a562e3a78faa0",
-      "logBytes": 60,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "private-mode-corrected",
-      "exitCode": 0,
-      "durationSeconds": 2.67,
-      "resultSha256": "228a741f09e2af5a764fd835f63641c13db4755a8aca722e05a27a9ee5cb1aff",
-      "logSha256": "5b2b84d607c81ce35f4d0a746357054f9eb853c7d5593c9ad3fd2557aa307a6e",
-      "logBytes": 93,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "private-stage-diagnostic",
-      "exitCode": 1,
-      "durationSeconds": 2.32,
-      "resultSha256": "56775a0b1f4992d7f54cf54456035d274587db003c7e577eea2bcd5c50557230",
-      "logSha256": "f3ea07ff9824d539638eff1ea2cecc5ea446344f7d445e567225476309243707",
-      "logBytes": 32,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "private-standard-modes",
-      "exitCode": 0,
-      "durationSeconds": 4.84,
-      "resultSha256": "8310992f6944fff5d5e9895f3a42efde37e7295633dc7fa8f38df64ae4d9f62a",
-      "logSha256": "5b2b84d607c81ce35f4d0a746357054f9eb853c7d5593c9ad3fd2557aa307a6e",
-      "logBytes": 93,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "redis-mode-diagnostic",
-      "exitCode": 2,
-      "durationSeconds": 1.82,
-      "resultSha256": "5bbcf7e80751b9e207c32e55971be45a39283d731eace050c69a1db9b6ebbb53",
-      "logSha256": "66a9e586fb78c85f0cbfec49f12631f233af53ddeff39fb17b488a75b59bf3bf",
-      "logBytes": 73,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-admin-browser",
-      "exitCode": 0,
-      "durationSeconds": 14.01,
-      "resultSha256": "e16c06bbd0c8e52a0a8f3d88a4526e871ddfaea5adcf093b5e89ebfd3a7f049c",
-      "logSha256": "8f878f015acf4d5e1db54e3a3c96c1608c588e83dfda50e9017d8300c4db25ce",
-      "logBytes": 1621,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-admin-ingress-image-pull",
-      "exitCode": 0,
-      "durationSeconds": 5.38,
-      "resultSha256": "efda66f20099a22d5bfe7274082207d25f206ebc2b95a780e54f7b378dd10223",
-      "logSha256": "8988425e2fe11549866fdbd14c20caf0f1a11cd47917403a10af11b4380e1277",
-      "logBytes": 410,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-admin-ingress",
-      "exitCode": 0,
-      "durationSeconds": 33.1,
-      "resultSha256": "2409e7b7c4fa1bb31dd32fb4da38ffc399306029f98f0a444eb2d1163659da04",
-      "logSha256": "86ce26a146428dc5d66de240f64001553d85846307ad37b10ee21f538e6c9e52",
-      "logBytes": 841,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-admin-private-files-and-tty",
-      "exitCode": 1,
-      "durationSeconds": 6.08,
-      "resultSha256": "cd4a227e070204788f37e5d142260e9eaea4fe29cf42158f87ea558adc7363a7",
-      "logSha256": "c2770a64c4ab777e6ec9c5e35d114193881523b011c2f2ba3a0cdaef0fe54d88",
-      "logBytes": 269,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-admin-private-node-image-pull",
-      "exitCode": 0,
-      "durationSeconds": 8.89,
-      "resultSha256": "5bcb78cbb941721a5ddb86f5a448f522b3f2ba2875d2aa3d16f0a47f9eef036a",
-      "logSha256": "a02dc5ebdd7cad70cb22db1080b68d4f74d02ec05d5dd446a92bafe7f2b74006",
-      "logBytes": 425,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-application-image-build",
-      "exitCode": 0,
-      "durationSeconds": 600.42,
-      "resultSha256": "598714927fad58c520fc6292cc45cd97f86b1ce01ad818d2ccde03535c1af94f",
-      "logSha256": "3d00226b4a9d81fbb3b9c480340ee89172d9123e8392c4200bdb486f423ffb82",
-      "logBytes": 195,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-application-image-smoke",
-      "exitCode": 1,
-      "durationSeconds": 78.28,
-      "resultSha256": "3a09e39f757b514c086b1b50a233a65a8d33f32151fd7cefe090665d311edc71",
-      "logSha256": "b01a334b0e2cd9f1f03232d50e766d63991164c65aefff71c21501609babbbe1",
-      "logBytes": 32,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-application-images",
-      "exitCode": 1,
-      "durationSeconds": 1.22,
-      "resultSha256": "a640bf003cf4cb606e332d027cf0541bad1a2b167e1a5ba8f0ac13cb0111e3cb",
-      "logSha256": "fb4c6c275b7901bf8b9a1344a1e62bfece39d6188981f27010dfae185dbbfa15",
-      "logBytes": 30,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-built-sdk-browser",
-      "exitCode": 0,
-      "durationSeconds": 25.77,
-      "resultSha256": "7560b5c669204345ad31391910b082084c8f30def3fc5a20c88771be760c9793",
-      "logSha256": "82927762245509dbfe5894ac2141e9c4dd66d85ccae16916623a5e4260c0e9e9",
-      "logBytes": 6060,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-images",
-      "exitCode": 1,
-      "durationSeconds": 1.17,
-      "resultSha256": "82d5d1156dc8172e6621dc3c228d6e9306f0f8f6d645b1bb5a7de80f218dbf84",
-      "logSha256": "180783b307474ee463b67a771434bf0feb5c3c8a7b6efa9fcf96cd06529b05f5",
-      "logBytes": 256,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-migration-fault-release",
-      "exitCode": 1,
-      "durationSeconds": 13.95,
-      "resultSha256": "3b9169491cfef45116cf7a20bb871c5cd4c92644147460d3b7f03d2cc62ab7c8",
-      "logSha256": "56279902be1b89c16203d17eb9226dac5b2341b647d0b49b9c197c31b6ad7dd4",
-      "logBytes": 202,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-normal-web-build",
-      "exitCode": 0,
-      "durationSeconds": 5.47,
-      "resultSha256": "cc4ac4254dd7d3deec812e15e77cb85a83c6f2a9ac4464fe64b710358108659f",
-      "logSha256": "5812a07fc152601c807cff757bfe135987c23c19dde55eb23bebd74b26e5ec97",
-      "logBytes": 891,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-ordinary-browser",
-      "exitCode": 0,
-      "durationSeconds": 25.73,
-      "resultSha256": "77c5d855ff0d1de381ce22bcbbcb82072fdaa7068cf700cd26b679b1dda01b32",
-      "logSha256": "9a043cb36e02d3e9e877c4bd68f87b9b5040aea776d659cc4c23c4e23275122f",
-      "logBytes": 4339,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "remaining-preview-isolation",
-      "exitCode": 0,
-      "durationSeconds": 3.07,
-      "resultSha256": "202f57cca90732f33b958ebfde549aef982dea99e28ea8dbed64d7f888a65268",
-      "logSha256": "9cbee9b55b62fba7681530587fa1abefb6dc6be28a50e4eeb705dfee66c220be",
-      "logBytes": 404,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "root-check-diagnostic",
-      "exitCode": 0,
-      "durationSeconds": 37.71,
-      "resultSha256": "0ad2c66d36309390c507d24dd5e70125639d925ceff26aabb0dbea4a66141fab",
-      "logSha256": "4fc25a5ce95e2bbc35a02e30eea05a6e0db57eafdf90f5b712edf9d8a5da9c2b",
-      "logBytes": 39940,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "root-check-forced-diagnostic",
-      "exitCode": 1,
-      "durationSeconds": 223.86,
-      "resultSha256": "710dc381fce37c78202984c18e84e41f56ca8f8afebc3582d5cb611579d6a3ae",
-      "logSha256": "0e22b5190d43d445466e7de86910ba809b9b76350d51a0bbfdcd2600f104e527",
-      "logBytes": 24526,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "standard-ci-fixed-wrapper",
-      "exitCode": 1,
-      "durationSeconds": 345.88,
-      "resultSha256": "7c0dd2919f01dc5bdb4a87b8fbb7154411ac9a14ab3daeea2de3e9500340a2c3",
-      "logSha256": "3e11b2a3117fbf4b94c04dc6b09e7a60cec2dbab002be443681917cbce587065",
-      "logBytes": 637,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "standard-ci",
-      "exitCode": 1,
-      "durationSeconds": 309.31,
-      "resultSha256": "1513b19656bbc507ad66a870602b5521a08158ca61cc28d59c124a3beba4e2e1",
-      "logSha256": "32482fdce3d6a8d40311c688fcf00b132a97bf49e4a9ad476462ad4eddf45c67",
-      "logBytes": 946,
-      "sourceCommit": "ddb3fc2ec79ffe077a3a9cf7870a362eb9594f78"
-    },
-    {
-      "id": "trivy-db-diagnostic",
-      "exitCode": 1,
-      "durationSeconds": 0.92,
-      "resultSha256": "b56f6fce3432546d5d738bdba939eeb42f2dd4489b85e1eb839b80f24cdb15b2",
-      "logSha256": "0169631df4feae10bf5a54915ee2a3875f42a088629f802c6d1d2a34fbcad8c9",
-      "logBytes": 2169,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
-    },
-    {
-      "id": "trivy-official-ghcr",
-      "exitCode": 124,
-      "durationSeconds": 180.52,
-      "resultSha256": "63d3641f66da05476e3471b0663d45675b714fba845f6f71abb19c29baca1ebb",
-      "logSha256": "672002776418c1b80b0111807b208b59ba6cacacef72c0e49a44add95448e6e2",
-      "logBytes": 286,
-      "sourceCommit": "30eaec017dd52dd50fd611bf5f68ee875329131d"
+      "durationSeconds": 1937.28,
+      "resultSha256": "c61462149f8c4e5d508edbec4c83c1378afc1ca925f2befb2b6fe729ca590351",
+      "logSha256": "074436d3a9d3c550af408ce239e346c7ee421fa23a1cbf0de36b007168651751",
+      "sourceBinding": "ae6a3ed isolated candidate"
     }
   ],
   "executionFileHashes": [
     {
-      "path": "candidate-identity.json",
-      "sha256": "4c174659c0af7559f77a2d285ec5b3216af99ab3e2ed26200722c6ee7178bbee"
+      "path": "run.py",
+      "sha256": "88ce310abd632cb3d01562eb953d66ed0cb3d89fc080f8e5d7c036421899d4cb"
     },
     {
-      "path": "run.py",
+      "path": "run-baseline.py",
       "sha256": "3e41702cab512d5cc91e9e150a5aafc8ac08ce7722af7ca46a7e4fa5831311b0"
     },
     {
-      "path": "run-main.py",
-      "sha256": "beb10ecfea3e98cb6ad677459ce5b4f748afc1eceb5c1f6021f28c1f463880e4"
-    },
-    {
-      "path": "remaining.py",
-      "sha256": "7e6409f0aa3d461d30b7dcc3580e10e561e84bbb2bab1a2ad9a972fe0291800f"
-    },
-    {
       "path": "environment.json",
-      "sha256": "ee8720d88c8aa7c4db4b8ca220caeba686f56a2092194f0ed48c0e51838d2f71"
+      "sha256": "de3a2cc3db2386c7945c07a796930e423cc7161d27d4bc8e5b0cd2fa111aab46"
+    },
+    {
+      "path": "capture-migration-failure.mjs",
+      "sha256": "db568dc0fa489115ecad05e71abcc91f8de4ca38e926519e92866574e6ab4e72"
+    },
+    {
+      "path": "observer-selftest.mjs",
+      "sha256": "935ce6a367b7328d88e16fdb99d94b060caa9b085309080f703f4662f6ce2a29"
+    },
+    {
+      "path": "observer-selftest-receipt.json",
+      "sha256": "39a14a48e27c6aafc6f6cdcd4ea0ebb0383f53a02ec6605ff2ffe9d25b5509b7"
     },
     {
       "path": "bin/docker",
@@ -1360,103 +907,55 @@
     },
     {
       "path": "build-admin-readable.py",
-      "sha256": "acd9e958a524855250aed21369407d1a9deb0a50a7fc6e5e174464ca2dcab4c0"
+      "sha256": "b44e997b3d076d2bc2b1506cb19cb02a5979eb6af4911e9c0d81cddd4569077c"
     },
     {
       "path": "scan-admin.mjs",
-      "sha256": "b0218d99a450856fe3349d9a1287ed526a3b5479da19f8d66611afe15a7fd52d"
-    },
-    {
-      "path": "image-drill.mjs",
-      "sha256": "3a7285594ae5f5e6f975b4b948b1e2bde51d9aa651ba9bd59ef0d40a5f8789ab"
-    },
-    {
-      "path": "admin-image-harness.mjs",
-      "sha256": "520a1a8f6353aa350c02ec8cb13cdc06a0dc021b6deff12c354830e151b4089d"
-    },
-    {
-      "path": "api-readability.mjs",
-      "sha256": "7e2136f38ca2c2b250b2af027eed8f481644412e604075dcacbd11526709620c"
-    },
-    {
-      "path": "private-diagnostic.mjs",
-      "sha256": "d4d4b488a0a239ed4eb37202c2e276f50d9686ae3b046ddab702a2bda8984f9a"
-    },
-    {
-      "path": "private-diagnostic.raw.json",
-      "sha256": "77d4880fd2ad10251d3b515750dc5f3941e9b06814f621c24d3ebe8425efda46"
-    },
-    {
-      "path": "postgres-stage-diagnostic.mjs",
-      "sha256": "fa5436fd30b1e3a90777674051e48123c13d60dcdede7c84e6fcb6f38f3a3e50"
-    },
-    {
-      "path": "finish-artifacts.py",
-      "sha256": "b15e6c23530aac2cd69b7638a11e9b3c25c3013d02b44ab0e5863c1df7b614eb"
-    },
-    {
-      "path": "confirm-admin-build.py",
-      "sha256": "9185dfa8298dd13236e1989022cb8b318605f081011a9e186369582bc7231fcb"
-    },
-    {
-      "path": "admin-image-build.private.log",
-      "sha256": "14e5d980c72651f0de7f3dbba85a11b5721fde3f5bd390f2f378088fb3238183"
-    },
-    {
-      "path": "admin-image-before-confirm.json",
-      "sha256": "fdf95952c8100d1e8ba937a0566b9aaf4bc8acddc057b5fd182176d5be0d4373"
+      "sha256": "32927c133a865360aad3a1b5aad7f68c9fa6885bdd8a045debeeb6a25daec5e6"
     },
     {
       "path": "image-drill-identity.mjs",
-      "sha256": "9299321346da7d04a2cae888b43b471895ca39ef4d7c0426ff9e2c1f73e8f52c"
+      "sha256": "cc11c2ee9616486574c9ebf087fc06a058c720f93961e654229d0cbf90ea8056"
     },
     {
       "path": "admin-image-identity-fixture.mjs",
-      "sha256": "3b7c102965bdd2aa88fcf59bfc324e3e7a6e2e3dd1cade1c960110264be3830b"
+      "sha256": "302abda710626d76c788eeb3e069f560549982248541d190d24f685f6760b200"
     },
     {
-      "path": "probe-running-admin.mjs",
-      "sha256": "24dcd5d2500c8c752f81fce05bf4c8052f26bf85cbc9e563dcc90e6980237fa9"
+      "path": "admin-image.json",
+      "sha256": "754088ebac3e68e20b9410b3e2d66815940cf46f36f2f73bac3f707648462560"
     },
     {
-      "path": "admin-exact-image-before-identity.json",
-      "sha256": "28855d8ebe81c40a4c09424757bfd345db2eed2c5c1429e9ed91a0ad792a62bf"
+      "path": "admin-image.scan.json",
+      "sha256": "c7166de96014bc37ed3b9dd02dbf3b458771b584f5882d0aa2689c838f1f37dc"
     },
     {
-      "path": "finish-docs.py",
-      "sha256": "8ba1ceb8e715ced58c2dc4f40332ded4b713c97fbf1d202b15323e696ecd8f03"
+      "path": "admin-exact-image.json",
+      "sha256": "ce09b5c2d699bc5388d3787c04070ec4f28309c11021385758aab8a02771d4cb"
     },
     {
-      "path": "final-inventory-equivalence.json",
-      "sha256": "58b3ced6aee80600ee92fa0b29799fce4985997a1e176087373ab6b0cd7f64e5"
+      "path": "admin-source-manifest.json",
+      "sha256": "90da235c6daeb2c38c90c5d26214fa94b7ca65a2d4877339e9f77cb09d553271"
     },
     {
-      "path": "write-evidence.py",
-      "sha256": "1544f6f90244d82e1a79ac38d46f6648df967e63607c854dbc639a1dbab55d14"
+      "path": "runner/hambazi-ci-evidence/manifest.json",
+      "sha256": "b2beb7e8e8c6a390a6ecebe20917167a3d68ebc284f3856220b7539f3ff8ff9a"
+    },
+    {
+      "path": "runner/hambazi-packaging/images.json",
+      "sha256": "6232452c7034e371bf95eddca753113058f407922b67a17faebe4f2c77b41571"
+    },
+    {
+      "path": "runner/hambazi-packaging/images.json.scan.json",
+      "sha256": "f2944278d7a0ed5f68cd8271d98ed30bed4c8037b62b3ceeb6895f1d27580341"
     }
   ],
-  "retainedFailuresAndLimits": [
-    "Earlier Task2/3/4 container/readiness failures, ECONNRESET and timeouts remain failures with unestablished causes as recorded in the SDD ledger.",
-    "Earlier Task5 Phase2/Phase3 five-second failures and focused/collect-all successes are not full qualification.",
-    "Task6 original browser failure followed by429 is retained; later proven abort leak does not establish the original browser failure cause.",
-    "Forced Kahroba model seeds7-11/four seats time out at5000ms; no engine/workload/timeouts changed.",
-    "Expected fixture telemetry and history cursor OpenAPI decimal-pattern/int32-description mismatch remain deferred minors.",
-    "Final current-source unchanged CI failed at migration-fault-release after23/28gates passed; four later gates unrun in that entrypoint. Earlier direct306+6 pass is independent; failure cause unestablished.",
-    "Individual diagnostics and artifact smoke are not a whole-CI pass. Prior-candidate gate passes do not become final-source entrypoint evidence."
-  ],
   "remainingGates": [
-    "Compatible rollback artifact retaining known writer/transport fixes: build, fresh scan and smoke/rehearsal not yet performed",
-    "Passing unchanged whole CI for reviewed final source",
-    "Separately authorized live Staging identity/health/deadline/advisory/drift/grant/ingress checks",
-    "Fresh encrypted full database/globals/config-key capsule, offserver same-archive hash, genuine isolated restore receipt for same final archive before cutover",
-    "Live Phase3 limited-role403 and ADMIN_REVOKE_SESSIONS receipt/Audit/revoked-session QA"
-  ],
-  "unrunByScope": [
-    "SSH/server/deploy/Phase5",
-    "Real OWNER access or enrollment",
-    "Real backup/restore or live permission activation",
-    "Hosted GitHub Actions",
-    "Capacity/load/stress/reconnect storm/two-hour soak; peak target undecided"
+    "Historical migration failure root cause remains unestablished; no causal-fix or implicit exception claimed",
+    "Future compatible rollback artifact: build, fresh scan and actual rehearsal preserving vocabulary/parser, Phase3 behavior and proven writer/abort fixes",
+    "Separately authorized Staging identity/health/config/grant/migration drift/security-deadline/ingress checks",
+    "Fresh encrypted real full backup/globals/config-key capsule, offserver matching hash and genuine isolated restore receipt for the same final archive before cutover",
+    "Live Phase3 limited-role403 and explicit ADMIN_REVOKE_SESSIONS receipt/Audit/revoked-session QA"
   ],
   "rollbackFloor": {
     "permissionVocabularyAndHistoryParser": "Task1-compatible or newer",
@@ -1470,16 +969,23 @@
     ],
     "rollbackArtifactBuiltScannedOrRehearsed": false
   },
-  "evidenceLogPairCount": 60,
+  "unrunByScope": [
+    "SSH/server/deploy/Phase5",
+    "Real OWNER access or enrollment",
+    "Real backup/restore or live permission activation",
+    "Hosted GitHub Actions",
+    "Capacity/load/stress/reconnect storm/two-hour soak; peak target undecided"
+  ],
   "review": {
-    "perTaskReviews": "Recorded in SDD progress ledger",
-    "finalIndependentReview": "COMPLETE_NO_NEW_MATERIAL_CODE_FINDINGS_NOT_READY_TO_MERGE",
-    "implementerSelfReview": "Scanned final documentation for source/artifact/entrypoint limits; final validation evidence is recorded separately.",
-    "reviewedRange": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e..c33e060bb19ab86c07147785eb3c6559e26ceeef",
-    "finalReviewReport": "docs/security/admin-phase4-final-review.md",
-    "localImplementationCompliant": true,
-    "readyToMerge": false,
-    "qualificationCondition": "Final unchanged whole CI remains failed; no deployment approval.",
-    "retainedMinor": "History cursor OpenAPI decimal range exceeds runtime int32 limit."
-  }
+    "sourceCorrection": "Independently approved, no actionable findings; scoped report in execution ledger",
+    "finalEvidenceAndReadiness": "COMPLETE_NO_ACTIONABLE_FINDINGS",
+    "reportPath": "docs/security/admin-phase4-release-blockers-review.md",
+    "implementationApproved": true,
+    "localAutomatedQualificationPassed": true,
+    "requestedHistoricalDiagnosisRepairComplete": false,
+    "deploymentApproved": false,
+    "independentVerification": "All18 result/log pairs,18 listed execution/artifact hashes,864 CI inventory files and22400 Admin context entries matched; exact source/tree/artifact/old-report bindings checked. No suite rerun."
+  },
+  "evidenceLogPairCount": 18,
+  "deploymentReadiness": "NO_GO"
 }

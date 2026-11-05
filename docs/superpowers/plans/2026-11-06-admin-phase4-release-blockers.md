@@ -32,19 +32,21 @@
 - [ ] Trace the failure, compare passing path and test one specific hypothesis. Record limitations if historical failure cannot be reproduced.
 - [ ] Write/observe a focused RED; implement the minimum correction; verify GREEN and the full migration/fault/release gate without weakened controls.
 
+**Task 1 outcome:** Investigation and both reproduction contexts completed, but neither reproduced the historical failure. Its cause and a causal repair remain unestablished; the unfinished cause/fix steps above remain open. No speculative migration change, timeout adjustment or risk exception was applied.
+
 ### Task 2: Align cursor contract
 
 **Files:** packages/validation/src/admin-game-management.ts, packages/validation/tests/admin-game-management.test.ts, generated docs/contracts/admin.openapi.json as needed; inspect apps/api/src/admin/infrastructure/contract.ts and its tests.
 
-- [ ] Add a failing generated-query-schema boundary assertion against runtime for the exact cursor cases in Review focus.
-- [ ] Apply the smallest existing Zod/OpenAPI-compatible restriction; retain runtime positive-int32 semantics.
-- [ ] Run validation/API contract checks and regenerate through declared scripts, without changing the frozen baseline/checker.
+- [x] Add a failing generated-query-schema boundary assertion against runtime for the exact cursor cases in Review focus.
+- [x] Apply the smallest existing Zod/OpenAPI-compatible restriction; retain runtime positive-int32 semantics.
+- [x] Run validation/API contract checks and regenerate through declared scripts, without changing the frozen baseline/checker.
 
 ### Task 3: Full qualification and final record
 
 **Files:** docs/security/admin-phase4-qualification.json, final-review record and docs/operations/admin-phase-4-release-readiness.md; retain the existing backup/rollback plan.
 
-- [ ] Commit runtime fixes; build a clean full-history local candidate without developer environment and install frozen dependencies.
-- [ ] Execute unchanged node infra/ci/verify.mjs through all 28 gates, inspect actual results and qualify final exact image identities/fresh scans including Admin.
-- [ ] Obtain independent final review; record actual passes/failures/unrun gates, root cause evidence, remaining backup/rollback/live gates and deferred capacity.
-- [ ] Commit documentation, verify Git status/diff and stop before deployment.
+- [x] Commit runtime fixes; build a clean full-history local candidate without developer environment and install frozen dependencies.
+- [x] Execute unchanged node infra/ci/verify.mjs through all 28 gates, inspect actual results and qualify final exact image identities/fresh scans including Admin.
+- [x] Obtain independent final review; record actual passes/failures/unrun gates, root cause evidence, remaining backup/rollback/live gates and deferred capacity.
+- [x] Commit documentation, verify Git status/diff and stop before deployment.

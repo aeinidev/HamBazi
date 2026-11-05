@@ -1,5 +1,7 @@
 # Independent final whole-branch review — Admin Phase 4
 
+Historical review cut; the [2026-11-06 follow-up](admin-phase4-release-blockers-review.md) and [current qualification](admin-phase4-qualification.json) record the subsequent cursor fix and passing complete local CI. This original verdict remains unchanged for its reviewed evidence.
+
 Reviewed range: `bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e..c33e060bb19ab86c07147785eb3c6559e26ceeef` (11 commits). Reviewed against the approved Phase 4 design/plan, ADR-093 and ADR-079/085. This is an independent final review, not an adoption of per-task approvals or the interrupted reviewer's interim comments. Review is read-only except this requested report; no suites, source changes, history changes, server operations or subagents.
 
 ## Strengths
