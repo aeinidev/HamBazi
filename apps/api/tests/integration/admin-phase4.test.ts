@@ -444,6 +444,45 @@ describe("phase four scoped owning search and details", () => {
       await root.query("DELETE FROM rooms WHERE id=$1", [suspectedRoomId]);
     }
   }, 130000);
+  it("runs focused phase-four security and accessibility against the owned TLS backend", async () => {
+    const readerId = randomUUID();
+    const reader = await execute({
+      operation: "ADMIN_CREATE",
+      targetId: readerId,
+      expectedVersion: 0,
+      username: "phase_four_security_reader",
+    });
+    await execute({
+      operation: "ADMIN_ACCESS",
+      targetId: readerId,
+      expectedVersion: 1,
+      roleIds: [],
+      grants: (["rooms.view", "matches.view"] as const).map((permission) => ({
+        permission,
+        environment: "test",
+        gameIds: null,
+        deny: false,
+      })),
+    });
+    const result = await promisify(execFile)(
+      "pnpm",
+      ["--filter", "@hambazi/admin", "test:browser", "phase4-security-real.spec.ts"],
+      {
+        env: {
+          ...process.env,
+          TEST_ADMIN_PHASE4_URL: origin,
+          TEST_ADMIN_PHASE4_USERNAME: username,
+          TEST_ADMIN_PHASE4_PASSWORD: password,
+          TEST_ADMIN_PHASE4_PIN: pin,
+          TEST_ADMIN_PHASE4_READER_USERNAME: "phase_four_security_reader",
+          TEST_ADMIN_PHASE4_READER_PASSWORD: reader.generatedPassword,
+        },
+        timeout: 120000,
+        maxBuffer: 2 * 1024 * 1024,
+      },
+    );
+    expect(result.stdout).toContain("PHASE4_SECURITY_BROWSER_EXECUTED");
+  }, 130000);
   it("activates all six authenticated paths and keeps legacy rows strict", async () => {
     for (const [kind, id] of [
       ["games", "phase-four-alpha"],
