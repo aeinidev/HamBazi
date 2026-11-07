@@ -1,0 +1,659 @@
+{
+  "schemaVersion": 1,
+  "kind": "admin-phase4-local-staging-preparation",
+  "recordedAtUtc": "2026-11-06T00:18:42.795869+00:00",
+  "status": "LOCAL_ADMIN_COMPATIBILITY_PASSED_CURRENT_SECURITY_STALE_DEPLOYMENT_NO_GO",
+  "deploymentAuthorized": false,
+  "serverObserved": false,
+  "realOwnerTouched": false,
+  "realBackupOrRestorePerformed": false,
+  "historicalMigrationCauseResolved": false,
+  "currentRuntime": {
+    "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+    "tree": "98de5e1791c7b4c6a5c5ef16f6e173cb48b62833",
+    "fullHistory": true,
+    "cleanAtCiEvidence": true,
+    "developerEnvPresent": false,
+    "sourceSnapshotSha256": "35c7c86b5d9165e9b207cc0fbcdf7a45ee9e689a66e056161a13dc995d1803ca",
+    "buildInputSha256": "d92f24248aa882654675c8de402d8f849871298c6d10dbca09dab1f33e17e90b",
+    "migrationSqlFiles": 21,
+    "migrationsUnchangedFrom": "bf34fc0",
+    "adminPhase4GrantSha256": "8d34f1ffa8f2e83cbb760ae07993dae66ce9705ca02bf6cc306707f84d0b7b02",
+    "laterDocumentationCommitsAreTestedRuntime": false
+  },
+  "currentQualificationPath": "docs/security/admin-phase4-qualification.json",
+  "originalQualificationSha256": "540a59db6fc9af983f53939b332a07001c06d2b4e1794c7fbfe1afa81ccbc638",
+  "qualificationRevalidation": {
+    "schemaVersion": 1,
+    "checkedAtUtc": "2026-11-06T00:14:59.628Z",
+    "passed": true,
+    "priorResultLogPairs": 18,
+    "priorExecutionHashes": 18,
+    "ciGates": 28,
+    "ciRerun": false,
+    "sourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+    "sourceTree": "98de5e1791c7b4c6a5c5ef16f6e173cb48b62833",
+    "ciManifestSha256": "b2beb7e8e8c6a390a6ecebe20917167a3d68ebc284f3856220b7539f3ff8ff9a",
+    "migrations": 21,
+    "migrationSchemaLockfileWorkerAndUsersUnchanged": true,
+    "standard24HourDatabaseFreshness": true,
+    "database": {
+      "updatedAt": "2026-11-05T07:00:54.926777429Z",
+      "downloadedAt": "2026-11-05T12:42:55.159104169Z"
+    },
+    "images": [
+      {
+        "image": "hambazi-local/postgres:18.6-alpine3.24-v2@sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+        "actualImageId": "sha256:9ac84fafc67fe04465ba4d47a5e82ba1657a5b6d0e5f09c5e1fbd2745706521b",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "redis:8.10.2-alpine3.23@sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+        "actualImageId": "sha256:16b124a2d3eacd620d917ead6fd26cbf1f1d7117fa94122398971931cfe2d403",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
+        "actualImageId": "sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/bot:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:295734287eb0c2fb1ad8f933123e00ed57410c8ef1be38f253c8961d35654390",
+        "actualImageId": "sha256:295734287eb0c2fb1ad8f933123e00ed57410c8ef1be38f253c8961d35654390",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/worker:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:09abe2ed174cc1ab2fdb4a10774f7339875fe7c060b31764dca3c42cf8264dfc",
+        "actualImageId": "sha256:09abe2ed174cc1ab2fdb4a10774f7339875fe7c060b31764dca3c42cf8264dfc",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
+        "actualImageId": "sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/admin:ae6a3ed7369a25db4a03a3566db44c35161a93fc-11397ac7d079c177@sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+        "actualImageId": "sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      },
+      {
+        "image": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+        "actualImageId": "sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+        "counts": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "unknown": 0
+        }
+      }
+    ],
+    "serverObserved": false
+  },
+  "fallback": {
+    "schemaVersion": 1,
+    "purpose": "local-phase3-compatible-rollback-recipe",
+    "deploymentAuthorized": false,
+    "baseCommit": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e",
+    "backportSourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+    "fallbackCommit": "dc9142b7be796b1097f5ae552d8e795bf9032ce4",
+    "patchPath": "infra/release/admin-phase3-compatible.patch",
+    "patchSha256": "b72dbe2238f7872e3a9eaca98c3af2d81c96d1c4ca7a2aa310799274a753d003",
+    "overlayFiles": [
+      "apps/api/src/composition/admin-http.ts",
+      "apps/api/src/matches/infrastructure/repositories/admin-operations.ts",
+      "apps/api/src/rooms/infrastructure/repositories/admin-operations.ts",
+      "docs/contracts/admin.openapi.json",
+      "infra/docker/admin/public-https.conf",
+      "packages/validation/src/admin-management.ts"
+    ],
+    "lockfileAndMigrationsUnchanged": true,
+    "patchScope": [
+      "five permission keys and action/history parser",
+      "narrow Room conditional-update and Match processed-command repairs",
+      "idempotent aborted-body admission cleanup preserving Phase3 route allowlist",
+      "explicit Phase4 search aliases denied in fallback ingress",
+      "regenerated compatible Phase3 management contract"
+    ],
+    "qualifiedProductionDependencies": "Reuse exact API image production dependency tree only when every workspace manifest and pnpm-lock match baseline; replace all built workspace dist with this candidate outputs; native package versions unchanged.",
+    "status": "LOCAL_BUILD_SCAN_AND_ADMIN_ROLLBACK_REHEARSAL_PASSED",
+    "localBranch": "codex/admin-phase3-compatible-fallback",
+    "image": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+    "sourceSnapshotSha256": "578c8209411472b60316c60839922bff416dd4e9859ac17f0f07927359564361",
+    "adminSourceSha256": "347d7b9efcb7f421548728c1ff63c7a2154b77082e32a34c278e2d51394721e9",
+    "buildInputSha256": "5faf24ec68d51e0b96ce12333e730f4b84c7253f2a5b79ec67bfcd0052056a46",
+    "evidencePath": "docs/security/admin-phase4-staging-preparation.json",
+    "scope": "Admin Backend/client/ingress only; retain qualified current Core/API/Bot/Worker/Web/data images; no complete Core rollback set built",
+    "realDeploymentVerified": false
+  },
+  "fallbackImage": {
+    "schemaVersion": 1,
+    "purpose": "local-phase3-compatible-fallback",
+    "productionReleaseApproved": false,
+    "image": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+    "adminSourceSha256": "347d7b9efcb7f421548728c1ff63c7a2154b77082e32a34c278e2d51394721e9",
+    "apiImage": "hambazi-candidate/api:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:b953205dc4208d2b83ea76014069522831e0baa4203378f5204de196976e26dc",
+    "runtimeImage": "hambazi-candidate/web:ae6a3ed7369a25db4a03a3566db44c35161a93fc-d92f24248aa88265@sha256:4698b1fd77c58a6d1e79e3a370720d4f6bd07ed0ce0ba303a07157d3401645cc",
+    "sourceSnapshotSha256": "578c8209411472b60316c60839922bff416dd4e9859ac17f0f07927359564361",
+    "fallbackCommit": "dc9142b7be796b1097f5ae552d8e795bf9032ce4",
+    "baseCommit": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e",
+    "patchSha256": "b72dbe2238f7872e3a9eaca98c3af2d81c96d1c4ca7a2aa310799274a753d003",
+    "replacedWorkspacePackages": [
+      "@hambazi/config",
+      "@hambazi/contracts",
+      "@hambazi/coup-engine",
+      "@hambazi/database",
+      "@hambazi/game-core",
+      "@hambazi/kahroba-engine",
+      "@hambazi/observability",
+      "@hambazi/validation"
+    ],
+    "coreInventorySha256": "6232452c7034e371bf95eddca753113058f407922b67a17faebe4f2c77b41571",
+    "buildInputSha256": "5faf24ec68d51e0b96ce12333e730f4b84c7253f2a5b79ec67bfcd0052056a46",
+    "intermediateImage": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:e0efde74972c0dc1941859c7a8926c601339b04e683191b870960a341d7bb813",
+    "labels": {
+      "org.opencontainers.image.revision": "dc9142b7be796b1097f5ae552d8e795bf9032ce4",
+      "io.hambazi.source-snapshot-sha256": "578c8209411472b60316c60839922bff416dd4e9859ac17f0f07927359564361",
+      "io.hambazi.build-input-sha256": "5faf24ec68d51e0b96ce12333e730f4b84c7253f2a5b79ec67bfcd0052056a46",
+      "io.hambazi.fallback-base": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e",
+      "io.hambazi.fallback-patch-sha256": "b72dbe2238f7872e3a9eaca98c3af2d81c96d1c4ca7a2aa310799274a753d003",
+      "io.hambazi.purpose": "local-phase3-compatible-fallback"
+    }
+  },
+  "fallbackScan": {
+    "ok": true,
+    "image": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+    "counts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "unknown": 0
+    },
+    "findings": [],
+    "database": {
+      "updatedAt": "2026-11-05T07:00:54.926777429Z",
+      "downloadedAt": "2026-11-05T12:42:55.159104169Z"
+    }
+  },
+  "rollbackRehearsal": {
+    "schemaVersion": 1,
+    "purpose": "owned-disposable-phase4-phase3-compatible-phase4",
+    "passed": true,
+    "checks": 133,
+    "facts": {
+      "flagDisabledRestrictionPreserved": true,
+      "abortedAdmissionRecovered": true,
+      "historyAfterGrantRevocation": true,
+      "migrationRedeployPreserved": true,
+      "phase3ReaderGrantsRestored": true,
+      "auditPrefixPreserved": true,
+      "ownerCredentialMetadataPreserved": true,
+      "pendingNewKeyActionParsed": true,
+      "idempotentReplayPreserved": true,
+      "limitedRole403": true,
+      "explicitSessionRevocation": true,
+      "phase3BrowserHistory": true,
+      "phase4RoutesClosed": true,
+      "phase3RestrictionEnforced": true,
+      "phase3ExpiryPreserved": true,
+      "roomCloseApplied": true,
+      "matchTerminateApplied": true,
+      "hiddenStatePreserved": true,
+      "currentForwardReadsRestored": true
+    },
+    "currentImage": "hambazi-candidate/admin:ae6a3ed7369a25db4a03a3566db44c35161a93fc-11397ac7d079c177@sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+    "fallbackImage": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+    "actualCurrentImage": "sha256:4b3377ea5141ea75b376607b3f2b5d10b4c1fe828d4f64216d903167ee16e338",
+    "actualFallbackImage": "sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+    "migrations": 21,
+    "tables": 45,
+    "extraColumnGrantsRevoked": 39,
+    "historyCases": 5,
+    "operationsPrefixCount": 6,
+    "auditPrefixCount": 31,
+    "realOwnerTouched": false,
+    "syntheticOnly": true
+  },
+  "rehearsalExitCode": 0,
+  "rehearsalIncludesSuccessfulCleanup": true,
+  "unitCounts": {
+    "api": 1073,
+    "validation": 115,
+    "admin": 3
+  },
+  "supplementalIngressTests": 4,
+  "ciRerun": false,
+  "limits": [
+    "Original exact-runtime 28-gate PASS is revalidated, not rerun or a causal repair of the old migration-fault-release failure.",
+    "Fallback is only Admin Backend/client/ingress; qualified current Core retained. No complete Core/API/Worker fallback images built or live rollback performed.",
+    "Direct Phase3 games/search is a legacy games/:id alias returning an empty old page; advanced filter is 400 and new roster/history paths404. Actual public fallback ingress denies Phase4 paths404 before upstream.",
+    "Synthetic schema has45 named public tables and21 migrations; real target inventory remains unobserved.",
+    "Fallback receipt133 checks is written before final health/isolation cleanup; whole owning process exit0 and completion markers are also required and verified.",
+    "Historical backup scripts remain unqualified for new ceremony; a newly bound reviewed and synthetic-tested full tool bundle remains necessary.",
+    "Synthetic OWNER, credentials, metadata/hash comparisons and restrictions only; no real data/credential hashes published.",
+    "Final metadata-only document scan found two generic-api-key matches on result/log digest field names; safe rule/file/line diagnostics confirmed both are public report SHA-256 values. Renamed those misleading fields to neutral finalDocumentCheck.resultSha256/logSha256, without scanner exceptions or policy changes; the failed scan remains retained."
+  ],
+  "failedAttemptsRetained": [
+    {
+      "stages": ["phase3-parser-red", "phase3-parser-complete-red"],
+      "classification": "Expected TDD RED: original Phase3 rejects five keys/new-key action histories; compatible parser GREEN."
+    },
+    {
+      "stages": ["rollback-rehearsal", "rollback-rehearsal-diagnostic"],
+      "classification": "Supplemental probe incorrectly expected private legacy games/search to404; confirmed legacy route and exact empty/invalid-query behavior plus separate public deny tested."
+    },
+    {
+      "stages": ["rollback-rehearsal-final", "rollback-rehearsal-location"],
+      "classification": "Supplemental browser locator expected exact role text on li containing edit/delete controls; corrected to unique role listitem with edit button, not product behavior."
+    },
+    {
+      "stages": ["rollback-rehearsal-ui-corrected"],
+      "classification": "Synthetic fixture duplicate Coup insert23505: baseline migration already seeds it. Reuse and assert existing owned baseline row; no product fix."
+    }
+  ],
+  "evidenceDirectory": "/home/mehdi/.cache/hambazi-phase4-staging-prep-mzd__czc",
+  "evidenceFiles": [
+    {
+      "stage": "evidence-revalidation",
+      "exitCode": 0,
+      "durationSeconds": 1.27,
+      "resultSha256": "69aaa36f209ee6bd71041d88ede650a11835c429f695afd42b51883252f1ad89",
+      "logSha256": "6d269c0774df1bc28cbed4dfcb64ef1db79f1e5e056a83d1d6f695cb1de38c5b"
+    },
+    {
+      "stage": "fallback-admin-unit",
+      "exitCode": 0,
+      "durationSeconds": 1.38,
+      "resultSha256": "18e3c5561414877ef5092b31c7f5725e6fd4a36cbcc63031b26e50904aa3d1df",
+      "logSha256": "9705e4a7b52812a7b00564716e9a2d2ee8c2ed50dc6a89da4346f671140ee4b5"
+    },
+    {
+      "stage": "fallback-api-unit",
+      "exitCode": 0,
+      "durationSeconds": 30.94,
+      "resultSha256": "7e1451abeae40afeaf0385092aca17fe1ae13d48bd80d69a652b78e3448766fe",
+      "logSha256": "0c5a06f35b380b4f3e26913a412454b4bb063a8f6caeea8db0998819093c08d7"
+    },
+    {
+      "stage": "fallback-build",
+      "exitCode": 0,
+      "durationSeconds": 23.77,
+      "resultSha256": "7de40c71c2165f4e4b97db89b749572e5567ff3a74e5a32f4bb96f304cdd72d2",
+      "logSha256": "7b45176e4fdbf13f0eb6453c6f4f15e28a5cdf968e32122b94a17a49d1bae5b7"
+    },
+    {
+      "stage": "fallback-contract-generate",
+      "exitCode": 0,
+      "durationSeconds": 6.59,
+      "resultSha256": "eb5564338ff417ba1ce7cc70a5ad38104e2457a65963a9b1f0d8df5b60c1bf0b",
+      "logSha256": "09b0b6a6fa568cf35096c4172d791506932c2959a4a652a73dd8926e075b9819"
+    },
+    {
+      "stage": "fallback-final-build",
+      "exitCode": 0,
+      "durationSeconds": 25.53,
+      "resultSha256": "04863a05b1f20a6c2f2579363611425210d06ddb5106cc5925c708526f66cec3",
+      "logSha256": "51dacaa3d9d48c17b41debb8d3d4f237a08eeddea88ae7deeb322df07065e4bb"
+    },
+    {
+      "stage": "fallback-format",
+      "exitCode": 0,
+      "durationSeconds": 1.77,
+      "resultSha256": "18b807a26d90d6189f0cf3cb065a0dd95148aad767fa9358d26794d30f117c7a",
+      "logSha256": "59376b3783023b90d92d1c5aeb27a62eb7c122ed3c1886cc3ff4a942b162a6f7"
+    },
+    {
+      "stage": "fallback-frozen-install",
+      "exitCode": 0,
+      "durationSeconds": 181.41,
+      "resultSha256": "f7e4401130d458747582a345b036332e2696172467771d8cc31d5bdbbd7bbb81",
+      "logSha256": "da693decb502f460548afb46e42be49e3b40bbd3d46300d82bd8f0221ed1cb16"
+    },
+    {
+      "stage": "fallback-image-build",
+      "exitCode": 0,
+      "durationSeconds": 131.52,
+      "resultSha256": "b9f03c7e50c5295758f79dc3cc7b056fd4799a596be067238b86a699273bad4e",
+      "logSha256": "8487acf076ecb4b0af3d946fce0833a5fb81c6e394a7eb0e03a82a31339013c3"
+    },
+    {
+      "stage": "fallback-image-finalize",
+      "exitCode": 0,
+      "durationSeconds": 7.39,
+      "resultSha256": "cb7eebc9c07c7e862e717bc2e41a06f4305a4a0449b016a9daac729b47989945",
+      "logSha256": "762bb0418ee50297681e5107d0edf924791683ce7511e90f5a8f3e1616e4f14d"
+    },
+    {
+      "stage": "fallback-image-scan",
+      "exitCode": 0,
+      "durationSeconds": 7.43,
+      "resultSha256": "a682b943188576437e396c6873b690b584b63e305ec71b492e269c14b07b1468",
+      "logSha256": "c0651c735c287a6759042bd93428754e88692c72c01e20977bfcaf6fc29343a3"
+    },
+    {
+      "stage": "fallback-ingress",
+      "exitCode": 0,
+      "durationSeconds": 28.81,
+      "resultSha256": "05ac097aee140fe8ea804e47fb8bb485765b612a241e7518745d3bacbc60f0e8",
+      "logSha256": "2b7426ecabe873da17c11478c2b8d8dc128b3a2e867e3180cb3666812921369b"
+    },
+    {
+      "stage": "fallback-source-snapshot",
+      "exitCode": 0,
+      "durationSeconds": 0.82,
+      "resultSha256": "d447357eab8c766907471b01ab80328a64c1454e79bb222dcbe87a6b69400379",
+      "logSha256": "7a112cb1812be0e98e5c9bf75954be85e526a4ccc2b9e156dc6d8c267cd0dbdf"
+    },
+    {
+      "stage": "fallback-validation-unit",
+      "exitCode": 0,
+      "durationSeconds": 1.22,
+      "resultSha256": "8e8a7b74f443c74f2f2436929c62320afab18f79a2b0f7fc9066ce814de0dacb",
+      "logSha256": "bc64db0d60c4635c4b1d0b056643c9a8028b8b522c0d9a523cd02eaf47d32f6c"
+    },
+    {
+      "stage": "phase3-compatible-parser-green",
+      "exitCode": 0,
+      "durationSeconds": 0.22,
+      "resultSha256": "34b3395040943c6becb32a379cfd4fdb0b0f4f779d2cccb5ea207a0435966a90",
+      "logSha256": "3773e5e3f12bcb2a587b3b79855c3276d57c425a0f1d879a1c29c7f1f4f88329"
+    },
+    {
+      "stage": "phase3-parser-complete-red",
+      "exitCode": 1,
+      "durationSeconds": 0.22,
+      "resultSha256": "2042bad3a10d30fa616e3e73abae4a485816ef8362dccb5010f26f731c1e1675",
+      "logSha256": "f33cdbd62886c3dfdb930abc8c1847ff95fc111156b2a157fdbca97f0179916e"
+    },
+    {
+      "stage": "phase3-parser-red",
+      "exitCode": 1,
+      "durationSeconds": 0.22,
+      "resultSha256": "77c641f5a1e222a3500cabda006d33e7b5e4400fa3bcd0c67389e0c382e6935b",
+      "logSha256": "6a7e394fdc8de0519a3b12e8d260da230c10aaf33274019c7d86f14ddfc8336c"
+    },
+    {
+      "stage": "rollback-probe-syntax",
+      "exitCode": 0,
+      "durationSeconds": 0.06,
+      "resultSha256": "62fa9aead494d0aa256139142cc865aa97987a9a22113970953617b5201f318d",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stage": "rollback-rehearsal-diagnostic",
+      "exitCode": 1,
+      "durationSeconds": 62.36,
+      "resultSha256": "4cb817949dc8f4bcc697f4c4caeba656dc90669a12575a8294badfde0953a5c1",
+      "logSha256": "ed9af551e2e055fc172e8bcfedf61a2cfa122f946b4135f2f97cecc41b8c67b8"
+    },
+    {
+      "stage": "rollback-rehearsal-final",
+      "exitCode": 1,
+      "durationSeconds": 73.71,
+      "resultSha256": "50b0c12c0e465c1792fd410d38b5f2123dcf19dc04e8700866d801677e01ec7f",
+      "logSha256": "dd9f07b38400d76ab1e8232aa205272658601068e92725d8a154f989183e83a5"
+    },
+    {
+      "stage": "rollback-rehearsal-location",
+      "exitCode": 1,
+      "durationSeconds": 74.76,
+      "resultSha256": "f6b75c8ecc44f54c95d56ce816bf3ac8e15b2ed3826582fd6eb9275502434f4c",
+      "logSha256": "80436c615e1adad168cabffdb6ea2c6df2d73b9084c6998ae20b897d0464e996"
+    },
+    {
+      "stage": "rollback-rehearsal-seed-corrected",
+      "exitCode": 0,
+      "durationSeconds": 100.37,
+      "resultSha256": "793aced1746ef6d06f9a7d018e3d689a736c402e963ad2dbd1ba921b025a614c",
+      "logSha256": "6f830613ecacd40af01569bafb21ff56d31d0a9263bd0d9a37606aa5bbd4ebc6"
+    },
+    {
+      "stage": "rollback-rehearsal-ui-corrected",
+      "exitCode": 1,
+      "durationSeconds": 78.32,
+      "resultSha256": "06cc0e12254469901231b7de13d06300c8bb55ee70b9a50372ec726a6a0143a3",
+      "logSha256": "2a557096194e3cf62cc2986ada7c4c9ecabd4a887c61d267e72527059d91744b"
+    },
+    {
+      "stage": "rollback-rehearsal",
+      "exitCode": 1,
+      "durationSeconds": 65.42,
+      "resultSha256": "5a8c275105e6550e901f8be6b379de7881f546df1ad0d0e20d9dff34fbf34c06",
+      "logSha256": "faa7d2bf04f3b4d9fb1a004c846c3fb904413705bb106f3d5beaba54d7f3fe46"
+    }
+  ],
+  "executionAndArtifactHashes": [
+    {
+      "path": "run.py",
+      "sha256": "6c7849b2b30a6261cfa4844ba1c3424628333b5e1d4b453e25d3f14f3cd92c0e"
+    },
+    {
+      "path": "environment.json",
+      "sha256": "25a87288505bf40a32edb1cd819cc6aae75d61decdc69f7cf85e6d8b119f797a"
+    },
+    {
+      "path": "parser-probe.mjs",
+      "sha256": "97db5293de05af73e97520e2596995fbeff7294eb97bd34fbf891eaebb4f4f87"
+    },
+    {
+      "path": "build-fallback-image.py",
+      "sha256": "3a6642e3a5b7003959ba6f6f9902bcc517e733afa26a79e9eaa92fa97ad59bc8"
+    },
+    {
+      "path": "finalize-fallback-image.py",
+      "sha256": "82096051e5a267a9e24149b5bab3aea8f1380c8c69616e868cd82d1460840cbf"
+    },
+    {
+      "path": "scan-fallback.mjs",
+      "sha256": "d194b06345111accccc5216e9459a1662355abf1ba5a06fa0bbbe06ead3e66be"
+    },
+    {
+      "path": "rollback-fixture.mjs",
+      "sha256": "253b0ad669ac28caee17ed396bca7d80de3b34aa0e908145e3787140afe43ea7"
+    },
+    {
+      "path": "rollback-image-drill.mjs",
+      "sha256": "5b1f09fa0c48c2ee3a4b7514dd25b496d5c003f1fc287c2c71f335f02b6bb6b2"
+    },
+    {
+      "path": "run-ingress.py",
+      "sha256": "fa10b797105b7a0752f4aeaa935c411151db226deeff977b362b1bb81860adaf"
+    },
+    {
+      "path": "ingress-original.test.ts",
+      "sha256": "e72184eb078e76855131a525f83301a2ef57d937f20ffa331a3a89c9b8118e81"
+    },
+    {
+      "path": "ingress-extended.test.ts",
+      "sha256": "fafec901f497f11ad2c348353784738386a527dccc194725fe3f83b0b3dd7936"
+    },
+    {
+      "path": "revalidate.mjs",
+      "sha256": "d537ba7020acd432f136bfd9e238662e9bda0d041006835eeb1cd95eb80f1a6f"
+    },
+    {
+      "path": "fallback-image.json",
+      "sha256": "8268b15e701e318db400ea4686075d986b7c232587002ee563a9ec184e09cffc"
+    },
+    {
+      "path": "fallback-image.scan.json",
+      "sha256": "e938bd2fe6a655a83f39ab8066f2f79fe55239ea25c6423b0f433c364b231a57"
+    },
+    {
+      "path": "fallback-source.json",
+      "sha256": "d795719a1b6fc432d508227f958b5480a195b6e578bb932ee586080350e90b62"
+    },
+    {
+      "path": "fallback-snapshot.json",
+      "sha256": "1e01e714cc6eaa49cf1e9e3dbc24df0ca59975cc2273b64cea7faa798500c14d"
+    },
+    {
+      "path": "admin-source-manifest.json",
+      "sha256": "e608eace9827324e0eeab02ca88a886536636b2ba9180bd75211427bc0c67ac2"
+    },
+    {
+      "path": "rollback-rehearsal.json",
+      "sha256": "38f1b66ba0a76719502d60f9a6d8e7bcdda0dd2da9af65451c6d7a78e018c0ea"
+    },
+    {
+      "path": "evidence-revalidation.json",
+      "sha256": "cc5089a9a572ef4e1b50fe3032e805b0242d21e4e9509a012ac25f611dabba59"
+    }
+  ],
+  "remainingGates": [
+    "Current image-scan evidence expired onNov7; bounded official database refresh failed before scans. Obtain fresh standard-policy database and rescan all eight exact current+fallback images; no exception or cause claim.",
+    "Unknown historical migration failure cause remains an explicitly unaccepted residual risk; no automatic waiver.",
+    "New current-source full backup/restore/admission tool bundle B0: review and synthetic full nonfixture/failure-path requalification.",
+    "Separate future Staging authorization, actual target health/drift/inventory/deadlines/image-load/ingress checks and fresh exact-image scans.",
+    "Fresh quiesced real encrypted full DB+globals+key/config archive, independently verified offserver copy and actual same-archive restore plus strict admission receipt.",
+    "Authorized liveQA including previously unverified limited-role403 and explicit session-revocation receipt/Audit."
+  ],
+  "unrun": [
+    "SSH/Staging/Production/real OWNER/real backups and restore/live QA",
+    "Capacity/load/stress/soak; deferred to future server",
+    "Phase5",
+    "Hosted Actions"
+  ],
+  "review": {
+    "status": "COMPLETE_NO_ACTIONABLE_FINDINGS",
+    "path": "docs/security/admin-phase4-staging-preparation-review.md",
+    "sourceReportSha256": "1ad647956427efad2741d8a3bd903601971ade256e2d2a02c062f6b49587091b",
+    "independentChecks": "24 result/log pairs,19 helper/artifact hashes, exact patch/source branch/image labels and22396 context entries; no heavy rerun, no real system access. Final doc formatting/secrets are parent follow-up.",
+    "subsequentParentUpdate": "After independent review, final documentation metadata matches were corrected without an exception and rescan passed. A Nov7 standard-policy refresh attempt subsequently failed before image scans; current security admission is BLOCKED. Independent review is not claimed to cover this later attempt.",
+    "followup": "Independent read-only follow-up verified latest BLOCKED statuses, failed refresh hashes/order/no outputs, and successful corrected/final-status document checks. No actionable finding; real release remains NO-GO."
+  },
+  "documentationValidation": {
+    "formatting": "passed all eight Markdown/JSON preparation documents/recipe",
+    "initialSecrets": {
+      "schemaVersion": 1,
+      "kind": "secrets",
+      "status": "passed",
+      "tool": {
+        "name": "gitleaks",
+        "version": "8.30.1",
+        "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+      },
+      "history": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 4,
+        "reviewedFalsePositives": 4
+      },
+      "files": 1264,
+      "current": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 1,
+        "reviewedFalsePositives": 1
+      },
+      "ok": true
+    },
+    "newSecurityExceptions": 0,
+    "finalReviewDocumentScan": "passed current+full history; existing exact reviewed false positives only",
+    "finalSecrets": {
+      "schemaVersion": 1,
+      "kind": "secrets",
+      "status": "passed",
+      "tool": {
+        "name": "gitleaks",
+        "version": "8.30.1",
+        "sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509"
+      },
+      "history": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 4,
+        "reviewedFalsePositives": 4
+      },
+      "files": 1265,
+      "current": {
+        "ok": true,
+        "findings": 0,
+        "detectedFindings": 1,
+        "reviewedFalsePositives": 1
+      },
+      "ok": true
+    },
+    "finalDocumentCheck": {
+      "stage": "corrected-doc-secrets",
+      "resultSha256": "ce5699494d65f02912c26df179f86754f5fd8d2004063fb815f89193a1fc7ae6",
+      "logSha256": "b034a82a6fd1cad25fc1c194808fe8e1f91dd1bf1f5994626e7da1ed53ad9977"
+    },
+    "failedMetadataScanRetained": {
+      "stage": "final-record-secrets",
+      "exitCode": 1,
+      "resultSha256": "8746e73665547cb03519c52b784734de3c2ffe18485b7b8123c72c20380ad9bc",
+      "logSha256": "3b8a1562777c1b0c90ded84fa4a6b589615c26be84722ed33032de929da04986"
+    },
+    "canonicalPatchValidation": "Exact git-generated bytes/hash match base→fallback diff; reverse git apply --check passes. Full cached whitespace check flags the mandatory one-space blank context marker in the patch data at334. Markdown/JSON whitespace check passes; no canonical patch bytes, policy or whitespace configuration changed."
+  },
+  "finalizedAtUtc": "2026-11-07T16:16:02.250782+00:00",
+  "currentSecurityAdmission": {
+    "status": "BLOCKED",
+    "checkedAtUtc": "2026-11-07T16:16:02.250782+00:00",
+    "priorNov6FreshnessIsCurrent": false,
+    "reason": "Nov5 scanner database exceeds unchanged24h freshness policy onNov7. Official pinned Trivy download did not complete within bounded attempt; command killed, signalSIGPIPE, exit1. No new per-image scan started; underlying external failure cause not established.",
+    "attemptedImages": 0,
+    "plannedExactImages": 8,
+    "stage": "refresh-eight-images",
+    "durationSeconds": 200.09,
+    "resultSha256": "9a9a5b1de2064ed0cbf55751e8236bb2c4149d3804a4ee2d25b75ddce53c7fa9",
+    "logSha256": "ac218c76d05bde6e837ae4a27221ec32d0fdcf0cfbfe622fa7fc10b9aa960609",
+    "helperSha256": "1391dd16721b522b1354515c2106495aeb57e2e39e69018d37da387443533e97",
+    "policyWeakened": false,
+    "newExceptions": 0
+  }
+}

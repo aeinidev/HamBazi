@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-phase3-compatible-rollback-recipe",
+  "deploymentAuthorized": false,
+  "baseCommit": "bf34fc0a4aa4638099018a2ba05c6b6ba7711a9e",
+  "backportSourceCommit": "ae6a3ed7369a25db4a03a3566db44c35161a93fc",
+  "fallbackCommit": "dc9142b7be796b1097f5ae552d8e795bf9032ce4",
+  "patchPath": "infra/release/admin-phase3-compatible.patch",
+  "patchSha256": "b72dbe2238f7872e3a9eaca98c3af2d81c96d1c4ca7a2aa310799274a753d003",
+  "overlayFiles": [
+    "apps/api/src/composition/admin-http.ts",
+    "apps/api/src/matches/infrastructure/repositories/admin-operations.ts",
+    "apps/api/src/rooms/infrastructure/repositories/admin-operations.ts",
+    "docs/contracts/admin.openapi.json",
+    "infra/docker/admin/public-https.conf",
+    "packages/validation/src/admin-management.ts"
+  ],
+  "lockfileAndMigrationsUnchanged": true,
+  "patchScope": [
+    "five permission keys and action/history parser",
+    "narrow Room conditional-update and Match processed-command repairs",
+    "idempotent aborted-body admission cleanup preserving Phase3 route allowlist",
+    "explicit Phase4 search aliases denied in fallback ingress",
+    "regenerated compatible Phase3 management contract"
+  ],
+  "qualifiedProductionDependencies": "Reuse exact API image production dependency tree only when every workspace manifest and pnpm-lock match baseline; replace all built workspace dist with this candidate outputs; native package versions unchanged.",
+  "status": "LOCAL_BUILD_SCAN_AND_ADMIN_ROLLBACK_REHEARSAL_PASSED",
+  "localBranch": "codex/admin-phase3-compatible-fallback",
+  "image": "hambazi-candidate/admin:dc9142b7be796b1097f5ae552d8e795bf9032ce4-347d7b9efcb7f421@sha256:fb168d48a0fdc425c0aa37ccd2b63073678b157a6059333002f9363e804ff9aa",
+  "sourceSnapshotSha256": "578c8209411472b60316c60839922bff416dd4e9859ac17f0f07927359564361",
+  "adminSourceSha256": "347d7b9efcb7f421548728c1ff63c7a2154b77082e32a34c278e2d51394721e9",
+  "buildInputSha256": "5faf24ec68d51e0b96ce12333e730f4b84c7253f2a5b79ec67bfcd0052056a46",
+  "evidencePath": "docs/security/admin-phase4-staging-preparation.json",
+  "scope": "Admin Backend/client/ingress only; retain qualified current Core/API/Bot/Worker/Web/data images; no complete Core rollback set built",
+  "realDeploymentVerified": false
+}

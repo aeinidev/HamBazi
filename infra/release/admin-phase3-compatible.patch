@@ -1,0 +1,362 @@
+diff --git a/apps/api/src/composition/admin-http.ts b/apps/api/src/composition/admin-http.ts
+index 84c9926..0990495 100644
+--- a/apps/api/src/composition/admin-http.ts
++++ b/apps/api/src/composition/admin-http.ts
+@@ -93,6 +93,11 @@ export async function createAdminHttpApplication(
+   const fastify = adapter.getInstance();
+   let inFlight = 0;
+   const admitted = new WeakSet<object>();
++  const admitting = new WeakSet<object>();
++  const aborted = new WeakSet<object>();
++  const release = (request: object) => {
++    if (admitted.delete(request)) inFlight--;
++  };
+   fastify.addHook("onRequest", async (request, reply) => {
+     reply.headers({
+       "Cache-Control": "no-store",
+@@ -137,8 +142,14 @@ export async function createAdminHttpApplication(
+     inFlight++;
+     admitted.add(request);
+     // Durable logout must remain possible during an ephemeral limiter outage.
+-    if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(clientIp)))
+-      return reply.code(429).send(body("RATE_LIMITED"));
++    admitting.add(request);
++    try {
++      if (request.raw.url !== "/v1/admin/auth/logout" && !(await transport.admitIp(clientIp)))
++        return reply.code(429).send(body("RATE_LIMITED"));
++    } finally {
++      admitting.delete(request);
++      if (aborted.delete(request)) release(request);
++    }
+   });
+   fastify.addHook("preHandler", async (request, reply) => {
+     if (request.raw.url === "/v1/admin/auth/login") {
+@@ -159,7 +170,11 @@ export async function createAdminHttpApplication(
+       return reply.code(400).send(body("INVALID_INPUT"));
+   });
+   fastify.addHook("onResponse", async (request) => {
+-    if (admitted.delete(request)) inFlight--;
++    release(request);
++  });
++  fastify.addHook("onRequestAbort", async (request) => {
++    if (admitting.has(request)) aborted.add(request);
++    else release(request);
+   });
+   const app = await NestFactory.create<NestFastifyApplication>(
+     createAdminHttpModule(deps),
+diff --git a/apps/api/src/matches/infrastructure/repositories/admin-operations.ts b/apps/api/src/matches/infrastructure/repositories/admin-operations.ts
+index 03f4fff..c178f40 100644
+--- a/apps/api/src/matches/infrastructure/repositories/admin-operations.ts
++++ b/apps/api/src/matches/infrastructure/repositories/admin-operations.ts
+@@ -106,7 +106,8 @@ export function createMatchesAdminOperationsRepository(
+             lastEventSeq: seq,
+             status: "TERMINATED",
+           };
+-          await db.processedCommand.create({
++          // No returned command columns are needed by this writer's narrow credential.
++          await db.processedCommand.createMany({
+             data: {
+               matchId: a.targetId,
+               actionId: op.id,
+@@ -118,7 +119,6 @@ export function createMatchesAdminOperationsRepository(
+               resultJsonb: ack,
+               createdAt: time,
+             },
+-            select: { matchId: true },
+           });
+           await db.outboxEvent.create({
+             data: {
+diff --git a/apps/api/src/rooms/infrastructure/repositories/admin-operations.ts b/apps/api/src/rooms/infrastructure/repositories/admin-operations.ts
+index ca5ebd1..13527d9 100644
+--- a/apps/api/src/rooms/infrastructure/repositories/admin-operations.ts
++++ b/apps/api/src/rooms/infrastructure/repositories/admin-operations.ts
+@@ -45,10 +45,10 @@ export function createRoomsAdminOperationsRepository(
+     execute(op: AdminEffectCommand) {
+       const a = action(op.action);
+       return scope.transaction(async (db) => {
+-        await db.lockRooms();
+         await db.lockAdminEffect(op.id);
+         const previous = await db.roomAdminEffect.findUnique({ where: { id: op.id } });
+         if (previous) return check(previous, op);
++        // Guarded UPDATE participates in the Room table lane without broader LOCK privileges.
+         const changed = await db.room.updateMany({
+           where: {
+             id: a.targetId,
+diff --git a/docs/contracts/admin.openapi.json b/docs/contracts/admin.openapi.json
+index b9fc8de..75cf2e1 100644
+--- a/docs/contracts/admin.openapi.json
++++ b/docs/contracts/admin.openapi.json
+@@ -2289,9 +2289,14 @@
+                           "rooms.view",
+                           "rooms.manage",
+                           "rooms.approve",
++                          "rooms.players.view",
++                          "rooms.diagnostics.view",
+                           "matches.view",
+                           "matches.manage",
+                           "matches.approve",
++                          "matches.players.view",
++                          "matches.history.view",
++                          "matches.diagnostics.view",
+                           "monitoring.view",
+                           "audit.view",
+                           "admins.view",
+@@ -2332,9 +2337,14 @@
+                             "rooms.view",
+                             "rooms.manage",
+                             "rooms.approve",
++                            "rooms.players.view",
++                            "rooms.diagnostics.view",
+                             "matches.view",
+                             "matches.manage",
+                             "matches.approve",
++                            "matches.players.view",
++                            "matches.history.view",
++                            "matches.diagnostics.view",
+                             "monitoring.view",
+                             "audit.view",
+                             "admins.view",
+@@ -2711,9 +2721,14 @@
+                                     "rooms.view",
+                                     "rooms.manage",
+                                     "rooms.approve",
++                                    "rooms.players.view",
++                                    "rooms.diagnostics.view",
+                                     "matches.view",
+                                     "matches.manage",
+                                     "matches.approve",
++                                    "matches.players.view",
++                                    "matches.history.view",
++                                    "matches.diagnostics.view",
+                                     "monitoring.view",
+                                     "audit.view",
+                                     "admins.view",
+@@ -2816,9 +2831,14 @@
+                                     "rooms.view",
+                                     "rooms.manage",
+                                     "rooms.approve",
++                                    "rooms.players.view",
++                                    "rooms.diagnostics.view",
+                                     "matches.view",
+                                     "matches.manage",
+                                     "matches.approve",
++                                    "matches.players.view",
++                                    "matches.history.view",
++                                    "matches.diagnostics.view",
+                                     "monitoring.view",
+                                     "audit.view",
+                                     "admins.view",
+@@ -4007,9 +4027,14 @@
+                                             "rooms.view",
+                                             "rooms.manage",
+                                             "rooms.approve",
++                                            "rooms.players.view",
++                                            "rooms.diagnostics.view",
+                                             "matches.view",
+                                             "matches.manage",
+                                             "matches.approve",
++                                            "matches.players.view",
++                                            "matches.history.view",
++                                            "matches.diagnostics.view",
+                                             "monitoring.view",
+                                             "audit.view",
+                                             "admins.view",
+@@ -4133,9 +4158,14 @@
+                                             "rooms.view",
+                                             "rooms.manage",
+                                             "rooms.approve",
++                                            "rooms.players.view",
++                                            "rooms.diagnostics.view",
+                                             "matches.view",
+                                             "matches.manage",
+                                             "matches.approve",
++                                            "matches.players.view",
++                                            "matches.history.view",
++                                            "matches.diagnostics.view",
+                                             "monitoring.view",
+                                             "audit.view",
+                                             "admins.view",
+@@ -4882,9 +4912,14 @@
+                                     "rooms.view",
+                                     "rooms.manage",
+                                     "rooms.approve",
++                                    "rooms.players.view",
++                                    "rooms.diagnostics.view",
+                                     "matches.view",
+                                     "matches.manage",
+                                     "matches.approve",
++                                    "matches.players.view",
++                                    "matches.history.view",
++                                    "matches.diagnostics.view",
+                                     "monitoring.view",
+                                     "audit.view",
+                                     "admins.view",
+@@ -5008,9 +5043,14 @@
+                                     "rooms.view",
+                                     "rooms.manage",
+                                     "rooms.approve",
++                                    "rooms.players.view",
++                                    "rooms.diagnostics.view",
+                                     "matches.view",
+                                     "matches.manage",
+                                     "matches.approve",
++                                    "matches.players.view",
++                                    "matches.history.view",
++                                    "matches.diagnostics.view",
+                                     "monitoring.view",
+                                     "audit.view",
+                                     "admins.view",
+@@ -5447,9 +5487,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -5573,9 +5618,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -6317,9 +6367,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -6443,9 +6498,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -9034,9 +9094,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -9160,9 +9225,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -9936,9 +10006,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+@@ -10062,9 +10137,14 @@
+                                       "rooms.view",
+                                       "rooms.manage",
+                                       "rooms.approve",
++                                      "rooms.players.view",
++                                      "rooms.diagnostics.view",
+                                       "matches.view",
+                                       "matches.manage",
+                                       "matches.approve",
++                                      "matches.players.view",
++                                      "matches.history.view",
++                                      "matches.diagnostics.view",
+                                       "monitoring.view",
+                                       "audit.view",
+                                       "admins.view",
+diff --git a/infra/docker/admin/public-https.conf b/infra/docker/admin/public-https.conf
+index 6862a65..14f5b83 100644
+--- a/infra/docker/admin/public-https.conf
++++ b/infra/docker/admin/public-https.conf
+@@ -5,6 +5,10 @@ limit_conn_zone $binary_remote_addr zone=hambazi_admin_connections:10m;
+ 
+ map "$request_method:$uri" $hambazi_admin_api_allowed {
+     default 0;
++    # Phase3-compatible fallback explicitly closes Phase4 search aliases.
++    "GET:/v1/admin/games/search" 0;
++    "GET:/v1/admin/rooms/search" 0;
++    "GET:/v1/admin/matches/search" 0;
+     "POST:/v1/admin/auth/login" 1;
+     "POST:/v1/admin/auth/pin" 1;
+     "POST:/v1/admin/auth/logout" 1;
+diff --git a/packages/validation/src/admin-management.ts b/packages/validation/src/admin-management.ts
+index 47eebaf..f95ab82 100644
+--- a/packages/validation/src/admin-management.ts
++++ b/packages/validation/src/admin-management.ts
+@@ -20,9 +20,14 @@ export const adminPermissionSchema = z.enum([
+   "rooms.view",
+   "rooms.manage",
+   "rooms.approve",
++  "rooms.players.view",
++  "rooms.diagnostics.view",
+   "matches.view",
+   "matches.manage",
+   "matches.approve",
++  "matches.players.view",
++  "matches.history.view",
++  "matches.diagnostics.view",
+   "monitoring.view",
+   "audit.view",
+   "admins.view",
