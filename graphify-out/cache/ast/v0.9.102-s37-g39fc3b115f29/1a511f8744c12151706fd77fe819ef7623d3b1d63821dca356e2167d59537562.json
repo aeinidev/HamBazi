@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_packages_database_prisma_admin_staging_owner_permissions_sql", "label": "admin-staging-owner-permissions.sql", "file_type": "code", "source_file": "packages/database/prisma/admin-staging-owner-permissions.sql", "source_location": null}], "edges": []}

@@ -9,7 +9,7 @@ services:
       driver: none
     security_opt:
       - no-new-privileges:true
-    image: hambazi-security/postgres-staging:20261024-brotli@sha256:646e47d029792855c984a6c1123a97843ee7456e0df5579683b99cba111641aa
+    image: hambazi-security/postgres-staging:20261107-zlib@sha256:2d22fd36f5641f795fbc33f35de72bfc31c726627169f1b7ab909ddfe2225bde
     entrypoint:
       - /bin/sh
       - /usr/local/bin/hambazi-postgres.sh
@@ -94,7 +94,7 @@ services:
       driver: none
     security_opt:
       - no-new-privileges:true
-    image: hambazi-security/redis-staging:20261023-musl@sha256:a2b3313295aa496436419ae5a5a14508ab2058ba39f1d6b1bcd1dcfd50cff57c
+    image: hambazi-security/redis-staging:20261107-zlib@sha256:4cb23e046fb86b8328f65b4d50510beb9c0d09f96be1daac4ef5953172c67452
     user: redis
     read_only: true
     cap_drop:

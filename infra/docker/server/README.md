@@ -9,6 +9,11 @@ Runtime files are `/opt/hambazi/private/compose.json` and
 identities already exist on this host. Merely copying this directory to another
 host does not recreate them or recover the database.
 
+The [2026-11-07 recovery](../../../docs/operations/staging-recovery-20261107.md)
+patched only zlib in the two data images and reopened the player services.
+Admin remained contained. Consult the installed controls and that incident record
+for the actual Phase 3 application pins; older application pins below predate it.
+
 The [2026-10-23 recovery](../../../docs/operations/staging-recovery-20261023.md)
 replaced all six images with musl security derivatives of the same application
 sources. Current pins are in `deployment.json` and `compose.yaml`.
