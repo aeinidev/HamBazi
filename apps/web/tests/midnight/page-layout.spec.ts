@@ -15,7 +15,7 @@ async function fits(page: Page) {
     .evaluateAll((es) =>
       // Cards deliberately scroll inside their own grid; reachability is tested below.
       es
-        .filter((e) => !e.closest(".home-game-grid"))
+        .filter((e) => !e.closest(".home-game-grid, .profile-content"))
         .map((e) => {
           const r = e.getBoundingClientRect();
           return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };

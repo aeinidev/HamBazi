@@ -1,10 +1,21 @@
 import { z } from "zod";
-import { settingsSchema, profilePatchSchema } from "../application/profile.js";
+import {
+  settingsSchema,
+  profilePatchSchema,
+  usernameSchema,
+  avatarSchema,
+} from "../application/profile.js";
+export const usernameAvailabilitySchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  available: z.boolean(),
+});
 export const profileResponseSchema = z.strictObject({
   schemaVersion: z.literal(1),
   userId: z.uuid(),
   displayName: z.string().min(1),
   publicHandle: z.string().min(1),
+  username: usernameSchema.nullable().optional(),
+  avatar: avatarSchema.nullable().optional(),
   version: z.number().int().min(0).max(2147483647),
   settings: settingsSchema,
 });
@@ -48,6 +59,18 @@ export function profileOpenApiDocument() {
       securitySchemes: { bearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
     },
     paths: {
+      "/v1/me/username-availability": {
+        get: {
+          operationId: "checkUsernameAvailability",
+          security: [{ bearer: [] }],
+          parameters: [
+            { name: "username", in: "query", required: true, schema: json(usernameSchema) },
+          ],
+          responses: responses(usernameAvailabilitySchema),
+          description:
+            "Authenticated advisory check; case-insensitive. Uniqueness is rechecked atomically on save. Uses the profile read quota.",
+        },
+      },
       "/v1/me": {
         get: {
           operationId: "readProfile",
@@ -62,7 +85,7 @@ export function profileOpenApiDocument() {
           requestBody: { required: true, content: content(profilePatchSchema) },
           responses: responses(profileAckSchema),
           description:
-            "Nonempty patch; settings if present must be nonempty. ADR-015 name validation. Partial settings merge. Same-value edits increment shared revision. Seven-day normalized-command retry acknowledgements; mismatched command reuse/stale revision returns PROFILE_CONFLICT. After receipt expiry old applied requests remain stale, but original acknowledgement is unavailable. GET current profile after success. Redis failure fails closed. Identity and handles are not editable.",
+            "Nonempty patch; settings if present must be nonempty. ADR-015 name validation. Partial settings merge. Optional username (3-32 ASCII letters/digits/underscore, normalized lowercase) and avatar (official ID, default, or bounded JPEG data URL). Same-value edits increment shared revision. Seven-day normalized-command retry acknowledgements; mismatched command reuse/stale revision or occupied username returns PROFILE_CONFLICT. After receipt expiry old applied requests remain stale, but original acknowledgement is unavailable. GET current profile after success. Redis failure fails closed. Identity and stable public handles are not editable. See ADR-080.",
         },
       },
     },

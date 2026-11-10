@@ -1,0 +1,82 @@
+[
+  {
+    "id": "hb-01",
+    "source": "Giyu Tomioka’s Split-Haori Portrait.png",
+    "sourceSha256": "735be06c38244fac83923bc7596d0d1c65d0288ba282fde2e721130b7d3eeb7a",
+    "outputSha256": "af5a77c2f0cc5efc2307f6c600a26855d196272fd9a7c5d294b4ccc090ec3cc3",
+    "bytes": 45226,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-02",
+    "source": "Jigoro Kuwajima, Elder Thunder Hashira.png",
+    "sourceSha256": "c3ef7d1350e404574ac87cea001594c72f8a364eeafe8907e385a2d7734c2eb0",
+    "outputSha256": "1ad631af478673e7e3343d9103a546ee66154bc3a6ffbd3fb8a4b5fc1ff9a9d8",
+    "bytes": 54024,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-03",
+    "source": "Tanjiro’s Chibi Fantasy Avatar.png",
+    "sourceSha256": "bf4e8115aff260cdce1161c6312eb8d0fcedd8d73ec35a1ee3ca4297cb386191",
+    "outputSha256": "84b49f2f41dea1ba4546452ae43cf3e512f786831ae90edeb6859a95ce8adfe7",
+    "bytes": 52652,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-04",
+    "source": "Cheerful Golden Ninja Avatar.png",
+    "sourceSha256": "88263b32bd4f16ae6aedf0d35c49c5905bee254e5ba4cde34216d4b5c45bf2d7",
+    "outputSha256": "4537806749b8b34289c90ad862b2db2838b7a582d460868602cd92fc22de7ac0",
+    "bytes": 52884,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-05",
+    "source": "Playful Frost Mage Portrait.png",
+    "sourceSha256": "d2ac44dab21cec2157038b77aa3d4a8e38ed5cdb2b66c189411831d9cdc5db50",
+    "outputSha256": "a3f0893b35e23d81eea19044863d5c7d9891884361cbca3c8187187cab1464e8",
+    "bytes": 68264,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-06",
+    "source": "Adorable emerald-eyed armored avatar.png",
+    "sourceSha256": "693fcde88e537590448d32fb58cf654b56291060d71228075420e2af0ed735cf",
+    "outputSha256": "6b236dcec17243ad1e02aafe0e504c7506566e39177572bd00563f616925a0d5",
+    "bytes": 59680,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-07",
+    "source": "Chibi Shinobu Kocho Butterfly Portrait.png",
+    "sourceSha256": "c63d25c9c238199f67e247093f269219794e285d7da64452e1912507f75da4f9",
+    "outputSha256": "bf373b9cd6d75b0bd7ab7ad9cabb6bfa90681e0b5c069d7d5b70d8b294dc32b5",
+    "bytes": 43630,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-08",
+    "source": "Copper-haired chibi tactical hero.png",
+    "sourceSha256": "1db72bced28ddcd6cd6efa4ab43c4a9d53c27149dd98391fb2825d9bfa8a32b8",
+    "outputSha256": "d1768800752b9d1fca34cdfc4d45658cf1ead855722afea96f3e3c4abd978115",
+    "bytes": 51230,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-09",
+    "source": "Crimson Sorceress Chibi Avatar.png",
+    "sourceSha256": "dea7d090b3497062d90b1385c64c2abd4c1829d1b173700e67619ed58adcce50",
+    "outputSha256": "e2e4a4bc3102c24e35f29c9dea8ef6dd3a0844d796f61b153edaa09a6cf99df1",
+    "bytes": 60864,
+    "size": [512, 512]
+  },
+  {
+    "id": "hb-10",
+    "source": "Sunny Rapunzel Fantasy Adventurer.png",
+    "sourceSha256": "64280c162352786d2418f7c7d5ac853b6b9dcd3a4327f9c47630b6bb8221ff8a",
+    "outputSha256": "02d5c35d2df38931650cde9105c67c3c4f281e5909e62fa854baed653d1d15c5",
+    "bytes": 67818,
+    "size": [512, 512]
+  }
+]

@@ -1,10 +1,12 @@
 import "reflect-metadata";
-import { Controller, Get, Patch, Module, Req, Res } from "@nestjs/common";
+import { Controller, Get, Patch, Module, Query, Req, Res } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { createErrorEnvelope } from "@hambazi/contracts";
 import type { ProfilePort } from "../application/profile.js";
 import type { ProfileRate } from "./profile-rate.js";
 import { profileResponseSchema, profileAckSchema } from "./profile-contract.js";
+import { z } from "zod";
+import { usernameSchema } from "../application/profile.js";
 export interface ProfileHttpDependencies {
   profile: ProfilePort;
   authenticate(token: string): Promise<
@@ -82,6 +84,20 @@ export function createProfileHttpModule(deps: ProfileHttpDependencies) {
   }
   @Controller("v1/me")
   class ProfileController {
+    @Get("username-availability")
+    async username(
+      @Req() req: FastifyRequest,
+      @Res() reply: FastifyReply,
+      @Query() query: unknown,
+    ) {
+      const userId = await identity(req, reply, "read");
+      if (!userId) return;
+      const parsed = z.strictObject({ username: usernameSchema }).safeParse(query);
+      if (!parsed.success) return fail(reply, "INVALID_INPUT");
+      const result = await deps.profile.checkUsername(userId, parsed.data.username);
+      if (!result.ok) return fail(reply, result.error.code);
+      return reply.code(200).send({ schemaVersion: 1, available: result.available });
+    }
     @Get()
     async read(@Req() req: FastifyRequest, @Res() reply: FastifyReply) {
       const userId = await identity(req, reply, "read");

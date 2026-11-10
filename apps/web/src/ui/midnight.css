@@ -262,10 +262,9 @@ html:has(.midnight-shell) {
   line-height: 1.4;
   white-space: nowrap;
 }
-.home-section-heading h1 .midnight-icon {
-  color: #0fe6fb;
-  width: 27px;
-  height: 27px;
+.home-section-heading h1 .lobby-icon {
+  width: 32px;
+  height: 32px;
 }
 .home-section-heading button {
   direction: rtl;

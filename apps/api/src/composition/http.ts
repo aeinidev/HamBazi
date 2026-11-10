@@ -56,6 +56,10 @@ export async function createHttpApplication(options: {
     http: { maxHeaderSize: 16384 },
   });
   const server = adapter.getInstance();
+  server.addHook("onRoute", (route) => {
+    if (options.profile && route.url === "/v1/me" && route.method === "PATCH")
+      route.bodyLimit = 262144;
+  });
   if (options.admission) server.server.maxConnections = options.admission.policy.maxConnections;
   const settled = trackHttpWork(server);
   let draining = false;
@@ -130,10 +134,11 @@ export async function createHttpApplication(options: {
     if (
       request.url.includes("?") &&
       !(
-        options.statistics &&
         request.method === "GET" &&
-        (request.routeOptions.url === "/v1/me/stats" ||
-          request.routeOptions.url === "/v1/leaderboards/:game")
+        ((options.profile && request.routeOptions.url === "/v1/me/username-availability") ||
+          (options.statistics &&
+            (request.routeOptions.url === "/v1/me/stats" ||
+              request.routeOptions.url === "/v1/leaderboards/:game")))
       )
     )
       return reply.code(400).send(createErrorEnvelope("INVALID_INPUT"));

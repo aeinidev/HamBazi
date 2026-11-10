@@ -23,6 +23,8 @@ function reset() {
     registrationRequired: false,
     modes: [{ id: "server-choice", title: "Server choice" }],
     profileVersion: 0,
+    username: null,
+    avatar: null,
     statsFailure: false,
     statsEmpty: false,
     displayName: "Test player",
@@ -254,6 +256,12 @@ const http = createServer(async (req, res) => {
       nextOffset: !state.statsEmpty && offset === 0 ? 50 : null,
     });
   }
+  if (req.url?.startsWith("/v1/me/username-availability?")) {
+    return send({
+      schemaVersion: 1,
+      available: new URL(req.url, "http://127.0.0.1").searchParams.get("username") !== "taken",
+    });
+  }
   if (req.url === "/v1/me") {
     if (req.method === "PATCH") {
       if (state.conflict) {
@@ -263,8 +271,10 @@ const http = createServer(async (req, res) => {
           error: { code: "PROFILE_CONFLICT", message: "private debug text", retryable: false },
         });
       }
-      state.displayName = body.patch.displayName;
-      state.settings = body.patch.settings;
+      state.displayName = body.patch.displayName ?? state.displayName;
+      state.settings = { ...state.settings, ...body.patch.settings };
+      state.username = body.patch.username ?? state.username;
+      state.avatar = body.patch.avatar ?? state.avatar;
       state.profileVersion++;
       return send({
         schemaVersion: 1,
@@ -277,6 +287,8 @@ const http = createServer(async (req, res) => {
       userId: userId(),
       displayName: state.displayName,
       publicHandle: "test_12345",
+      username: state.username,
+      avatar: state.avatar,
       version: state.profileVersion,
       settings: state.settings,
     });

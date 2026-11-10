@@ -4,6 +4,7 @@ export interface TelegramApp {
   initDataUnsafe?: { start_param?: unknown };
   colorScheme?: string;
   viewportStableHeight?: number;
+  viewportHeight?: number;
   isFullscreen?: boolean;
   isVersionAtLeast?(version: string): boolean;
   requestFullscreen?(): void;
@@ -12,6 +13,8 @@ export interface TelegramApp {
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
   close?(): void;
+  enableClosingConfirmation?(): void;
+  disableClosingConfirmation?(): void;
   openTelegramLink?(url: string): void;
   ready(): void;
   expand(): void;

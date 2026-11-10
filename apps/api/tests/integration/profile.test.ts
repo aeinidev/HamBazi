@@ -71,6 +71,43 @@ async function fixture() {
   return { first, second, userId, clock, input, handle: created.account.publicHandle };
 }
 describe("durable profile", () => {
+  it("reserves a case-insensitive username once across concurrent accounts and persists avatars", async () => {
+    const f = await fixture();
+    const other = await fixture();
+    const username = `p_${randomUUID().replaceAll("-", "").slice(0, 24)}`;
+    const command = { ...f.input(), patch: { username: username.toUpperCase(), avatar: "hb-01" } };
+    const results = await Promise.all([
+      f.first.patch(f.userId, command),
+      other.second.patch(other.userId, { ...command, commandId: randomUUID() }),
+    ]);
+    expect(results.filter((r) => r.ok)).toHaveLength(1);
+    expect(results.filter((r) => !r.ok)).toMatchObject([{ error: { code: "PROFILE_CONFLICT" } }]);
+    const winner = results[0]!.ok ? f : other;
+    const loser = winner === f ? other : f;
+    expect(await winner.first.read(winner.userId)).toMatchObject({
+      profile: { username, avatar: "hb-01", publicHandle: winner.handle, version: 1 },
+    });
+    expect(await loser.first.read(loser.userId)).toMatchObject({
+      profile: { username: null, avatar: null, version: 0 },
+    });
+    expect(await loser.first.checkUsername(loser.userId, username)).toEqual({
+      ok: true,
+      available: false,
+    });
+    expect(await winner.first.checkUsername(winner.userId, username)).toEqual({
+      ok: true,
+      available: true,
+    });
+    const reset = { ...winner.input(1), patch: { avatar: "default" } };
+    expect(await winner.first.patch(winner.userId, reset)).toMatchObject({ ok: true });
+    expect(await winner.first.patch(winner.userId, reset)).toMatchObject({
+      ok: true,
+      appliedVersion: 2,
+    });
+    expect(
+      await winner.first.patch(winner.userId, { ...reset, patch: { avatar: "hb-02" } }),
+    ).toMatchObject({ error: { code: "PROFILE_CONFLICT" } });
+  });
   it("rolls back name, settings and revision when receipt insertion fails", async () => {
     const f = await fixture();
     const failing = profileService(createProfileRepository(a, f.clock, () => "invalid-uuid"));

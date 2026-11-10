@@ -15,6 +15,8 @@ model User {
   telegramUserId          BigInt                   @unique @map("telegram_user_id")
   displayName             String                   @map("display_name")
   publicHandle            String                   @unique @map("public_handle")
+  username                String?                  @unique
+  profileAvatar           String?                  @map("profile_avatar")
   telegramUsername        String?                  @map("telegram_username")
   status                  String
   createdAt               DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)

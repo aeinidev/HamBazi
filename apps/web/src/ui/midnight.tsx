@@ -3,9 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { profileSchema } from "../platform/contracts.js";
 import { useRuntime, useSession } from "./shared.js";
 import { LobbyIcon } from "./lobby-icon.js";
+import { avatarPhoto } from "./avatar.js";
 
 export function AccountAvatar({ photoUrl }: { photoUrl: string | null }) {
   const [failed, setFailed] = useState(false);
+  const [source, setSource] = useState(photoUrl);
+  if (source !== photoUrl) {
+    setSource(photoUrl);
+    setFailed(false);
+  }
   return photoUrl && !failed ? (
     <img
       className="account-avatar"
@@ -144,7 +150,7 @@ export function MidnightHeader({
     return (
       <header className="home-header" aria-label="هم‌بازی">
         <div className="home-identity">
-          <AccountAvatar photoUrl={photoUrl} />
+          <AccountAvatar photoUrl={avatarPhoto(profile.data?.avatar, photoUrl)} />
           <span dir="auto">{profile.data?.displayName ?? "هم‌بازی"}</span>
         </div>
         <div className="home-header-actions">
@@ -168,7 +174,7 @@ export function MidnightHeader({
       </div>
       {session ? (
         <div className="header-identity">
-          <AccountAvatar photoUrl={photoUrl} />
+          <AccountAvatar photoUrl={avatarPhoto(profile.data?.avatar, photoUrl)} />
           <span dir="auto">{profile.data?.displayName ?? "هم‌بازی"}</span>
         </div>
       ) : (

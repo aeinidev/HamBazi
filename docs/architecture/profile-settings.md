@@ -1,5 +1,17 @@
 # Profile and settings operations
 
+The requested [Profile Hub](../design/profile-hub.md) adds optional username and
+avatar fields under [ADR-080](../adr/080-profile-hub.md). Stable `publicHandle`
+and settings v1 retain their original meaning. `GET /v1/me` may now include nullable
+`username`/`avatar`; `PATCH /v1/me` accepts those optional fields. The separate
+authenticated username-availability route is advisory and uses the read quota.
+Username uniqueness is enforced in the save transaction and by a database index.
+The bounded JPEG avatar is current profile data; source uploads are not persisted.
+Only profile PATCH accepts up to 256 KiB; other HTTP body limits remain unchanged.
+Apply migration `202611090001_profile_hub` before API/web rollout. Keep additive
+columns and the existing receipt cleanup on rollback. The sections below describe
+the original Phase 7A behavior; ADR-080 documents its additive extension.
+
 Phase 7A implements [ADR-017](../adr/017-profile-settings.md). Users owns profile
 data, preferences, revisions and retry receipts. HTTP composition adapts Auth's
 session port into a verified user identity; Users has no Auth dependency.

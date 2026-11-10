@@ -41,6 +41,7 @@
         "$TURBO_ROOT$/docs/contracts/bot-internal.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/health.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/profile.v1.baseline.json",
+        "$TURBO_ROOT$/docs/contracts/profile.hub.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/catalog.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/catalog.modes.v1.baseline.json",
         "$TURBO_ROOT$/docs/contracts/catalog.availability.v1.baseline.json",

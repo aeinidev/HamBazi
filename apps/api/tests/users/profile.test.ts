@@ -12,6 +12,7 @@ function fixture() {
       appliedVersion: input.expectedVersion + 1,
     })),
     cleanup: vi.fn(),
+    usernameAvailable: vi.fn(async () => true),
   };
   return { repository, service: profileService(repository) };
 }
@@ -44,6 +45,54 @@ describe("profile intent", () => {
     });
     expect(f.repository.patch).toHaveBeenCalledWith(userId, {
       ...input({ displayName: "José Silva", settings: { theme: "dark" } }),
+    });
+  });
+  it("accepts a normalized username and an official avatar", async () => {
+    const f = fixture();
+    expect(
+      await f.service.patch(userId, input({ username: "New_Player", avatar: "hb-01" })),
+    ).toMatchObject({ ok: true });
+    expect(f.repository.patch).toHaveBeenCalledWith(
+      userId,
+      input({ username: "new_player", avatar: "hb-01" }),
+    );
+  });
+  it.each(["ab", "a b", "نام", "name@", "x".repeat(33)])(
+    "rejects invalid username %s",
+    async (username) => {
+      const f = fixture();
+      expect(await f.service.patch(userId, input({ username }))).toMatchObject({
+        error: { code: "INVALID_INPUT" },
+      });
+    },
+  );
+  it.each([
+    "https://evil.example/a.jpg",
+    "data:image/svg+xml;base64,PHN2Zz4=",
+    "hb-11",
+    "data:image/jpeg;base64," + "A".repeat(250000),
+  ])("rejects unsafe avatars", async (avatar) => {
+    const f = fixture();
+    expect(await f.service.patch(userId, input({ avatar }))).toMatchObject({
+      error: { code: "INVALID_INPUT" },
+    });
+  });
+  it("checks usernames using verified identity, normalization and safe errors", async () => {
+    const f = fixture();
+    expect(await f.service.checkUsername(userId, "Free_Name")).toEqual({
+      ok: true,
+      available: true,
+    });
+    expect(f.repository.usernameAvailable).toHaveBeenCalledWith(userId, "free_name");
+    expect(await f.service.checkUsername("bad", "free_name")).toMatchObject({
+      error: { code: "UNAUTHENTICATED" },
+    });
+    expect(await f.service.checkUsername(userId, "bad name")).toMatchObject({
+      error: { code: "INVALID_INPUT" },
+    });
+    vi.mocked(f.repository.usernameAvailable).mockRejectedValue(new Error("private data"));
+    expect(await f.service.checkUsername(userId, "free_name")).toMatchObject({
+      error: { code: "INTERNAL_ERROR" },
     });
   });
   it.each([-1, 2147483647, 1.5, "0"])("rejects invalid revision %s", async (expectedVersion) => {

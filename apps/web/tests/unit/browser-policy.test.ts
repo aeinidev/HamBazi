@@ -32,7 +32,8 @@ describe("static Mini App browser policy", () => {
     );
     expect(csp).toContain("frame-ancestors https://web.telegram.org");
     expect(csp).not.toContain("connect-src https:");
-    expect(csp).toContain("img-src 'self' https://t.me;");
+    expect(csp).toContain("img-src 'self' https://t.me data: blob:;");
+    expect(csp).toContain("worker-src blob:;");
   });
   it("provides a fail-closed same-origin baseline when deployment origins are not selected", () => {
     const policy = make({ webOrigin: null, apiOrigin: null, frameAncestors: [] });

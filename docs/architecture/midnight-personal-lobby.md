@@ -16,14 +16,14 @@ Only an explicitly unpaused and already admitted Coup session has an enabled rou
 The CTA, all-games control, Friends, Leaderboard and notifications are visibly
 disabled. The Settings control continues to the existing editor.
 
-| Route                  | Screen                                 | Entry side effects                                                                         |
-| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `/games`               | Responsive home; verified availability | Own profile and availability read                                                          |
-| `/profile`             | Existing profile editor                | Own profile read; explicit patch only                                                      |
-| `/games/coup`          | Availability-gated Coup entry          | None                                                                                       |
-| `/games/coup/tutorial` | Availability-gated tutorial            | None                                                                                       |
-| `/settings`            | Existing profile preferences editor    | Own profile read; explicit patch only                                                      |
-| `/games/coup/play`     | Existing personal game/table           | Personal connection/current lookup; creation only when unpaused with explicit start intent |
+| Route                  | Screen                                                                       | Entry side effects                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `/games`               | Responsive home; verified availability                                       | Own profile and availability read                                                          |
+| `/profile`             | RTL Profile Hub with pinned identity, avatar picker/crop and real statistics | Own profile/stats read, debounced username availability; explicit patch only               |
+| `/games/coup`          | Availability-gated Coup entry                                                | None                                                                                       |
+| `/games/coup/tutorial` | Availability-gated tutorial                                                  | None                                                                                       |
+| `/settings`            | Existing profile preferences editor                                          | Own profile read; explicit patch only                                                      |
+| `/games/coup/play`     | Existing personal game/table                                                 | Personal connection/current lookup; creation only when unpaused with explicit start intent |
 
 Direct future-game routes show an unavailable screen without game requests. The
 ordinary Games API still registers only non-playable Coup under ADR-018; future

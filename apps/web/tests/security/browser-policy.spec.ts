@@ -218,15 +218,10 @@ test("unapproved network, CSS/image, frames, forms, bases and workers are denied
     } catch {
       /* WebKit may deny synchronously. */
     }
-    const worker = URL.createObjectURL(
-      new Blob(["postMessage('synthetic')"], { type: "application/javascript" }),
-    );
     try {
-      new Worker(worker);
+      new Worker("data:application/javascript,postMessage('synthetic')");
     } catch {
       // A synchronous CSP denial is also an expected outcome.
-    } finally {
-      URL.revokeObjectURL(worker);
     }
   });
   for (const directive of [

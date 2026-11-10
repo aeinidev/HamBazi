@@ -34,7 +34,13 @@ export const profileSchema = z.object({
   displayName: z.string(),
   publicHandle: z.string(),
   version,
+  username: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
   settings: settingsSchema,
+});
+export const usernameAvailabilitySchema = z.object({
+  schemaVersion: z.literal(1),
+  available: z.boolean(),
 });
 export const profileAckSchema = z.object({
   schemaVersion: z.literal(1),

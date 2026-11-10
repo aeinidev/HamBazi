@@ -102,6 +102,27 @@ it("serves immutable assets with the reviewed CSP, no-store, MIME and HEAD seman
   expect(await health.json()).toEqual({ schemaVersion: 1, status: "READY" });
   expect((await fetch(origin + "/v1/health/ready")).status).toBe(404);
 });
+it("preserves and serves the HEIF license and notice as plain text", async () => {
+  const { directory, environment } = await fixture();
+  await mkdir(join(directory, "vendor/heic-to"), { recursive: true });
+  const documents = new Map();
+  for (const name of ["LICENSE.txt", "NOTICE.txt"]) {
+    const bytes = await readFile(
+      new URL(`../../apps/web/public/vendor/heic-to/${name}`, import.meta.url),
+    );
+    documents.set(name, bytes);
+    await writeFile(join(directory, "vendor/heic-to", name), bytes);
+  }
+  servers.push(await startStaticWeb(environment, directory));
+  for (const [name, bytes] of documents) {
+    const response = await fetch(`http://127.0.0.1:${environment.WEB_PORT}/vendor/heic-to/${name}`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+  }
+});
 it("rejects traversal, private/unknown assets and non-read methods without echoing input", async () => {
   const { directory, environment } = await fixture();
   servers.push(await startStaticWeb(environment, directory));
@@ -190,6 +211,29 @@ it("precompresses public text, negotiates br/gzip and preserves HEAD, validators
     });
     expect(cached.status).toBe(304);
     expect(cached.headers.get("vary")).toBe("Accept-Encoding");
+  }
+});
+it("opens only the authenticated profile routes with a bounded avatar body allowance", async () => {
+  const config = await readFile(new URL("../docker/server/nginx.conf", import.meta.url), "utf8");
+  const profiles = [
+    ...config.matchAll(
+      /location = \/v1\/me \{([\s\S]*?)proxy_pass http:\/\/10\.89\.18\.10:8080;\s*\}/g,
+    ),
+  ];
+  const checks = [
+    ...config.matchAll(
+      /location = \/v1\/me\/username-availability \{([\s\S]*?)proxy_pass http:\/\/10\.89\.18\.10:8080;\s*\}/g,
+    ),
+  ];
+  expect(profiles).toHaveLength(2);
+  expect(checks).toHaveLength(2);
+  for (const [, body] of profiles) {
+    expect(body).toContain("client_max_body_size 256k;");
+    expect(body).toContain("limit_except GET PATCH OPTIONS { deny all; }");
+  }
+  for (const [, body] of checks) {
+    expect(body).toContain("limit_except GET OPTIONS { deny all; }");
+    expect(body).not.toContain("client_max_body_size");
   }
 });
 it("forwards only public compression and cache validators through each static ingress", async () => {

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { profileAckSchema, profileSchema, type Profile } from "../../platform/contracts.js";
 import { ErrorNotice, Loading, Panel, useRuntime, useTask } from "../../ui/shared.js";
+export { ProfileHubScreen } from "./hub.js";
 function Editor({ profile, persian = false }: { profile: Profile; persian?: boolean }) {
   const runtime = useRuntime();
   const task = useTask(persian ? "fa" : undefined);

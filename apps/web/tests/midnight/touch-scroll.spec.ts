@@ -25,6 +25,8 @@ test("short personal pages reject vertical dragging without affecting taps, edit
       expect(await verticalDrag(name)).toBe(false);
       await name.fill("نام قابل ویرایش");
       await expect(name).toHaveValue("نام قابل ویرایش");
+      // Restore the draft before exercising navigation to another page.
+      await name.fill("Test player");
     }
   }
   await page.getByRole("button", { name: "آموزش بازی", exact: true }).click();
@@ -60,7 +62,9 @@ test("content outside the game list and smaller viewports release the lock", asy
   await expect(page.getByLabel("نام نمایشی")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-fitted-page", "true");
   await page.setViewportSize({ width: 320, height: 360 });
-  await expect(page.locator("html")).not.toHaveAttribute("data-fitted-page", "true");
+  // The hub keeps identity/actions pinned and scrolls only the editing region.
+  await expect(page.locator("html")).toHaveAttribute("data-fitted-page", "true");
+  expect(await verticalDrag(page.getByRole("region", { name: "ویرایش پروفایل" }), -80)).toBe(false);
   await page.getByRole("button", { name: "ذخیرهٔ تغییرات" }).scrollIntoViewIfNeeded();
   await expect(page.getByRole("button", { name: "ذخیرهٔ تغییرات" })).toBeInViewport();
   await page.setViewportSize({ width: 320, height: 568 });

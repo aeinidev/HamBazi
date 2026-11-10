@@ -14,19 +14,19 @@
   "images": [
     {
       "role": "api",
-      "image": "hambazi-security/api:20261024-zod466-026b1f826a9c@sha256:0c500843ddda1359451e410db6e93df8cee7c99aa359afb8aac495e6deeb558a"
+      "image": "hambazi-profile-hub/api:20261109-dffa31e7d677310b@sha256:18f586952ea3314de68a7960c006ab42b48121b7bd029c6a239d4eef1a95cd6c"
     },
     {
       "role": "bot",
-      "image": "hambazi-security/bot:20261024-zod466-026b1f826a9c@sha256:a92fcbfdeec4e754d90bdf75f9884e6916bdba147520650a1d271fbec92263cc"
+      "image": "hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8"
     },
     {
       "role": "worker",
-      "image": "hambazi-security/worker:20261024-zod466-026b1f826a9c@sha256:5ae0219afa0a9912729990789f9fb2739d6e883e6b37b9f1e06036730d7dd783"
+      "image": "hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338"
     },
     {
       "role": "web",
-      "image": "hambazi-header-icons/web:20261025-3e1da9c675c0f176@sha256:98f2488faf1b369604529d514b51d53617f59330e407ccc32313f2f213c33998"
+      "image": "hambazi-profile-ux/web:20261110-962afb12ddcef7c9@sha256:c5f8309c45c4a3030c2eb92668a1de2c1c4257492e9e712c77d53912adebc32b"
     }
   ],
   "dataRecovery": {
@@ -89,7 +89,8 @@
     "extendedLoading": "passed-chromium-webkit-extended-top-art-no-eyebrow-responsive-loading-minimum-duration-and-lobby-regression",
     "desktopWindow": "passed-chromium-webkit-desktop-windowed-portrait-frame-mobile-native-presentation-and-lobby-regression",
     "headerIcons": "passed-chromium-webkit-header-icons-borderless-transparent-no-shadow-and-lobby-regression",
-    "postgresLibcurlSecurityPatch": "passed-seven-exact-image-scans-real-encrypted-backup-restore-unchanged-18.6-volume-data-and-grants-core-and-admin-renewal-private-admin-and-player-https"
+    "postgresLibcurlSecurityPatch": "passed-seven-exact-image-scans-real-encrypted-backup-restore-unchanged-18.6-volume-data-and-grants-core-and-admin-renewal-private-admin-and-player-https",
+    "profileMobileEditing": "passed-live-chromium-webkit-keyboard-visible-viewport-gesture-crop-heif-csp-and-unchanged-two-user-admission"
   },
   "securityRenewal": {
     "policy": "normal-24-hour-exact-image",
@@ -124,24 +125,24 @@
   "sourceBindingScope": "top-level source fields describe the initial four-image deployment; currentApplicationSources binds each active role",
   "currentApplicationSources": {
     "api": {
-      "sourceCommit": "6da9f12eb8a2fb99020b5d57960c9deaaa5b7217",
-      "sourceSnapshotSha256": "a29353ca34c0c7f6a2414c6f08ad1741d65b111edde0abdc9d3df992253487e7",
-      "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
-    },
-    "bot": {
-      "sourceCommit": "5a507c0e95a076fde2c2140021cdd6ced1020433",
-      "sourceSnapshotSha256": "1d7d903ea3f7ec34331c51addaebc73b17eeb1a22de16b945ca004a815f6839b",
-      "buildInputSha256": "dac8f88a032e9caec9736b741864ddc845f37ec217773bec661aa8fcd0642b88"
-    },
-    "worker": {
-      "sourceCommit": "6da9f12eb8a2fb99020b5d57960c9deaaa5b7217",
-      "sourceSnapshotSha256": "a29353ca34c0c7f6a2414c6f08ad1741d65b111edde0abdc9d3df992253487e7",
-      "buildInputSha256": "d4902d5b5d3b0f1f79ae0007aab492490e8d5acd95908ce46fe8a010ed7b3820"
+      "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+      "sourceSnapshotSha256": "060d725ddd28706531bef36242ce52f771d2d3f81fe2002d4180df996ffb17ba",
+      "buildInputSha256": "dffa31e7d677310b39dde5a02b9690337eecbed42ea542a203d8722de7434be8"
     },
     "web": {
-      "sourceCommit": "c5229ead1631333015dc6e9e96aa8c0d30adbd6b",
-      "sourceSnapshotSha256": "b0de5dd016dc215b4ddfbcfe7e2aefb865ed15854fb45724ef3e43806eac48a8",
-      "buildInputSha256": "3e1da9c675c0f176f3be6f6c7b58270d3474698291c6660fabf9cae76b36f4c5"
+      "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+      "sourceSnapshotSha256": "2898b9928470c944a30ba1a2fc78dd4bc4c243d0c3e08bfc62c1c85d22793191",
+      "buildInputSha256": "020b440dc83c00276f87647bd13ecd4d5036cf1f772b03949de7efab28350be8"
+    },
+    "bot": {
+      "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+      "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+      "buildInputSha256": "5161e94f91139e1af78ac792ba1cbab66c032d9104eba37e4ef239ad779b162a"
+    },
+    "worker": {
+      "sourceCommit": "c7add7bf7b32e77b153abc6ebb411d4954e4a668",
+      "sourceSnapshotSha256": "3d12ee27f587dddf0050641bc1390e734a9a350123c6b5e832ef5ac8c39261c0",
+      "buildInputSha256": "5161e94f91139e1af78ac792ba1cbab66c032d9104eba37e4ef239ad779b162a"
     }
   },
   "cloudflareGateway": {
@@ -479,5 +480,62 @@
     "adminReopened": false,
     "privateEvidenceDirectory": "/opt/hambazi/security/recovery-20261107",
     "record": "docs/operations/staging-recovery-20261107.md"
+  },
+  "sectionHeadingIcon": {
+    "deployedAtUTC": "2026-11-09T12:27:27.026734+00:00",
+    "image": "hambazi-section-icon/web:20261109-e83ab2bb5cc338a4@sha256:185263e45c72992b3639948d48d54d72ee9f8152bb99660f0fc47525addf9822",
+    "parent": "hambazi-candidate/web:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:a9a375113e3db3d745c6ef00a42ef695d2bea0678f2fa65954dd1060053aa2a6",
+    "record": "docs/operations/lobby-section-icon-deployment-20261109.md",
+    "onlyWebRecreated": true,
+    "nativeTelegramAcceptance": false
+  },
+  "profileHub": {
+    "deployedAtUTC": "2026-11-09T23:05:57.447528+00:00",
+    "record": "docs/operations/profile-hub-staging-deployed-20261110.md",
+    "releaseId": "profile-hub-20261110-r3-dc9150a9",
+    "imagesChanged": ["api", "web"],
+    "migration": "202611090001_profile_hub",
+    "migrationImage": {
+      "image": "sha256:4780c30ae1d5559cfbc4531917d1f473cfc38540e5aba320e73de1270334c4cd",
+      "baseImage": "sha256:7a4446b7fce2dc624054b832d917e1d67f42894d49fb7f14d060157117e0a9dd",
+      "inputManifestSha256": "d2ed567c8a2708509204832076dd4249171449fcb2cbb4150d620950157787a1",
+      "dockerfileSha256": "14c9fcebef12b51b57e363a18d2315b316001544e1d89197cfb0b8823d905faf"
+    },
+    "migrationsApplied": 22,
+    "backup": {
+      "ceremonyId": "dc9150a9-8c9e-4d88-8f90-a89815a6b190",
+      "archiveSha256": "a59d9ed5b64d04f70a43b311cb38df8d212c24d22db853bf1b1b7a48e1f5164a",
+      "archiveBytes": 124320178,
+      "offserverFullRestoreVerified": true
+    },
+    "browsersVerified": ["chromium", "webkit"],
+    "users": 2,
+    "admissionFilesUnchanged": true,
+    "productionChanged": false,
+    "nativeTelegramAcceptance": false,
+    "verifiedAtUTC": "2026-11-09T23:14:53.813772+00:00"
+  },
+  "profileMobileEditing": {
+    "deployedAtUTC": "2026-11-10T08:38:35.216974+00:00",
+    "releaseId": "profile-ux-20261110-b4e2e3fa",
+    "image": "hambazi-profile-ux/web:20261110-962afb12ddcef7c9@sha256:c5f8309c45c4a3030c2eb92668a1de2c1c4257492e9e712c77d53912adebc32b",
+    "parent": "hambazi-profile-hub/web:20261110-020b440dc83c0027@sha256:030d12df4f48cb6c0f6fcb7c9544ba51db7904408ffa0bd3ac2cde2cc8deea10",
+    "sourceSnapshotSha256": "c9899074fe200798b627435bb41c018988bc139376cf35119916ddfb10e2918d",
+    "buildInputSha256": "962afb12ddcef7c9d0b837d581a2e2dfcf66a6e38f166f3e87eb82f0f85ff51c",
+    "onlyWebRecreated": true,
+    "migrationRequired": false,
+    "migrationsApplied": 22,
+    "backup": {
+      "archiveSha256": "f986a5c17309f8d5fe2dc9d95507b97782e4ef48ce6a84518bd0cfe4a9f2642d",
+      "archiveBytes": 124328086,
+      "offserverFullRestoreVerified": true
+    },
+    "browsersVerified": ["chromium", "webkit"],
+    "users": 2,
+    "admissionFilesUnchanged": true,
+    "productionChanged": false,
+    "nativeTelegramAcceptance": false,
+    "verifiedAtUTC": "2026-11-10T10:07:58.146732+00:00",
+    "record": "docs/operations/profile-mobile-editing-staging-20261110.md"
   }
 }

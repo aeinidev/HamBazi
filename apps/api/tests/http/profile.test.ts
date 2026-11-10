@@ -7,6 +7,7 @@ import { profileService } from "../../src/users/application/profile.js";
 import type { ProfileRateDecision } from "../../src/users/infrastructure/profile-rate.js";
 import { profileOpenApiDocument } from "../../src/users/index.js";
 import { compatibleAuthContract } from "../../scripts/contract-compatibility.mjs";
+import { compatibleLegacyProfile } from "../../scripts/profile-compatibility.mjs";
 import { readFileSync } from "node:fs";
 const active: Awaited<ReturnType<typeof createHttpApplication>>[] = [];
 afterEach(async () => {
@@ -51,7 +52,12 @@ async function setup(decision: ProfileRateDecision = { allowed: true }) {
       },
     },
     profile: {
-      profile: profileService({ read, patch, cleanup: async () => 0 }),
+      profile: profileService({
+        read,
+        patch,
+        usernameAvailable: async (_userId, username) => username !== "taken",
+        cleanup: async () => 0,
+      }),
       authenticate,
       rate,
       degraded: logger.profileRateUnavailable,
@@ -95,6 +101,59 @@ it("GET fails open with safe warning/counter on Redis loss; PATCH fails closed",
   expect(logs).toContain("profile.rate_read_fail_open");
   expect(logs).not.toContain("PrivateName");
   expect(logs).not.toContain("synthetic.token");
+});
+it("authenticates and validates username availability without exposing another user", async () => {
+  const f = await setup();
+  expect(
+    (await f.server.inject({ url: "/v1/me/username-availability?username=free" })).statusCode,
+  ).toBe(401);
+  for (const [username, available] of [
+    ["free", true],
+    ["TAKEN", false],
+  ] as const) {
+    const result = await f.server.inject({
+      url: `/v1/me/username-availability?username=${username}`,
+      headers: f.headers,
+    });
+    expect(result.statusCode).toBe(200);
+    expect(result.json()).toEqual({ schemaVersion: 1, available });
+  }
+  expect(
+    (
+      await f.server.inject({
+        url: "/v1/me/username-availability?username=bad%40",
+        headers: f.headers,
+      })
+    ).statusCode,
+  ).toBe(400);
+  expect(
+    (
+      await f.server.inject({
+        url: "/v1/me/username-availability?username=free&extra=1",
+        headers: f.headers,
+      })
+    ).statusCode,
+  ).toBe(400);
+});
+it("accepts a bounded cropped JPEG without raising body limits for other routes", async () => {
+  const f = await setup();
+  const result = await f.server.inject({
+    method: "PATCH",
+    url: "/v1/me",
+    headers: f.headers,
+    payload: { ...f.payload, patch: { avatar: "data:image/jpeg;base64,/9j/" + "A".repeat(40000) } },
+  });
+  expect(result.statusCode).toBe(200);
+  const oversized = await f.server.inject({
+    method: "PATCH",
+    url: "/v1/me",
+    headers: f.headers,
+    payload: {
+      ...f.payload,
+      patch: { avatar: "data:image/jpeg;base64,/9j/" + "A".repeat(270000) },
+    },
+  });
+  expect(oversized.statusCode).toBe(413);
 });
 it("fail-open never bypasses missing or invalid authentication", async () => {
   const f = await setup({ allowed: false, reason: "unavailable" });
@@ -156,10 +215,17 @@ it("freezes profile wire schemas/security against the initial baseline", () => {
       "utf8",
     ),
   );
-  expect(compatibleAuthContract(baseline, profileOpenApiDocument())).toBe(true);
+  expect(compatibleLegacyProfile(baseline, profileOpenApiDocument())).toBe(true);
+  const hubBaseline = JSON.parse(
+    readFileSync(
+      new URL("../../../../docs/contracts/profile.hub.v1.baseline.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  expect(compatibleAuthContract(hubBaseline, profileOpenApiDocument())).toBe(true);
   const changed = structuredClone(profileOpenApiDocument());
   changed.paths["/v1/me"].get.security = [];
-  expect(compatibleAuthContract(baseline, changed)).toBe(false);
+  expect(compatibleLegacyProfile(baseline, changed)).toBe(false);
 });
 it("read fail-open does not conceal a database failure", async () => {
   const f = await setup({ allowed: false, reason: "unavailable" });

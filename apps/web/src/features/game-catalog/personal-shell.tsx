@@ -5,7 +5,7 @@ import { HamBaziLoading } from "../../ui/loading.js";
 import type { TelegramApp } from "../../platform/telegram.js";
 import { AuthScreen } from "../auth/index.js";
 import { PersonalGame } from "../personal-game/index.js";
-import { SettingsScreen } from "../profile/index.js";
+import { ProfileHubScreen, SettingsScreen } from "../profile/index.js";
 import { useLobbyAvailability, availabilityLabel } from "./availability.js";
 import { CoupEntry, CoupTutorial } from "../../games/coup/index.js";
 import { MidnightHeader } from "../../ui/midnight.js";
@@ -64,14 +64,22 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
   }, []);
   useEffect(() => {
     const change = () => {
-      setRoute(window.location.hash.slice(1) || "/games");
+      const next = window.location.hash.slice(1) || "/games";
+      if (
+        next !== route &&
+        !window.dispatchEvent(new Event("hambazi:before-navigate", { cancelable: true }))
+      ) {
+        window.history.replaceState(null, "", `#${route}`);
+        return;
+      }
+      setRoute(next);
       entering.current = false;
       setOpening(false);
       window.scrollTo(0, 0);
     };
     window.addEventListener("hashchange", change);
     return () => window.removeEventListener("hashchange", change);
-  }, []);
+  }, [route]);
   useEffect(() => {
     telegram?.BackButton?.onClick(back);
     if (hasBack) telegram?.BackButton?.show();
@@ -136,7 +144,7 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
       >
         رفتن به محتوا
       </a>
-      {session && (
+      {session && !profile && (
         <MidnightHeader
           back={hasBack && !homeFrame ? back : undefined}
           home={homeFrame}
@@ -164,8 +172,10 @@ export function PersonalLobbyShell({ telegram }: { telegram?: TelegramApp | unde
             startIntent={canStart ? startIntent : undefined}
             onStartConsumed={consumed}
           />
-        ) : settings || profile ? (
-          <SettingsScreen title={profile ? "پروفایل" : "تنظیمات"} />
+        ) : profile ? (
+          <ProfileHubScreen />
+        ) : settings ? (
+          <SettingsScreen />
         ) : unavailable ? (
           <section className="home-unavailable" role="status">
             <h1>به‌زودی</h1>

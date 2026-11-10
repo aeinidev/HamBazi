@@ -19,6 +19,10 @@ function digest(input: ProfilePatch) {
       input.patch.displayName ?? null,
       input.patch.settings?.locale ?? null,
       input.patch.settings?.theme ?? null,
+      // Preserve legacy receipt digests when the additive fields are omitted.
+      ...(input.patch.username !== undefined || input.patch.avatar !== undefined
+        ? [input.patch.username ?? null, input.patch.avatar ?? null]
+        : []),
     ]),
     "hex",
   );
@@ -50,6 +54,16 @@ export function createProfileRepository(
     return new Date(value);
   }
   return {
+    usernameAvailable(userId, username) {
+      return scope.execute(async (db) => {
+        const user = await db.user.findUnique({ where: { id: userId }, select: { status: true } });
+        if (user?.status !== "ACTIVE") throw new Error("Ineligible profile");
+        return !(await db.user.findFirst({
+          where: { username, id: { not: userId } },
+          select: { id: true },
+        }));
+      });
+    },
     read(userId) {
       return retry(() =>
         scope.transaction(async (db) => {
@@ -59,6 +73,8 @@ export function createProfileRepository(
               id: true,
               displayName: true,
               publicHandle: true,
+              username: true,
+              profileAvatar: true,
               profileVersion: true,
               status: true,
             },
@@ -78,6 +94,8 @@ export function createProfileRepository(
               userId: row.id,
               displayName: row.displayName,
               publicHandle: row.publicHandle,
+              username: row.username,
+              avatar: row.profileAvatar,
               version: row.profileVersion,
               settings: settings.data,
             },
@@ -91,7 +109,13 @@ export function createProfileRepository(
         scope.transaction(async (db) => {
           const row = await db.user.findUnique({
             where: { id: userId },
-            select: { status: true, profileVersion: true, displayName: true },
+            select: {
+              status: true,
+              profileVersion: true,
+              displayName: true,
+              username: true,
+              profileAvatar: true,
+            },
           });
           if (!row || row.status !== "ACTIVE") return createErrorEnvelope("UNAUTHENTICATED");
           const receipt = await db.profileMutationReceipt.findUnique({
@@ -110,6 +134,14 @@ export function createProfileRepository(
           }
           if (row.profileVersion !== input.expectedVersion)
             return createErrorEnvelope("PROFILE_CONFLICT");
+          if (
+            input.patch.username !== undefined &&
+            (await db.user.findFirst({
+              where: { username: input.patch.username, id: { not: userId } },
+              select: { id: true },
+            }))
+          )
+            return createErrorEnvelope("PROFILE_CONFLICT");
           const prefs = await db.userSettings.findUnique({
             where: { userId },
             select: { schemaVersion: true, settingsJsonb: true },
@@ -123,6 +155,8 @@ export function createProfileRepository(
             data: {
               profileVersion: { increment: 1 },
               displayName: input.patch.displayName ?? row.displayName,
+              username: input.patch.username ?? row.username,
+              profileAvatar: input.patch.avatar ?? row.profileAvatar,
             },
           });
           if (changed.count !== 1) return createErrorEnvelope("PROFILE_CONFLICT");

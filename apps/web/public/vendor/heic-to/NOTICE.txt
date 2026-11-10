@@ -1,0 +1,8 @@
+HamBazi loads the unmodified heic-to 1.6.7 CSP decoder only for HEIF/HEIC uploads.
+Copyright Hopper Gee and the respective libheif/libde265 contributors.
+License: LGPL-3.0-or-later; see LICENSE.txt.
+Corresponding package source: https://github.com/hoppergee/heic-to/tree/78345a3fcdb4a1d70d513fce2646aeff0127f7ba
+Package distribution: https://registry.npmjs.org/heic-to/-/heic-to-1.6.7.tgz
+Decoder source/build instructions: https://github.com/hoppergee/heic-to#development-guide
+Underlying libheif 1.23.7: https://github.com/strukturag/libheif
+This dependency is not part of the ten supplied HamBazi avatar artworks.

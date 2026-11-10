@@ -129,7 +129,7 @@ export function PersonalLobby() {
 
       <div className="home-section-heading">
         <h1 id="games-heading">
-          <MidnightIcon name="cards" /> بازی‌ها
+          <LobbyIcon name="games" /> بازی‌ها
         </h1>
         <button disabled aria-label="همه را ببینید، به‌زودی">
           همه را ببینید <span aria-hidden="true">→</span>

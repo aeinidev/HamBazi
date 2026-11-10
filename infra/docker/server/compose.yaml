@@ -146,7 +146,7 @@ services:
         aliases:
           - redis-staging
   api:
-    image: hambazi-security/api:20261024-zod466-026b1f826a9c@sha256:0c500843ddda1359451e410db6e93df8cee7c99aa359afb8aac495e6deeb558a
+    image: hambazi-profile-hub/api:20261109-dffa31e7d677310b@sha256:18f586952ea3314de68a7960c006ab42b48121b7bd029c6a239d4eef1a95cd6c
     platform: linux/amd64
     pull_policy: never
     user: 1000:1000
@@ -204,7 +204,7 @@ services:
         bind:
           create_host_path: false
   bot:
-    image: hambazi-security/bot:20261024-zod466-026b1f826a9c@sha256:a92fcbfdeec4e754d90bdf75f9884e6916bdba147520650a1d271fbec92263cc
+    image: hambazi-candidate/bot:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:9c85b3dfcf1cffef1a0eef26d3f8078097fe198915955654bbfbee4da4a23ad8
     platform: linux/amd64
     pull_policy: never
     user: 1000:1000
@@ -265,7 +265,7 @@ services:
         bind:
           create_host_path: false
   worker:
-    image: hambazi-security/worker:20261024-zod466-026b1f826a9c@sha256:5ae0219afa0a9912729990789f9fb2739d6e883e6b37b9f1e06036730d7dd783
+    image: hambazi-candidate/worker:c7add7bf7b32e77b153abc6ebb411d4954e4a668-5161e94f91139e1a@sha256:e891d537505b1d6c65ff291496d4062a86d294598ee795dbd2b24dc760398338
     platform: linux/amd64
     pull_policy: never
     user: 1000:1000
@@ -299,7 +299,7 @@ services:
         bind:
           create_host_path: false
   web:
-    image: hambazi-header-icons/web:20261025-3e1da9c675c0f176@sha256:98f2488faf1b369604529d514b51d53617f59330e407ccc32313f2f213c33998
+    image: hambazi-profile-ux/web:20261110-962afb12ddcef7c9@sha256:c5f8309c45c4a3030c2eb92668a1de2c1c4257492e9e712c77d53912adebc32b
     platform: linux/amd64
     pull_policy: never
     user: 1000:1000
